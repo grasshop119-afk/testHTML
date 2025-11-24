@@ -35,7 +35,7 @@
         .welcome-section {
             position: absolute;
             left: 10%;
-            top: calc(50% + 25px); /* Подняли еще на 65px (было 90px, стало 25px) */
+            top: calc(50% + 25px);
             text-align: left;
             width: 80%;
             max-width: 400px;
@@ -153,6 +153,16 @@
             background-repeat: no-repeat;
             background-position: center;
             flex-shrink: 0;
+        }
+
+        /* Белая иконка для основной плашки */
+        .main-card .icon {
+            filter: invert(1);
+            background-image: url('https://img.icons8.com/?size=100&id=j1nrfP6OFNOh&format=png&color=000000');
+        }
+
+        /* Иконки для дополнительных плашек */
+        .additional-card .icon {
             filter: invert(1);
         }
 
@@ -340,8 +350,7 @@
         const userName = user?.first_name || 'User';
         document.getElementById('userName').textContent = userName + '!';
 
-        // Устанавливаем иконки
-        document.querySelector('.icon').style.backgroundImage = 'url("https://img.icons8.com/?size=100&id=3A5E5yADqtYc&format=png&color=000000")';
+        // Устанавливаем иконки для дополнительных плашек
         document.querySelector('#topCard .additional-icon').style.backgroundImage = 'url("https://img.icons8.com/?size=100&id=YvcFCFKp34m1&format=png&color=000000")';
         document.querySelector('#bottomCard .additional-icon').style.backgroundImage = 'url("https://img.icons8.com/?size=100&id=IrWymf258Hhl&format=png&color=000000")';
 
@@ -357,10 +366,11 @@
         let returnTimeout = null;
         let animationFrame = null;
 
-        // Функция вибрации
+        // Функция вибрации через Telegram
         function vibrate() {
-            if (navigator.vibrate) {
-                navigator.vibrate(10); // Мягкая вибрация 10ms
+            // Вибрация через Telegram Web App
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred('light');
             }
         }
 
@@ -388,7 +398,7 @@
         document.addEventListener('touchstart', (e) => {
             isPressed = true;
             card.classList.add('pressed');
-            vibrate(); // Вибрация при касании
+            vibrate(); // Вибрация через Telegram при касании
             
             if (returnTimeout) {
                 clearTimeout(returnTimeout);
