@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Today Tasks</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;800&display=swap" rel="stylesheet">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * {
             margin: 0;
@@ -25,57 +26,16 @@
             position: fixed;
             width: 100%;
             touch-action: none;
-            transition: background-color 0.3s ease;
+            background-color: #171717;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding-bottom: 80px; /* Место для кнопки */
-        }
-
-        /* Светлая тема по умолчанию */
-        body.light-theme {
-            background-color: white;
-        }
-
-        body.light-theme .main-card {
-            background-color: #171717;
-        }
-
-        body.light-theme .title,
-        body.light-theme .description {
-            color: white;
-        }
-
-        body.light-theme .icon-square {
-            background-color: white;
-        }
-
-        /* Темная тема */
-        body.dark-theme {
-            background-color: #171717;
-        }
-
-        body.dark-theme .main-card {
-            background-color: white;
-        }
-
-        body.dark-theme .title,
-        body.dark-theme .description {
-            color: #171717;
-        }
-
-        body.dark-theme .icon-square {
-            background-color: #171717;
-        }
-
-        body.dark-theme .icon {
-            filter: invert(1);
         }
 
         .welcome-section {
             position: absolute;
             left: 10%;
-            top: calc(50% + 25px); /* Было 90px, стало 25px (подняли на 65px) */
+            top: calc(50% + 25px); /* Подняли еще на 65px (было 90px, стало 25px) */
             text-align: left;
             width: 80%;
             max-width: 400px;
@@ -85,9 +45,9 @@
             font-size: 42px;
             font-weight: 800;
             margin-bottom: 8px;
-            transition: color 0.3s ease;
             letter-spacing: -1px;
             line-height: 1;
+            color: white;
         }
 
         .welcome-main {
@@ -98,28 +58,12 @@
             opacity: 0.7;
         }
 
-        .light-theme .welcome-title {
-            color: #171717;
-        }
-
-        .dark-theme .welcome-title {
-            color: white;
-        }
-
         .welcome-description {
             font-size: 16px;
             line-height: 1.4;
             opacity: 0.7;
-            transition: color 0.3s ease;
-            margin-top: 5px;
-        }
-
-        .light-theme .welcome-description {
-            color: #171717;
-        }
-
-        .dark-theme .welcome-description {
             color: white;
+            margin-top: 5px;
         }
 
         .container {
@@ -139,12 +83,13 @@
             height: 55px;
             border-radius: 19px;
             position: relative;
-            transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), background-color 0.3s ease;
+            transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             transform-style: preserve-3d;
             display: flex;
             align-items: center;
             padding-left: 8px;
             z-index: 10;
+            background-color: white;
         }
 
         .main-card.pressed {
@@ -162,6 +107,7 @@
             display: flex;
             align-items: center;
             padding-left: 8px;
+            background-color: white;
         }
 
         .additional-card.top {
@@ -197,7 +143,7 @@
             justify-content: center;
             align-items: center;
             flex-shrink: 0;
-            transition: background-color 0.3s ease;
+            background-color: #171717;
         }
 
         .icon {
@@ -207,7 +153,7 @@
             background-repeat: no-repeat;
             background-position: center;
             flex-shrink: 0;
-            transition: filter 0.3s ease;
+            filter: invert(1);
         }
 
         .text-content {
@@ -224,18 +170,17 @@
             font-weight: 800;
             line-height: 1.1;
             margin-bottom: 2px;
-            transition: color 0.3s ease;
+            color: #171717;
         }
 
         .description {
             font-size: 11px;
             opacity: 0.7;
             line-height: 1;
-            transition: color 0.3s ease;
+            color: #171717;
         }
 
-        /* Кнопка Telegram */
-        .telegram-button {
+        .continue-button {
             position: fixed;
             bottom: 20px;
             left: 50%;
@@ -243,26 +188,21 @@
             width: 85%;
             max-width: 400px;
             height: 50px;
-            background: linear-gradient(135deg, #0088cc, #00a2ff);
+            background-color: white;
             border: none;
             border-radius: 12px;
-            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             font-size: 17px;
             font-weight: 600;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #171717;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 136, 204, 0.3);
             z-index: 1000;
+            transition: all 0.2s ease;
         }
 
-        .telegram-button:active {
+        .continue-button:active {
             transform: translateX(-50%) scale(0.98);
-            box-shadow: 0 2px 8px rgba(0, 136, 204, 0.4);
-        }
-
-        .telegram-button:hover {
-            background: linear-gradient(135deg, #0077b3, #0090e0);
+            background-color: #f0f0f0;
         }
 
         /* Адаптация для мобильных */
@@ -296,9 +236,9 @@
                 height: 26px;
             }
 
-            .telegram-button {
+            .continue-button {
                 width: 90%;
-                height: 48px;
+                bottom: 15px;
             }
         }
 
@@ -332,10 +272,9 @@
                 height: 24px;
             }
 
-            .telegram-button {
+            .continue-button {
                 width: 92%;
-                height: 46px;
-                font-size: 16px;
+                bottom: 12px;
             }
         }
     </style>
@@ -387,79 +326,29 @@
         </div>
     </div>
 
-    <button class="telegram-button" id="continueButton">Продолжить</button>
+    <button class="continue-button" id="continueBtn">Продолжить</button>
 
     <script>
-        // Telegram Web App initialization
-        if (window.Telegram && Telegram.WebApp) {
-            const tg = Telegram.WebApp;
-            
-            // Expand the app to full screen
-            tg.expand();
-            
-            // Set user name
-            const user = tg.initDataUnsafe?.user;
-            if (user) {
-                const firstName = user.first_name || 'User';
-                document.getElementById('userName').textContent = firstName + '!';
-            }
-            
-            // Enable vibration
-            tg.enableVibration();
-        }
+        // Инициализация Telegram Web App
+        const tg = window.Telegram.WebApp;
+        
+        // Разворачиваем приложение на весь экран
+        tg.expand();
+        
+        // Получаем данные пользователя
+        const user = tg.initDataUnsafe?.user;
+        const userName = user?.first_name || 'User';
+        document.getElementById('userName').textContent = userName + '!';
 
-        // Вибрация при нажатии
-        function vibrate() {
-            if (navigator.vibrate) {
-                navigator.vibrate(10); // Мягкая вибрация 10ms
-            }
-        }
-
-        // Определение системной темы
-        function detectSystemTheme() {
-            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                return 'dark';
-            }
-            return 'light';
-        }
-
-        // Установка темы
-        function setTheme(theme) {
-            document.body.className = theme + '-theme';
-            
-            const topCard = document.getElementById('topCard');
-            const bottomCard = document.getElementById('bottomCard');
-            const additionalIcons = document.querySelectorAll('.additional-icon');
-            
-            if (theme === 'dark') {
-                topCard.style.backgroundColor = 'white';
-                bottomCard.style.backgroundColor = 'white';
-                additionalIcons.forEach(icon => {
-                    icon.style.filter = 'invert(1)';
-                });
-            } else {
-                topCard.style.backgroundColor = '#171717';
-                bottomCard.style.backgroundColor = '#171717';
-                additionalIcons.forEach(icon => {
-                    icon.style.filter = 'invert(0)';
-                });
-            }
-        }
-
-        // Инициализация темы при загрузке
-        setTheme(detectSystemTheme());
-
-        // Слушаем изменения системной темы
-        if (window.matchMedia) {
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-                setTheme(e.matches ? 'dark' : 'light');
-            });
-        }
+        // Устанавливаем иконки
+        document.querySelector('.icon').style.backgroundImage = 'url("https://img.icons8.com/?size=100&id=3A5E5yADqtYc&format=png&color=000000")';
+        document.querySelector('#topCard .additional-icon').style.backgroundImage = 'url("https://img.icons8.com/?size=100&id=YvcFCFKp34m1&format=png&color=000000")';
+        document.querySelector('#bottomCard .additional-icon').style.backgroundImage = 'url("https://img.icons8.com/?size=100&id=IrWymf258Hhl&format=png&color=000000")';
 
         const card = document.getElementById('card');
         const topCard = document.getElementById('topCard');
         const bottomCard = document.getElementById('bottomCard');
-        const continueButton = document.getElementById('continueButton');
+        const continueBtn = document.getElementById('continueBtn');
         let isPressed = false;
         let currentX = 0;
         let currentY = 0;
@@ -468,32 +357,11 @@
         let returnTimeout = null;
         let animationFrame = null;
 
-        // Устанавливаем правильные иконки
-        document.querySelector('.icon').style.backgroundImage = 'url("https://img.icons8.com/?size=100&id=3A5E5yADqtYc&format=png&color=000000")';
-        document.querySelector('#topCard .additional-icon').style.backgroundImage = 'url("https://img.icons8.com/?size=100&id=YvcFCFKp34m1&format=png&color=000000")';
-        document.querySelector('#bottomCard .additional-icon').style.backgroundImage = 'url("https://img.icons8.com/?size=100&id=IrWymf258Hhl&format=png&color=000000")';
-
-        // Обработчик нажатий с вибрацией
-        function handleTouchStart(e) {
-            vibrate();
-            isPressed = true;
-            card.classList.add('pressed');
-            
-            if (returnTimeout) {
-                clearTimeout(returnTimeout);
-                returnTimeout = null;
+        // Функция вибрации
+        function vibrate() {
+            if (navigator.vibrate) {
+                navigator.vibrate(10); // Мягкая вибрация 10ms
             }
-            if (animationFrame) {
-                cancelAnimationFrame(animationFrame);
-                animationFrame = null;
-            }
-            
-            const touch = e.touches[0];
-            targetX = (touch.clientX / window.innerWidth - 0.5) * 2;
-            targetY = (touch.clientY / window.innerHeight - 0.5) * 2;
-            
-            animateRotation();
-            e.preventDefault();
         }
 
         // Анимация плавного поворота
@@ -517,7 +385,27 @@
         }
 
         // Обработчик начала нажатия
-        document.addEventListener('touchstart', handleTouchStart, { passive: false });
+        document.addEventListener('touchstart', (e) => {
+            isPressed = true;
+            card.classList.add('pressed');
+            vibrate(); // Вибрация при касании
+            
+            if (returnTimeout) {
+                clearTimeout(returnTimeout);
+                returnTimeout = null;
+            }
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+                animationFrame = null;
+            }
+            
+            const touch = e.touches[0];
+            targetX = (touch.clientX / window.innerWidth - 0.5) * 2;
+            targetY = (touch.clientY / window.innerHeight - 0.5) * 2;
+            
+            animateRotation();
+            e.preventDefault();
+        }, { passive: false });
 
         // Обработчик движения при нажатия
         document.addEventListener('touchmove', (e) => {
@@ -542,17 +430,6 @@
             }, 700);
         });
 
-        // Обработчик кнопки "Продолжить"
-        continueButton.addEventListener('click', function() {
-            vibrate();
-            // Здесь можно добавить логику перехода
-            if (window.Telegram && Telegram.WebApp) {
-                Telegram.WebApp.showAlert('Продолжаем! 🚀');
-            } else {
-                alert('Продолжаем! 🚀');
-            }
-        });
-
         function returnToStart() {
             targetX = 0;
             targetY = 0;
@@ -570,6 +447,17 @@
                 translateZ(${translateZ}px)
             `;
         }
+
+        // Обработчик кнопки "Продолжить"
+        continueBtn.addEventListener('click', () => {
+            vibrate();
+            // Здесь можно добавить логику перехода
+            tg.showPopup({
+                title: 'Продолжаем!',
+                message: 'Переходим к созданию задач...',
+                buttons: [{ type: 'ok' }]
+            });
+        });
 
         // Анимация дополнительных плашек
         function startAdditionalCardsAnimation() {
