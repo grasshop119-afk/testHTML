@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Today Tasks</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            touch-action: none;
+            transition: background-color 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 80px; /* Место для кнопки */
+        }
+
+        /* Светлая тема по умолчанию */
+        body.light-theme {
+            background-color: white;
+        }
+
+        body.light-theme .main-card {
+            background-color: #171717;
+        }
+
+        body.light-theme .title,
+        body.light-theme .description {
+            color: white;
+        }
+
+        body.light-theme .icon-square {
+            background-color: white;
+        }
+
+        /* Темная тема */
+        body.dark-theme {
+            background-color: #171717;
+        }
+
+        body.dark-theme .main-card {
+            background-color: white;
+        }
+
+        body.dark-theme .title,
+        body.dark-theme .description {
+            color: #171717;
+        }
+
+        body.dark-theme .icon-square {
+            background-color: #171717;
+        }
+
+        body.dark-theme .icon {
+            filter: invert(1);
+        }
+
+        .welcome-section {
+            position: absolute;
+            left: 10%;
+            top: calc(50% + 25px); /* Было 90px, стало 25px (подняли на 65px) */
+            text-align: left;
+            width: 80%;
+            max-width: 400px;
+        }
+
+        .welcome-title {
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            transition: color 0.3s ease;
+            letter-spacing: -1px;
+            line-height: 1;
+        }
+
+        .welcome-main {
+            opacity: 1;
+        }
+
+        .welcome-name {
+            opacity: 0.7;
+        }
+
+        .light-theme .welcome-title {
+            color: #171717;
+        }
+
+        .dark-theme .welcome-title {
+            color: white;
+        }
+
+        .welcome-description {
+            font-size: 16px;
+            line-height: 1.4;
+            opacity: 0.7;
+            transition: color 0.3s ease;
+            margin-top: 5px;
+        }
+
+        .light-theme .welcome-description {
+            color: #171717;
+        }
+
+        .dark-theme .welcome-description {
+            color: white;
+        }
+
+        .container {
+            width: 60%;
+            max-width: 400px;
+            position: absolute;
+            top: calc(50% - 125px);
+            transform: translateY(-50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1000px;
+        }
+
+        .main-card {
+            width: 100%;
+            height: 55px;
+            border-radius: 19px;
+            position: relative;
+            transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), background-color 0.3s ease;
+            transform-style: preserve-3d;
+            display: flex;
+            align-items: center;
+            padding-left: 8px;
+            z-index: 10;
+        }
+
+        .main-card.pressed {
+            transition: transform 0.2s ease-out;
+        }
+
+        .additional-card {
+            width: 100%;
+            height: 55px;
+            border-radius: 19px;
+            position: absolute;
+            opacity: 0;
+            z-index: 5;
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            display: flex;
+            align-items: center;
+            padding-left: 8px;
+        }
+
+        .additional-card.top {
+            transform: translateY(0);
+            opacity: 0;
+        }
+
+        .additional-card.bottom {
+            transform: translateY(0);
+            opacity: 0;
+        }
+
+        .additional-card.top.visible {
+            transform: translateY(-65px);
+            opacity: 0.5;
+        }
+
+        .additional-card.bottom.visible {
+            transform: translateY(65px);
+            opacity: 0.5;
+        }
+
+        .icon-container {
+            flex-shrink: 0;
+            margin-left: 4px;
+        }
+
+        .icon-square {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            transition: background-color 0.3s ease;
+        }
+
+        .icon {
+            width: 28px;
+            height: 28px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            flex-shrink: 0;
+            transition: filter 0.3s ease;
+        }
+
+        .text-content {
+            margin-left: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .title {
+            font-size: 16px;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 2px;
+            transition: color 0.3s ease;
+        }
+
+        .description {
+            font-size: 11px;
+            opacity: 0.7;
+            line-height: 1;
+            transition: color 0.3s ease;
+        }
+
+        /* Кнопка Telegram */
+        .telegram-button {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 85%;
+            max-width: 400px;
+            height: 50px;
+            background: linear-gradient(135deg, #0088cc, #00a2ff);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 17px;
+            font-weight: 600;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 136, 204, 0.3);
+            z-index: 1000;
+        }
+
+        .telegram-button:active {
+            transform: translateX(-50%) scale(0.98);
+            box-shadow: 0 2px 8px rgba(0, 136, 204, 0.4);
+        }
+
+        .telegram-button:hover {
+            background: linear-gradient(135deg, #0077b3, #0090e0);
+        }
+
+        /* Адаптация для мобильных */
+        @media (max-width: 480px) {
+            .container {
+                width: 75%;
+                top: calc(50% - 115px);
+            }
+            
+            .welcome-section {
+                width: 85%;
+                left: 7.5%;
+                top: calc(50% + 15px);
+            }
+            
+            .welcome-title {
+                font-size: 36px;
+            }
+            
+            .welcome-description {
+                font-size: 14px;
+            }
+
+            .icon-square {
+                width: 42px;
+                height: 42px;
+            }
+
+            .icon {
+                width: 26px;
+                height: 26px;
+            }
+
+            .telegram-button {
+                width: 90%;
+                height: 48px;
+            }
+        }
+
+        @media (max-width: 320px) {
+            .container {
+                width: 80%;
+                top: calc(50% - 105px);
+            }
+            
+            .welcome-section {
+                width: 90%;
+                left: 5%;
+                top: calc(50% + 10px);
+            }
+            
+            .welcome-title {
+                font-size: 32px;
+            }
+            
+            .welcome-description {
+                font-size: 13px;
+            }
+
+            .icon-square {
+                width: 40px;
+                height: 40px;
+            }
+
+            .icon {
+                width: 24px;
+                height: 24px;
+            }
+
+            .telegram-button {
+                width: 92%;
+                height: 46px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="welcome-section">
+        <div class="welcome-title">
+            <span class="welcome-main">Welcome, </span>
+            <span class="welcome-name" id="userName">User!</span>
+        </div>
+        <div class="welcome-description">
+            Here you can create folders with ToDos to better manage your daily tasks. It's especially comfortable to do with our pretty minimalistic Ul design! Let's start! 🚀
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="additional-card top" id="topCard">
+            <div class="icon-container">
+                <div class="icon-square">
+                    <div class="icon additional-icon"></div>
+                </div>
+            </div>
+            <div class="text-content">
+                <div class="title">Creative Projects</div>
+                <div class="description">Design new app interface • Brainstorm ideas</div>
+            </div>
+        </div>
+        <div class="main-card" id="card">
+            <div class="icon-container">
+                <div class="icon-square">
+                    <div class="icon"></div>
+                </div>
+            </div>
+            <div class="text-content">
+                <div class="title">Today</div>
+                <div class="description">Create a folder for daily routine to make your experience more comfortable</div>
+            </div>
+        </div>
+        <div class="additional-card bottom" id="bottomCard">
+            <div class="icon-container">
+                <div class="icon-square">
+                    <div class="icon additional-icon"></div>
+                </div>
+            </div>
+            <div class="text-content">
+                <div class="title">Birthday Prep</div>
+                <div class="description">Buy gift • Decorate room • Plan surprise</div>
+            </div>
+        </div>
+    </div>
+
+    <button class="telegram-button" id="continueButton">Продолжить</button>
+
+    <script>
+        // Telegram Web App initialization
+        if (window.Telegram && Telegram.WebApp) {
+            const tg = Telegram.WebApp;
+            
+            // Expand the app to full screen
+            tg.expand();
+            
+            // Set user name
+            const user = tg.initDataUnsafe?.user;
+            if (user) {
+                const firstName = user.first_name || 'User';
+                document.getElementById('userName').textContent = firstName + '!';
+            }
+            
+            // Enable vibration
+            tg.enableVibration();
+        }
+
+        // Вибрация при нажатии
+        function vibrate() {
+            if (navigator.vibrate) {
+                navigator.vibrate(10); // Мягкая вибрация 10ms
+            }
+        }
+
+        // Определение системной темы
+        function detectSystemTheme() {
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                return 'dark';
+            }
+            return 'light';
+        }
+
+        // Установка темы
+        function setTheme(theme) {
+            document.body.className = theme + '-theme';
+            
+            const topCard = document.getElementById('topCard');
+            const bottomCard = document.getElementById('bottomCard');
+            const additionalIcons = document.querySelectorAll('.additional-icon');
+            
+            if (theme === 'dark') {
+                topCard.style.backgroundColor = 'white';
+                bottomCard.style.backgroundColor = 'white';
+                additionalIcons.forEach(icon => {
+                    icon.style.filter = 'invert(1)';
+                });
+            } else {
+                topCard.style.backgroundColor = '#171717';
+                bottomCard.style.backgroundColor = '#171717';
+                additionalIcons.forEach(icon => {
+                    icon.style.filter = 'invert(0)';
+                });
+            }
+        }
+
+        // Инициализация темы при загрузке
+        setTheme(detectSystemTheme());
+
+        // Слушаем изменения системной темы
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                setTheme(e.matches ? 'dark' : 'light');
+            });
+        }
+
+        const card = document.getElementById('card');
+        const topCard = document.getElementById('topCard');
+        const bottomCard = document.getElementById('bottomCard');
+        const continueButton = document.getElementById('continueButton');
+        let isPressed = false;
+        let currentX = 0;
+        let currentY = 0;
+        let targetX = 0;
+        let targetY = 0;
+        let returnTimeout = null;
+        let animationFrame = null;
+
+        // Устанавливаем правильные иконки
+        document.querySelector('.icon').style.backgroundImage = 'url("https://img.icons8.com/?size=100&id=3A5E5yADqtYc&format=png&color=000000")';
+        document.querySelector('#topCard .additional-icon').style.backgroundImage = 'url("https://img.icons8.com/?size=100&id=YvcFCFKp34m1&format=png&color=000000")';
+        document.querySelector('#bottomCard .additional-icon').style.backgroundImage = 'url("https://img.icons8.com/?size=100&id=IrWymf258Hhl&format=png&color=000000")';
+
+        // Обработчик нажатий с вибрацией
+        function handleTouchStart(e) {
+            vibrate();
+            isPressed = true;
+            card.classList.add('pressed');
+            
+            if (returnTimeout) {
+                clearTimeout(returnTimeout);
+                returnTimeout = null;
+            }
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+                animationFrame = null;
+            }
+            
+            const touch = e.touches[0];
+            targetX = (touch.clientX / window.innerWidth - 0.5) * 2;
+            targetY = (touch.clientY / window.innerHeight - 0.5) * 2;
+            
+            animateRotation();
+            e.preventDefault();
+        }
+
+        // Анимация плавного поворота
+        function animateRotation() {
+            const diffX = targetX - currentX;
+            const diffY = targetY - currentY;
+            
+            currentX += diffX * 0.3;
+            currentY += diffY * 0.3;
+            
+            if (Math.abs(diffX) < 0.001 && Math.abs(diffY) < 0.001) {
+                currentX = targetX;
+                currentY = targetY;
+                cancelAnimationFrame(animationFrame);
+                animationFrame = null;
+            } else {
+                animationFrame = requestAnimationFrame(animateRotation);
+            }
+            
+            updateCardTransform();
+        }
+
+        // Обработчик начала нажатия
+        document.addEventListener('touchstart', handleTouchStart, { passive: false });
+
+        // Обработчик движения при нажатия
+        document.addEventListener('touchmove', (e) => {
+            if (!isPressed) return;
+            
+            const touch = e.touches[0];
+            targetX = (touch.clientX / window.innerWidth - 0.5) * 2;
+            targetY = (touch.clientY / window.innerHeight - 0.5) * 2;
+            
+            e.preventDefault();
+        }, { passive: false });
+
+        // Обработчик окончания нажатия
+        document.addEventListener('touchend', (e) => {
+            if (!isPressed) return;
+            
+            isPressed = false;
+            card.classList.remove('pressed');
+            
+            returnTimeout = setTimeout(() => {
+                returnToStart();
+            }, 700);
+        });
+
+        // Обработчик кнопки "Продолжить"
+        continueButton.addEventListener('click', function() {
+            vibrate();
+            // Здесь можно добавить логику перехода
+            if (window.Telegram && Telegram.WebApp) {
+                Telegram.WebApp.showAlert('Продолжаем! 🚀');
+            } else {
+                alert('Продолжаем! 🚀');
+            }
+        });
+
+        function returnToStart() {
+            targetX = 0;
+            targetY = 0;
+            animateRotation();
+        }
+
+        function updateCardTransform() {
+            const rotateY = currentX * 22;
+            const rotateX = -currentY * 12;
+            const translateZ = isPressed ? 25 : 0;
+            
+            card.style.transform = `
+                rotateY(${rotateY}deg)
+                rotateX(${rotateX}deg)
+                translateZ(${translateZ}px)
+            `;
+        }
+
+        // Анимация дополнительных плашек
+        function startAdditionalCardsAnimation() {
+            setTimeout(() => {
+                showAdditionalCards();
+                
+                setTimeout(() => {
+                    hideAdditionalCards();
+                    
+                    setInterval(() => {
+                        setTimeout(() => {
+                            showAdditionalCards();
+                            
+                            setTimeout(() => {
+                                hideAdditionalCards();
+                            }, 7000);
+                            
+                        }, 5000);
+                        
+                    }, 12000);
+                    
+                }, 7000);
+                
+            }, 3000);
+        }
+
+        function showAdditionalCards() {
+            topCard.classList.add('visible');
+            bottomCard.classList.add('visible');
+        }
+
+        function hideAdditionalCards() {
+            topCard.classList.remove('visible');
+            bottomCard.classList.remove('visible');
+        }
+
+        // Запускаем анимацию дополнительных плашек
+        startAdditionalCardsAnimation();
+
+        // Запрет выделения текста и изображений
+        document.addEventListener('selectstart', function(e) {
+            e.preventDefault();
+            return false;
+        });
+
+        // Запрет контекстного меню
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+
+        // Запрет масштабирования
+        document.addEventListener('wheel', function(e) {
+            if (e.ctrlKey) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // Запрет масштабирования на мобильных устройствах
+        document.addEventListener('touchmove', function(e) {
+            if (e.scale !== 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+    </script>
+</body>
+</html>
