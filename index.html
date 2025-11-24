@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Today Tasks</title>
+    <title>Taskr</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;800&display=swap" rel="stylesheet">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
@@ -70,7 +70,7 @@
             width: 60%;
             max-width: 400px;
             position: absolute;
-            top: calc(50% - 125px);
+            top: calc(50% - 170px); /* Подняли на 45px выше (было -125px) */
             transform: translateY(-50%);
             display: flex;
             justify-content: center;
@@ -155,10 +155,10 @@
             flex-shrink: 0;
         }
 
-        /* Белая иконка для основной плашки */
+        /* Новая иконка для основной плашки */
         .main-card .icon {
             filter: invert(1);
-            background-image: url('https://img.icons8.com/?size=100&id=j1nrfP6OFNOh&format=png&color=000000');
+            background-image: url('https://img.icons8.com/?size=100&id=KXtAS0MR3VBG&format=png&color=000000');
         }
 
         /* Иконки для дополнительных плашек */
@@ -208,6 +208,10 @@
             cursor: pointer;
             z-index: 1000;
             transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .continue-button:active {
@@ -215,11 +219,20 @@
             background-color: #f0f0f0;
         }
 
+        .button-icon {
+            width: 20px;
+            height: 20px;
+            background-image: url('https://img.icons8.com/?size=100&id=5xd1Y72eNEFO&format=png&color=000000');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
         /* Адаптация для мобильных */
         @media (max-width: 480px) {
             .container {
                 width: 75%;
-                top: calc(50% - 115px);
+                top: calc(50% - 160px);
             }
             
             .welcome-section {
@@ -255,7 +268,7 @@
         @media (max-width: 320px) {
             .container {
                 width: 80%;
-                top: calc(50% - 105px);
+                top: calc(50% - 150px);
             }
             
             .welcome-section {
@@ -296,7 +309,7 @@
             <span class="welcome-name" id="userName">User!</span>
         </div>
         <div class="welcome-description">
-            TaskFlow is your ultimate productivity companion built natively for Telegram! Organize your daily routines, work projects, and personal goals with our intuitive folder system. Create custom ToDo lists, set reminders, and track your progress seamlessly. The clean, minimalistic design ensures you stay focused on what matters most. Perfect for students, professionals, and anyone looking to boost their productivity. Sync across all your devices and never miss a deadline again! 🚀
+            Taskr is your ultimate productivity companion built natively for Telegram! Organize your daily routines, work projects, and personal goals with our intuitive folder system. Create custom ToDo lists, set reminders, and track your progress seamlessly. The clean, minimalistic design ensures you stay focused on what matters most. Perfect for students, professionals, and anyone looking to boost their productivity. Sync across all your devices and never miss a deadline again! 🚀
         </div>
     </div>
 
@@ -336,7 +349,10 @@
         </div>
     </div>
 
-    <button class="continue-button" id="continueBtn">Продолжить</button>
+    <button class="continue-button" id="continueBtn">
+        Got it
+        <div class="button-icon"></div>
+    </button>
 
     <script>
         // Инициализация Telegram Web App
@@ -458,13 +474,13 @@
             `;
         }
 
-        // Обработчик кнопки "Продолжить"
+        // Обработчик кнопки "Got it"
         continueBtn.addEventListener('click', () => {
             vibrate();
             // Здесь можно добавить логику перехода
             tg.showPopup({
-                title: 'Продолжаем!',
-                message: 'Переходим к созданию задач...',
+                title: 'Got it!',
+                message: 'Moving to task creation...',
                 buttons: [{ type: 'ok' }]
             });
         });
