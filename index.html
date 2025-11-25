@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Inbox</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;800&display=swap" rel="stylesheet">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * {
@@ -12,23 +11,15 @@
             padding: 0;
             box-sizing: border-box;
             -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             height: 100vh;
             overflow: hidden;
-            position: fixed;
-            width: 100%;
-            touch-action: none;
             background-color: #171717;
-            display: flex;
-            flex-direction: column;
             color: white;
         }
 
@@ -38,38 +29,24 @@
             left: 0;
             width: 100%;
             height: 50%;
-            background-color: #1f1f1f;
-            border-radius: 0;
-            z-index: 1;
-            background-image: url('https://i.ibb.co/TBV21B2B/image.png');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
+            background: linear-gradient(to bottom, #1f1f1f 70%, rgba(255,255,255,0.1) 100%);
         }
 
         .card-container {
             position: absolute;
-            top: calc(35% - 45px);
+            top: calc(35% - 65px);
             left: 50%;
             transform: translate(-50%, -50%);
             width: 80%;
             max-width: 400px;
-            display: flex;
-            justify-content: center;
             perspective: 1000px;
-            z-index: 10;
         }
 
         .card-wrapper {
             display: flex;
-            width: 100%;
             gap: 10px;
             transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             transform-style: preserve-3d;
-        }
-
-        .card-wrapper.pressed {
-            transition: transform 0.2s ease-out;
         }
 
         .main-card {
@@ -80,12 +57,11 @@
             display: flex;
             align-items: center;
             padding-left: 8px;
-            position: relative;
         }
 
         .percentage-box {
-            width: 62px;
-            height: 62px;
+            width: 56px;
+            height: 56px;
             border-radius: 19px;
             background-color: white;
             display: flex;
@@ -96,26 +72,17 @@
         .percentage-icon {
             width: 28px;
             height: 28px;
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            background-image: url('https://img.icons8.com/?size=100&id=zFiUfDTGXSeZ&format=png&color=000000');
-        }
-
-        .icon-container {
-            flex-shrink: 0;
-            margin-left: 4px;
+            background: url('https://img.icons8.com/?size=100&id=zFiUfDTGXSeZ&format=png&color=000000') center/contain no-repeat;
         }
 
         .icon-square {
             width: 44px;
             height: 44px;
             border-radius: 10px;
+            background-color: #171717;
             display: flex;
             justify-content: center;
             align-items: center;
-            flex-shrink: 0;
-            background-color: #171717;
             overflow: hidden;
         }
 
@@ -141,71 +108,18 @@
 
         .text-content {
             margin-left: 12px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            min-width: 0;
-            flex: 1;
         }
 
         .title {
             font-size: 16px;
             font-weight: 800;
-            line-height: 1.1;
-            margin-bottom: 2px;
             color: #171717;
         }
 
         .description {
             font-size: 11px;
             opacity: 0.7;
-            line-height: 1;
             color: #171717;
-        }
-
-        /* Адаптация для мобильных */
-        @media (max-width: 480px) {
-            .card-container {
-                width: 85%;
-                top: calc(35% - 45px);
-            }
-
-            .icon-square {
-                width: 42px;
-                height: 42px;
-            }
-
-            .percentage-box {
-                width: 56px;
-                height: 56px;
-            }
-
-            .percentage-icon {
-                width: 26px;
-                height: 26px;
-            }
-        }
-
-        @media (max-width: 320px) {
-            .card-container {
-                width: 90%;
-                top: calc(35% - 45px);
-            }
-
-            .icon-square {
-                width: 40px;
-                height: 40px;
-            }
-
-            .percentage-box {
-                width: 52px;
-                height: 52px;
-            }
-
-            .percentage-icon {
-                width: 24px;
-                height: 24px;
-            }
         }
     </style>
 </head>
@@ -215,11 +129,7 @@
     <div class="card-container">
         <div class="card-wrapper" id="cardWrapper">
             <div class="main-card">
-                <div class="icon-container">
-                    <div class="icon-square" id="avatarContainer">
-                        <!-- Аватарка будет вставлена через JavaScript -->
-                    </div>
-                </div>
+                <div class="icon-square" id="avatarContainer"></div>
                 <div class="text-content">
                     <div class="title">User</div>
                     <div class="description">You have 0 current tasks</div>
@@ -232,181 +142,69 @@
     </div>
 
     <script>
-        // Инициализация Telegram Web App
-        let tg;
-        try {
-            tg = window.Telegram.WebApp;
-            // Разворачиваем приложение на весь экран
+        const tg = window.Telegram?.WebApp;
+        if (tg) {
             tg.expand();
-            // Включаем кнопку закрытия
-            tg.enableClosingConfirmation();
-            
-            // Получаем данные пользователя
             const user = tg.initDataUnsafe?.user;
             const userName = user?.first_name || 'User';
             
-            // Обновляем название плашки
             document.querySelector('.title').textContent = userName;
-            document.querySelector('.description').textContent = 'You have 0 current tasks';
-
-            // Загружаем аватар пользователя
+            
             const avatarContainer = document.getElementById('avatarContainer');
-            if (user && user.photo_url) {
+            if (user?.photo_url) {
                 const avatarImg = document.createElement('img');
                 avatarImg.src = user.photo_url;
-                avatarImg.alt = userName;
                 avatarImg.className = 'user-avatar';
                 avatarContainer.appendChild(avatarImg);
             } else {
-                // Если аватарки нет, показываем первую букву имени
                 const placeholder = document.createElement('div');
                 placeholder.className = 'avatar-placeholder';
                 placeholder.textContent = userName.charAt(0).toUpperCase();
                 avatarContainer.appendChild(placeholder);
             }
-            
-        } catch (error) {
-            console.log('Telegram Web App not available, running in standalone mode');
-            // Заглушка для standalone режима
-            tg = {
-                HapticFeedback: {
-                    impactOccurred: () => {}
-                }
-            };
-            
-            // В standalone режиме показываем заглушку для аватара
-            const avatarContainer = document.getElementById('avatarContainer');
-            const placeholder = document.createElement('div');
-            placeholder.className = 'avatar-placeholder';
-            placeholder.textContent = 'U';
-            avatarContainer.appendChild(placeholder);
         }
 
         const cardWrapper = document.getElementById('cardWrapper');
         let isPressed = false;
-        let currentX = 0;
-        let currentY = 0;
-        let targetX = 0;
-        let targetY = 0;
-        let returnTimeout = null;
-        let animationFrame = null;
+        let currentX = 0, currentY = 0, targetX = 0, targetY = 0;
 
-        // Функция вибрации через Telegram
-        function vibrate() {
-            if (tg && tg.HapticFeedback) {
-                tg.HapticFeedback.impactOccurred('light');
-            }
-        }
-
-        // Анимация плавного поворота
         function animateRotation() {
-            const diffX = targetX - currentX;
-            const diffY = targetY - currentY;
+            currentX += (targetX - currentX) * 0.3;
+            currentY += (targetY - currentY) * 0.3;
             
-            currentX += diffX * 0.3;
-            currentY += diffY * 0.3;
-            
-            if (Math.abs(diffX) < 0.001 && Math.abs(diffY) < 0.001) {
-                currentX = targetX;
-                currentY = targetY;
-                cancelAnimationFrame(animationFrame);
-                animationFrame = null;
-            } else {
-                animationFrame = requestAnimationFrame(animateRotation);
+            if (Math.abs(targetX - currentX) > 0.001 || Math.abs(targetY - currentY) > 0.001) {
+                requestAnimationFrame(animateRotation);
             }
-            
-            updateCardTransform();
-        }
-
-        // Обработчик начала нажатия
-        document.addEventListener('touchstart', (e) => {
-            isPressed = true;
-            cardWrapper.classList.add('pressed');
-            vibrate();
-            
-            if (returnTimeout) {
-                clearTimeout(returnTimeout);
-                returnTimeout = null;
-            }
-            if (animationFrame) {
-                cancelAnimationFrame(animationFrame);
-                animationFrame = null;
-            }
-            
-            const touch = e.touches[0];
-            targetX = (touch.clientX / window.innerWidth - 0.5) * 3;
-            targetY = (touch.clientY / window.innerHeight - 0.5) * 2;
-            
-            animateRotation();
-            e.preventDefault();
-        }, { passive: false });
-
-        // Обработчик движения при нажатия
-        document.addEventListener('touchmove', (e) => {
-            if (!isPressed) return;
-            
-            const touch = e.touches[0];
-            targetX = (touch.clientX / window.innerWidth - 0.5) * 3;
-            targetY = (touch.clientY / window.innerHeight - 0.5) * 2;
-            
-            e.preventDefault();
-        }, { passive: false });
-
-        // Обработчик окончания нажатия
-        document.addEventListener('touchend', (e) => {
-            if (!isPressed) return;
-            
-            isPressed = false;
-            cardWrapper.classList.remove('pressed');
-            
-            returnTimeout = setTimeout(() => {
-                returnToStart();
-            }, 700);
-        });
-
-        function returnToStart() {
-            targetX = 0;
-            targetY = 0;
-            animateRotation();
-        }
-
-        function updateCardTransform() {
-            const rotateY = currentX * 25;
-            const rotateX = -currentY * 15;
-            const translateZ = isPressed ? 30 : 0;
             
             cardWrapper.style.transform = `
-                rotateY(${rotateY}deg)
-                rotateX(${rotateX}deg)
-                translateZ(${translateZ}px)
+                rotateY(${currentX * 25}deg)
+                rotateX(${-currentY * 15}deg)
+                translateZ(${isPressed ? 30 : 0}px)
             `;
         }
 
-        // Запрет выделения текста и изображений
-        document.addEventListener('selectstart', function(e) {
-            e.preventDefault();
-            return false;
+        document.addEventListener('touchstart', (e) => {
+            isPressed = true;
+            const touch = e.touches[0];
+            targetX = (touch.clientX / window.innerWidth - 0.5) * 3;
+            targetY = (touch.clientY / window.innerHeight - 0.5) * 2;
+            animateRotation();
         });
 
-        // Запрет контекстного меню
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-            return false;
+        document.addEventListener('touchmove', (e) => {
+            if (!isPressed) return;
+            const touch = e.touches[0];
+            targetX = (touch.clientX / window.innerWidth - 0.5) * 3;
+            targetY = (touch.clientY / window.innerHeight - 0.5) * 2;
         });
 
-        // Запрет масштабирования
-        document.addEventListener('wheel', function(e) {
-            if (e.ctrlKey) {
-                e.preventDefault();
-            }
-        }, { passive: false });
-
-        // Запрет масштабирования на мобильных устройствах
-        document.addEventListener('touchmove', function(e) {
-            if (e.scale !== 1) {
-                e.preventDefault();
-            }
-        }, { passive: false });
+        document.addEventListener('touchend', () => {
+            isPressed = false;
+            setTimeout(() => {
+                targetX = targetY = 0;
+                animateRotation();
+            }, 700);
+        });
     </script>
 </body>
 </html>
