@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Taskr</title>
+    <title>Inbox</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;800&display=swap" rel="stylesheet">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
@@ -29,105 +29,90 @@
             background-color: #171717;
             display: flex;
             flex-direction: column;
+            color: white;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
             align-items: center;
+            padding: 60px 20px 20px;
+            position: relative;
+            z-index: 10;
         }
 
-        .welcome-section {
-            position: absolute;
-            left: 10%;
-            top: calc(50% + 25px);
-            text-align: left;
-            width: 80%;
-            max-width: 400px;
-        }
-
-        .welcome-title {
+        .page-title {
             font-size: 42px;
             font-weight: 800;
-            margin-bottom: 8px;
             letter-spacing: -1px;
             line-height: 1;
             color: white;
         }
 
-        .welcome-main {
-            opacity: 1;
-        }
-
-        .welcome-name {
-            opacity: 0.7;
-        }
-
-        .welcome-description {
-            font-size: 16px;
-            line-height: 1.4;
-            opacity: 0.7;
-            color: white;
-            margin-top: 5px;
-        }
-
-        .container {
-            width: 60%;
-            max-width: 400px;
+        .background-rectangle {
             position: absolute;
-            top: calc(50% - 170px); /* Подняли на 45px выше (было -125px) */
-            transform: translateY(-50%);
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            background-color: #1f1f1f;
+            border-radius: 0;
+            z-index: 1;
+        }
+
+        .card-container {
+            position: absolute;
+            top: calc(35% - 45px);
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 400px;
             display: flex;
             justify-content: center;
-            align-items: center;
             perspective: 1000px;
+            z-index: 10;
         }
 
-        .main-card {
+        .card-wrapper {
+            display: flex;
             width: 100%;
-            height: 55px;
-            border-radius: 19px;
-            position: relative;
+            gap: 10px;
             transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             transform-style: preserve-3d;
-            display: flex;
-            align-items: center;
-            padding-left: 8px;
-            z-index: 10;
-            background-color: white;
         }
 
-        .main-card.pressed {
+        .card-wrapper.pressed {
             transition: transform 0.2s ease-out;
         }
 
-        .additional-card {
-            width: 100%;
+        .main-card {
+            flex: 1;
             height: 55px;
             border-radius: 19px;
-            position: absolute;
-            opacity: 0;
-            z-index: 5;
-            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            background-color: white;
             display: flex;
             align-items: center;
             padding-left: 8px;
+            position: relative;
+        }
+
+        .percentage-box {
+            width: 62px;
+            height: 62px;
+            border-radius: 19px;
             background-color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        .additional-card.top {
-            transform: translateY(0);
-            opacity: 0;
-        }
-
-        .additional-card.bottom {
-            transform: translateY(0);
-            opacity: 0;
-        }
-
-        .additional-card.top.visible {
-            transform: translateY(-65px);
-            opacity: 0.5;
-        }
-
-        .additional-card.bottom.visible {
-            transform: translateY(65px);
-            opacity: 0.5;
+        .percentage-icon {
+            width: 28px;
+            height: 28px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-image: url('https://img.icons8.com/?size=100&id=zFiUfDTGXSeZ&format=png&color=000000');
         }
 
         .icon-container {
@@ -146,24 +131,18 @@
             background-color: #171717;
         }
 
-        .icon {
-            width: 28px;
-            height: 28px;
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            flex-shrink: 0;
+        .sticker-container {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        /* Новая иконка для основной плашки */
-        .main-card .icon {
-            filter: invert(1);
-            background-image: url('https://img.icons8.com/?size=100&id=KXtAS0MR3VBG&format=png&color=000000');
-        }
-
-        /* Иконки для дополнительных плашек */
-        .additional-card .icon {
-            filter: invert(1);
+        .sticker {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
         .text-content {
@@ -190,63 +169,19 @@
             color: #171717;
         }
 
-        .continue-button {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 85%;
-            max-width: 400px;
-            height: 50px;
-            background-color: white;
-            border: none;
-            border-radius: 12px;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            font-size: 17px;
-            font-weight: 600;
-            color: #171717;
-            cursor: pointer;
-            z-index: 1000;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .continue-button:active {
-            transform: translateX(-50%) scale(0.98);
-            background-color: #f0f0f0;
-        }
-
-        .button-icon {
-            width: 20px;
-            height: 20px;
-            background-image: url('https://img.icons8.com/?size=100&id=5xd1Y72eNEFO&format=png&color=000000');
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-        }
-
         /* Адаптация для мобильных */
         @media (max-width: 480px) {
-            .container {
-                width: 75%;
-                top: calc(50% - 160px);
+            .header {
+                padding: 50px 16px 16px;
             }
             
-            .welcome-section {
-                width: 85%;
-                left: 7.5%;
-                top: calc(50% + 15px);
-            }
-            
-            .welcome-title {
+            .page-title {
                 font-size: 36px;
             }
             
-            .welcome-description {
-                font-size: 14px;
+            .card-container {
+                width: 85%;
+                top: calc(35% - 45px);
             }
 
             .icon-square {
@@ -254,35 +189,34 @@
                 height: 42px;
             }
 
-            .icon {
-                width: 26px;
-                height: 26px;
+            .sticker-container {
+                width: 30px;
+                height: 30px;
             }
 
-            .continue-button {
-                width: 90%;
-                bottom: 15px;
+            .percentage-box {
+                width: 56px;
+                height: 56px;
+            }
+
+            .percentage-icon {
+                width: 26px;
+                height: 26px;
             }
         }
 
         @media (max-width: 320px) {
-            .container {
-                width: 80%;
-                top: calc(50% - 150px);
+            .header {
+                padding: 45px 12px 12px;
             }
             
-            .welcome-section {
-                width: 90%;
-                left: 5%;
-                top: calc(50% + 10px);
-            }
-            
-            .welcome-title {
+            .page-title {
                 font-size: 32px;
             }
             
-            .welcome-description {
-                font-size: 13px;
+            .card-container {
+                width: 90%;
+                top: calc(35% - 45px);
             }
 
             .icon-square {
@@ -290,90 +224,116 @@
                 height: 40px;
             }
 
-            .icon {
-                width: 24px;
-                height: 24px;
+            .sticker-container {
+                width: 28px;
+                height: 28px;
             }
 
-            .continue-button {
-                width: 92%;
-                bottom: 12px;
+            .percentage-box {
+                width: 52px;
+                height: 52px;
+            }
+
+            .percentage-icon {
+                width: 24px;
+                height: 24px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="welcome-section">
-        <div class="welcome-title">
-            <span class="welcome-main">Welcome, </span>
-            <span class="welcome-name" id="userName">User!</span>
-        </div>
-        <div class="welcome-description">
-            Taskr is your ultimate productivity companion built natively for Telegram! Organize your daily routines, work projects, and personal goals with our intuitive folder system. Create custom ToDo lists, set reminders, and track your progress seamlessly. The clean, minimalistic design ensures you stay focused on what matters most. Perfect for students, professionals, and anyone looking to boost their productivity. Sync across all your devices and never miss a deadline again! 🚀
-        </div>
+    <div class="background-rectangle"></div>
+    
+    <div class="header">
+        <div class="page-title">Inbox</div>
     </div>
 
-    <div class="container">
-        <div class="additional-card top" id="topCard">
-            <div class="icon-container">
-                <div class="icon-square">
-                    <div class="icon additional-icon"></div>
+    <div class="card-container">
+        <div class="card-wrapper" id="cardWrapper">
+            <div class="main-card">
+                <div class="icon-container">
+                    <div class="icon-square">
+                        <div class="sticker-container">
+                            <img src="" alt="🚀" class="sticker" id="rocketSticker">
+                        </div>
+                    </div>
+                </div>
+                <div class="text-content">
+                    <div class="title">User</div>
+                    <div class="description">You have 0 current tasks</div>
                 </div>
             </div>
-            <div class="text-content">
-                <div class="title">Creative Projects</div>
-                <div class="description">Design new app interface • Brainstorm ideas</div>
-            </div>
-        </div>
-        <div class="main-card" id="card">
-            <div class="icon-container">
-                <div class="icon-square">
-                    <div class="icon"></div>
-                </div>
-            </div>
-            <div class="text-content">
-                <div class="title">Today</div>
-                <div class="description">Create a folder for daily routine to make your experience more comfortable</div>
-            </div>
-        </div>
-        <div class="additional-card bottom" id="bottomCard">
-            <div class="icon-container">
-                <div class="icon-square">
-                    <div class="icon additional-icon"></div>
-                </div>
-            </div>
-            <div class="text-content">
-                <div class="title">Birthday Prep</div>
-                <div class="description">Buy gift • Decorate room • Plan surprise</div>
+            <div class="percentage-box">
+                <div class="percentage-icon"></div>
             </div>
         </div>
     </div>
-
-    <button class="continue-button" id="continueBtn">
-        Got it
-        <div class="button-icon"></div>
-    </button>
 
     <script>
         // Инициализация Telegram Web App
-        const tg = window.Telegram.WebApp;
-        
-        // Разворачиваем приложение на весь экран
-        tg.expand();
-        
-        // Получаем данные пользователя
-        const user = tg.initDataUnsafe?.user;
-        const userName = user?.first_name || 'User';
-        document.getElementById('userName').textContent = userName + '!';
+        let tg;
+        try {
+            tg = window.Telegram.WebApp;
+            // Разворачиваем приложение на весь экран
+            tg.expand();
+            // Включаем кнопку закрытия
+            tg.enableClosingConfirmation();
+            
+            // Получаем данные пользователя
+            const user = tg.initDataUnsafe?.user;
+            const userName = user?.first_name || 'User';
+            
+            // Обновляем название плашки
+            document.querySelector('.title').textContent = userName;
+            document.querySelector('.description').textContent = 'You have 0 current tasks';
+            
+        } catch (error) {
+            console.log('Telegram Web App not available, running in standalone mode');
+            // Заглушка для standalone режима
+            tg = {
+                HapticFeedback: {
+                    impactOccurred: () => {}
+                }
+            };
+        }
 
-        // Устанавливаем иконки для дополнительных плашек
-        document.querySelector('#topCard .additional-icon').style.backgroundImage = 'url("https://img.icons8.com/?size=100&id=YvcFCFKp34m1&format=png&color=000000")';
-        document.querySelector('#bottomCard .additional-icon').style.backgroundImage = 'url("https://img.icons8.com/?size=100&id=IrWymf258Hhl&format=png&color=000000")';
+        // Функция для получения стикера
+        async function loadRocketSticker() {
+            const rocketSticker = document.getElementById('rocketSticker');
+            
+            try {
+                // Пробуем получить информацию о стикере через Bot API
+                // Для этого нужен bot token и file_id стикера
+                // Временно используем fallback на статичный стикер
+                
+                // Если есть доступ к Bot API, можно использовать такой подход:
+                // const response = await fetch(`https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getFile?file_id=<STICKER_FILE_ID>`);
+                // const fileData = await response.json();
+                // const filePath = fileData.result.file_path;
+                // const stickerUrl = `https://api.telegram.org/file/bot<YOUR_BOT_TOKEN>/${filePath}`;
+                
+                // Временно используем статичную ссылку на анимированный стикер ракеты
+                // Замените на реальный URL вашего стикера
+                const fallbackStickerUrl = 'https://raw.githubusercontent.com/TelegramStickers/rocket/master/sticker.webp';
+                
+                rocketSticker.src = fallbackStickerUrl;
+                rocketSticker.onerror = function() {
+                    // Если стикер не загрузился, показываем эмодзи как fallback
+                    this.style.display = 'none';
+                    this.parentElement.innerHTML = '🚀';
+                };
+                
+            } catch (error) {
+                console.log('Error loading sticker:', error);
+                rocketSticker.style.display = 'none';
+                rocketSticker.parentElement.innerHTML = '🚀';
+            }
+        }
 
-        const card = document.getElementById('card');
-        const topCard = document.getElementById('topCard');
-        const bottomCard = document.getElementById('bottomCard');
-        const continueBtn = document.getElementById('continueBtn');
+        // Загружаем стикер при инициализации
+        loadRocketSticker();
+
+        const cardWrapper = document.getElementById('cardWrapper');
         let isPressed = false;
         let currentX = 0;
         let currentY = 0;
@@ -384,8 +344,7 @@
 
         // Функция вибрации через Telegram
         function vibrate() {
-            // Вибрация через Telegram Web App
-            if (tg.HapticFeedback) {
+            if (tg && tg.HapticFeedback) {
                 tg.HapticFeedback.impactOccurred('light');
             }
         }
@@ -413,8 +372,8 @@
         // Обработчик начала нажатия
         document.addEventListener('touchstart', (e) => {
             isPressed = true;
-            card.classList.add('pressed');
-            vibrate(); // Вибрация через Telegram при касании
+            cardWrapper.classList.add('pressed');
+            vibrate();
             
             if (returnTimeout) {
                 clearTimeout(returnTimeout);
@@ -426,7 +385,7 @@
             }
             
             const touch = e.touches[0];
-            targetX = (touch.clientX / window.innerWidth - 0.5) * 2;
+            targetX = (touch.clientX / window.innerWidth - 0.5) * 3;
             targetY = (touch.clientY / window.innerHeight - 0.5) * 2;
             
             animateRotation();
@@ -438,7 +397,7 @@
             if (!isPressed) return;
             
             const touch = e.touches[0];
-            targetX = (touch.clientX / window.innerWidth - 0.5) * 2;
+            targetX = (touch.clientX / window.innerWidth - 0.5) * 3;
             targetY = (touch.clientY / window.innerHeight - 0.5) * 2;
             
             e.preventDefault();
@@ -449,7 +408,7 @@
             if (!isPressed) return;
             
             isPressed = false;
-            card.classList.remove('pressed');
+            cardWrapper.classList.remove('pressed');
             
             returnTimeout = setTimeout(() => {
                 returnToStart();
@@ -463,65 +422,16 @@
         }
 
         function updateCardTransform() {
-            const rotateY = currentX * 22;
-            const rotateX = -currentY * 12;
-            const translateZ = isPressed ? 25 : 0;
+            const rotateY = currentX * 25;
+            const rotateX = -currentY * 15;
+            const translateZ = isPressed ? 30 : 0;
             
-            card.style.transform = `
+            cardWrapper.style.transform = `
                 rotateY(${rotateY}deg)
                 rotateX(${rotateX}deg)
                 translateZ(${translateZ}px)
             `;
         }
-
-        // Обработчик кнопки "Got it"
-        continueBtn.addEventListener('click', () => {
-            vibrate();
-            // Здесь можно добавить логику перехода
-            tg.showPopup({
-                title: 'Got it!',
-                message: 'Moving to task creation...',
-                buttons: [{ type: 'ok' }]
-            });
-        });
-
-        // Анимация дополнительных плашек
-        function startAdditionalCardsAnimation() {
-            setTimeout(() => {
-                showAdditionalCards();
-                
-                setTimeout(() => {
-                    hideAdditionalCards();
-                    
-                    setInterval(() => {
-                        setTimeout(() => {
-                            showAdditionalCards();
-                            
-                            setTimeout(() => {
-                                hideAdditionalCards();
-                            }, 7000);
-                            
-                        }, 5000);
-                        
-                    }, 12000);
-                    
-                }, 7000);
-                
-            }, 3000);
-        }
-
-        function showAdditionalCards() {
-            topCard.classList.add('visible');
-            bottomCard.classList.add('visible');
-        }
-
-        function hideAdditionalCards() {
-            topCard.classList.remove('visible');
-            bottomCard.classList.remove('visible');
-        }
-
-        // Запускаем анимацию дополнительных плашек
-        startAdditionalCardsAnimation();
 
         // Запрет выделения текста и изображений
         document.addEventListener('selectstart', function(e) {
