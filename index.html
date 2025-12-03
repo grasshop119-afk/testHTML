@@ -30,19 +30,6 @@
             transition: none !important;
         }
 
-        .screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #1F2021;
-        }
-
-        .hidden {
-            display: none;
-        }
-
         .header {
             position: fixed;
             top: 0;
@@ -73,13 +60,9 @@
         .header-icon {
             width: 24px;
             height: 24px;
-            opacity: 0.8;
+            opacity: 0.9;
             transition: opacity 0.2s ease;
             cursor: pointer;
-        }
-
-        .header-icon:hover {
-            opacity: 1;
         }
 
         .header-icon:active {
@@ -115,28 +98,14 @@
 
         .section {
             margin-bottom: 24px;
-            position: relative;
         }
 
         .section-title {
             font-size: 17px;
             font-weight: 600;
             margin-bottom: 12px;
-            padding: 0 8px 8px 0;
+            padding: 0 8px;
             color: #FFFFFF;
-            position: relative;
-            display: inline-block;
-            padding-right: 80px;
-        }
-
-        .section-title::after {
-            content: '';
-            position: absolute;
-            right: 0;
-            bottom: 4px;
-            width: calc(100% - 120px);
-            height: 0.5px;
-            background: #2A2B2C;
         }
 
         .collection-card {
@@ -163,6 +132,19 @@
             justify-content: center;
             margin-right: 12px;
             overflow: hidden;
+            position: relative;
+        }
+
+        .collection-error {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+            text-align: center;
+            width: 100%;
+            padding: 0 4px;
         }
 
         .collection-icon img {
@@ -195,6 +177,346 @@
             border-radius: 12px;
             font-size: 13px;
             font-weight: 600;
+        }
+
+        .ideas-container {
+            overflow-x: auto;
+            display: flex;
+            gap: 12px;
+            padding: 0 0 16px 0;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .ideas-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .idea-card {
+            border: 1.5px solid #2A2B2C;
+            border-radius: 14px;
+            padding: 16px;
+            min-width: 280px;
+            max-width: 280px;
+            height: 180px;
+            position: relative;
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .idea-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .idea-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #FFFFFF;
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .delete-icon {
+            width: 18px;
+            height: 18px;
+            margin-left: 8px;
+            opacity: 0.7;
+            cursor: pointer;
+            filter: invert(20%) sepia(90%) saturate(3000%) hue-rotate(350deg) brightness(90%) contrast(90%);
+        }
+
+        .delete-icon:active {
+            opacity: 1;
+        }
+
+        .idea-content {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.4;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .idea-content.truncated::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 50px;
+            height: 20px;
+            background: linear-gradient(90deg, transparent, #1F2021 70%);
+        }
+
+        .idea-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+        }
+
+        .reaction-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .reaction-btn {
+            background: #2A2B2C;
+            border-radius: 19px;
+            padding: 6px 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .reaction-btn.active {
+            background: var(--accent-color);
+        }
+
+        .reaction-btn.active .reaction-count {
+            color: white;
+            font-weight: 600;
+        }
+
+        .reaction-gif {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+        }
+
+        .reaction-count {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .view-full-btn {
+            background: transparent;
+            border: none;
+            color: var(--accent-color);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 4px 8px;
+            opacity: 0.8;
+        }
+
+        .view-full-btn:active {
+            opacity: 1;
+        }
+
+        .add-idea-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            padding: 12px;
+            width: 100%;
+            font-size: 16px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: opacity 0.2s ease;
+        }
+
+        .add-idea-btn:active {
+            opacity: 0.8;
+        }
+
+        .add-idea-btn-icon {
+            width: 20px;
+            height: 20px;
+            filter: invert(1);
+        }
+
+        .no-ideas-text {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+            padding: 20px 0;
+            margin-top: 8px;
+        }
+
+        /* Модальное окно для добавления/просмотра идеи */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #1F2021;
+            z-index: 1000;
+            display: none;
+        }
+
+        .modal-overlay.active {
+            display: block;
+        }
+
+        .modal-header {
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+        }
+
+        .modal-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-title-icon {
+            width: 20px;
+            height: 20px;
+            filter: invert(1);
+        }
+
+        .modal-close {
+            width: 24px;
+            height: 24px;
+            opacity: 0.8;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .modal-close::before,
+        .modal-close::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 18px;
+            height: 2px;
+            background: white;
+        }
+
+        .modal-close::before {
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+
+        .modal-close::after {
+            transform: translate(-50%, -50%) rotate(-45deg);
+        }
+
+        .modal-divider {
+            height: 0.5px;
+            background: #2A2B2C;
+            margin: 0 16px;
+        }
+
+        .modal-content {
+            padding: 20px 16px;
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+        }
+
+        .view-modal-content {
+            padding: 20px 16px;
+            color: white;
+        }
+
+        .view-modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .view-modal-text {
+            font-size: 16px;
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .input-group {
+            margin-bottom: 24px;
+        }
+
+        .input-label {
+            font-size: 15px;
+            font-weight: 500;
+            color: #FFFFFF;
+            margin-bottom: 8px;
+            padding-left: 4px;
+        }
+
+        .input-field {
+            width: 100%;
+            background: transparent;
+            border: 1px solid #353637;
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 16px;
+            color: white;
+            font-family: inherit;
+        }
+
+        .input-field::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .textarea-field {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .char-counter {
+            text-align: right;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 4px;
+            padding-right: 4px;
+        }
+
+        .char-counter.error {
+            color: #ff453a;
+        }
+
+        .modal-actions {
+            margin-top: 32px;
+        }
+
+        .modal-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .modal-btn:active {
+            opacity: 0.8;
         }
 
         .collection-screen {
@@ -339,11 +661,6 @@
             object-fit: contain;
         }
 
-        :root {
-            --accent-color: #007AFF;
-        }
-
-        /* Стили для прелоадера */
         .preloader {
             position: fixed;
             top: 0;
@@ -404,7 +721,9 @@
                 <div class="section-title">Коллекции</div>
                 
                 <div class="collection-card" onclick="openCollection('common')">
-                    <div class="collection-icon" id="commonIcon"></div>
+                    <div class="collection-icon" id="commonIcon">
+                        <div class="collection-error">Ошибка подключения</div>
+                    </div>
                     <div class="collection-info">
                         <div class="collection-name">Обычные чибики</div>
                         <div class="collection-stats" id="commonStats">Твоя шедевральная коллекция</div>
@@ -413,7 +732,9 @@
                 </div>
                 
                 <div class="collection-card" onclick="openCollection('secret')" id="secretCard">
-                    <div class="collection-icon" id="secretIcon"></div>
+                    <div class="collection-icon" id="secretIcon">
+                        <div class="collection-error">Ошибка подключения</div>
+                    </div>
                     <div class="collection-info">
                         <div class="collection-name">Секретные чибики</div>
                         <div class="collection-stats" id="secretStats">Абсолютно секретно</div>
@@ -422,7 +743,9 @@
                 </div>
                 
                 <div class="collection-card" onclick="openCollection('prize')" id="prizeCard">
-                    <div class="collection-icon" id="prizeIcon"></div>
+                    <div class="collection-icon" id="prizeIcon">
+                        <div class="collection-error">Ошибка подключения</div>
+                    </div>
                     <div class="collection-info">
                         <div class="collection-name">Призовые чибики</div>
                         <div class="collection-stats" id="prizeStats">Твои чибики с розыгрышей</div>
@@ -431,26 +754,12 @@
             </div>
 
             <div class="section">
-                <div class="section-title">Статьи</div>
-                
-                <div class="collection-card" onclick="openArticle('dice')">
-                    <div class="collection-icon">
-                        <img src="https://img.icons8.com/?size=100&id=D9RFWfYE57lW&format=png&color=8E8E93" alt="Статья" style="width: 24px; height: 24px;">
-                    </div>
-                    <div class="collection-info">
-                        <div class="collection-name">Что такое кости и с чем их едят?</div>
-                        <div class="collection-stats">Шикарный и понятный гайд про азартную игру</div>
-                    </div>
+                <div class="section-title">Идеи</div>
+                <div class="ideas-container" id="ideasContainer">
+                    <!-- Идеи будут добавлены здесь -->
                 </div>
-                
-                <div class="collection-card" onclick="openArticle('help')">
-                    <div class="collection-icon">
-                        <img src="https://img.icons8.com/?size=100&id=D9RFWfYE57lW&format=png&color=8E8E93" alt="Статья" style="width: 24px; height: 24px;">
-                    </div>
-                    <div class="collection-info">
-                        <div class="collection-name">Как обратиться к админам?</div>
-                        <div class="collection-stats">Расскажем как связаться с нами анонимно</div>
-                    </div>
+                <div id="addIdeaBtnContainer">
+                    <!-- Кнопка добавить идею будет здесь -->
                 </div>
             </div>
         </div>
@@ -468,6 +777,61 @@
         </div>
     </div>
 
+    <!-- Модальное окно добавления идеи -->
+    <div class="modal-overlay" id="addIdeaModal">
+        <div class="modal-header">
+            <div class="modal-title">
+                <img src="https://img.icons8.com/?size=100&id=KXtAS0MR3VBG&format=png&color=000000" 
+                     alt="Иконка" 
+                     class="modal-title-icon">
+                Закинуть идею
+            </div>
+            <div class="modal-close" onclick="closeAddIdeaModal()"></div>
+        </div>
+        <div class="modal-divider"></div>
+        <div class="modal-content">
+            <div class="input-group">
+                <div class="input-label">Название</div>
+                <input type="text" 
+                       class="input-field" 
+                       id="ideaTitle" 
+                       placeholder="Введи название идейки"
+                       maxlength="15">
+                <div class="char-counter" id="titleCharCounter">0/15</div>
+            </div>
+            
+            <div class="input-group">
+                <div class="input-label">Твоя идейка</div>
+                <textarea class="input-field textarea-field" 
+                          id="ideaContent" 
+                          placeholder="Опиши свою идею"></textarea>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="modal-btn" onclick="submitIdea()">Закинуть</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно просмотра идеи -->
+    <div class="modal-overlay" id="viewIdeaModal">
+        <div class="modal-header">
+            <div class="modal-title">
+                <img src="https://img.icons8.com/?size=100&id=KXtAS0MR3VBG&format=png&color=000000" 
+                     alt="Иконка" 
+                     class="modal-title-icon">
+                <span id="viewModalTitle">Заголовок</span>
+            </div>
+            <div class="modal-close" onclick="closeViewIdeaModal()"></div>
+        </div>
+        <div class="modal-divider"></div>
+        <div class="view-modal-content">
+            <div class="view-modal-text" id="viewModalText">
+                Содержимое идеи
+            </div>
+        </div>
+    </div>
+
     <div class="fullscreen-viewer" id="fullscreenViewer" onclick="closeFullscreen()">
         <img src="" alt="" class="fullscreen-image" id="fullscreenImage">
     </div>
@@ -481,7 +845,15 @@
             prize: { collected: [], all: [] }
         };
         
+        let ideas = [];
         let currentScreen = 'home';
+        let currentUser = null;
+        const isEventPeriod = () => {
+            const now = new Date();
+            const month = now.getMonth() + 1; // 1-12
+            const day = now.getDate(); // 1-31
+            return month === 12 && day >= 1 && day <= 31;
+        };
 
         function initTelegramApp() {
             tg.ready();
@@ -491,19 +863,82 @@
             
             tg.BackButton.onClick(goBack);
             
+            // Получаем пользователя
+            currentUser = tg.initDataUnsafe?.user;
+            
+            // Устанавливаем иконкам акцентный цвет
+            updateHeaderIcons();
+            
             showPreloader();
             loadUserData();
+            loadIdeas();
+        }
+
+        function updateHeaderIcons() {
+            // Установка акцентного цвета из темы Telegram
+            let accentColor = '#007AFF';
+            if (tg.themeParams.accent_text_color) {
+                accentColor = tg.themeParams.accent_text_color;
+            }
+            document.documentElement.style.setProperty('--accent-color', accentColor);
+            
+            // Применяем фильтры к иконкам в шапке для изменения цвета
+            const headerIcons = document.querySelectorAll('.header-icon');
+            headerIcons.forEach(icon => {
+                // Создаем SVG фильтр для перекрашивания в акцентный цвет
+                const color = hexToRgb(accentColor);
+                if (color) {
+                    icon.style.filter = `
+                        invert(45%) 
+                        sepia(100%) 
+                        saturate(1000%) 
+                        hue-rotate(${getHueFromColor(accentColor)}deg) 
+                        brightness(90%) 
+                        contrast(110%)
+                    `;
+                }
+            });
+        }
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        function getHueFromColor(color) {
+            const hex = color.replace('#', '');
+            const r = parseInt(hex.substr(0,2), 16) / 255;
+            const g = parseInt(hex.substr(2,2), 16) / 255;
+            const b = parseInt(hex.substr(4,2), 16) / 255;
+            
+            const max = Math.max(r, g, b);
+            const min = Math.min(r, g, b);
+            let h = 0;
+            
+            if (max === min) {
+                h = 0;
+            } else if (max === r) {
+                h = (60 * ((g - b) / (max - min)) + 360) % 360;
+            } else if (max === g) {
+                h = (60 * ((b - r) / (max - min)) + 120) % 360;
+            } else if (max === b) {
+                h = (60 * ((r - g) / (max - min)) + 240) % 360;
+            }
+            
+            return h;
         }
 
         function showPreloader() {
             const preloader = document.getElementById('preloader');
             preloader.classList.remove('hidden');
             
-            const randomTime = 800 + Math.random() * 500;
-            
             setTimeout(() => {
                 preloader.classList.add('hidden');
-            }, randomTime);
+            }, 800 + Math.random() * 500);
         }
 
         function goBack() {
@@ -555,55 +990,301 @@
             tg.openTelegramLink('https://t.me/request_chibeki_bot');
         }
 
-        function showBotAlert() {
-            tg.showPopup({
-                title: 'Запусти бота! 🚀',
-                message: 'Чтобы собрать свою коллекцию чибиков, нужно сначала запустить @chibeki_bot',
-                buttons: [
-                    {
-                        type: 'default',
-                        text: 'Запустить бота',
-                        id: 'launch_bot'
-                    },
-                    {
-                        type: 'cancel',
-                        text: 'Позже',
-                        id: 'later'
-                    }
-                ]
-            }, function(buttonId) {
-                if (buttonId === 'launch_bot') {
-                    tg.openTelegramLink('https://t.me/chibeki_bot');
+        // Функции для работы с идеями
+        function loadIdeas() {
+            try {
+                const savedIdeas = localStorage.getItem('chibekiIdeas');
+                if (savedIdeas) {
+                    ideas = JSON.parse(savedIdeas);
                 }
+                renderIdeas();
+            } catch (error) {
+                console.error('Error loading ideas:', error);
+                ideas = [];
+            }
+        }
+
+        function saveIdeas() {
+            localStorage.setItem('chibekiIdeas', JSON.stringify(ideas));
+        }
+
+        function renderIdeas() {
+            const ideasContainer = document.getElementById('ideasContainer');
+            const addIdeaBtnContainer = document.getElementById('addIdeaBtnContainer');
+            
+            ideasContainer.innerHTML = '';
+            
+            if (ideas.length === 0) {
+                ideasContainer.innerHTML = '<div class="no-ideas-text">Идей пока нет…</div>';
+            } else {
+                ideas.forEach((idea, index) => {
+                    const ideaCard = document.createElement('div');
+                    ideaCard.className = 'idea-card';
+                    
+                    // Проверяем, является ли текущий пользователь админом
+                    const isAdmin = currentUser && (
+                        currentUser.username === 'ya_admin7' || 
+                        currentUser.username === 'tmkazavr'
+                    );
+                    
+                    // Проверяем, нужна ли кнопка "Полностью"
+                    const needsFullView = idea.content.length > 150;
+                    const displayContent = needsFullView ? 
+                        idea.content.substring(0, 150) + '...' : 
+                        idea.content;
+                    
+                    // Получаем реакцию пользователя
+                    const userReaction = getUserReaction(idea, currentUser?.id);
+                    const isLiked = userReaction === 'like';
+                    const isReacted1 = userReaction === 'event1';
+                    const isReacted2 = userReaction === 'event2';
+                    
+                    ideaCard.innerHTML = `
+                        <div class="idea-header">
+                            <div class="idea-title">${idea.title}</div>
+                            ${isAdmin ? `
+                                <img src="https://img.icons8.com/?size=100&id=IY5fIbHO723h&format=png&color=000000" 
+                                     class="delete-icon" 
+                                     alt="Удалить"
+                                     onclick="deleteIdea(${index})">
+                            ` : ''}
+                        </div>
+                        <div class="idea-content ${needsFullView ? 'truncated' : ''}">
+                            ${displayContent}
+                        </div>
+                        <div class="idea-footer">
+                            <div class="reaction-container">
+                                <button class="reaction-btn ${isLiked ? 'active' : ''}" onclick="toggleReaction(${index}, 'like')">
+                                    <img src="https://stickers.fullyst.com/b9f1c4ec-ff51-507f-a011-b3c035880c92/full/AgADyQcAAuN4BAAB.webp" 
+                                         class="reaction-gif" 
+                                         alt="❤️">
+                                    <span class="reaction-count">${idea.reactions?.like?.count || 0}</span>
+                                </button>
+                                ${isEventPeriod() ? `
+                                    <button class="reaction-btn ${isReacted1 ? 'active' : ''}" onclick="toggleReaction(${index}, 'event1')">
+                                        <img src="https://stickers.fullyst.com/b9f1c4ec-ff51-507f-a011-b3c035880c92/full/AgADzgEAAkGPGEQ.webp" 
+                                             class="reaction-gif" 
+                                             alt="🎄">
+                                        <span class="reaction-count">${idea.reactions?.event1?.count || 0}</span>
+                                    </button>
+                                    <button class="reaction-btn ${isReacted2 ? 'active' : ''}" onclick="toggleReaction(${index}, 'event2')">
+                                        <img src="https://stickers.fullyst.com/b9f1c4ec-ff51-507f-a011-b3c035880c92/full/AgAD_QIAAgapIEQ.webp" 
+                                             class="reaction-gif" 
+                                             alt="🎅">
+                                        <span class="reaction-count">${idea.reactions?.event2?.count || 0}</span>
+                                    </button>
+                                ` : ''}
+                            </div>
+                            ${needsFullView ? `
+                                <button class="view-full-btn" onclick="viewFullIdea(${index})">
+                                    Полностью
+                                </button>
+                            ` : ''}
+                        </div>
+                    `;
+                    ideasContainer.appendChild(ideaCard);
+                });
+            }
+            
+            // Кнопка добавления идеи
+            addIdeaBtnContainer.innerHTML = `
+                <button class="add-idea-btn" onclick="openAddIdeaModal()">
+                    <img src="https://images.icon-icons.com/916/PNG/512/Plus_icon-icons.com_71848.png" 
+                         alt="Добавить" 
+                         class="add-idea-btn-icon">
+                    Закинуть идею
+                </button>
+            `;
+        }
+
+        function getUserReaction(idea, userId) {
+            if (!userId || !idea.reactions) return null;
+            
+            for (const [reactionType, reactionData] of Object.entries(idea.reactions)) {
+                if (reactionData.users && reactionData.users.includes(userId)) {
+                    return reactionType;
+                }
+            }
+            return null;
+        }
+
+        function toggleReaction(ideaIndex, reactionType) {
+            tg.HapticFeedback.impactOccurred('light');
+            
+            if (!currentUser) {
+                tg.showPopup({
+                    title: 'Ошибка',
+                    message: 'Нужно войти в аккаунт Telegram',
+                    buttons: [{ type: 'ok', text: 'Понятно' }]
+                });
+                return;
+            }
+            
+            const idea = ideas[ideaIndex];
+            if (!idea) return;
+            
+            if (!idea.reactions) {
+                idea.reactions = {};
+            }
+            
+            if (!idea.reactions[reactionType]) {
+                idea.reactions[reactionType] = {
+                    count: 0,
+                    users: []
+                };
+            }
+            
+            const reaction = idea.reactions[reactionType];
+            const userId = currentUser.id;
+            const userIndex = reaction.users.indexOf(userId);
+            
+            // Удаляем пользователя из других реакций
+            for (const [otherType, otherReaction] of Object.entries(idea.reactions)) {
+                if (otherType !== reactionType) {
+                    const otherIndex = otherReaction.users.indexOf(userId);
+                    if (otherIndex !== -1) {
+                        otherReaction.users.splice(otherIndex, 1);
+                        otherReaction.count = Math.max(0, otherReaction.count - 1);
+                    }
+                }
+            }
+            
+            // Добавляем или удаляем текущую реакцию
+            if (userIndex === -1) {
+                // Добавляем реакцию
+                reaction.users.push(userId);
+                reaction.count++;
+            } else {
+                // Удаляем реакцию
+                reaction.users.splice(userIndex, 1);
+                reaction.count = Math.max(0, reaction.count - 1);
+            }
+            
+            // Удаляем пустые реакции
+            Object.keys(idea.reactions).forEach(key => {
+                if (idea.reactions[key].count === 0) {
+                    delete idea.reactions[key];
+                }
+            });
+            
+            saveIdeas();
+            renderIdeas();
+        }
+
+        function viewFullIdea(index) {
+            tg.HapticFeedback.impactOccurred('light');
+            const idea = ideas[index];
+            if (!idea) return;
+            
+            document.getElementById('viewModalTitle').textContent = idea.title;
+            document.getElementById('viewModalText').textContent = idea.content;
+            
+            const modal = document.getElementById('viewIdeaModal');
+            modal.classList.add('active');
+        }
+
+        function openAddIdeaModal() {
+            tg.HapticFeedback.impactOccurred('light');
+            const modal = document.getElementById('addIdeaModal');
+            modal.classList.add('active');
+            
+            // Сброс полей
+            document.getElementById('ideaTitle').value = '';
+            document.getElementById('ideaContent').value = '';
+            document.getElementById('titleCharCounter').textContent = '0/15';
+            document.getElementById('titleCharCounter').classList.remove('error');
+            
+            // Добавляем слушатель для подсчета символов
+            const titleInput = document.getElementById('ideaTitle');
+            titleInput.removeEventListener('input', updateCharCounter);
+            titleInput.addEventListener('input', updateCharCounter);
+        }
+
+        function closeAddIdeaModal() {
+            tg.HapticFeedback.impactOccurred('light');
+            const modal = document.getElementById('addIdeaModal');
+            modal.classList.remove('active');
+        }
+
+        function closeViewIdeaModal() {
+            tg.HapticFeedback.impactOccurred('light');
+            const modal = document.getElementById('viewIdeaModal');
+            modal.classList.remove('active');
+        }
+
+        function updateCharCounter() {
+            const titleInput = document.getElementById('ideaTitle');
+            const counter = document.getElementById('titleCharCounter');
+            const charCount = titleInput.value.length;
+            const maxChars = 15;
+            
+            counter.textContent = `${charCount}/${maxChars}`;
+            
+            if (charCount > maxChars) {
+                counter.classList.add('error');
+                titleInput.value = titleInput.value.substring(0, maxChars);
+            } else {
+                counter.classList.remove('error');
+            }
+        }
+
+        function submitIdea() {
+            tg.HapticFeedback.impactOccurred('light');
+            
+            const title = document.getElementById('ideaTitle').value.trim();
+            const content = document.getElementById('ideaContent').value.trim();
+            
+            if (!title || title.length === 0) {
+                tg.showPopup({
+                    title: 'Ошибка',
+                    message: 'Название не может быть пустым',
+                    buttons: [{ type: 'ok', text: 'Понятно' }]
+                });
+                return;
+            }
+            
+            if (title.length > 15) {
+                tg.showPopup({
+                    title: 'Ошибка',
+                    message: 'Название не должно превышать 15 символов',
+                    buttons: [{ type: 'ok', text: 'Понятно' }]
+                });
+                return;
+            }
+            
+            const newIdea = {
+                id: Date.now(),
+                title: title,
+                content: content,
+                author: currentUser ? currentUser.first_name : 'Аноним',
+                userId: currentUser ? currentUser.id : null,
+                timestamp: new Date().toISOString(),
+                reactions: {}
+            };
+            
+            ideas.unshift(newIdea);
+            saveIdeas();
+            renderIdeas();
+            closeAddIdeaModal();
+            
+            tg.showPopup({
+                title: 'Успешно!',
+                message: 'Идея добавлена',
+                buttons: [{ type: 'ok', text: 'Круто' }]
             });
         }
 
-        function openArticle(type) {
+        function deleteIdea(index) {
             tg.HapticFeedback.impactOccurred('medium');
             
-            const articles = {
-                dice: {
-                    title: 'Что такое кости и с чем их едят?',
-                    message: 'Шикарный и понятный гайд про азартную игру',
-                    url: 'https://telegra.ph/Kak-rabotayut-kosti--CHIBIKI-11-10'
-                },
-                help: {
-                    title: 'Как обратиться к админам?',
-                    message: 'Расскажем как связаться с нами анонимно',
-                    url: 'https://telegra.ph/Kak-svyazatsya-s-adminami-11-11'
-                }
-            };
-            
-            const article = articles[type];
-            
             tg.showPopup({
-                title: article.title,
-                message: article.message,
+                title: 'Ты точно хочешь удалить эту идею?',
+                message: 'Восстановить ее уже не получится',
                 buttons: [
                     {
-                        type: 'default',
-                        text: 'Читать',
-                        id: 'read'
+                        type: 'destructive',
+                        text: 'Удалить',
+                        id: 'delete'
                     },
                     {
                         type: 'cancel',
@@ -611,45 +1292,39 @@
                         id: 'cancel'
                     }
                 ]
-            }, function(buttonId) {
-                if (buttonId === 'read') {
-                    tg.openLink(article.url);
+            }, (buttonId) => {
+                if (buttonId === 'delete') {
+                    ideas.splice(index, 1);
+                    saveIdeas();
+                    renderIdeas();
+                    
+                    tg.showPopup({
+                        title: 'Успешно',
+                        message: 'Идея удалена',
+                        buttons: [{ type: 'ok', text: 'Ок' }]
+                    });
                 }
             });
         }
 
         async function loadUserData() {
             try {
-                const user = tg.initDataUnsafe?.user;
-                
                 await loadChibiLists();
                 
-                if (user) {
-                    await loadUserCollection(user.id);
-                    
-                    if (user.username === 'ya_admin7') {
-                        setTimeout(showBotAlert, 1000);
-                    }
+                if (currentUser) {
+                    await loadUserCollection(currentUser.id);
                 }
                 
                 updateMainScreen();
                 
-                const totalChibis = userData.common.collected.length + userData.secret.collected.length + userData.prize.collected.length;
-                if (totalChibis === 0 && user && user.username !== 'ya_admin7') {
-                    setTimeout(showBotAlert, 1000);
-                }
-                
             } catch (error) {
                 console.error('Error loading data:', error);
-                const user = tg.initDataUnsafe?.user;
-                if (user && user.username === 'ya_admin7') {
-                    setTimeout(showBotAlert, 1000);
-                }
             }
         }
 
         async function loadChibiLists() {
             try {
+                // Загружаем список чибиков
                 userData.common.all = ['Chibi 1', 'Chibi 2', 'Chibi 3', 'Chibi 4', 'Chibi 5', 'Chibi 6', 'Chibi 7', 'Chibi 8', 'Chibi 9', 'Chibi 10', 'Chibi 11', 'Chibi 12'];
                 userData.secret.all = ['Secret 1', 'Secret 2', 'Secret 3', 'Secret 4'];
                 userData.prize.all = ['Prize 1', 'Prize 2', 'Prize 3'];
@@ -676,27 +1351,15 @@
                     userData.secret.collected = collection.secret || [];
                     userData.prize.collected = collection.prize || [];
                     
-                    if (collection.all_common) userData.common.all = collection.all_common;
-                    if (collection.all_secret) userData.secret.all = collection.all_secret;
-                    if (collection.all_prize) userData.prize.all = collection.all_prize;
-                    
                 } else {
                     throw new Error('Failed to load collection');
                 }
             } catch (error) {
                 console.error('Error loading user collection:', error);
-                userData.common.collected = userData.common.all.slice(0, 4);
-                userData.secret.collected = [];
-                userData.prize.collected = [];
             }
         }
 
         function updateMainScreen() {
-            // Установка акцентного цвета из темы Telegram
-            if (tg.themeParams.accent_text_color) {
-                document.documentElement.style.setProperty('--accent-color', tg.themeParams.accent_text_color);
-            }
-            
             updateCollectionIcon('common');
             updateCollectionIcon('secret');
             updateCollectionIcon('prize');
@@ -735,11 +1398,15 @@
                 const randomChibi = collected[Math.floor(Math.random() * collected.length)];
                 const imageUrl = `https://raw.githubusercontent.com/therootishere00-ux/Chibi-bot/main/chibis/${type}/${randomChibi.replace(/ /g, '_')}.png`;
                 
-                iconElement.innerHTML = `<img src="${imageUrl}" alt="${type}" onerror="this.style.display='none'">`;
-            } else {
-                iconElement.innerHTML = `
-                    <img src="https://img.icons8.com/?size=100&id=wKLATegpDP1G&format=png&color=000000" alt="Lock" style="filter: invert(0.6); width: 24px; height: 24px;">
-                `;
+                const img = new Image();
+                img.src = imageUrl;
+                img.onload = function() {
+                    // Если картинка загрузилась, показываем ее
+                    iconElement.innerHTML = `<img src="${imageUrl}" alt="${type}">`;
+                };
+                img.onerror = function() {
+                    // Если не загрузилась, оставляем текст ошибки
+                };
             }
         }
 
