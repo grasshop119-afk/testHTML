@@ -216,7 +216,7 @@
     <script>
         const tg = window.Telegram.WebApp;
         
-        const ADMIN_IDS = ['1430001432', '1699654607'];
+        const ADMIN_USERNAMES = ['ya_admin7', 'tmkazavr'];
         
         const firebaseConfig = {
             apiKey: "AIzaSyDrvqEb5GMrWaCLSd3aHEdOQIDA321v_BA",
@@ -291,7 +291,7 @@
                 const card = document.createElement('div');
                 card.className = 'idea-card';
                 
-                const isAdmin = currentUser && ADMIN_IDS.includes(currentUser.id.toString());
+                const isAdmin = currentUser && ADMIN_USERNAMES.includes(currentUser.username);
                 const userId = currentUser?.id?.toString();
                 const userLiked = idea.reactions?.like?.users?.includes(userId);
                 const needsFullView = idea.content.length > 100;
@@ -396,7 +396,7 @@
         }
 
         async function deleteIdea(ideaId) {
-            const isAdmin = currentUser && ADMIN_IDS.includes(currentUser.id.toString());
+            const isAdmin = currentUser && ADMIN_USERNAMES.includes(currentUser.username);
             
             if (!isAdmin) {
                 tg.showPopup({
@@ -409,7 +409,7 @@
             
             tg.showPopup({
                 title: 'Удалить идею?',
-                message: 'Это действие нельзя отменить',
+                message: 'Идея будет удалена для всех пользователей',
                 buttons: [
                     { type: 'destructive', text: 'Удалить', id: 'delete' },
                     { type: 'cancel', text: 'Отмена', id: 'cancel' }
@@ -419,8 +419,18 @@
                     try {
                         await db.collection('ideas').doc(ideaId).delete();
                         currentSlide = Math.max(0, currentSlide - 1);
+                        tg.showPopup({
+                            title: 'Успешно',
+                            message: 'Идея удалена',
+                            buttons: [{ type: 'ok', text: 'Ок' }]
+                        });
                     } catch(e) {
                         console.error('Error deleting idea:', e);
+                        tg.showPopup({
+                            title: 'Ошибка',
+                            message: 'Не удалось удалить идею',
+                            buttons: [{ type: 'ok', text: 'Понятно' }]
+                        });
                     }
                 }
             });
