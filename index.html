@@ -49,14 +49,14 @@
             left: 0;
             right: 0;
             height: 52px;
-            background: rgba(28, 28, 30, 0.85);
+            background: rgba(0, 0, 0, 0.85);
             backdrop-filter: blur(20px);
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 16px;
             z-index: 100;
-            border-bottom: 0.5px solid #38383A;
+            border-bottom: 0.5px solid #1C1C1E;
         }
 
         .logo {
@@ -64,22 +64,32 @@
             width: auto;
         }
 
-        .header-right {
+        .header-icons {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 16px;
         }
 
         .header-icon {
-            width: 28px;
-            height: 28px;
-            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            opacity: 0.9;
             transition: opacity 0.2s ease;
-            filter: invert(39%) sepia(90%) saturate(2476%) hue-rotate(202deg) brightness(102%) contrast(106%);
+            cursor: pointer;
         }
 
         .header-icon:active {
             opacity: 0.7;
+        }
+
+        .header-icon.hidden {
+            display: none;
+        }
+
+        .header-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
         .view-toggle {
@@ -87,15 +97,13 @@
             height: 28px;
             opacity: 0.8;
             transition: opacity 0.2s ease;
-            filter: invert(1) brightness(2);
         }
 
         .view-toggle:active {
             opacity: 1;
         }
 
-        .view-toggle.hidden,
-        .header-icon.hidden {
+        .view-toggle.hidden {
             display: none;
         }
 
@@ -111,7 +119,7 @@
             justify-content: space-around;
             padding: 0 20px;
             z-index: 100;
-            border-top: 0.5px solid #38383A;
+            border-top: 0.5px solid #2C2C2E;
         }
 
         .footer.hidden {
@@ -124,7 +132,7 @@
             align-items: center;
             justify-content: center;
             padding: 8px 14px;
-            opacity: 0.6;
+            opacity: 0.7;
             transition: opacity 0.2s ease;
         }
 
@@ -132,24 +140,12 @@
             opacity: 1;
         }
 
-        .footer-tab svg,
         .footer-tab img {
             width: 28px;
             height: 28px;
             margin-bottom: 4px;
-        }
-
-        .footer-tab svg {
-            fill: #8E8E93;
-        }
-
-        .footer-tab.active svg {
-            fill: var(--accent-color, #007AFF);
-        }
-
-        .footer-tab img {
-            opacity: 1;
-            filter: invert(0.6);
+            filter: invert(1) brightness(2);
+            transition: filter 0.2s ease;
         }
 
         .footer-tab.active img {
@@ -206,6 +202,26 @@
             color: #FFFFFF;
         }
 
+        .promo-image {
+            width: 100%;
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+
+        .promo-image:active {
+            transform: scale(0.98);
+        }
+
+        .promo-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+        }
+
         .collection-card {
             background: #1C1C1E;
             border-radius: 14px;
@@ -214,7 +230,6 @@
             display: flex;
             align-items: center;
             transition: background-color 0.15s ease;
-            border: 0.5px solid #38383A;
         }
 
         .collection-card:active {
@@ -263,25 +278,6 @@
             border-radius: 12px;
             font-size: 13px;
             font-weight: 600;
-        }
-
-        .promo-image {
-            width: 100%;
-            border-radius: 14px;
-            overflow: hidden;
-            margin-top: 8px;
-            cursor: pointer;
-            transition: opacity 0.15s ease;
-        }
-
-        .promo-image:active {
-            opacity: 0.8;
-        }
-
-        .promo-image img {
-            width: 100%;
-            height: auto;
-            display: block;
         }
 
         .collection-screen {
@@ -346,7 +342,6 @@
             position: relative;
             transition: all 0.15s ease;
             overflow: hidden;
-            border: 0.5px solid #38383A;
         }
 
         .chibi-card:active {
@@ -401,7 +396,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(28, 28, 30, 0.92);
+            background: rgba(0, 0, 0, 0.92);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -448,11 +443,10 @@
             border-radius: 16px;
             overflow: hidden;
             margin-bottom: 21px;
-            background: #2C2C2E;
+            background: #1C1C1E;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 0.5px solid #38383A;
         }
 
         .profile-avatar img {
@@ -477,7 +471,7 @@
 
         .divider {
             height: 0.5px;
-            background: #38383A;
+            background: #2C2C2E;
             margin: 24px 0;
         }
 
@@ -486,7 +480,6 @@
             border-radius: 16px;
             overflow: hidden;
             margin-bottom: 24px;
-            border: 0.5px solid #38383A;
         }
 
         .setting-item {
@@ -511,22 +504,22 @@
             opacity: 0.6;
         }
 
-        .setting-icon.blue img {
-            filter: invert(0.4) sepia(1) saturate(20) hue-rotate(190deg) brightness(1.2);
+        .setting-icon.blue {
+            background-color: rgba(0, 122, 255, 0.2);
         }
 
-        .setting-icon.purple img {
-            filter: invert(0.4) sepia(1) saturate(20) hue-rotate(250deg) brightness(1.2);
+        .setting-icon.purple {
+            background-color: rgba(175, 82, 222, 0.2);
         }
 
-        .setting-icon.pink img {
-            filter: invert(0.4) sepia(1) saturate(20) hue-rotate(320deg) brightness(1.2);
+        .setting-icon.pink {
+            background-color: rgba(255, 45, 85, 0.2);
         }
 
         .setting-icon img {
             width: 20px;
             height: 20px;
-            opacity: 1;
+            filter: invert(1) brightness(2);
         }
 
         .setting-info {
@@ -620,14 +613,13 @@
             --accent-color: #007AFF;
         }
 
-        /* Стили для прелоадера */
         .preloader {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(28, 28, 30, 0.8);
+            background: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(10px);
             display: flex;
             align-items: center;
@@ -654,6 +646,27 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        .empty-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .empty-gif {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 16px;
+        }
+
+        .empty-text {
+            font-size: 16px;
+            font-weight: 500;
+            color: #8E8E93;
+        }
     </style>
 </head>
 <body>
@@ -663,15 +676,14 @@
 
     <div class="header">
         <img src="https://i.ibb.co/zTB331HR/image.png" alt="Chibeki" class="logo">
-        <div class="header-right">
-            <img src="https://img.icons8.com/?size=100&id=7zrQuOFD9ARc&format=png&color=000000" 
-                 class="header-icon hidden" 
-                 id="channelIcon"
-                 onclick="openChannel()">
-            <svg class="header-icon hidden" id="chatIcon" onclick="openChatBot()" width="28" height="28" viewBox="0 0 24 24">
-                <path fill="currentColor" d="M 12 2 C 6.52 2 2 5.9939394 2 11 C 2 16.006061 6.52 20 12 20 C 12.367449 20 12.660131 19.937924 13 19.902344 L 13 23.142578 L 14.544922 22.138672 C 16.657893 20.765241 21.430378 17.194425 21.994141 12.007812 L 22 11.955078 L 22 11 C 22 5.9939394 17.48 2 12 2 z"></path>
-            </svg>
-            <img src="https://img.icons8.com/?size=100&id=undefined&format=png&color=000000" 
+        <div class="header-icons">
+            <div class="header-icon" onclick="openChannels()" id="headerIcons">
+                <img src="https://img.icons8.com/?size=100&id=7zrQuOFD9ARc&format=png&color=000000" alt="Каналы">
+            </div>
+            <div class="header-icon" onclick="openRequestBot()" id="headerIcons">
+                <img src="https://img.icons8.com/?size=100&id=87048&format=png&color=000000" alt="Бот">
+            </div>
+            <img src="https://img.icons8.com/?size=100&id=59801&format=png&color=000000" 
                  class="view-toggle hidden" 
                  id="viewToggle"
                  onclick="toggleViewMode()">
@@ -684,12 +696,12 @@
             <div class="tab-label">Главная</div>
         </div>
         
-        <div class="footer-tab" onclick="switchTab('main')">
-            <img src="https://img.icons8.com/?size=100&id=EvX1oECLk2bm&format=png&color=000000" alt="Мейн">
-            <div class="tab-label">Мейн</div>
+        <div class="footer-tab" onclick="openMainTab()">
+            <img src="https://img.icons8.com/?size=100&id=EvX1oECLk2bm&format=png&color=000000" alt="???">
+            <div class="tab-label">???</div>
         </div>
         
-        <div class="footer-tab" onclick="showDevelopmentAlert()">
+        <div class="footer-tab" onclick="openProfileTab()">
             <img src="https://img.icons8.com/?size=100&id=NZIHaxOhFpue&format=png&color=000000" alt="???">
             <div class="tab-label">???</div>
         </div>
@@ -727,8 +739,8 @@
                 </div>
             </div>
 
-            <div class="promo-image" onclick="openPromoChannel()">
-                <img src="https://i.ibb.co/prWdft96" alt="Promo">
+            <div class="promo-image" onclick="openChibekiOfficial()">
+                <img src="https://i.ibb.co/prWdft96/image.png" alt="Chibeki Official">
             </div>
 
             <div class="section">
@@ -736,7 +748,7 @@
                 
                 <div class="collection-card" onclick="openArticle('dice')">
                     <div class="collection-icon">
-                        <img src="https://img.icons8.com/?size=100&id=83194&format=png&color=000000" alt="Статья" style="filter: invert(0.6); width: 24px; height: 24px;">
+                        <img src="https://img.icons8.com/?size=100&id=83194&format=png&color=000000" alt="Статья">
                     </div>
                     <div class="collection-info">
                         <div class="collection-name">Что такое кости и с чем их едят?</div>
@@ -746,7 +758,7 @@
                 
                 <div class="collection-card" onclick="openArticle('help')">
                     <div class="collection-icon">
-                        <img src="https://img.icons8.com/?size=100&id=83194&format=png&color=000000" alt="Статья" style="filter: invert(0.6); width: 24px; height: 24px;">
+                        <img src="https://img.icons8.com/?size=100&id=83194&format=png&color=000000" alt="Статья">
                     </div>
                     <div class="collection-info">
                         <div class="collection-name">Как обратиться к админам?</div>
@@ -754,12 +766,10 @@
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="screen hidden" id="mainScreen">
-            <div class="development-screen">
-                <img src="https://media.giphy.com/media/3o7bu8sRnYpTOG1p8k/giphy.gif" alt="В разработке" class="development-gif">
-                <div class="development-text">В разработке</div>
+            <div class="empty-section">
+                <img src="https://media.tenor.com/LO1LW4khBigAAAAi/utya-utya-duck.gif" alt="Пусто" class="empty-gif">
+                <div class="empty-text">Пока здесь пусто</div>
             </div>
         </div>
 
@@ -775,7 +785,7 @@
             <div class="section-title">Внешний вид</div>
             <div class="settings-section">
                 <div class="setting-item">
-                    <div class="setting-icon blue" style="background-color: rgba(0, 122, 255, 0.6);">
+                    <div class="setting-icon blue">
                         <img src="https://img.icons8.com/?size=100&id=pYnrAZ9TKgwl&format=png&color=000000" alt="Анимации">
                     </div>
                     <div class="setting-info">
@@ -788,7 +798,7 @@
                 </div>
 
                 <div class="setting-item">
-                    <div class="setting-icon purple" style="background-color: rgba(175, 82, 222, 0.6);">
+                    <div class="setting-icon purple">
                         <img src="https://img.icons8.com/?size=100&id=MA2u7eOkbJSh&format=png&color=000000" alt="Цвет темы">
                     </div>
                     <div class="setting-info">
@@ -804,7 +814,7 @@
             <div class="section-title">Прочие штуки</div>
             <div class="settings-section">
                 <div class="setting-item">
-                    <div class="setting-icon pink" style="background-color: rgba(255, 45, 85, 0.6);">
+                    <div class="setting-icon pink">
                         <img src="https://img.icons8.com/?size=100&id=ej7toC9rWoVj&format=png&color=000000" alt="Вибрация">
                     </div>
                     <div class="setting-info">
@@ -829,6 +839,11 @@
         <div class="screen collection-screen hidden" id="prizeCollectionScreen">
             <div class="chibi-grid grid-3" id="prizeGrid"></div>
         </div>
+
+        <div class="screen development-screen hidden" id="mainTabScreen">
+            <img src="https://media.tenor.com/LO1LW4khBigAAAAi/utya-utya-duck.gif" alt="В разработке" class="development-gif">
+            <div class="development-text">В разработке</div>
+        </div>
     </div>
 
     <div class="fullscreen-viewer" id="fullscreenViewer" onclick="closeFullscreen()">
@@ -849,7 +864,7 @@
         let settings = {
             smoothAnimations: true,
             vibration: true,
-            themeColor: false
+            themeColor: true
         };
 
         function loadSettings() {
@@ -876,6 +891,7 @@
                 document.getElementById('themeColor').checked = settings.themeColor;
             }
             
+            // Автоматическое определение акцентного цвета из темы Telegram
             if (settings.themeColor && tg.themeParams.accent_text_color) {
                 const accentColor = tg.themeParams.accent_text_color;
                 document.documentElement.style.setProperty('--accent-color', accentColor);
@@ -894,24 +910,24 @@
         function initTelegramApp() {
             tg.ready();
             tg.expand();
-            tg.setHeaderColor('#1C1C1E');
+            tg.setHeaderColor('#000000');
             tg.setBackgroundColor('#000000');
             
             tg.BackButton.onClick(goBack);
             
-            // Показываем прелоадер при загрузке
             showPreloader();
-            
             loadSettings();
             loadUserData();
             setupEventListeners();
+            
+            // Показываем/скрываем иконки в шапке в зависимости от экрана
+            updateHeaderIcons();
         }
 
         function showPreloader() {
             const preloader = document.getElementById('preloader');
             preloader.classList.remove('hidden');
             
-            // Случайное время от 0.8 до 1.3 секунд
             const randomTime = 800 + Math.random() * 500;
             
             setTimeout(() => {
@@ -948,71 +964,74 @@
             }
             
             document.querySelectorAll('.footer-tab').forEach(t => t.classList.remove('active'));
-            document.getElementById('footer').classList.remove('hidden');
+            document.querySelectorAll('.footer-tab')[tab === 'home' ? 0 : tab === 'profile' ? 2 : 1].classList.add('active');
             
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             
-            currentScreen = tab;
-            
             if (tab === 'home') {
-                document.querySelectorAll('.footer-tab')[0].classList.add('active');
                 document.getElementById('homeScreen').classList.remove('hidden');
-                document.getElementById('channelIcon').classList.remove('hidden');
-                document.getElementById('chatIcon').classList.remove('hidden');
-                document.getElementById('viewToggle').classList.add('hidden');
+                currentScreen = 'home';
                 tg.BackButton.hide();
-                
-            } else if (tab === 'main') {
-                document.querySelectorAll('.footer-tab')[1].classList.add('active');
-                document.getElementById('mainScreen').classList.remove('hidden');
-                document.getElementById('channelIcon').classList.add('hidden');
-                document.getElementById('chatIcon').classList.add('hidden');
+                document.getElementById('footer').classList.remove('hidden');
                 document.getElementById('viewToggle').classList.add('hidden');
-                tg.BackButton.hide();
-                
-            } else if (tab === 'profile') {
-                document.querySelectorAll('.footer-tab')[2].classList.add('active');
-                document.getElementById('profileScreen').classList.remove('hidden');
-                document.getElementById('channelIcon').classList.add('hidden');
-                document.getElementById('chatIcon').classList.add('hidden');
-                document.getElementById('viewToggle').classList.add('hidden');
-                tg.BackButton.hide();
+                updateHeaderIcons();
             }
         }
 
-        function showDevelopmentAlert() {
+        function openMainTab() {
             if (settings.vibration) {
                 tg.HapticFeedback.impactOccurred('light');
             }
             
-            tg.showPopup({
-                title: 'В разработке',
-                message: 'Скоро здесь что-то будет…',
-                buttons: [
-                    {
-                        type: 'ok',
-                        text: 'Понятно',
-                        id: 'ok'
-                    }
-                ]
-            });
+            hideAllScreens();
+            document.getElementById('mainTabScreen').classList.remove('hidden');
+            currentScreen = 'mainTab';
+            
+            tg.BackButton.show();
+            document.getElementById('footer').classList.remove('hidden');
+            document.getElementById('viewToggle').classList.add('hidden');
+            updateHeaderIcons();
         }
 
-        function openChannel() {
+        function openProfileTab() {
+            if (settings.vibration) {
+                tg.HapticFeedback.impactOccurred('light');
+            }
+            
+            hideAllScreens();
+            document.getElementById('profileScreen').classList.remove('hidden');
+            currentScreen = 'profile';
+            
+            tg.BackButton.show();
+            document.getElementById('footer').classList.remove('hidden');
+            document.getElementById('viewToggle').classList.add('hidden');
+            updateHeaderIcons();
+        }
+
+        function updateHeaderIcons() {
+            const headerIcons = document.querySelectorAll('.header-icon');
+            if (currentScreen === 'home') {
+                headerIcons.forEach(icon => icon.classList.remove('hidden'));
+            } else {
+                headerIcons.forEach(icon => icon.classList.add('hidden'));
+            }
+        }
+
+        function openChannels() {
             if (settings.vibration) {
                 tg.HapticFeedback.impactOccurred('light');
             }
             tg.openTelegramLink('https://t.me/chibeki_official');
         }
 
-        function openChatBot() {
+        function openRequestBot() {
             if (settings.vibration) {
                 tg.HapticFeedback.impactOccurred('light');
             }
             tg.openTelegramLink('https://t.me/request_chibeki_bot');
         }
 
-        function openPromoChannel() {
+        function openChibekiOfficial() {
             if (settings.vibration) {
                 tg.HapticFeedback.impactOccurred('light');
             }
@@ -1031,9 +1050,8 @@
             currentScreen = type;
             
             tg.BackButton.show();
-            document.getElementById('channelIcon').classList.add('hidden');
-            document.getElementById('chatIcon').classList.add('hidden');
             document.getElementById('viewToggle').classList.remove('hidden');
+            updateHeaderIcons();
             renderCollection(type);
         }
 
@@ -1042,7 +1060,7 @@
                 tg.HapticFeedback.impactOccurred('light');
             }
             
-            if (currentScreen === 'profile' || currentScreen === 'main') {
+            if (currentScreen === 'profile' || currentScreen === 'mainTab') {
                 switchTab('home');
             } else if (currentScreen === 'common' || currentScreen === 'secret' || currentScreen === 'prize') {
                 hideAllScreens();
@@ -1050,9 +1068,8 @@
                 currentScreen = 'home';
                 tg.BackButton.hide();
                 document.getElementById('viewToggle').classList.add('hidden');
-                document.getElementById('channelIcon').classList.remove('hidden');
-                document.getElementById('chatIcon').classList.remove('hidden');
                 document.getElementById('footer').classList.remove('hidden');
+                updateHeaderIcons();
             }
         }
 
