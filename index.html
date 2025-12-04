@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Chibeki</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Firebase SDK v9 compat -->
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
     <style>
         * {
             -webkit-touch-callout: none;
@@ -24,10 +28,6 @@
             color: white;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             overflow: hidden;
-        }
-
-        body.no-animations * {
-            transition: none !important;
         }
 
         .header {
@@ -63,10 +63,27 @@
             opacity: 0.9;
             transition: opacity 0.2s ease;
             cursor: pointer;
+            -webkit-mask-size: contain;
+            mask-size: contain;
+            -webkit-mask-repeat: no-repeat;
+            mask-repeat: no-repeat;
+            -webkit-mask-position: center;
+            mask-position: center;
+            background-color: var(--accent-color);
         }
 
         .header-icon:active {
-            transform: scale(0.95);
+            opacity: 0.7;
+        }
+
+        .header-icon.telegram {
+            -webkit-mask-image: url('https://images.icon-icons.com/4040/PNG/512/telegram_logo_icon_256772.png');
+            mask-image: url('https://images.icon-icons.com/4040/PNG/512/telegram_logo_icon_256772.png');
+        }
+
+        .header-icon.chat {
+            -webkit-mask-image: url('https://images.icon-icons.com/2942/PNG/512/chat_icon_183898.png');
+            mask-image: url('https://images.icon-icons.com/2942/PNG/512/chat_icon_183898.png');
         }
 
         .main-content {
@@ -196,13 +213,14 @@
             border: 1.5px solid #2A2B2C;
             border-radius: 14px;
             padding: 16px;
-            min-width: 280px;
-            max-width: 280px;
-            height: 180px;
+            min-width: 320px;
+            max-width: 320px;
+            height: 200px;
             position: relative;
             background: transparent;
             display: flex;
             flex-direction: column;
+            flex-shrink: 0;
         }
 
         .idea-header {
@@ -228,7 +246,11 @@
             margin-left: 8px;
             opacity: 0.7;
             cursor: pointer;
-            filter: invert(20%) sepia(90%) saturate(3000%) hue-rotate(350deg) brightness(90%) contrast(90%);
+            -webkit-mask: url('https://img.icons8.com/?size=100&id=IY5fIbHO723h&format=png&color=000000');
+            mask: url('https://img.icons8.com/?size=100&id=IY5fIbHO723h&format=png&color=000000');
+            -webkit-mask-size: contain;
+            mask-size: contain;
+            background-color: #ff453a;
         }
 
         .delete-icon:active {
@@ -704,14 +726,8 @@
     <div class="header">
         <img src="https://i.ibb.co/zTB331HR/image.png" alt="Chibeki" class="logo">
         <div class="header-right">
-            <img src="https://images.icon-icons.com/4040/PNG/512/telegram_logo_icon_256772.png" 
-                 class="header-icon" 
-                 alt="Канал"
-                 onclick="openChannel()">
-            <img src="https://images.icon-icons.com/2942/PNG/512/chat_icon_183898.png" 
-                 class="header-icon" 
-                 alt="Чат с ботом"
-                 onclick="openRequestBot()">
+            <div class="header-icon telegram" onclick="openChannel()" title="Канал"></div>
+            <div class="header-icon chat" onclick="openRequestBot()" title="Чат с ботом"></div>
         </div>
     </div>
 
@@ -839,6 +855,24 @@
     <script>
         const tg = window.Telegram.WebApp;
         
+        // 🔒 БЕЗОПАСНАЯ КОНФИГУРАЦИЯ FIREBASE
+        // ⚠️ ВАЖНО: Создайте СВОЙ проект Firebase и замените эти данные!
+        const firebaseConfig = {
+            apiKey: "AIzaSyDrvqEb5GMrWaCLSd3aHEdOQIDA321v_BA",
+            authDomain: "chibeki-ideas.firebaseapp.com",
+            projectId: "chibeki-ideas",
+            storageBucket: "chibeki-ideas.firebasestorage.app",
+            messagingSenderId: "31211023786",
+            appId: "1:31211023786:web:35343c74dbf73a50f6cfd3"
+        };
+
+        // 🔐 АДМИНИСТРАТОРЫ (Telegram ID)
+        const ADMIN_USERNAMES = ['ya_admin7', 'tmkazavr'];
+        
+        // Инициализируем Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
         let userData = {
             common: { collected: [], all: [] },
             secret: { collected: [], all: [] },
@@ -848,10 +882,12 @@
         let ideas = [];
         let currentScreen = 'home';
         let currentUser = null;
+        let unsubscribeIdeas = null;
+
         const isEventPeriod = () => {
             const now = new Date();
-            const month = now.getMonth() + 1; // 1-12
-            const day = now.getDate(); // 1-31
+            const month = now.getMonth() + 1;
+            const day = now.getDate();
             return month === 12 && day >= 1 && day <= 31;
         };
 
@@ -863,73 +899,20 @@
             
             tg.BackButton.onClick(goBack);
             
-            // Получаем пользователя
             currentUser = tg.initDataUnsafe?.user;
             
-            // Устанавливаем иконкам акцентный цвет
-            updateHeaderIcons();
-            
+            updateAccentColor();
             showPreloader();
             loadUserData();
             loadIdeas();
         }
 
-        function updateHeaderIcons() {
-            // Установка акцентного цвета из темы Telegram
+        function updateAccentColor() {
             let accentColor = '#007AFF';
             if (tg.themeParams.accent_text_color) {
                 accentColor = tg.themeParams.accent_text_color;
             }
             document.documentElement.style.setProperty('--accent-color', accentColor);
-            
-            // Применяем фильтры к иконкам в шапке для изменения цвета
-            const headerIcons = document.querySelectorAll('.header-icon');
-            headerIcons.forEach(icon => {
-                // Создаем SVG фильтр для перекрашивания в акцентный цвет
-                const color = hexToRgb(accentColor);
-                if (color) {
-                    icon.style.filter = `
-                        invert(45%) 
-                        sepia(100%) 
-                        saturate(1000%) 
-                        hue-rotate(${getHueFromColor(accentColor)}deg) 
-                        brightness(90%) 
-                        contrast(110%)
-                    `;
-                }
-            });
-        }
-
-        function hexToRgb(hex) {
-            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-            return result ? {
-                r: parseInt(result[1], 16),
-                g: parseInt(result[2], 16),
-                b: parseInt(result[3], 16)
-            } : null;
-        }
-
-        function getHueFromColor(color) {
-            const hex = color.replace('#', '');
-            const r = parseInt(hex.substr(0,2), 16) / 255;
-            const g = parseInt(hex.substr(2,2), 16) / 255;
-            const b = parseInt(hex.substr(4,2), 16) / 255;
-            
-            const max = Math.max(r, g, b);
-            const min = Math.min(r, g, b);
-            let h = 0;
-            
-            if (max === min) {
-                h = 0;
-            } else if (max === r) {
-                h = (60 * ((g - b) / (max - min)) + 360) % 360;
-            } else if (max === g) {
-                h = (60 * ((b - r) / (max - min)) + 120) % 360;
-            } else if (max === b) {
-                h = (60 * ((r - g) / (max - min)) + 240) % 360;
-            }
-            
-            return h;
         }
 
         function showPreloader() {
@@ -990,22 +973,42 @@
             tg.openTelegramLink('https://t.me/request_chibeki_bot');
         }
 
-        // Функции для работы с идеями
         function loadIdeas() {
             try {
-                const savedIdeas = localStorage.getItem('chibekiIdeas');
-                if (savedIdeas) {
-                    ideas = JSON.parse(savedIdeas);
-                }
-                renderIdeas();
+                unsubscribeIdeas = db.collection('ideas')
+                    .orderBy('timestamp', 'desc')
+                    .onSnapshot((snapshot) => {
+                        ideas = [];
+                        snapshot.forEach((doc) => {
+                            const idea = doc.data();
+                            idea.id = doc.id;
+                            ideas.push(idea);
+                        });
+                        renderIdeas();
+                    }, (error) => {
+                        console.error('Error loading ideas:', error);
+                        handleFirebaseError(error);
+                    });
             } catch (error) {
                 console.error('Error loading ideas:', error);
-                ideas = [];
+                handleFirebaseError(error);
             }
         }
 
-        function saveIdeas() {
-            localStorage.setItem('chibekiIdeas', JSON.stringify(ideas));
+        function handleFirebaseError(error) {
+            if (error.code === 'permission-denied') {
+                tg.showPopup({
+                    title: 'Ошибка доступа',
+                    message: 'Нет разрешения на чтение идей. Проверьте правила Firebase.',
+                    buttons: [{ type: 'ok', text: 'Понятно' }]
+                });
+            } else {
+                tg.showPopup({
+                    title: 'Ошибка Firebase',
+                    message: 'Не удалось загрузить идеи',
+                    buttons: [{ type: 'ok', text: 'Понятно' }]
+                });
+            }
         }
 
         function renderIdeas() {
@@ -1021,20 +1024,20 @@
                     const ideaCard = document.createElement('div');
                     ideaCard.className = 'idea-card';
                     
-                    // Проверяем, является ли текущий пользователь админом
-                    const isAdmin = currentUser && (
-                        currentUser.username === 'ya_admin7' || 
-                        currentUser.username === 'tmkazavr'
-                    );
+                    const isAdmin = currentUser && ADMIN_USERNAMES.includes(currentUser.username);
                     
-                    // Проверяем, нужна ли кнопка "Полностью"
                     const needsFullView = idea.content.length > 150;
                     const displayContent = needsFullView ? 
                         idea.content.substring(0, 150) + '...' : 
                         idea.content;
                     
-                    // Получаем реакцию пользователя
-                    const userReaction = getUserReaction(idea, currentUser?.id);
+                    const userId = currentUser?.id?.toString();
+                    const userReaction = idea.reactions ? 
+                        Object.keys(idea.reactions).find(reaction => 
+                            idea.reactions[reaction].users && 
+                            idea.reactions[reaction].users.includes(userId)
+                        ) : null;
+                    
                     const isLiked = userReaction === 'like';
                     const isReacted1 = userReaction === 'event1';
                     const isReacted2 = userReaction === 'event2';
@@ -1043,10 +1046,7 @@
                         <div class="idea-header">
                             <div class="idea-title">${idea.title}</div>
                             ${isAdmin ? `
-                                <img src="https://img.icons8.com/?size=100&id=IY5fIbHO723h&format=png&color=000000" 
-                                     class="delete-icon" 
-                                     alt="Удалить"
-                                     onclick="deleteIdea(${index})">
+                                <div class="delete-icon" onclick="showAdminDeleteAlert('${idea.id}')" title="Удалить идею"></div>
                             ` : ''}
                         </div>
                         <div class="idea-content ${needsFullView ? 'truncated' : ''}">
@@ -1054,20 +1054,20 @@
                         </div>
                         <div class="idea-footer">
                             <div class="reaction-container">
-                                <button class="reaction-btn ${isLiked ? 'active' : ''}" onclick="toggleReaction(${index}, 'like')">
+                                <button class="reaction-btn ${isLiked ? 'active' : ''}" onclick="toggleReaction('${idea.id}', 'like')">
                                     <img src="https://stickers.fullyst.com/b9f1c4ec-ff51-507f-a011-b3c035880c92/full/AgADyQcAAuN4BAAB.webp" 
                                          class="reaction-gif" 
                                          alt="❤️">
                                     <span class="reaction-count">${idea.reactions?.like?.count || 0}</span>
                                 </button>
                                 ${isEventPeriod() ? `
-                                    <button class="reaction-btn ${isReacted1 ? 'active' : ''}" onclick="toggleReaction(${index}, 'event1')">
+                                    <button class="reaction-btn ${isReacted1 ? 'active' : ''}" onclick="toggleReaction('${idea.id}', 'event1')">
                                         <img src="https://stickers.fullyst.com/b9f1c4ec-ff51-507f-a011-b3c035880c92/full/AgADzgEAAkGPGEQ.webp" 
                                              class="reaction-gif" 
                                              alt="🎄">
                                         <span class="reaction-count">${idea.reactions?.event1?.count || 0}</span>
                                     </button>
-                                    <button class="reaction-btn ${isReacted2 ? 'active' : ''}" onclick="toggleReaction(${index}, 'event2')">
+                                    <button class="reaction-btn ${isReacted2 ? 'active' : ''}" onclick="toggleReaction('${idea.id}', 'event2')">
                                         <img src="https://stickers.fullyst.com/b9f1c4ec-ff51-507f-a011-b3c035880c92/full/AgAD_QIAAgapIEQ.webp" 
                                              class="reaction-gif" 
                                              alt="🎅">
@@ -1086,7 +1086,6 @@
                 });
             }
             
-            // Кнопка добавления идеи
             addIdeaBtnContainer.innerHTML = `
                 <button class="add-idea-btn" onclick="openAddIdeaModal()">
                     <img src="https://images.icon-icons.com/916/PNG/512/Plus_icon-icons.com_71848.png" 
@@ -1097,20 +1096,7 @@
             `;
         }
 
-        function getUserReaction(idea, userId) {
-            if (!userId || !idea.reactions) return null;
-            
-            for (const [reactionType, reactionData] of Object.entries(idea.reactions)) {
-                if (reactionData.users && reactionData.users.includes(userId)) {
-                    return reactionType;
-                }
-            }
-            return null;
-        }
-
-        function toggleReaction(ideaIndex, reactionType) {
-            tg.HapticFeedback.impactOccurred('light');
-            
+        async function toggleReaction(ideaId, reactionType) {
             if (!currentUser) {
                 tg.showPopup({
                     title: 'Ошибка',
@@ -1120,55 +1106,109 @@
                 return;
             }
             
-            const idea = ideas[ideaIndex];
-            if (!idea) return;
-            
-            if (!idea.reactions) {
-                idea.reactions = {};
-            }
-            
-            if (!idea.reactions[reactionType]) {
-                idea.reactions[reactionType] = {
-                    count: 0,
-                    users: []
-                };
-            }
-            
-            const reaction = idea.reactions[reactionType];
-            const userId = currentUser.id;
-            const userIndex = reaction.users.indexOf(userId);
-            
-            // Удаляем пользователя из других реакций
-            for (const [otherType, otherReaction] of Object.entries(idea.reactions)) {
-                if (otherType !== reactionType) {
-                    const otherIndex = otherReaction.users.indexOf(userId);
-                    if (otherIndex !== -1) {
-                        otherReaction.users.splice(otherIndex, 1);
-                        otherReaction.count = Math.max(0, otherReaction.count - 1);
+            try {
+                tg.HapticFeedback.impactOccurred('light');
+                
+                const ideaRef = db.collection('ideas').doc(ideaId);
+                const userId = currentUser.id.toString();
+                
+                const doc = await ideaRef.get();
+                if (!doc.exists) return;
+                
+                const idea = doc.data();
+                if (!idea.reactions) {
+                    idea.reactions = {};
+                }
+                
+                if (!idea.reactions[reactionType]) {
+                    idea.reactions[reactionType] = {
+                        count: 0,
+                        users: []
+                    };
+                }
+                
+                const reaction = idea.reactions[reactionType];
+                const userIndex = reaction.users.indexOf(userId);
+                
+                Object.keys(idea.reactions).forEach(key => {
+                    if (key !== reactionType) {
+                        const otherReaction = idea.reactions[key];
+                        const otherIndex = otherReaction.users.indexOf(userId);
+                        if (otherIndex !== -1) {
+                            otherReaction.users.splice(otherIndex, 1);
+                            otherReaction.count = Math.max(0, otherReaction.count - 1);
+                            
+                            if (otherReaction.count === 0) {
+                                delete idea.reactions[key];
+                            }
+                        }
+                    }
+                });
+                
+                if (userIndex === -1) {
+                    reaction.users.push(userId);
+                    reaction.count++;
+                } else {
+                    reaction.users.splice(userIndex, 1);
+                    reaction.count = Math.max(0, reaction.count - 1);
+                    
+                    if (reaction.count === 0) {
+                        delete idea.reactions[reactionType];
                     }
                 }
+                
+                await ideaRef.update({
+                    reactions: idea.reactions
+                });
+                
+            } catch (error) {
+                console.error('Error toggling reaction:', error);
+                handleFirebaseError(error);
+            }
+        }
+
+        function showAdminDeleteAlert(ideaId) {
+            const isAdmin = currentUser && ADMIN_USERNAMES.includes(currentUser.username);
+            
+            if (!isAdmin) {
+                tg.showPopup({
+                    title: 'Доступ запрещен',
+                    message: 'Только администраторы могут удалять идеи',
+                    buttons: [{ type: 'ok', text: 'Понятно' }]
+                });
+                return;
             }
             
-            // Добавляем или удаляем текущую реакцию
-            if (userIndex === -1) {
-                // Добавляем реакцию
-                reaction.users.push(userId);
-                reaction.count++;
-            } else {
-                // Удаляем реакцию
-                reaction.users.splice(userIndex, 1);
-                reaction.count = Math.max(0, reaction.count - 1);
-            }
-            
-            // Удаляем пустые реакции
-            Object.keys(idea.reactions).forEach(key => {
-                if (idea.reactions[key].count === 0) {
-                    delete idea.reactions[key];
+            tg.showPopup({
+                title: 'Удалить идею?',
+                message: 'Это действие нельзя отменить. Идея будет удалена для всех пользователей.',
+                buttons: [
+                    {
+                        type: 'destructive',
+                        text: 'Удалить',
+                        id: 'delete'
+                    },
+                    {
+                        type: 'cancel',
+                        text: 'Отмена',
+                        id: 'cancel'
+                    }
+                ]
+            }, async (buttonId) => {
+                if (buttonId === 'delete') {
+                    try {
+                        await db.collection('ideas').doc(ideaId).delete();
+                        tg.showPopup({
+                            title: 'Успешно',
+                            message: 'Идея удалена',
+                            buttons: [{ type: 'ok', text: 'Ок' }]
+                        });
+                    } catch (error) {
+                        console.error('Error deleting idea:', error);
+                        handleFirebaseError(error);
+                    }
                 }
             });
-            
-            saveIdeas();
-            renderIdeas();
         }
 
         function viewFullIdea(index) {
@@ -1184,17 +1224,24 @@
         }
 
         function openAddIdeaModal() {
+            if (!currentUser) {
+                tg.showPopup({
+                    title: 'Ошибка',
+                    message: 'Нужно войти в аккаунт Telegram',
+                    buttons: [{ type: 'ok', text: 'Понятно' }]
+                });
+                return;
+            }
+            
             tg.HapticFeedback.impactOccurred('light');
             const modal = document.getElementById('addIdeaModal');
             modal.classList.add('active');
             
-            // Сброс полей
             document.getElementById('ideaTitle').value = '';
             document.getElementById('ideaContent').value = '';
             document.getElementById('titleCharCounter').textContent = '0/15';
             document.getElementById('titleCharCounter').classList.remove('error');
             
-            // Добавляем слушатель для подсчета символов
             const titleInput = document.getElementById('ideaTitle');
             titleInput.removeEventListener('input', updateCharCounter);
             titleInput.addEventListener('input', updateCharCounter);
@@ -1228,7 +1275,7 @@
             }
         }
 
-        function submitIdea() {
+        async function submitIdea() {
             tg.HapticFeedback.impactOccurred('light');
             
             const title = document.getElementById('ideaTitle').value.trim();
@@ -1252,59 +1299,30 @@
                 return;
             }
             
-            const newIdea = {
-                id: Date.now(),
-                title: title,
-                content: content,
-                author: currentUser ? currentUser.first_name : 'Аноним',
-                userId: currentUser ? currentUser.id : null,
-                timestamp: new Date().toISOString(),
-                reactions: {}
-            };
-            
-            ideas.unshift(newIdea);
-            saveIdeas();
-            renderIdeas();
-            closeAddIdeaModal();
-            
-            tg.showPopup({
-                title: 'Успешно!',
-                message: 'Идея добавлена',
-                buttons: [{ type: 'ok', text: 'Круто' }]
-            });
-        }
-
-        function deleteIdea(index) {
-            tg.HapticFeedback.impactOccurred('medium');
-            
-            tg.showPopup({
-                title: 'Ты точно хочешь удалить эту идею?',
-                message: 'Восстановить ее уже не получится',
-                buttons: [
-                    {
-                        type: 'destructive',
-                        text: 'Удалить',
-                        id: 'delete'
-                    },
-                    {
-                        type: 'cancel',
-                        text: 'Отмена',
-                        id: 'cancel'
-                    }
-                ]
-            }, (buttonId) => {
-                if (buttonId === 'delete') {
-                    ideas.splice(index, 1);
-                    saveIdeas();
-                    renderIdeas();
-                    
-                    tg.showPopup({
-                        title: 'Успешно',
-                        message: 'Идея удалена',
-                        buttons: [{ type: 'ok', text: 'Ок' }]
-                    });
-                }
-            });
+            try {
+                const newIdea = {
+                    title: title,
+                    content: content,
+                    author: currentUser ? currentUser.first_name : 'Аноним',
+                    username: currentUser ? currentUser.username : null,
+                    userId: currentUser ? currentUser.id.toString() : null,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    // Не добавляем reactions при создании - это нарушит правила
+                };
+                
+                await db.collection('ideas').add(newIdea);
+                closeAddIdeaModal();
+                
+                tg.showPopup({
+                    title: 'Успешно!',
+                    message: 'Идея добавлена',
+                    buttons: [{ type: 'ok', text: 'Круто' }]
+                });
+                
+            } catch (error) {
+                console.error('Error adding idea:', error);
+                handleFirebaseError(error);
+            }
         }
 
         async function loadUserData() {
@@ -1324,7 +1342,6 @@
 
         async function loadChibiLists() {
             try {
-                // Загружаем список чибиков
                 userData.common.all = ['Chibi 1', 'Chibi 2', 'Chibi 3', 'Chibi 4', 'Chibi 5', 'Chibi 6', 'Chibi 7', 'Chibi 8', 'Chibi 9', 'Chibi 10', 'Chibi 11', 'Chibi 12'];
                 userData.secret.all = ['Secret 1', 'Secret 2', 'Secret 3', 'Secret 4'];
                 userData.prize.all = ['Prize 1', 'Prize 2', 'Prize 3'];
@@ -1401,11 +1418,10 @@
                 const img = new Image();
                 img.src = imageUrl;
                 img.onload = function() {
-                    // Если картинка загрузилась, показываем ее
                     iconElement.innerHTML = `<img src="${imageUrl}" alt="${type}">`;
                 };
                 img.onerror = function() {
-                    // Если не загрузилась, оставляем текст ошибки
+                    // Оставляем текст ошибки
                 };
             }
         }
@@ -1458,6 +1474,12 @@
                 grid.appendChild(card);
             });
         }
+
+        window.addEventListener('beforeunload', () => {
+            if (unsubscribeIdeas) {
+                unsubscribeIdeas();
+            }
+        });
 
         document.addEventListener('DOMContentLoaded', initTelegramApp);
     </script>
