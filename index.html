@@ -68,10 +68,17 @@
         .author-avatar {
             width: 24px; height: 24px; border-radius: 50%; overflow: hidden;
             margin-left: 8px; flex-shrink: 0; cursor: pointer;
-            border: 1.5px solid #2A2B2C;
+            border: 1.5px solid #2A2B2C; background: #2A2B2C;
+            display: flex; align-items: center; justify-content: center;
         }
         
-        .author-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .author-avatar img { 
+            width: 100%; height: 100%; object-fit: cover; display: block;
+        }
+        
+        .default-avatar {
+            width: 14px; height: 14px; filter: invert(0.6);
+        }
         
         .idea-content { 
             font-size: 14px; color: rgba(255, 255, 255, 0.7); line-height: 1.4; 
@@ -273,15 +280,6 @@
                     snapshot.forEach(doc => {
                         const idea = doc.data();
                         idea.id = doc.id;
-                        
-                        if (idea.authorPhotoUrl) {
-                            idea.authorAvatar = idea.authorPhotoUrl;
-                        } else if (idea.userPhotoUrl) {
-                            idea.authorAvatar = idea.userPhotoUrl;
-                        } else {
-                            idea.authorAvatar = '';
-                        }
-                        
                         ideas.push(idea);
                     });
                     renderIdeas();
@@ -313,16 +311,19 @@
                 const displayContent = needsFullView ? idea.content.substring(0, 100) + '...' : idea.content;
                 const hasUsername = idea.username && idea.username.trim() !== '';
                 const profileLink = hasUsername ? `https://t.me/${idea.username}` : null;
+                const hasAvatar = idea.authorPhotoUrl || idea.userPhotoUrl;
+                const avatarUrl = idea.authorPhotoUrl || idea.userPhotoUrl;
                 
                 card.innerHTML = `
                     <div class="idea-header">
                         <div class="idea-title">${idea.title}</div>
-                        ${idea.authorAvatar || hasUsername ? `
-                            <div class="author-avatar" onclick="${profileLink ? `openProfile('${profileLink}')` : ''}" 
-                                 title="${idea.author || 'Автор'}">
-                                ${idea.authorAvatar ? `<img src="${idea.authorAvatar}" alt="${idea.author}">` : ''}
-                            </div>
-                        ` : ''}
+                        <div class="author-avatar" ${hasUsername ? `onclick="openProfile('${profileLink}')"` : ''} 
+                             title="${idea.author || 'Автор'}">
+                            ${hasAvatar ? 
+                                `<img src="${avatarUrl}" alt="${idea.author}" onerror="this.parentElement.innerHTML='<img src=\\'https://img.icons8.com/?size=100&id=98953&format=png&color=8E8E93\\' class=\\'default-avatar\\'>'">` : 
+                                `<img src="https://img.icons8.com/?size=100&id=98953&format=png&color=8E8E93" class="default-avatar">`
+                            }
+                        </div>
                     </div>
                     <div class="idea-content ${needsFullView ? 'truncated' : ''}">${displayContent}</div>
                     <div class="idea-footer">
@@ -522,6 +523,7 @@
                     username: currentUser.username || null,
                     userId: currentUser.id.toString(),
                     authorPhotoUrl: currentUser.photo_url || null,
+                    userPhotoUrl: currentUser.photo_url || null,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 
