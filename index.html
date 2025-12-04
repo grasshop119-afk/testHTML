@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Chibeki</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
     <style>
@@ -27,36 +26,39 @@
         .header-icon {
             width: 24px; height: 24px; opacity: 0.9; cursor: pointer;
             -webkit-mask-size: contain; mask-size: contain; 
-            -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
             background-color: var(--accent-color);
         }
         
-        .header-icon.telegram { -webkit-mask-image: url('https://images.icon-icons.com/4040/PNG/512/telegram_logo_icon_256772.png'); mask-image: url('https://images.icon-icons.com/4040/PNG/512/telegram_logo_icon_256772.png'); }
-        .header-icon.chat { -webkit-mask-image: url('https://images.icon-icons.com/2942/PNG/512/chat_icon_183898.png'); mask-image: url('https://images.icon-icons.com/2942/PNG/512/chat_icon_183898.png'); }
+        .header-icon.telegram { -webkit-mask-image: url('https://images.icon-icons.com/4040/PNG/512/telegram_logo_icon_256772.png'); }
+        .header-icon.chat { -webkit-mask-image: url('https://images.icon-icons.com/2942/PNG/512/chat_icon_183898.png'); }
         
         .main-content { position: absolute; top: 52px; bottom: 0; left: 0; right: 0; overflow-y: auto; }
         .main-content::-webkit-scrollbar { display: none; }
         
-        .main-screen { padding: 16px; }
+        .main-screen { padding: 16px; height: calc(100vh - 52px); display: flex; flex-direction: column; }
         
         .section-title { font-size: 17px; font-weight: 600; margin-bottom: 12px; color: #FFFFFF; }
         
-        .ideas-container { border-radius: 14px; }
+        .ideas-container {
+            flex: 1; position: relative; overflow: hidden; border-radius: 14px;
+            touch-action: pan-y; margin-bottom: 12px;
+        }
+        
+        .ideas-track {
+            display: flex; height: 100%; transition: transform 0.3s ease;
+        }
         
         .idea-card {
             border: 1.5px solid #2A2B2C; border-radius: 14px; padding: 16px;
-            background: transparent; margin-bottom: 12px;
+            background: transparent; width: 100%; height: 100%; flex-shrink: 0;
+            display: flex; flex-direction: column;
         }
         
         .idea-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
         .idea-title { font-size: 16px; font-weight: 600; color: #FFFFFF; flex: 1; }
         .idea-content { 
             font-size: 14px; color: rgba(255, 255, 255, 0.7); line-height: 1.4; 
-            margin-bottom: 16px; position: relative; max-height: 60px; overflow: hidden;
-        }
-        .idea-content.truncated::after {
-            content: ''; position: absolute; bottom: 0; right: 0; width: 50px; height: 20px;
-            background: linear-gradient(90deg, transparent, #1F2021 70%);
+            flex: 1; margin-bottom: 16px; overflow: hidden;
         }
         
         .idea-footer { display: flex; justify-content: space-between; align-items: center; }
@@ -65,7 +67,7 @@
         .reaction-btn {
             background: #2A2B2C; border-radius: 19px; padding: 6px 12px;
             display: flex; align-items: center; gap: 4px; cursor: pointer;
-            border: none; font-family: inherit; position: relative; overflow: hidden;
+            border: none; font-family: inherit;
         }
         
         .reaction-btn.active { background: var(--accent-color); }
@@ -84,18 +86,20 @@
         .read-full-btn {
             background: transparent; border: none; color: var(--accent-color);
             font-size: 13px; font-weight: 500; cursor: pointer; padding: 4px 8px;
-            opacity: 0.8; text-decoration: none;
         }
-        .read-full-btn:active { opacity: 1; }
         
         .add-idea-btn {
             background: var(--accent-color); color: white; border: none; border-radius: 14px;
             padding: 12px; width: 100%; font-size: 16px; font-weight: 500;
             display: flex; align-items: center; justify-content: center; gap: 8px;
-            cursor: pointer; margin-top: 16px;
+            cursor: pointer; margin-top: auto;
         }
         
         .add-idea-btn-icon { width: 20px; height: 20px; filter: invert(1); }
+        
+        .pagination { display: flex; justify-content: center; gap: 6px; margin-top: 12px; }
+        .pagination-dot { width: 6px; height: 6px; border-radius: 50%; background: #2A2B2C; }
+        .pagination-dot.active { background: var(--accent-color); }
         
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1F2021; z-index: 1000; display: none; }
         .modal-overlay.active { display: block; }
@@ -118,25 +122,19 @@
             padding: 12px; font-size: 16px; color: white; font-family: inherit;
         }
         
-        .input-field::placeholder { color: rgba(255, 255, 255, 0.3); }
         .input-field:focus { outline: none; border-color: var(--accent-color); }
         
         .char-counter { text-align: right; font-size: 12px; color: rgba(255, 255, 255, 0.5); margin-top: 4px; }
-        .char-counter.error { color: #ff453a; }
         
         .modal-btn {
             width: 100%; padding: 14px; border-radius: 10px; font-size: 16px; font-weight: 500;
             border: none; cursor: pointer; background: var(--accent-color); color: white;
         }
         
-        .view-modal-content { padding: 20px 16px; color: white; }
-        .view-modal-text { font-size: 16px; line-height: 1.5; color: rgba(255, 255, 255, 0.9); }
-        
         :root { --accent-color: #007AFF; }
         
-        /* Анимация для реакции */
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
-        .reaction-btn.pulse { animation: pulse 0.3s ease; }
+        .pulse { animation: pulse 0.3s ease; }
     </style>
 </head>
 <body>
@@ -151,9 +149,13 @@
     <div class="main-content">
         <div class="main-screen">
             <div class="section-title">Идеи</div>
+            
             <div class="ideas-container" id="ideasContainer">
-                <!-- Идеи будут здесь -->
+                <div class="ideas-track" id="ideasTrack"></div>
             </div>
+            
+            <div class="pagination" id="pagination"></div>
+            
             <button class="add-idea-btn" onclick="openAddIdeaModal()">
                 <img src="https://images.icon-icons.com/916/PNG/512/Plus_icon-icons.com_71848.png" 
                      class="add-idea-btn-icon">Закинуть идею
@@ -161,7 +163,6 @@
         </div>
     </div>
 
-    <!-- Модальное окно добавления идеи -->
     <div class="modal-overlay" id="addIdeaModal">
         <div class="modal-header">
             <div class="modal-title">
@@ -184,24 +185,10 @@
         </div>
     </div>
 
-    <!-- Модальное окно просмотра идеи -->
-    <div class="modal-overlay" id="viewIdeaModal">
-        <div class="modal-header">
-            <div class="modal-title">
-                <img src="https://img.icons8.com/?size=100&id=KXtAS0MR3VBG&format=png&color=000000" 
-                     class="modal-title-icon">
-                <span id="viewModalTitle"></span>
-            </div>
-            <div class="modal-close" onclick="closeViewIdeaModal()"></div>
-        </div>
-        <div class="view-modal-content">
-            <div class="view-modal-text" id="viewModalText"></div>
-        </div>
-    </div>
-
     <script>
         const tg = window.Telegram.WebApp;
-        const ADMIN_USERNAMES = ['ya_admin7', 'tmkazavr'];
+        
+        const ADMIN_IDS = ['1430001432', '1699654607'];
         
         const firebaseConfig = {
             apiKey: "AIzaSyDrvqEb5GMrWaCLSd3aHEdOQIDA321v_BA",
@@ -216,10 +203,14 @@
         const db = firebase.firestore();
         
         let ideas = [], currentUser = null, unsubscribeIdeas = null;
+        let currentSlide = 0, startX = 0, isDragging = false;
 
         function init() {
-            tg.ready(); tg.expand();
-            tg.setHeaderColor('#1F2021'); tg.setBackgroundColor('#1F2021');
+            tg.ready();
+            tg.expand();
+            tg.setHeaderColor('#1F2021');
+            tg.setBackgroundColor('#1F2021');
+            
             currentUser = tg.initDataUnsafe?.user;
             
             let accentColor = '#007AFF';
@@ -227,12 +218,20 @@
             document.documentElement.style.setProperty('--accent-color', accentColor);
             
             loadIdeas();
+            setupSwipe();
         }
 
-        function openChannel() { tg.HapticFeedback.impactOccurred('light'); tg.openTelegramLink('https://t.me/chibeki_official'); }
-        function openRequestBot() { tg.HapticFeedback.impactOccurred('light'); tg.openTelegramLink('https://t.me/request_chibeki_bot'); }
+        function openChannel() {
+            tg.HapticFeedback.impactOccurred('light');
+            tg.openTelegramLink('https://t.me/chibeki_official');
+        }
 
-        async function loadIdeas() {
+        function openRequestBot() {
+            tg.HapticFeedback.impactOccurred('light');
+            tg.openTelegramLink('https://t.me/request_chibeki_bot');
+        }
+
+        function loadIdeas() {
             try {
                 unsubscribeIdeas = db.collection('ideas').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
                     ideas = [];
@@ -243,34 +242,38 @@
                     });
                     renderIdeas();
                 });
-            } catch(e) { console.error('Error loading ideas:', e); }
+            } catch(e) {
+                console.error('Error loading ideas:', e);
+            }
         }
 
         function renderIdeas() {
-            const container = document.getElementById('ideasContainer');
+            const ideasTrack = document.getElementById('ideasTrack');
+            const pagination = document.getElementById('pagination');
+            
+            ideasTrack.innerHTML = '';
+            pagination.innerHTML = '';
             
             if (ideas.length === 0) {
-                container.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,0.5);padding:40px 0;">Идей пока нет…</div>';
+                ideasTrack.innerHTML = '<div class="idea-card" style="display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.5);">Идей пока нет…</div>';
                 return;
             }
             
-            container.innerHTML = '';
-            
-            ideas.forEach(idea => {
-                const isAdmin = currentUser && ADMIN_USERNAMES.includes(currentUser.username);
-                const userId = currentUser?.id?.toString();
-                const userLiked = idea.reactions?.like?.users?.includes(userId);
-                const needsFullView = idea.content.length > 100;
-                const displayContent = needsFullView ? idea.content.substring(0, 100) + '...' : idea.content;
-                
+            ideas.forEach((idea, index) => {
                 const card = document.createElement('div');
                 card.className = 'idea-card';
+                
+                const isAdmin = currentUser && ADMIN_IDS.includes(currentUser.id.toString());
+                const userId = currentUser?.id?.toString();
+                const userLiked = idea.reactions?.like?.users?.includes(userId);
+                const displayContent = idea.content;
+                
                 card.innerHTML = `
                     <div class="idea-header">
                         <div class="idea-title">${idea.title}</div>
                         ${isAdmin ? `<div class="delete-icon" onclick="deleteIdea('${idea.id}')"></div>` : ''}
                     </div>
-                    <div class="idea-content ${needsFullView ? 'truncated' : ''}">${displayContent}</div>
+                    <div class="idea-content">${displayContent}</div>
                     <div class="idea-footer">
                         <div class="reaction-container">
                             <button class="reaction-btn ${userLiked ? 'active' : ''}" 
@@ -280,16 +283,27 @@
                                 <span class="reaction-count">${idea.reactions?.like?.count || 0}</span>
                             </button>
                         </div>
-                        ${needsFullView ? `<button class="read-full-btn" onclick="viewFullIdea('${idea.id}')">Читать целиком</button>` : ''}
                     </div>
                 `;
-                container.appendChild(card);
+                
+                ideasTrack.appendChild(card);
+                
+                const dot = document.createElement('div');
+                dot.className = `pagination-dot ${index === currentSlide ? 'active' : ''}`;
+                dot.onclick = () => goToSlide(index);
+                pagination.appendChild(dot);
             });
+            
+            updateSlidePosition();
         }
 
         async function toggleReaction(ideaId) {
             if (!currentUser) {
-                tg.showPopup({title:'Ошибка',message:'Нужно войти в аккаунт Telegram',buttons:[{type:'ok',text:'Понятно'}]});
+                tg.showPopup({
+                    title: 'Ошибка',
+                    message: 'Нужно войти в аккаунт Telegram',
+                    buttons: [{ type: 'ok', text: 'Понятно' }]
+                });
                 return;
             }
             
@@ -297,15 +311,12 @@
                 tg.HapticFeedback.impactOccurred('medium');
                 
                 const btn = event.target.closest('.reaction-btn');
-                if (btn) {
-                    btn.classList.add('pulse');
-                    setTimeout(() => btn.classList.remove('pulse'), 300);
-                }
+                btn.classList.add('pulse');
+                setTimeout(() => btn.classList.remove('pulse'), 300);
                 
                 const ideaRef = db.collection('ideas').doc(ideaId);
                 const userId = currentUser.id.toString();
                 
-                // Получаем текущие данные
                 const doc = await ideaRef.get();
                 if (!doc.exists) return;
                 
@@ -318,77 +329,116 @@
                 const reaction = idea.reactions.like;
                 const userIndex = reaction.users.indexOf(userId);
                 
-                // Тоггл: если уже лайкнул - убираем, если нет - добавляем
                 if (userIndex === -1) {
-                    // Добавляем лайк
                     reaction.users.push(userId);
                     reaction.count++;
                 } else {
-                    // Убираем лайк
                     reaction.users.splice(userIndex, 1);
                     reaction.count = Math.max(0, reaction.count - 1);
                 }
                 
-                // Если лайков 0, удаляем пустой объект
                 if (reaction.count === 0) {
                     delete idea.reactions.like;
                 }
                 
-                // Обновляем в базе
                 await ideaRef.update({
                     reactions: idea.reactions
                 });
                 
-            } catch(e) { 
+            } catch(e) {
                 console.error('Error toggling reaction:', e);
-                tg.showPopup({title:'Ошибка',message:'Не удалось поставить реакцию',buttons:[{type:'ok',text:'Понятно'}]});
             }
         }
 
-        function viewFullIdea(ideaId) {
-            tg.HapticFeedback.impactOccurred('light');
-            const idea = ideas.find(i => i.id === ideaId);
-            if (!idea) return;
+        async function deleteIdea(ideaId) {
+            const isAdmin = currentUser && ADMIN_IDS.includes(currentUser.id.toString());
             
-            document.getElementById('viewModalTitle').textContent = idea.title;
-            document.getElementById('viewModalText').textContent = idea.content;
-            document.getElementById('viewIdeaModal').classList.add('active');
-        }
-
-        function closeViewIdeaModal() {
-            tg.HapticFeedback.impactOccurred('light');
-            document.getElementById('viewIdeaModal').classList.remove('active');
-        }
-
-        function deleteIdea(ideaId) {
-            const isAdmin = currentUser && ADMIN_USERNAMES.includes(currentUser.username);
-            if (!isAdmin) return;
+            if (!isAdmin) {
+                tg.showPopup({
+                    title: 'Доступ запрещен',
+                    message: 'Только администраторы могут удалять идеи',
+                    buttons: [{ type: 'ok', text: 'Понятно' }]
+                });
+                return;
+            }
             
             tg.showPopup({
                 title: 'Удалить идею?',
-                message: 'Восстановить нельзя',
+                message: 'Это действие нельзя отменить',
                 buttons: [
-                    {type: 'destructive', text: 'Удалить', id: 'delete'},
-                    {type: 'cancel', text: 'Отмена', id: 'cancel'}
+                    { type: 'destructive', text: 'Удалить', id: 'delete' },
+                    { type: 'cancel', text: 'Отмена', id: 'cancel' }
                 ]
             }, async (btnId) => {
                 if (btnId === 'delete') {
                     try {
                         await db.collection('ideas').doc(ideaId).delete();
-                        tg.showPopup({title:'Успешно',message:'Идея удалена',buttons:[{type:'ok',text:'Ок'}]});
-                    } catch(e) { 
+                        currentSlide = Math.max(0, currentSlide - 1);
+                    } catch(e) {
                         console.error('Error deleting idea:', e);
-                        tg.showPopup({title:'Ошибка',message:'Не удалось удалить идею',buttons:[{type:'ok',text:'Понятно'}]});
                     }
                 }
             });
         }
 
+        function setupSwipe() {
+            const container = document.getElementById('ideasContainer');
+            
+            container.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                isDragging = true;
+            });
+            
+            container.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                e.preventDefault();
+            });
+            
+            container.addEventListener('touchend', (e) => {
+                if (!isDragging) return;
+                isDragging = false;
+                
+                const endX = e.changedTouches[0].clientX;
+                const diff = startX - endX;
+                
+                if (Math.abs(diff) > 50) {
+                    if (diff > 0 && currentSlide < ideas.length - 1) {
+                        goToSlide(currentSlide + 1);
+                    } else if (diff < 0 && currentSlide > 0) {
+                        goToSlide(currentSlide - 1);
+                    }
+                }
+            });
+        }
+
+        function goToSlide(index) {
+            if (index < 0 || index >= ideas.length) return;
+            
+            currentSlide = index;
+            updateSlidePosition();
+            
+            document.querySelectorAll('.pagination-dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentSlide);
+            });
+        }
+
+        function updateSlidePosition() {
+            const track = document.getElementById('ideasTrack');
+            if (!track) return;
+            
+            track.style.transform = `translateX(-${currentSlide * 100}%)`;
+        }
+
         function openAddIdeaModal() {
             if (!currentUser) {
-                tg.showPopup({title:'Ошибка',message:'Нужно войти в аккаунт Telegram',buttons:[{type:'ok',text:'Понятно'}]});
+                tg.showPopup({
+                    title: 'Ошибка',
+                    message: 'Нужно войти в аккаунт Telegram',
+                    buttons: [{ type: 'ok', text: 'Понятно' }]
+                });
                 return;
             }
+            
             tg.HapticFeedback.impactOccurred('light');
             document.getElementById('addIdeaModal').classList.add('active');
             document.getElementById('ideaTitle').value = '';
@@ -406,12 +456,20 @@
             const content = document.getElementById('ideaContent').value.trim();
             
             if (!title) {
-                tg.showPopup({title:'Ошибка',message:'Название не может быть пустым',buttons:[{type:'ok',text:'Понятно'}]});
+                tg.showPopup({
+                    title: 'Ошибка',
+                    message: 'Название не может быть пустым',
+                    buttons: [{ type: 'ok', text: 'Понятно' }]
+                });
                 return;
             }
             
             if (title.length > 15) {
-                tg.showPopup({title:'Ошибка',message:'Название не должно превышать 15 символов',buttons:[{type:'ok',text:'Понятно'}]});
+                tg.showPopup({
+                    title: 'Ошибка',
+                    message: 'Название не должно превышать 15 символов',
+                    buttons: [{ type: 'ok', text: 'Понятно' }]
+                });
                 return;
             }
             
@@ -424,11 +482,18 @@
                     userId: currentUser.id.toString(),
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
+                
                 closeAddIdeaModal();
-                tg.showPopup({title:'Успешно!',message:'Идея добавлена',buttons:[{type:'ok',text:'Круто'}]});
-            } catch(e) { 
+                currentSlide = 0;
+                
+                tg.showPopup({
+                    title: 'Успешно!',
+                    message: 'Идея добавлена',
+                    buttons: [{ type: 'ok', text: 'Круто' }]
+                });
+                
+            } catch(e) {
                 console.error('Error adding idea:', e);
-                tg.showPopup({title:'Ошибка',message:'Не удалось добавить идею',buttons:[{type:'ok',text:'Понятно'}]});
             }
         }
 
