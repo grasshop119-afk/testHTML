@@ -67,16 +67,6 @@
             line-height: 24px;
         }
         
-        .author-avatar {
-            width: 24px; height: 24px; border-radius: 50%; overflow: hidden;
-            margin-left: 8px; flex-shrink: 0; cursor: pointer;
-            background: #2A2B2C; border: none;
-        }
-        
-        .author-avatar img { 
-            width: 100%; height: 100%; object-fit: cover; display: block;
-        }
-        
         .idea-content { 
             font-size: 14px; color: rgba(255, 255, 255, 0.7); line-height: 1.4; 
             flex: 1; margin-bottom: 12px; position: relative; max-height: 60px; overflow: hidden;
@@ -98,20 +88,35 @@
         
         .reaction-btn {
             background: #2A2B2C; border-radius: 19px; padding: 6px 12px;
-            display: flex; align-items: center; gap: 4px; cursor: pointer;
+            display: flex; align-items: center; gap: 6px; cursor: pointer;
             border: none; font-family: inherit; position: relative;
+            height: 32px; min-width: 60px; overflow: hidden;
         }
         
         .reaction-btn.has-reaction { background: var(--accent-color); }
         .reaction-btn.has-reaction .reaction-count { color: white; font-weight: 600; }
         
-        .reaction-gif { width: 20px; height: 20px; object-fit: contain; }
-        .reaction-count { font-size: 14px; color: rgba(255, 255, 255, 0.7); }
+        .reaction-emoji { 
+            font-size: 20px; width: 20px; height: 20px; display: flex; 
+            align-items: center; justify-content: center; position: relative;
+            z-index: 2;
+        }
+        
+        .reaction-count { 
+            font-size: 14px; color: rgba(255, 255, 255, 0.7); 
+            min-width: 16px; text-align: center; position: relative;
+            z-index: 2;
+        }
+        
+        .plus-icon {
+            width: 20px; height: 20px; filter: invert(0.6);
+            position: relative; z-index: 2;
+        }
         
         .reactions-popup {
             position: absolute; bottom: 100%; left: 0; margin-bottom: 8px;
-            background: #2A2B2C; border-radius: 27px; padding: 8px;
-            display: none; align-items: center; gap: 8px;
+            background: #2A2B2C; border-radius: 27px; padding: 8px 12px;
+            display: none; align-items: center; gap: 12px;
             z-index: 1000; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             border: 0.5px solid #353637;
         }
@@ -122,16 +127,36 @@
             width: 36px; height: 36px; border-radius: 50%; overflow: hidden;
             cursor: pointer; display: flex; align-items: center; justify-content: center;
             background: transparent; border: none; padding: 0;
-            transition: transform 0.2s ease;
+            transition: transform 0.2s ease; font-size: 24px;
+            position: relative;
         }
         
         .reaction-option:hover { transform: scale(1.1); }
         
-        .reaction-option img { width: 100%; height: 100%; object-fit: contain; }
-        
-        .plus-icon {
-            width: 20px; height: 20px; filter: invert(0.6);
+        .effect-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 1;
         }
+        
+        .effect-particles {
+            position: absolute; width: 100%; height: 100%;
+            display: none;
+        }
+        
+        .effect-particles.active {
+            display: block;
+        }
+        
+        .particle {
+            position: absolute; font-size: 20px; animation: floatUp 1s ease-out forwards;
+        }
+        
+        .heart-particle { color: #ff4757; }
+        .fire-particle { color: #ffa502; }
+        .thumbs-up-particle { color: #2ed573; }
+        .thumbs-down-particle { color: #ff6b81; }
+        .pill-particle { color: #3742fa; }
+        .clown-particle { color: #ff9f1a; }
         
         .read-full-btn {
             background: transparent; border: none; color: var(--accent-color);
@@ -189,6 +214,45 @@
         
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
         .pulse { animation: pulse 0.3s ease; }
+        
+        @keyframes floatUp {
+            0% { 
+                opacity: 1; 
+                transform: translateY(0) scale(1); 
+            }
+            100% { 
+                opacity: 0; 
+                transform: translateY(-60px) scale(1.5); 
+            }
+        }
+        
+        @keyframes heartBeat {
+            0% { transform: scale(1); }
+            25% { transform: scale(1.3); }
+            50% { transform: scale(1); }
+            75% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes fireGlow {
+            0%, 100% { text-shadow: 0 0 5px currentColor; }
+            50% { text-shadow: 0 0 20px currentColor, 0 0 30px currentColor; }
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .heart-emoji { animation: heartBeat 0.8s ease; }
+        .fire-emoji { animation: fireGlow 1s infinite; }
+        .rocket-emoji { animation: bounce 0.5s ease 2; }
+        .clown-emoji { animation: rotate 1s ease; }
     </style>
 </head>
 <body>
@@ -268,12 +332,14 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         
+        // Эмодзи с эффектами
         const REACTIONS = [
-            { id: 'like', url: 'https://stickers.fullyst.com/b9f1c4ec-ff51-507f-a011-b3c035880c92/full/AgADyQcAAuN4BAAB.webp' },
-            { id: 'heart', url: 'https://stickers.fullyst.com/b9f1c4ec-ff51-507f-a011-b3c035880c92/full/AgAD_QIAAgapIEQ.webp' },
-            { id: 'fire', url: 'https://stickers.fullyst.com/b9f1c4ec-ff51-507f-a011-b3c035880c92/full/AgAD0QEAAj4eMEc.webp' },
-            { id: 'laugh', url: 'https://stickers.fullyst.com/b9f1c4ec-ff51-507f-a011-b3c035880c92/full/AgADtAIAArQKGUQ.webp' },
-            { id: 'wow', url: 'https://stickers.fullyst.com/b9f1c4ec-ff51-507f-a011-b3c035880c92/full/AgAD_QIAAgapIEQ.webp' }
+            { id: 'heart', emoji: '❤️', name: 'heart', effect: 'heart', effectEmoji: '❤️', color: '#ff4757' },
+            { id: 'fire', emoji: '🔥', name: 'fire', effect: 'fire', effectEmoji: '🔥', color: '#ffa502' },
+            { id: 'thumb_up', emoji: '👍', name: 'thumb_up', effect: 'thumbs-up', effectEmoji: '👍', color: '#2ed573' },
+            { id: 'thumb_down', emoji: '👎', name: 'thumb_down', effect: 'thumbs-down', effectEmoji: '👎', color: '#ff6b81' },
+            { id: 'ambulance', emoji: '🚑', name: 'ambulance', effect: 'pill', effectEmoji: '💊', color: '#3742fa' },
+            { id: 'clown', emoji: '🤡', name: 'clown', effect: 'clown', effectEmoji: '🤡', color: '#ff9f1a' }
         ];
         
         let ideas = [], currentUser = null, unsubscribeIdeas = null;
@@ -347,46 +413,44 @@
                 
                 const userId = currentUser?.id?.toString();
                 
-                const userReactions = {};
-                REACTIONS.forEach(reaction => {
-                    if (idea.reactions?.[reaction.id]?.users?.includes(userId)) {
-                        userReactions[reaction.id] = true;
-                    }
-                });
+                // Определяем, какую реакцию поставил пользователь
+                let userReaction = null;
+                let reactionCount = 0;
                 
-                const userReacted = Object.keys(userReactions).length > 0;
-                const userReactionId = userReacted ? Object.keys(userReactions)[0] : null;
+                if (idea.reactions) {
+                    REACTIONS.forEach(reaction => {
+                        if (idea.reactions[reaction.id]?.users?.includes(userId)) {
+                            userReaction = reaction;
+                        }
+                        if (idea.reactions[reaction.id]?.count) {
+                            reactionCount += idea.reactions[reaction.id].count;
+                        }
+                    });
+                }
+                
                 const needsFullView = idea.content.length > 100;
                 const displayContent = needsFullView ? idea.content.substring(0, 100) + '...' : idea.content;
-                const hasUsername = idea.username && idea.username.trim() !== '';
-                const profileLink = hasUsername ? `https://t.me/${idea.username}` : null;
                 
                 card.innerHTML = `
                     <div class="idea-header">
                         <div class="idea-title">${idea.title}</div>
-                        <div class="author-avatar" ${hasUsername ? `onclick="openProfile('${profileLink}')"` : ''} 
-                             title="${idea.author || 'Автор'}">
-                            ${idea.authorPhotoUrl || idea.userPhotoUrl ? 
-                                `<img src="${idea.authorPhotoUrl || idea.userPhotoUrl}" alt="${idea.author}" onerror="this.style.display='none'">` : 
-                                `<img src="https://img.icons8.com/?size=100&id=98953&format=png&color=8E8E93">`
-                            }
-                        </div>
                     </div>
                     <div class="idea-content ${needsFullView ? 'truncated' : ''}">${displayContent}</div>
                     <div class="idea-footer">
                         <div class="reaction-section">
-                            <button class="reaction-btn ${userReacted ? 'has-reaction' : ''}" 
+                            <button class="reaction-btn ${userReaction ? 'has-reaction' : ''}" 
                                     onclick="showReactionsPopup('${idea.id}', this)">
-                                ${userReacted ? 
-                                    `<img src="${REACTIONS.find(r => r.id === userReactionId).url}" class="reaction-gif">` :
+                                <div class="effect-container" id="effect-${idea.id}"></div>
+                                ${userReaction ? 
+                                    `<span class="reaction-emoji ${userReaction.effect}-emoji">${userReaction.emoji}</span>` :
                                     `<img src="https://img.icons8.com/?size=100&id=98953&format=png&color=8E8E93" class="plus-icon">`
                                 }
-                                <span class="reaction-count">${userReacted ? (idea.reactions[userReactionId]?.count || 0) : '0'}</span>
+                                <span class="reaction-count">${userReaction ? (idea.reactions[userReaction.id]?.count || 0) : reactionCount || 0}</span>
                             </button>
                             <div class="reactions-popup" id="popup-${idea.id}">
                                 ${REACTIONS.map(reaction => `
-                                    <button class="reaction-option" onclick="addReaction('${idea.id}', '${reaction.id}', this)">
-                                        <img src="${reaction.url}" alt="${reaction.id}">
+                                    <button class="reaction-option" onclick="addReaction('${idea.id}', '${reaction.id}', '${reaction.emoji}', '${reaction.effect}', '${reaction.color}', '${reaction.effectEmoji}', this)">
+                                        ${reaction.emoji}
                                     </button>
                                 `).join('')}
                             </div>
@@ -423,7 +487,43 @@
             activeReactionPopup = popup;
         }
 
-        async function addReaction(ideaId, reactionId, button) {
+        function createEffect(containerId, effectType, color, emoji) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            const particlesContainer = document.createElement('div');
+            particlesContainer.className = `effect-particles active`;
+            
+            // Создаем частицы эффекта
+            for (let i = 0; i < 12; i++) {
+                const particle = document.createElement('div');
+                particle.className = `particle ${effectType}-particle`;
+                particle.textContent = emoji;
+                particle.style.color = color;
+                
+                // Случайная позиция
+                const startX = 10 + Math.random() * 30;
+                const endX = startX + (Math.random() - 0.5) * 40;
+                
+                particle.style.left = `${startX}px`;
+                particle.style.top = `20px`;
+                particle.style.animationDelay = `${Math.random() * 0.3}s`;
+                particle.style.fontSize = `${12 + Math.random() * 12}px`;
+                
+                particlesContainer.appendChild(particle);
+            }
+            
+            container.appendChild(particlesContainer);
+            
+            // Удаляем эффект через 1.5 секунды
+            setTimeout(() => {
+                if (particlesContainer.parentNode === container) {
+                    container.removeChild(particlesContainer);
+                }
+            }, 1500);
+        }
+
+        async function addReaction(ideaId, reactionId, reactionEmoji, effectType, color, effectEmoji, button) {
             if (!currentUser) {
                 tg.showPopup({
                     title: 'Ошибка',
@@ -440,6 +540,9 @@
                 reactionBtn.classList.add('pulse');
                 setTimeout(() => reactionBtn.classList.remove('pulse'), 300);
                 
+                // Создаем эффект
+                createEffect(`effect-${ideaId}`, effectType, color, effectEmoji);
+                
                 const ideaRef = db.collection('ideas').doc(ideaId);
                 const userId = currentUser.id.toString();
                 
@@ -449,8 +552,9 @@
                 const idea = doc.data();
                 if (!idea.reactions) idea.reactions = {};
                 
+                // Удаляем предыдущие реакции пользователя
                 REACTIONS.forEach(reaction => {
-                    if (idea.reactions[reaction.id] && reaction.id !== reactionId) {
+                    if (idea.reactions[reaction.id] && idea.reactions[reaction.id].users?.includes(userId)) {
                         const userIndex = idea.reactions[reaction.id].users.indexOf(userId);
                         if (userIndex !== -1) {
                             idea.reactions[reaction.id].users.splice(userIndex, 1);
@@ -462,28 +566,42 @@
                     }
                 });
                 
+                // Добавляем новую реакцию
                 if (!idea.reactions[reactionId]) {
                     idea.reactions[reactionId] = { count: 0, users: [] };
                 }
                 
                 const reaction = idea.reactions[reactionId];
-                const userIndex = reaction.users.indexOf(userId);
-                
-                if (userIndex === -1) {
+                if (!reaction.users.includes(userId)) {
                     reaction.users.push(userId);
                     reaction.count++;
-                } else {
-                    reaction.users.splice(userIndex, 1);
-                    reaction.count = Math.max(0, reaction.count - 1);
+                    
+                    await ideaRef.update({
+                        reactions: idea.reactions
+                    });
+                    
+                    // Находим реакцию для класса анимации
+                    const reactionData = REACTIONS.find(r => r.id === reactionId);
+                    
+                    // Обновляем отображение кнопки с анимацией
+                    reactionBtn.innerHTML = `
+                        <div class="effect-container" id="effect-${ideaId}"></div>
+                        <span class="reaction-emoji ${reactionData.effect}-emoji">${reactionEmoji}</span>
+                        <span class="reaction-count">${reaction.count}</span>
+                    `;
+                    reactionBtn.classList.add('has-reaction');
+                    
+                    // Добавляем анимацию на сам эмодзи
+                    const emojiElement = reactionBtn.querySelector('.reaction-emoji');
+                    if (emojiElement) {
+                        setTimeout(() => {
+                            emojiElement.classList.add(`${reactionData.effect}-emoji`);
+                            setTimeout(() => {
+                                emojiElement.classList.remove(`${reactionData.effect}-emoji`);
+                            }, 1000);
+                        }, 100);
+                    }
                 }
-                
-                if (reaction.count === 0) {
-                    delete idea.reactions[reactionId];
-                }
-                
-                await ideaRef.update({
-                    reactions: idea.reactions
-                });
                 
                 if (activeReactionPopup) {
                     activeReactionPopup.classList.remove('show');
@@ -493,11 +611,6 @@
             } catch(e) {
                 console.error('Error adding reaction:', e);
             }
-        }
-
-        function openProfile(link) {
-            tg.HapticFeedback.impactOccurred('light');
-            tg.openTelegramLink(link);
         }
 
         function viewFullIdea(ideaId) {
@@ -614,8 +727,6 @@
                     author: currentUser.first_name || 'Аноним',
                     username: currentUser.username || null,
                     userId: currentUser.id.toString(),
-                    authorPhotoUrl: currentUser.photo_url || null,
-                    userPhotoUrl: currentUser.photo_url || null,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 
