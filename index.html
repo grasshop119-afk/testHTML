@@ -35,33 +35,43 @@
         .main-content { position: absolute; top: 52px; bottom: 0; left: 0; right: 0; overflow-y: auto; }
         .main-content::-webkit-scrollbar { display: none; }
         
-        .main-screen { padding: 16px; height: calc(100vh - 52px); display: flex; flex-direction: column; }
+        .main-screen { padding: 16px; }
         
         .section-title { font-size: 17px; font-weight: 600; margin-bottom: 12px; color: #FFFFFF; }
         
         .ideas-container {
-            flex: 1; position: relative; overflow: hidden; border-radius: 14px;
+            position: relative; overflow: hidden; border-radius: 14px;
             touch-action: pan-y; margin-bottom: 12px;
         }
         
         .ideas-track {
-            display: flex; height: 100%; transition: transform 0.3s ease;
+            display: flex; transition: transform 0.3s ease;
         }
         
         .idea-card {
             border: 1.5px solid #2A2B2C; border-radius: 14px; padding: 16px;
-            background: transparent; width: 100%; height: 100%; flex-shrink: 0;
-            display: flex; flex-direction: column;
+            background: transparent; width: 100%; flex-shrink: 0;
+            display: flex; flex-direction: column; min-height: 140px;
         }
         
         .idea-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-        .idea-title { font-size: 16px; font-weight: 600; color: #FFFFFF; flex: 1; }
+        .idea-title { font-size: 16px; font-weight: 600; color: #FFFFFF; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
         .idea-content { 
             font-size: 14px; color: rgba(255, 255, 255, 0.7); line-height: 1.4; 
-            flex: 1; margin-bottom: 16px; overflow: hidden;
+            flex: 1; margin-bottom: 12px; position: relative; max-height: 60px; overflow: hidden;
         }
         
-        .idea-footer { display: flex; justify-content: space-between; align-items: center; }
+        .idea-content.truncated::after {
+            content: ''; position: absolute; bottom: 0; right: 0; width: 50px; height: 20px;
+            background: linear-gradient(90deg, transparent, #1F2021 70%);
+        }
+        
+        .idea-footer {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-top: auto; padding-top: 12px; border-top: 0.5px solid #2A2B2C;
+        }
+        
         .reaction-container { display: flex; align-items: center; gap: 8px; }
         
         .reaction-btn {
@@ -86,18 +96,19 @@
         .read-full-btn {
             background: transparent; border: none; color: var(--accent-color);
             font-size: 13px; font-weight: 500; cursor: pointer; padding: 4px 8px;
+            text-decoration: none;
         }
         
         .add-idea-btn {
             background: var(--accent-color); color: white; border: none; border-radius: 14px;
             padding: 12px; width: 100%; font-size: 16px; font-weight: 500;
             display: flex; align-items: center; justify-content: center; gap: 8px;
-            cursor: pointer; margin-top: auto;
+            cursor: pointer;
         }
         
         .add-idea-btn-icon { width: 20px; height: 20px; filter: invert(1); }
         
-        .pagination { display: flex; justify-content: center; gap: 6px; margin-top: 12px; }
+        .pagination { display: flex; justify-content: center; gap: 6px; margin-top: 12px; margin-bottom: 16px; }
         .pagination-dot { width: 6px; height: 6px; border-radius: 50%; background: #2A2B2C; }
         .pagination-dot.active { background: var(--accent-color); }
         
@@ -114,6 +125,9 @@
         .modal-close::after { transform: translate(-50%, -50%) rotate(-45deg); }
         
         .modal-content { padding: 20px 16px; }
+        
+        .view-modal-content { padding: 20px 16px; color: white; }
+        .view-modal-text { font-size: 16px; line-height: 1.5; color: rgba(255, 255, 255, 0.9); }
         
         .input-group { margin-bottom: 16px; }
         .input-label { font-size: 15px; font-weight: 500; color: #FFFFFF; margin-bottom: 8px; }
@@ -182,6 +196,20 @@
                 <textarea class="input-field" id="ideaContent" placeholder="Опиши свою идею" style="min-height: 100px;"></textarea>
             </div>
             <button class="modal-btn" onclick="submitIdea()">Закинуть</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="viewIdeaModal">
+        <div class="modal-header">
+            <div class="modal-title">
+                <img src="https://img.icons8.com/?size=100&id=KXtAS0MR3VBG&format=png&color=000000" 
+                     class="modal-title-icon">
+                <span id="viewModalTitle"></span>
+            </div>
+            <div class="modal-close" onclick="closeViewIdeaModal()"></div>
+        </div>
+        <div class="view-modal-content">
+            <div class="view-modal-text" id="viewModalText"></div>
         </div>
     </div>
 
@@ -255,7 +283,7 @@
             pagination.innerHTML = '';
             
             if (ideas.length === 0) {
-                ideasTrack.innerHTML = '<div class="idea-card" style="display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.5);">Идей пока нет…</div>';
+                ideasTrack.innerHTML = '<div class="idea-card" style="display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.5);padding:40px 16px;">Идей пока нет…</div>';
                 return;
             }
             
@@ -266,14 +294,15 @@
                 const isAdmin = currentUser && ADMIN_IDS.includes(currentUser.id.toString());
                 const userId = currentUser?.id?.toString();
                 const userLiked = idea.reactions?.like?.users?.includes(userId);
-                const displayContent = idea.content;
+                const needsFullView = idea.content.length > 100;
+                const displayContent = needsFullView ? idea.content.substring(0, 100) + '...' : idea.content;
                 
                 card.innerHTML = `
                     <div class="idea-header">
                         <div class="idea-title">${idea.title}</div>
                         ${isAdmin ? `<div class="delete-icon" onclick="deleteIdea('${idea.id}')"></div>` : ''}
                     </div>
-                    <div class="idea-content">${displayContent}</div>
+                    <div class="idea-content ${needsFullView ? 'truncated' : ''}">${displayContent}</div>
                     <div class="idea-footer">
                         <div class="reaction-container">
                             <button class="reaction-btn ${userLiked ? 'active' : ''}" 
@@ -283,6 +312,7 @@
                                 <span class="reaction-count">${idea.reactions?.like?.count || 0}</span>
                             </button>
                         </div>
+                        ${needsFullView ? `<button class="read-full-btn" onclick="viewFullIdea('${idea.id}')">Читать целиком</button>` : ''}
                     </div>
                 `;
                 
@@ -348,6 +378,21 @@
             } catch(e) {
                 console.error('Error toggling reaction:', e);
             }
+        }
+
+        function viewFullIdea(ideaId) {
+            tg.HapticFeedback.impactOccurred('light');
+            const idea = ideas.find(i => i.id === ideaId);
+            if (!idea) return;
+            
+            document.getElementById('viewModalTitle').textContent = idea.title;
+            document.getElementById('viewModalText').textContent = idea.content;
+            document.getElementById('viewIdeaModal').classList.add('active');
+        }
+
+        function closeViewIdeaModal() {
+            tg.HapticFeedback.impactOccurred('light');
+            document.getElementById('viewIdeaModal').classList.remove('active');
         }
 
         async function deleteIdea(ideaId) {
