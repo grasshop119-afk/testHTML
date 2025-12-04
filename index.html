@@ -5,10 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Chibeki</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Firebase SDK v9 compat -->
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
     <style>
         * {
             -webkit-touch-callout: none;
@@ -95,21 +91,10 @@
             overflow-y: auto;
             -ms-overflow-style: none;
             scrollbar-width: none;
+            padding: 16px;
         }
 
         .main-content::-webkit-scrollbar {
-            display: none;
-        }
-
-        .main-screen {
-            padding: 16px;
-            overflow-y: auto;
-            height: 100%;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        .main-screen::-webkit-scrollbar {
             display: none;
         }
 
@@ -125,84 +110,17 @@
             color: #FFFFFF;
         }
 
-        .collection-card {
-            background: #2A2B2C;
-            border-radius: 14px;
-            padding: 16px;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            transition: background-color 0.15s ease;
-        }
-
-        .collection-card:active {
-            background: #353637;
-        }
-
-        .collection-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 10px;
-            background: #353637;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 12px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .collection-error {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 12px;
-            text-align: center;
-            width: 100%;
-            padding: 0 4px;
-        }
-
-        .collection-icon img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .collection-info {
-            flex: 1;
-        }
-
-        .collection-name {
-            font-size: 16px;
-            font-weight: 500;
-            margin-bottom: 2px;
-            color: #FFFFFF;
-        }
-
-        .collection-stats {
-            font-size: 14px;
-            opacity: 0.7;
-            color: rgba(255,255,255,0.7);
-        }
-
-        .collection-badge {
-            background: var(--accent-color);
-            color: #FFFFFF;
-            padding: 6px 12px;
-            border-radius: 12px;
-            font-size: 13px;
-            font-weight: 600;
-        }
-
         .ideas-container {
-            overflow-x: auto;
             display: flex;
             gap: 12px;
-            padding: 0 0 16px 0;
+            width: 100%;
+            overflow-x: auto;
+            scroll-behavior: smooth;
             scrollbar-width: none;
             -ms-overflow-style: none;
+            padding-bottom: 8px;
+            position: relative;
+            touch-action: pan-x;
         }
 
         .ideas-container::-webkit-scrollbar {
@@ -213,14 +131,12 @@
             border: 1.5px solid #2A2B2C;
             border-radius: 14px;
             padding: 16px;
-            min-width: 320px;
-            max-width: 320px;
-            height: 200px;
-            position: relative;
+            width: 100%;
+            min-width: 100%;
+            flex-shrink: 0;
             background: transparent;
             display: flex;
             flex-direction: column;
-            flex-shrink: 0;
         }
 
         .idea-header {
@@ -235,26 +151,6 @@
             font-weight: 600;
             color: #FFFFFF;
             flex: 1;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .delete-icon {
-            width: 18px;
-            height: 18px;
-            margin-left: 8px;
-            opacity: 0.7;
-            cursor: pointer;
-            -webkit-mask: url('https://img.icons8.com/?size=100&id=IY5fIbHO723h&format=png&color=000000');
-            mask: url('https://img.icons8.com/?size=100&id=IY5fIbHO723h&format=png&color=000000');
-            -webkit-mask-size: contain;
-            mask-size: contain;
-            background-color: #ff453a;
-        }
-
-        .delete-icon:active {
-            opacity: 1;
         }
 
         .idea-content {
@@ -262,44 +158,36 @@
             color: rgba(255, 255, 255, 0.7);
             line-height: 1.4;
             flex: 1;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .idea-content.truncated::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 50px;
-            height: 20px;
-            background: linear-gradient(90deg, transparent, #1F2021 70%);
+            margin-bottom: 16px;
         }
 
         .idea-footer {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            margin-top: 12px;
+            margin-top: auto;
         }
 
         .reaction-container {
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
         }
 
         .reaction-btn {
             background: #2A2B2C;
             border-radius: 19px;
-            padding: 6px 12px;
+            padding: 8px 16px;
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
             cursor: pointer;
             border: none;
             font-family: inherit;
-            transition: all 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            transform-origin: center;
         }
 
         .reaction-btn.active {
@@ -311,30 +199,41 @@
             font-weight: 600;
         }
 
+        .reaction-btn.animating {
+            animation: pulseEffect 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+
+        @keyframes pulseEffect {
+            0% {
+                transform: scale(1);
+            }
+            30% {
+                transform: scale(1.5);
+            }
+            50% {
+                transform: scale(1.5);
+            }
+            70% {
+                transform: scale(0.95);
+            }
+            85% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
         .reaction-gif {
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             object-fit: contain;
         }
 
         .reaction-count {
-            font-size: 14px;
+            font-size: 15px;
             color: rgba(255, 255, 255, 0.7);
-        }
-
-        .view-full-btn {
-            background: transparent;
-            border: none;
-            color: var(--accent-color);
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            padding: 4px 8px;
-            opacity: 0.8;
-        }
-
-        .view-full-btn:active {
-            opacity: 1;
+            transition: all 0.3s ease;
         }
 
         .add-idea-btn {
@@ -369,11 +268,11 @@
             text-align: center;
             color: rgba(255, 255, 255, 0.5);
             font-size: 14px;
-            padding: 20px 0;
+            padding: 40px 20px;
             margin-top: 8px;
         }
 
-        /* Модальное окно для добавления/просмотра идеи */
+        /* Модальное окно для добавления идеи */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -451,26 +350,6 @@
             overflow-y: auto;
         }
 
-        .view-modal-content {
-            padding: 20px 16px;
-            color: white;
-        }
-
-        .view-modal-title {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .view-modal-text {
-            font-size: 16px;
-            line-height: 1.5;
-            color: rgba(255, 255, 255, 0.9);
-        }
-
         .input-group {
             margin-bottom: 24px;
         }
@@ -541,146 +420,26 @@
             opacity: 0.8;
         }
 
-        .collection-screen {
-            padding: 16px;
-            padding-top: 68px;
-            overflow-y: auto;
-            height: 100vh;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        .collection-screen::-webkit-scrollbar {
-            display: none;
-        }
-
-        .chibi-grid {
-            display: grid;
-            gap: 12px;
-            transition: all 0.3s ease;
-        }
-
-        .grid-3 {
-            grid-template-columns: repeat(3, 1fr);
-        }
-
-        .grid-2 {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-        .grid-1 {
-            grid-template-columns: 1fr;
-        }
-
-        .chibi-card {
-            background: #2A2B2C;
-            border-radius: 16px;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            transition: all 0.15s ease;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .chibi-card:active {
-            transform: scale(0.98);
-            background: #353637;
-        }
-
-        .chibi-image-container {
-            position: relative;
-            width: 100%;
-            overflow: hidden;
-        }
-
-        .grid-3 .chibi-image-container {
-            aspect-ratio: 1/1;
-        }
-
-        .grid-2 .chibi-image-container {
-            aspect-ratio: 1/1.1;
-        }
-
-        .grid-1 .chibi-image-container {
-            aspect-ratio: 1/1.2;
-        }
-
-        .chibi-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-
-        .chibi-info {
-            padding: 12px 8px 8px;
-            position: relative;
-        }
-
-        .chibi-name {
-            font-size: 13px;
-            font-weight: 600;
-            color: #FFFFFF;
+        .swipe-indicator {
             text-align: center;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            line-height: 1.2;
-        }
-
-        .locked-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(31, 32, 33, 0.92);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            backdrop-filter: blur(8px);
-        }
-
-        .locked-icon {
-            width: 24px;
-            height: 24px;
-            margin-bottom: 8px;
-            opacity: 0.7;
-        }
-
-        .locked-text {
+            color: rgba(255, 255, 255, 0.3);
             font-size: 12px;
-            color: #8E8E93;
-            font-weight: 500;
-        }
-
-        .fullscreen-viewer {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            margin-top: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
+            gap: 6px;
         }
 
-        .fullscreen-viewer.active {
-            opacity: 1;
-            pointer-events: all;
+        .swipe-arrow {
+            font-size: 16px;
+            opacity: 0.5;
+            animation: swipeBounce 2s infinite;
         }
 
-        .fullscreen-image {
-            max-width: 90%;
-            max-height: 90%;
-            object-fit: contain;
+        @keyframes swipeBounce {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(5px); }
         }
 
         .preloader {
@@ -716,6 +475,10 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        :root {
+            --accent-color: #007AFF;
+        }
     </style>
 </head>
 <body>
@@ -732,64 +495,19 @@
     </div>
 
     <div class="main-content">
-        <div class="screen main-screen" id="homeScreen">
-            <div class="section">
-                <div class="section-title">Коллекции</div>
-                
-                <div class="collection-card" onclick="openCollection('common')">
-                    <div class="collection-icon" id="commonIcon">
-                        <div class="collection-error">Ошибка подключения</div>
-                    </div>
-                    <div class="collection-info">
-                        <div class="collection-name">Обычные чибики</div>
-                        <div class="collection-stats" id="commonStats">Твоя шедевральная коллекция</div>
-                    </div>
-                    <div class="collection-badge" id="commonBadge">0%</div>
-                </div>
-                
-                <div class="collection-card" onclick="openCollection('secret')" id="secretCard">
-                    <div class="collection-icon" id="secretIcon">
-                        <div class="collection-error">Ошибка подключения</div>
-                    </div>
-                    <div class="collection-info">
-                        <div class="collection-name">Секретные чибики</div>
-                        <div class="collection-stats" id="secretStats">Абсолютно секретно</div>
-                    </div>
-                    <div class="collection-badge" id="secretBadge">NEW</div>
-                </div>
-                
-                <div class="collection-card" onclick="openCollection('prize')" id="prizeCard">
-                    <div class="collection-icon" id="prizeIcon">
-                        <div class="collection-error">Ошибка подключения</div>
-                    </div>
-                    <div class="collection-info">
-                        <div class="collection-name">Призовые чибики</div>
-                        <div class="collection-stats" id="prizeStats">Твои чибики с розыгрышей</div>
-                    </div>
-                </div>
+        <div class="section">
+            <div class="section-title">Идеи</div>
+            <div class="ideas-container" id="ideasContainer">
+                <!-- Идеи будут добавлены здесь -->
             </div>
-
-            <div class="section">
-                <div class="section-title">Идеи</div>
-                <div class="ideas-container" id="ideasContainer">
-                    <!-- Идеи будут добавлены здесь -->
-                </div>
-                <div id="addIdeaBtnContainer">
-                    <!-- Кнопка добавить идею будет здесь -->
-                </div>
+            <div class="swipe-indicator">
+                <span class="swipe-arrow">→</span>
+                Свайп для навигации
+                <span class="swipe-arrow">←</span>
             </div>
-        </div>
-
-        <div class="screen collection-screen hidden" id="commonCollectionScreen">
-            <div class="chibi-grid grid-3" id="commonGrid"></div>
-        </div>
-
-        <div class="screen collection-screen hidden" id="secretCollectionScreen">
-            <div class="chibi-grid grid-3" id="secretGrid"></div>
-        </div>
-
-        <div class="screen collection-screen hidden" id="prizeCollectionScreen">
-            <div class="chibi-grid grid-3" id="prizeGrid"></div>
+            <div id="addIdeaBtnContainer">
+                <!-- Кнопка добавить идею будет здесь -->
+            </div>
         </div>
     </div>
 
@@ -829,67 +547,45 @@
         </div>
     </div>
 
-    <!-- Модальное окно просмотра идеи -->
-    <div class="modal-overlay" id="viewIdeaModal">
-        <div class="modal-header">
-            <div class="modal-title">
-                <img src="https://img.icons8.com/?size=100&id=KXtAS0MR3VBG&format=png&color=000000" 
-                     alt="Иконка" 
-                     class="modal-title-icon">
-                <span id="viewModalTitle">Заголовок</span>
-            </div>
-            <div class="modal-close" onclick="closeViewIdeaModal()"></div>
-        </div>
-        <div class="modal-divider"></div>
-        <div class="view-modal-content">
-            <div class="view-modal-text" id="viewModalText">
-                Содержимое идеи
-            </div>
-        </div>
-    </div>
-
-    <div class="fullscreen-viewer" id="fullscreenViewer" onclick="closeFullscreen()">
-        <img src="" alt="" class="fullscreen-image" id="fullscreenImage">
-    </div>
-
     <script>
         const tg = window.Telegram.WebApp;
         
-        // 🔒 БЕЗОПАСНАЯ КОНФИГУРАЦИЯ FIREBASE
-        // ⚠️ ВАЖНО: Создайте СВОЙ проект Firebase и замените эти данные!
-        const firebaseConfig = {
-            apiKey: "AIzaSyDrvqEb5GMrWaCLSd3aHEdOQIDA321v_BA",
-            authDomain: "chibeki-ideas.firebaseapp.com",
-            projectId: "chibeki-ideas",
-            storageBucket: "chibeki-ideas.firebasestorage.app",
-            messagingSenderId: "31211023786",
-            appId: "1:31211023786:web:35343c74dbf73a50f6cfd3"
-        };
-
-        // 🔐 АДМИНИСТРАТОРЫ (Telegram ID)
-        const ADMIN_USERNAMES = ['ya_admin7', 'tmkazavr'];
+        let ideas = [
+            {
+                id: 1,
+                title: "Новый вид чибиков",
+                content: "Предлагаю добавить чибиков в костюмах разных профессий: врачи, пожарные, космонавты!",
+                reactions: {
+                    like: { count: 5, users: [] },
+                    event1: { count: 2, users: [] },
+                    event2: { count: 1, users: [] }
+                }
+            },
+            {
+                id: 2,
+                title: "Сезонные ивенты",
+                content: "Можно делать тематические события к праздникам: хэллоуин, новый год, день рождения проекта.",
+                reactions: {
+                    like: { count: 8, users: [] },
+                    event1: { count: 3, users: [] }
+                }
+            },
+            {
+                id: 3,
+                title: "Обмен чибиками",
+                content: "Система трейдинга, чтобы можно было меняться дубликатами с друзьями.",
+                reactions: {
+                    like: { count: 12, users: [] },
+                    event2: { count: 4, users: [] }
+                }
+            }
+        ];
         
-        // Инициализируем Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        
-        let userData = {
-            common: { collected: [], all: [] },
-            secret: { collected: [], all: [] },
-            prize: { collected: [], all: [] }
-        };
-        
-        let ideas = [];
-        let currentScreen = 'home';
         let currentUser = null;
-        let unsubscribeIdeas = null;
-
-        const isEventPeriod = () => {
-            const now = new Date();
-            const month = now.getMonth() + 1;
-            const day = now.getDate();
-            return month === 12 && day >= 1 && day <= 31;
-        };
+        let currentIdeaIndex = 0;
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const MIN_SWIPE_DISTANCE = 50;
 
         function initTelegramApp() {
             tg.ready();
@@ -897,14 +593,12 @@
             tg.setHeaderColor('#1F2021');
             tg.setBackgroundColor('#1F2021');
             
-            tg.BackButton.onClick(goBack);
-            
             currentUser = tg.initDataUnsafe?.user;
             
             updateAccentColor();
             showPreloader();
-            loadUserData();
-            loadIdeas();
+            renderIdeas();
+            setupSwipe();
         }
 
         function updateAccentColor() {
@@ -924,166 +618,81 @@
             }, 800 + Math.random() * 500);
         }
 
-        function goBack() {
-            tg.HapticFeedback.impactOccurred('light');
+        function setupSwipe() {
+            const container = document.getElementById('ideasContainer');
             
-            if (currentScreen === 'common' || currentScreen === 'secret' || currentScreen === 'prize') {
-                hideAllScreens();
-                document.getElementById('homeScreen').classList.remove('hidden');
-                currentScreen = 'home';
-                tg.BackButton.hide();
-            }
-        }
-
-        function hideAllScreens() {
-            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-        }
-
-        function openCollection(type) {
-            tg.HapticFeedback.impactOccurred('light');
+            container.addEventListener('touchstart', (e) => {
+                touchStartX = e.touches[0].clientX;
+            }, { passive: true });
             
-            hideAllScreens();
-            document.getElementById(`${type}CollectionScreen`).classList.remove('hidden');
-            currentScreen = type;
+            container.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].clientX;
+                handleSwipe();
+            }, { passive: true });
             
-            tg.BackButton.show();
-            renderCollection(type);
+            // Для мыши
+            container.addEventListener('mousedown', (e) => {
+                touchStartX = e.clientX;
+                document.addEventListener('mouseup', handleMouseUp);
+            });
         }
 
-        function openFullscreen(imageSrc) {
-            const viewer = document.getElementById('fullscreenViewer');
-            const image = document.getElementById('fullscreenImage');
+        function handleMouseUp(e) {
+            touchEndX = e.clientX;
+            handleSwipe();
+            document.removeEventListener('mouseup', handleMouseUp);
+        }
+
+        function handleSwipe() {
+            const swipeDistance = touchEndX - touchStartX;
             
-            image.src = imageSrc;
-            viewer.classList.add('active');
-        }
-
-        function closeFullscreen() {
-            const viewer = document.getElementById('fullscreenViewer');
-            viewer.classList.remove('active');
-        }
-
-        function openChannel() {
-            tg.HapticFeedback.impactOccurred('light');
-            tg.openTelegramLink('https://t.me/chibeki_official');
-        }
-
-        function openRequestBot() {
-            tg.HapticFeedback.impactOccurred('light');
-            tg.openTelegramLink('https://t.me/request_chibeki_bot');
-        }
-
-        function loadIdeas() {
-            try {
-                unsubscribeIdeas = db.collection('ideas')
-                    .orderBy('timestamp', 'desc')
-                    .onSnapshot((snapshot) => {
-                        ideas = [];
-                        snapshot.forEach((doc) => {
-                            const idea = doc.data();
-                            idea.id = doc.id;
-                            ideas.push(idea);
-                        });
-                        renderIdeas();
-                    }, (error) => {
-                        console.error('Error loading ideas:', error);
-                        handleFirebaseError(error);
-                    });
-            } catch (error) {
-                console.error('Error loading ideas:', error);
-                handleFirebaseError(error);
-            }
-        }
-
-        function handleFirebaseError(error) {
-            if (error.code === 'permission-denied') {
-                tg.showPopup({
-                    title: 'Ошибка доступа',
-                    message: 'Нет разрешения на чтение идей. Проверьте правила Firebase.',
-                    buttons: [{ type: 'ok', text: 'Понятно' }]
-                });
+            if (Math.abs(swipeDistance) < MIN_SWIPE_DISTANCE) return;
+            
+            if (swipeDistance > 0) {
+                // Свайп вправо - предыдущая идея
+                navigateIdeas(-1);
             } else {
-                tg.showPopup({
-                    title: 'Ошибка Firebase',
-                    message: 'Не удалось загрузить идеи',
-                    buttons: [{ type: 'ok', text: 'Понятно' }]
-                });
+                // Свайп влево - следующая идея
+                navigateIdeas(1);
             }
+        }
+
+        function navigateIdeas(direction) {
+            if (ideas.length <= 1) return;
+            
+            currentIdeaIndex += direction;
+            
+            if (currentIdeaIndex < 0) {
+                currentIdeaIndex = ideas.length - 1;
+            } else if (currentIdeaIndex >= ideas.length) {
+                currentIdeaIndex = 0;
+            }
+            
+            const container = document.getElementById('ideasContainer');
+            container.style.transform = `translateX(${direction > 0 ? '20px' : '-20px'})`;
+            container.style.opacity = '0.5';
+            
+            setTimeout(() => {
+                container.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+                container.style.transform = 'translateX(0)';
+                container.style.opacity = '1';
+                
+                renderCurrentIdea();
+                
+                setTimeout(() => {
+                    container.style.transition = '';
+                }, 300);
+            }, 50);
         }
 
         function renderIdeas() {
-            const ideasContainer = document.getElementById('ideasContainer');
             const addIdeaBtnContainer = document.getElementById('addIdeaBtnContainer');
             
-            ideasContainer.innerHTML = '';
-            
             if (ideas.length === 0) {
-                ideasContainer.innerHTML = '<div class="no-ideas-text">Идей пока нет…</div>';
+                document.getElementById('ideasContainer').innerHTML = 
+                    '<div class="no-ideas-text">Идей пока нет…</div>';
             } else {
-                ideas.forEach((idea, index) => {
-                    const ideaCard = document.createElement('div');
-                    ideaCard.className = 'idea-card';
-                    
-                    const isAdmin = currentUser && ADMIN_USERNAMES.includes(currentUser.username);
-                    
-                    const needsFullView = idea.content.length > 150;
-                    const displayContent = needsFullView ? 
-                        idea.content.substring(0, 150) + '...' : 
-                        idea.content;
-                    
-                    const userId = currentUser?.id?.toString();
-                    const userReaction = idea.reactions ? 
-                        Object.keys(idea.reactions).find(reaction => 
-                            idea.reactions[reaction].users && 
-                            idea.reactions[reaction].users.includes(userId)
-                        ) : null;
-                    
-                    const isLiked = userReaction === 'like';
-                    const isReacted1 = userReaction === 'event1';
-                    const isReacted2 = userReaction === 'event2';
-                    
-                    ideaCard.innerHTML = `
-                        <div class="idea-header">
-                            <div class="idea-title">${idea.title}</div>
-                            ${isAdmin ? `
-                                <div class="delete-icon" onclick="showAdminDeleteAlert('${idea.id}')" title="Удалить идею"></div>
-                            ` : ''}
-                        </div>
-                        <div class="idea-content ${needsFullView ? 'truncated' : ''}">
-                            ${displayContent}
-                        </div>
-                        <div class="idea-footer">
-                            <div class="reaction-container">
-                                <button class="reaction-btn ${isLiked ? 'active' : ''}" onclick="toggleReaction('${idea.id}', 'like')">
-                                    <img src="https://stickers.fullyst.com/b9f1c4ec-ff51-507f-a011-b3c035880c92/full/AgADyQcAAuN4BAAB.webp" 
-                                         class="reaction-gif" 
-                                         alt="❤️">
-                                    <span class="reaction-count">${idea.reactions?.like?.count || 0}</span>
-                                </button>
-                                ${isEventPeriod() ? `
-                                    <button class="reaction-btn ${isReacted1 ? 'active' : ''}" onclick="toggleReaction('${idea.id}', 'event1')">
-                                        <img src="https://stickers.fullyst.com/b9f1c4ec-ff51-507f-a011-b3c035880c92/full/AgADzgEAAkGPGEQ.webp" 
-                                             class="reaction-gif" 
-                                             alt="🎄">
-                                        <span class="reaction-count">${idea.reactions?.event1?.count || 0}</span>
-                                    </button>
-                                    <button class="reaction-btn ${isReacted2 ? 'active' : ''}" onclick="toggleReaction('${idea.id}', 'event2')">
-                                        <img src="https://stickers.fullyst.com/b9f1c4ec-ff51-507f-a011-b3c035880c92/full/AgAD_QIAAgapIEQ.webp" 
-                                             class="reaction-gif" 
-                                             alt="🎅">
-                                        <span class="reaction-count">${idea.reactions?.event2?.count || 0}</span>
-                                    </button>
-                                ` : ''}
-                            </div>
-                            ${needsFullView ? `
-                                <button class="view-full-btn" onclick="viewFullIdea(${index})">
-                                    Полностью
-                                </button>
-                            ` : ''}
-                        </div>
-                    `;
-                    ideasContainer.appendChild(ideaCard);
-                });
+                renderCurrentIdea();
             }
             
             addIdeaBtnContainer.innerHTML = `
@@ -1096,7 +705,77 @@
             `;
         }
 
-        async function toggleReaction(ideaId, reactionType) {
+        function renderCurrentIdea() {
+            const ideasContainer = document.getElementById('ideasContainer');
+            const idea = ideas[currentIdeaIndex];
+            
+            if (!idea) return;
+            
+            const userId = currentUser?.id?.toString();
+            const userReaction = idea.reactions ? 
+                Object.keys(idea.reactions).find(reaction => 
+                    idea.reactions[reaction].users && 
+                    idea.reactions[reaction].users.includes(userId)
+                ) : null;
+            
+            const isLiked = userReaction === 'like';
+            const isReacted1 = userReaction === 'event1';
+            const isReacted2 = userReaction === 'event2';
+            const isEventPeriod = checkEventPeriod();
+            
+            ideasContainer.innerHTML = `
+                <div class="idea-card">
+                    <div class="idea-header">
+                        <div class="idea-title">${idea.title}</div>
+                    </div>
+                    <div class="idea-content">
+                        ${idea.content}
+                    </div>
+                    <div class="idea-footer">
+                        <div class="reaction-container">
+                            <button class="reaction-btn ${isLiked ? 'active' : ''}" 
+                                    onclick="animateReaction(this, 'like')"
+                                    data-idea-id="${idea.id}"
+                                    data-reaction-type="like">
+                                <img src="https://stickers.fullyst.com/b9f1c4ec-ff51-507f-a011-b3c035880c92/full/AgADyQcAAuN4BAAB.webp" 
+                                     class="reaction-gif" 
+                                     alt="❤️">
+                                <span class="reaction-count">${idea.reactions?.like?.count || 0}</span>
+                            </button>
+                            ${isEventPeriod ? `
+                                <button class="reaction-btn ${isReacted1 ? 'active' : ''}" 
+                                        onclick="animateReaction(this, 'event1')"
+                                        data-idea-id="${idea.id}"
+                                        data-reaction-type="event1">
+                                    <img src="https://stickers.fullyst.com/b9f1c4ec-ff51-507f-a011-b3c035880c92/full/AgADzgEAAkGPGEQ.webp" 
+                                         class="reaction-gif" 
+                                         alt="🎄">
+                                    <span class="reaction-count">${idea.reactions?.event1?.count || 0}</span>
+                                </button>
+                                <button class="reaction-btn ${isReacted2 ? 'active' : ''}" 
+                                        onclick="animateReaction(this, 'event2')"
+                                        data-idea-id="${idea.id}"
+                                        data-reaction-type="event2">
+                                    <img src="https://stickers.fullyst.com/b9f1c4ec-ff51-507f-a011-b3c035880c92/full/AgAD_QIAAgapIEQ.webp" 
+                                         class="reaction-gif" 
+                                         alt="🎅">
+                                    <span class="reaction-count">${idea.reactions?.event2?.count || 0}</span>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function checkEventPeriod() {
+            const now = new Date();
+            const month = now.getMonth() + 1;
+            const day = now.getDate();
+            return month === 12 && day >= 1 && day <= 31;
+        }
+
+        function animateReaction(button, reactionType) {
             if (!currentUser) {
                 tg.showPopup({
                     title: 'Ошибка',
@@ -1106,16 +785,18 @@
                 return;
             }
             
-            try {
-                tg.HapticFeedback.impactOccurred('light');
+            tg.HapticFeedback.impactOccurred('light');
+            
+            button.classList.add('animating');
+            
+            setTimeout(() => {
+                button.classList.remove('animating');
                 
-                const ideaRef = db.collection('ideas').doc(ideaId);
-                const userId = currentUser.id.toString();
+                const ideaId = parseInt(button.dataset.ideaId);
+                const idea = ideas.find(i => i.id === ideaId);
                 
-                const doc = await ideaRef.get();
-                if (!doc.exists) return;
+                if (!idea) return;
                 
-                const idea = doc.data();
                 if (!idea.reactions) {
                     idea.reactions = {};
                 }
@@ -1128,6 +809,7 @@
                 }
                 
                 const reaction = idea.reactions[reactionType];
+                const userId = currentUser.id.toString();
                 const userIndex = reaction.users.indexOf(userId);
                 
                 Object.keys(idea.reactions).forEach(key => {
@@ -1148,79 +830,32 @@
                 if (userIndex === -1) {
                     reaction.users.push(userId);
                     reaction.count++;
+                    button.classList.add('active');
                 } else {
                     reaction.users.splice(userIndex, 1);
                     reaction.count = Math.max(0, reaction.count - 1);
+                    button.classList.remove('active');
                     
                     if (reaction.count === 0) {
                         delete idea.reactions[reactionType];
                     }
                 }
                 
-                await ideaRef.update({
-                    reactions: idea.reactions
-                });
-                
-            } catch (error) {
-                console.error('Error toggling reaction:', error);
-                handleFirebaseError(error);
-            }
-        }
-
-        function showAdminDeleteAlert(ideaId) {
-            const isAdmin = currentUser && ADMIN_USERNAMES.includes(currentUser.username);
-            
-            if (!isAdmin) {
-                tg.showPopup({
-                    title: 'Доступ запрещен',
-                    message: 'Только администраторы могут удалять идеи',
-                    buttons: [{ type: 'ok', text: 'Понятно' }]
-                });
-                return;
-            }
-            
-            tg.showPopup({
-                title: 'Удалить идею?',
-                message: 'Это действие нельзя отменить. Идея будет удалена для всех пользователей.',
-                buttons: [
-                    {
-                        type: 'destructive',
-                        text: 'Удалить',
-                        id: 'delete'
-                    },
-                    {
-                        type: 'cancel',
-                        text: 'Отмена',
-                        id: 'cancel'
-                    }
-                ]
-            }, async (buttonId) => {
-                if (buttonId === 'delete') {
-                    try {
-                        await db.collection('ideas').doc(ideaId).delete();
-                        tg.showPopup({
-                            title: 'Успешно',
-                            message: 'Идея удалена',
-                            buttons: [{ type: 'ok', text: 'Ок' }]
-                        });
-                    } catch (error) {
-                        console.error('Error deleting idea:', error);
-                        handleFirebaseError(error);
+                const countElement = button.querySelector('.reaction-count');
+                if (countElement) {
+                    countElement.textContent = reaction.count;
+                    if (button.classList.contains('active')) {
+                        countElement.style.color = 'white';
+                        countElement.style.fontWeight = '600';
+                    } else {
+                        countElement.style.color = 'rgba(255, 255, 255, 0.7)';
+                        countElement.style.fontWeight = 'normal';
                     }
                 }
-            });
-        }
-
-        function viewFullIdea(index) {
-            tg.HapticFeedback.impactOccurred('light');
-            const idea = ideas[index];
-            if (!idea) return;
-            
-            document.getElementById('viewModalTitle').textContent = idea.title;
-            document.getElementById('viewModalText').textContent = idea.content;
-            
-            const modal = document.getElementById('viewIdeaModal');
-            modal.classList.add('active');
+                
+                renderCurrentIdea();
+                
+            }, 800);
         }
 
         function openAddIdeaModal() {
@@ -1253,12 +888,6 @@
             modal.classList.remove('active');
         }
 
-        function closeViewIdeaModal() {
-            tg.HapticFeedback.impactOccurred('light');
-            const modal = document.getElementById('viewIdeaModal');
-            modal.classList.remove('active');
-        }
-
         function updateCharCounter() {
             const titleInput = document.getElementById('ideaTitle');
             const counter = document.getElementById('titleCharCounter');
@@ -1275,7 +904,7 @@
             }
         }
 
-        async function submitIdea() {
+        function submitIdea() {
             tg.HapticFeedback.impactOccurred('light');
             
             const title = document.getElementById('ideaTitle').value.trim();
@@ -1299,187 +928,36 @@
                 return;
             }
             
-            try {
-                const newIdea = {
-                    title: title,
-                    content: content,
-                    author: currentUser ? currentUser.first_name : 'Аноним',
-                    username: currentUser ? currentUser.username : null,
-                    userId: currentUser ? currentUser.id.toString() : null,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    // Не добавляем reactions при создании - это нарушит правила
-                };
-                
-                await db.collection('ideas').add(newIdea);
-                closeAddIdeaModal();
-                
-                tg.showPopup({
-                    title: 'Успешно!',
-                    message: 'Идея добавлена',
-                    buttons: [{ type: 'ok', text: 'Круто' }]
-                });
-                
-            } catch (error) {
-                console.error('Error adding idea:', error);
-                handleFirebaseError(error);
-            }
-        }
-
-        async function loadUserData() {
-            try {
-                await loadChibiLists();
-                
-                if (currentUser) {
-                    await loadUserCollection(currentUser.id);
-                }
-                
-                updateMainScreen();
-                
-            } catch (error) {
-                console.error('Error loading data:', error);
-            }
-        }
-
-        async function loadChibiLists() {
-            try {
-                userData.common.all = ['Chibi 1', 'Chibi 2', 'Chibi 3', 'Chibi 4', 'Chibi 5', 'Chibi 6', 'Chibi 7', 'Chibi 8', 'Chibi 9', 'Chibi 10', 'Chibi 11', 'Chibi 12'];
-                userData.secret.all = ['Secret 1', 'Secret 2', 'Secret 3', 'Secret 4'];
-                userData.prize.all = ['Prize 1', 'Prize 2', 'Prize 3'];
-                
-            } catch (error) {
-                console.error('Error loading chibi lists:', error);
-            }
-        }
-
-        async function loadUserCollection(telegramId) {
-            try {
-                const response = await fetch('https://chibi-bot-3d4x.onrender.com/get_user_collection', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ telegram_id: telegramId })
-                });
-
-                if (response.ok) {
-                    const collection = await response.json();
-                    
-                    userData.common.collected = collection.common || [];
-                    userData.secret.collected = collection.secret || [];
-                    userData.prize.collected = collection.prize || [];
-                    
-                } else {
-                    throw new Error('Failed to load collection');
-                }
-            } catch (error) {
-                console.error('Error loading user collection:', error);
-            }
-        }
-
-        function updateMainScreen() {
-            updateCollectionIcon('common');
-            updateCollectionIcon('secret');
-            updateCollectionIcon('prize');
+            const newIdea = {
+                id: Date.now(),
+                title: title,
+                content: content,
+                author: currentUser ? currentUser.first_name : 'Аноним',
+                timestamp: new Date().toISOString(),
+                reactions: {}
+            };
             
-            const commonStats = document.getElementById('commonStats');
-            const commonBadge = document.getElementById('commonBadge');
-            const commonProgress = userData.common.all.length > 0 ? 
-                Math.round((userData.common.collected.length / userData.common.all.length) * 100) : 0;
+            ideas.unshift(newIdea);
+            currentIdeaIndex = 0;
+            renderIdeas();
+            closeAddIdeaModal();
             
-            commonStats.textContent = `Твоя шедевральная коллекция`;
-            commonBadge.textContent = `${commonProgress}%`;
-            
-            const secretCard = document.getElementById('secretCard');
-            const prizeCard = document.getElementById('prizeCard');
-            const secretBadge = document.getElementById('secretBadge');
-            
-            if (userData.secret.collected.length > 0) {
-                secretCard.style.display = 'flex';
-                secretBadge.textContent = 'NEW';
-            } else {
-                secretCard.style.display = 'none';
-            }
-            
-            if (userData.prize.collected.length > 0) {
-                prizeCard.style.display = 'flex';
-            } else {
-                prizeCard.style.display = 'none';
-            }
-        }
-
-        function updateCollectionIcon(type) {
-            const iconElement = document.getElementById(`${type}Icon`);
-            const collected = userData[type].collected;
-            
-            if (collected.length > 0) {
-                const randomChibi = collected[Math.floor(Math.random() * collected.length)];
-                const imageUrl = `https://raw.githubusercontent.com/therootishere00-ux/Chibi-bot/main/chibis/${type}/${randomChibi.replace(/ /g, '_')}.png`;
-                
-                const img = new Image();
-                img.src = imageUrl;
-                img.onload = function() {
-                    iconElement.innerHTML = `<img src="${imageUrl}" alt="${type}">`;
-                };
-                img.onerror = function() {
-                    // Оставляем текст ошибки
-                };
-            }
-        }
-
-        function renderCollection(type) {
-            const grid = document.getElementById(`${type}Grid`);
-            const data = userData[type];
-            
-            grid.innerHTML = '';
-            
-            const chibisToShow = (type === 'common') ? data.all : data.collected;
-            
-            chibisToShow.forEach((chibiName) => {
-                const isCollected = data.collected.includes(chibiName);
-                
-                const card = document.createElement('div');
-                card.className = 'chibi-card';
-                card.onclick = () => {
-                    if (isCollected) {
-                        const imageUrl = `https://raw.githubusercontent.com/therootishere00-ux/Chibi-bot/main/chibis/${type}/${chibiName.replace(/ /g, '_')}.png`;
-                        openFullscreen(imageUrl);
-                    }
-                    tg.HapticFeedback.impactOccurred('light');
-                };
-                
-                const imageUrl = `https://raw.githubusercontent.com/therootishere00-ux/Chibi-bot/main/chibis/${type}/${chibiName.replace(/ /g, '_')}.png`;
-                
-                card.innerHTML = `
-                    <div class="chibi-image-container">
-                        <img src="${imageUrl}" alt="${chibiName}" class="chibi-image"
-                             onerror="this.style.display='none'">
-                    </div>
-                    ${isCollected ? `
-                        <div class="chibi-info">
-                            <div class="chibi-name">${chibiName}</div>
-                        </div>
-                    ` : ''}
-                `;
-                
-                if (!isCollected && type === 'common') {
-                    const lockOverlay = document.createElement('div');
-                    lockOverlay.className = 'locked-overlay';
-                    lockOverlay.innerHTML = `
-                        <img src="https://img.icons8.com/?size=100&id=wKLATegpDP1G&format=png&color=000000" alt="Lock" class="locked-icon" style="filter: invert(0.6);">
-                        <div class="locked-text">Заблокировано</div>
-                    `;
-                    card.appendChild(lockOverlay);
-                }
-                
-                grid.appendChild(card);
+            tg.showPopup({
+                title: 'Успешно!',
+                message: 'Идея добавлена',
+                buttons: [{ type: 'ok', text: 'Круто' }]
             });
         }
 
-        window.addEventListener('beforeunload', () => {
-            if (unsubscribeIdeas) {
-                unsubscribeIdeas();
-            }
-        });
+        function openChannel() {
+            tg.HapticFeedback.impactOccurred('light');
+            tg.openTelegramLink('https://t.me/chibeki_official');
+        }
+
+        function openRequestBot() {
+            tg.HapticFeedback.impactOccurred('light');
+            tg.openTelegramLink('https://t.me/request_chibeki_bot');
+        }
 
         document.addEventListener('DOMContentLoaded', initTelegramApp);
     </script>
