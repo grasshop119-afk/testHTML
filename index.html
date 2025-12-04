@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Chibeki</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
     <style>
         * {
             -webkit-touch-callout: none;
             -webkit-user-select: none;
-            -khtml-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
             box-sizing: border-box;
@@ -22,8 +22,7 @@
             padding: 0;
             background: #1F2021;
             color: white;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
         .header {
@@ -57,19 +56,12 @@
             width: 24px;
             height: 24px;
             opacity: 0.9;
-            transition: opacity 0.2s ease;
             cursor: pointer;
             -webkit-mask-size: contain;
             mask-size: contain;
             -webkit-mask-repeat: no-repeat;
             mask-repeat: no-repeat;
-            -webkit-mask-position: center;
-            mask-position: center;
             background-color: var(--accent-color);
-        }
-
-        .header-icon:active {
-            opacity: 0.7;
         }
 
         .header-icon.telegram {
@@ -91,40 +83,34 @@
             overflow-y: auto;
             -ms-overflow-style: none;
             scrollbar-width: none;
-            padding: 16px;
         }
 
         .main-content::-webkit-scrollbar {
             display: none;
         }
 
-        .section {
-            margin-bottom: 24px;
+        .main-screen {
+            padding: 16px;
         }
 
         .section-title {
             font-size: 17px;
             font-weight: 600;
             margin-bottom: 12px;
-            padding: 0 8px;
             color: #FFFFFF;
         }
 
         .ideas-container {
-            display: flex;
-            gap: 12px;
-            width: 100%;
-            overflow-x: auto;
-            scroll-behavior: smooth;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-            padding-bottom: 8px;
             position: relative;
-            touch-action: pan-x;
+            width: 100%;
+            overflow: hidden;
+            border-radius: 14px;
         }
 
-        .ideas-container::-webkit-scrollbar {
-            display: none;
+        .ideas-track {
+            display: flex;
+            transition: transform 0.3s ease;
+            width: 100%;
         }
 
         .idea-card {
@@ -132,9 +118,9 @@
             border-radius: 14px;
             padding: 16px;
             width: 100%;
-            min-width: 100%;
             flex-shrink: 0;
             background: transparent;
+            min-height: 180px;
             display: flex;
             flex-direction: column;
         }
@@ -143,7 +129,7 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .idea-title {
@@ -151,6 +137,23 @@
             font-weight: 600;
             color: #FFFFFF;
             flex: 1;
+        }
+
+        .delete-icon {
+            width: 18px;
+            height: 18px;
+            margin-left: 8px;
+            opacity: 0.7;
+            cursor: pointer;
+            -webkit-mask: url('https://img.icons8.com/?size=100&id=IY5fIbHO723h&format=png&color=000000');
+            mask: url('https://img.icons8.com/?size=100&id=IY5fIbHO723h&format=png&color=000000');
+            -webkit-mask-size: contain;
+            mask-size: contain;
+            background-color: #ff453a;
+        }
+
+        .delete-icon:active {
+            opacity: 1;
         }
 
         .idea-content {
@@ -163,31 +166,27 @@
 
         .idea-footer {
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            margin-top: auto;
         }
 
         .reaction-container {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 12px;
-            width: 100%;
+            gap: 8px;
         }
 
         .reaction-btn {
             background: #2A2B2C;
             border-radius: 19px;
-            padding: 8px 16px;
+            padding: 6px 12px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
             cursor: pointer;
             border: none;
             font-family: inherit;
-            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-            transform-origin: center;
+            transition: all 0.2s ease;
         }
 
         .reaction-btn.active {
@@ -199,281 +198,43 @@
             font-weight: 600;
         }
 
-        .reaction-btn.animating {
-            animation: pulseEffect 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-        }
-
-        @keyframes pulseEffect {
-            0% {
-                transform: scale(1);
-            }
-            30% {
-                transform: scale(1.5);
-            }
-            50% {
-                transform: scale(1.5);
-            }
-            70% {
-                transform: scale(0.95);
-            }
-            85% {
-                transform: scale(1.05);
-            }
-            100% {
-                transform: scale(1);
-            }
-        }
-
         .reaction-gif {
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
             object-fit: contain;
         }
 
         .reaction-count {
-            font-size: 15px;
+            font-size: 14px;
             color: rgba(255, 255, 255, 0.7);
-            transition: all 0.3s ease;
-        }
-
-        .add-idea-btn {
-            background: var(--accent-color);
-            color: white;
-            border: none;
-            border-radius: 14px;
-            padding: 12px;
-            width: 100%;
-            font-size: 16px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            cursor: pointer;
-            margin-top: 8px;
-            transition: opacity 0.2s ease;
-        }
-
-        .add-idea-btn:active {
-            opacity: 0.8;
-        }
-
-        .add-idea-btn-icon {
-            width: 20px;
-            height: 20px;
-            filter: invert(1);
         }
 
         .no-ideas-text {
             text-align: center;
             color: rgba(255, 255, 255, 0.5);
             font-size: 14px;
-            padding: 40px 20px;
-            margin-top: 8px;
+            padding: 40px 0;
+            border: 1.5px solid #2A2B2C;
+            border-radius: 14px;
         }
 
-        /* Модальное окно для добавления идеи */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #1F2021;
-            z-index: 1000;
-            display: none;
-        }
-
-        .modal-overlay.active {
-            display: block;
-        }
-
-        .modal-header {
-            height: 52px;
+        .pagination {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 16px;
-        }
-
-        .modal-title {
-            font-size: 17px;
-            font-weight: 600;
-            color: #FFFFFF;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .modal-title-icon {
-            width: 20px;
-            height: 20px;
-            filter: invert(1);
-        }
-
-        .modal-close {
-            width: 24px;
-            height: 24px;
-            opacity: 0.8;
-            cursor: pointer;
-            position: relative;
-        }
-
-        .modal-close::before,
-        .modal-close::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 18px;
-            height: 2px;
-            background: white;
-        }
-
-        .modal-close::before {
-            transform: translate(-50%, -50%) rotate(45deg);
-        }
-
-        .modal-close::after {
-            transform: translate(-50%, -50%) rotate(-45deg);
-        }
-
-        .modal-divider {
-            height: 0.5px;
-            background: #2A2B2C;
-            margin: 0 16px;
-        }
-
-        .modal-content {
-            padding: 20px 16px;
-            max-height: calc(100vh - 120px);
-            overflow-y: auto;
-        }
-
-        .input-group {
-            margin-bottom: 24px;
-        }
-
-        .input-label {
-            font-size: 15px;
-            font-weight: 500;
-            color: #FFFFFF;
-            margin-bottom: 8px;
-            padding-left: 4px;
-        }
-
-        .input-field {
-            width: 100%;
-            background: transparent;
-            border: 1px solid #353637;
-            border-radius: 10px;
-            padding: 12px;
-            font-size: 16px;
-            color: white;
-            font-family: inherit;
-        }
-
-        .input-field::placeholder {
-            color: rgba(255, 255, 255, 0.3);
-        }
-
-        .input-field:focus {
-            outline: none;
-            border-color: var(--accent-color);
-        }
-
-        .textarea-field {
-            min-height: 120px;
-            resize: vertical;
-        }
-
-        .char-counter {
-            text-align: right;
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.5);
-            margin-top: 4px;
-            padding-right: 4px;
-        }
-
-        .char-counter.error {
-            color: #ff453a;
-        }
-
-        .modal-actions {
-            margin-top: 32px;
-        }
-
-        .modal-btn {
-            width: 100%;
-            padding: 14px;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 500;
-            border: none;
-            cursor: pointer;
-            transition: opacity 0.2s ease;
-            background: var(--accent-color);
-            color: white;
-        }
-
-        .modal-btn:active {
-            opacity: 0.8;
-        }
-
-        .swipe-indicator {
-            text-align: center;
-            color: rgba(255, 255, 255, 0.3);
-            font-size: 12px;
-            margin-top: 8px;
-            display: flex;
-            align-items: center;
             justify-content: center;
             gap: 6px;
+            margin-top: 16px;
         }
 
-        .swipe-arrow {
-            font-size: 16px;
-            opacity: 0.5;
-            animation: swipeBounce 2s infinite;
-        }
-
-        @keyframes swipeBounce {
-            0%, 100% { transform: translateX(0); }
-            50% { transform: translateX(5px); }
-        }
-
-        .preloader {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(31, 32, 33, 0.8);
-            backdrop-filter: blur(10px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            transition: opacity 0.5s ease, visibility 0.5s ease;
-        }
-
-        .preloader.hidden {
-            opacity: 0;
-            visibility: hidden;
-        }
-
-        .loader {
-            width: 48px;
-            height: 48px;
-            border: 4px solid rgba(255, 255, 255, 0.1);
+        .pagination-dot {
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
-            border-top: 4px solid var(--accent-color);
-            animation: spin 1s linear infinite;
+            background: #2A2B2C;
+            transition: background-color 0.3s ease;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .pagination-dot.active {
+            background: var(--accent-color);
         }
 
         :root {
@@ -482,110 +243,52 @@
     </style>
 </head>
 <body>
-    <div class="preloader" id="preloader">
-        <div class="loader"></div>
-    </div>
-
     <div class="header">
         <img src="https://i.ibb.co/zTB331HR/image.png" alt="Chibeki" class="logo">
         <div class="header-right">
-            <div class="header-icon telegram" onclick="openChannel()" title="Канал"></div>
-            <div class="header-icon chat" onclick="openRequestBot()" title="Чат с ботом"></div>
+            <div class="header-icon telegram" onclick="openChannel()"></div>
+            <div class="header-icon chat" onclick="openRequestBot()"></div>
         </div>
     </div>
 
     <div class="main-content">
-        <div class="section">
+        <div class="main-screen">
             <div class="section-title">Идеи</div>
+            
             <div class="ideas-container" id="ideasContainer">
-                <!-- Идеи будут добавлены здесь -->
-            </div>
-            <div class="swipe-indicator">
-                <span class="swipe-arrow">→</span>
-                Свайп для навигации
-                <span class="swipe-arrow">←</span>
-            </div>
-            <div id="addIdeaBtnContainer">
-                <!-- Кнопка добавить идею будет здесь -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Модальное окно добавления идеи -->
-    <div class="modal-overlay" id="addIdeaModal">
-        <div class="modal-header">
-            <div class="modal-title">
-                <img src="https://img.icons8.com/?size=100&id=KXtAS0MR3VBG&format=png&color=000000" 
-                     alt="Иконка" 
-                     class="modal-title-icon">
-                Закинуть идею
-            </div>
-            <div class="modal-close" onclick="closeAddIdeaModal()"></div>
-        </div>
-        <div class="modal-divider"></div>
-        <div class="modal-content">
-            <div class="input-group">
-                <div class="input-label">Название</div>
-                <input type="text" 
-                       class="input-field" 
-                       id="ideaTitle" 
-                       placeholder="Введи название идейки"
-                       maxlength="15">
-                <div class="char-counter" id="titleCharCounter">0/15</div>
+                <div class="ideas-track" id="ideasTrack"></div>
             </div>
             
-            <div class="input-group">
-                <div class="input-label">Твоя идейка</div>
-                <textarea class="input-field textarea-field" 
-                          id="ideaContent" 
-                          placeholder="Опиши свою идею"></textarea>
-            </div>
-            
-            <div class="modal-actions">
-                <button class="modal-btn" onclick="submitIdea()">Закинуть</button>
-            </div>
+            <div class="pagination" id="pagination"></div>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         
-        let ideas = [
-            {
-                id: 1,
-                title: "Новый вид чибиков",
-                content: "Предлагаю добавить чибиков в костюмах разных профессий: врачи, пожарные, космонавты!",
-                reactions: {
-                    like: { count: 5, users: [] },
-                    event1: { count: 2, users: [] },
-                    event2: { count: 1, users: [] }
-                }
-            },
-            {
-                id: 2,
-                title: "Сезонные ивенты",
-                content: "Можно делать тематические события к праздникам: хэллоуин, новый год, день рождения проекта.",
-                reactions: {
-                    like: { count: 8, users: [] },
-                    event1: { count: 3, users: [] }
-                }
-            },
-            {
-                id: 3,
-                title: "Обмен чибиками",
-                content: "Система трейдинга, чтобы можно было меняться дубликатами с друзьями.",
-                reactions: {
-                    like: { count: 12, users: [] },
-                    event2: { count: 4, users: [] }
-                }
-            }
-        ];
+        // 🔒 Firebase конфигурация - ВАШ ПРОЕКТ!
+        const firebaseConfig = {
+            apiKey: "AIzaSyDrvqEb5GMrWaCLSd3aHEdOQIDA321v_BA",
+            authDomain: "chibeki-ideas.firebaseapp.com",
+            projectId: "chibeki-ideas",
+            storageBucket: "chibeki-ideas.firebasestorage.app",
+            messagingSenderId: "31211023786",
+            appId: "1:31211023786:web:35343c74dbf73a50f6cfd3"
+        };
+
+        // 🔐 Администраторы
+        const ADMIN_USERNAMES = ['ya_admin7', 'tmkazavr'];
         
+        // Инициализация Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        let currentSlide = 0;
+        let ideas = [];
+        let startX = 0;
+        let isDragging = false;
         let currentUser = null;
-        let currentIdeaIndex = 0;
-        let touchStartX = 0;
-        let touchEndX = 0;
-        const MIN_SWIPE_DISTANCE = 50;
+        let unsubscribeIdeas = null;
 
         function initTelegramApp() {
             tg.ready();
@@ -596,9 +299,11 @@
             currentUser = tg.initDataUnsafe?.user;
             
             updateAccentColor();
-            showPreloader();
-            renderIdeas();
+            loadIdeas();
             setupSwipe();
+            
+            // Добавляем тестовую идею если Firebase пуст
+            addTestIdeaIfEmpty();
         }
 
         function updateAccentColor() {
@@ -607,346 +312,6 @@
                 accentColor = tg.themeParams.accent_text_color;
             }
             document.documentElement.style.setProperty('--accent-color', accentColor);
-        }
-
-        function showPreloader() {
-            const preloader = document.getElementById('preloader');
-            preloader.classList.remove('hidden');
-            
-            setTimeout(() => {
-                preloader.classList.add('hidden');
-            }, 800 + Math.random() * 500);
-        }
-
-        function setupSwipe() {
-            const container = document.getElementById('ideasContainer');
-            
-            container.addEventListener('touchstart', (e) => {
-                touchStartX = e.touches[0].clientX;
-            }, { passive: true });
-            
-            container.addEventListener('touchend', (e) => {
-                touchEndX = e.changedTouches[0].clientX;
-                handleSwipe();
-            }, { passive: true });
-            
-            // Для мыши
-            container.addEventListener('mousedown', (e) => {
-                touchStartX = e.clientX;
-                document.addEventListener('mouseup', handleMouseUp);
-            });
-        }
-
-        function handleMouseUp(e) {
-            touchEndX = e.clientX;
-            handleSwipe();
-            document.removeEventListener('mouseup', handleMouseUp);
-        }
-
-        function handleSwipe() {
-            const swipeDistance = touchEndX - touchStartX;
-            
-            if (Math.abs(swipeDistance) < MIN_SWIPE_DISTANCE) return;
-            
-            if (swipeDistance > 0) {
-                // Свайп вправо - предыдущая идея
-                navigateIdeas(-1);
-            } else {
-                // Свайп влево - следующая идея
-                navigateIdeas(1);
-            }
-        }
-
-        function navigateIdeas(direction) {
-            if (ideas.length <= 1) return;
-            
-            currentIdeaIndex += direction;
-            
-            if (currentIdeaIndex < 0) {
-                currentIdeaIndex = ideas.length - 1;
-            } else if (currentIdeaIndex >= ideas.length) {
-                currentIdeaIndex = 0;
-            }
-            
-            const container = document.getElementById('ideasContainer');
-            container.style.transform = `translateX(${direction > 0 ? '20px' : '-20px'})`;
-            container.style.opacity = '0.5';
-            
-            setTimeout(() => {
-                container.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-                container.style.transform = 'translateX(0)';
-                container.style.opacity = '1';
-                
-                renderCurrentIdea();
-                
-                setTimeout(() => {
-                    container.style.transition = '';
-                }, 300);
-            }, 50);
-        }
-
-        function renderIdeas() {
-            const addIdeaBtnContainer = document.getElementById('addIdeaBtnContainer');
-            
-            if (ideas.length === 0) {
-                document.getElementById('ideasContainer').innerHTML = 
-                    '<div class="no-ideas-text">Идей пока нет…</div>';
-            } else {
-                renderCurrentIdea();
-            }
-            
-            addIdeaBtnContainer.innerHTML = `
-                <button class="add-idea-btn" onclick="openAddIdeaModal()">
-                    <img src="https://images.icon-icons.com/916/PNG/512/Plus_icon-icons.com_71848.png" 
-                         alt="Добавить" 
-                         class="add-idea-btn-icon">
-                    Закинуть идею
-                </button>
-            `;
-        }
-
-        function renderCurrentIdea() {
-            const ideasContainer = document.getElementById('ideasContainer');
-            const idea = ideas[currentIdeaIndex];
-            
-            if (!idea) return;
-            
-            const userId = currentUser?.id?.toString();
-            const userReaction = idea.reactions ? 
-                Object.keys(idea.reactions).find(reaction => 
-                    idea.reactions[reaction].users && 
-                    idea.reactions[reaction].users.includes(userId)
-                ) : null;
-            
-            const isLiked = userReaction === 'like';
-            const isReacted1 = userReaction === 'event1';
-            const isReacted2 = userReaction === 'event2';
-            const isEventPeriod = checkEventPeriod();
-            
-            ideasContainer.innerHTML = `
-                <div class="idea-card">
-                    <div class="idea-header">
-                        <div class="idea-title">${idea.title}</div>
-                    </div>
-                    <div class="idea-content">
-                        ${idea.content}
-                    </div>
-                    <div class="idea-footer">
-                        <div class="reaction-container">
-                            <button class="reaction-btn ${isLiked ? 'active' : ''}" 
-                                    onclick="animateReaction(this, 'like')"
-                                    data-idea-id="${idea.id}"
-                                    data-reaction-type="like">
-                                <img src="https://stickers.fullyst.com/b9f1c4ec-ff51-507f-a011-b3c035880c92/full/AgADyQcAAuN4BAAB.webp" 
-                                     class="reaction-gif" 
-                                     alt="❤️">
-                                <span class="reaction-count">${idea.reactions?.like?.count || 0}</span>
-                            </button>
-                            ${isEventPeriod ? `
-                                <button class="reaction-btn ${isReacted1 ? 'active' : ''}" 
-                                        onclick="animateReaction(this, 'event1')"
-                                        data-idea-id="${idea.id}"
-                                        data-reaction-type="event1">
-                                    <img src="https://stickers.fullyst.com/b9f1c4ec-ff51-507f-a011-b3c035880c92/full/AgADzgEAAkGPGEQ.webp" 
-                                         class="reaction-gif" 
-                                         alt="🎄">
-                                    <span class="reaction-count">${idea.reactions?.event1?.count || 0}</span>
-                                </button>
-                                <button class="reaction-btn ${isReacted2 ? 'active' : ''}" 
-                                        onclick="animateReaction(this, 'event2')"
-                                        data-idea-id="${idea.id}"
-                                        data-reaction-type="event2">
-                                    <img src="https://stickers.fullyst.com/b9f1c4ec-ff51-507f-a011-b3c035880c92/full/AgAD_QIAAgapIEQ.webp" 
-                                         class="reaction-gif" 
-                                         alt="🎅">
-                                    <span class="reaction-count">${idea.reactions?.event2?.count || 0}</span>
-                                </button>
-                            ` : ''}
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function checkEventPeriod() {
-            const now = new Date();
-            const month = now.getMonth() + 1;
-            const day = now.getDate();
-            return month === 12 && day >= 1 && day <= 31;
-        }
-
-        function animateReaction(button, reactionType) {
-            if (!currentUser) {
-                tg.showPopup({
-                    title: 'Ошибка',
-                    message: 'Нужно войти в аккаунт Telegram',
-                    buttons: [{ type: 'ok', text: 'Понятно' }]
-                });
-                return;
-            }
-            
-            tg.HapticFeedback.impactOccurred('light');
-            
-            button.classList.add('animating');
-            
-            setTimeout(() => {
-                button.classList.remove('animating');
-                
-                const ideaId = parseInt(button.dataset.ideaId);
-                const idea = ideas.find(i => i.id === ideaId);
-                
-                if (!idea) return;
-                
-                if (!idea.reactions) {
-                    idea.reactions = {};
-                }
-                
-                if (!idea.reactions[reactionType]) {
-                    idea.reactions[reactionType] = {
-                        count: 0,
-                        users: []
-                    };
-                }
-                
-                const reaction = idea.reactions[reactionType];
-                const userId = currentUser.id.toString();
-                const userIndex = reaction.users.indexOf(userId);
-                
-                Object.keys(idea.reactions).forEach(key => {
-                    if (key !== reactionType) {
-                        const otherReaction = idea.reactions[key];
-                        const otherIndex = otherReaction.users.indexOf(userId);
-                        if (otherIndex !== -1) {
-                            otherReaction.users.splice(otherIndex, 1);
-                            otherReaction.count = Math.max(0, otherReaction.count - 1);
-                            
-                            if (otherReaction.count === 0) {
-                                delete idea.reactions[key];
-                            }
-                        }
-                    }
-                });
-                
-                if (userIndex === -1) {
-                    reaction.users.push(userId);
-                    reaction.count++;
-                    button.classList.add('active');
-                } else {
-                    reaction.users.splice(userIndex, 1);
-                    reaction.count = Math.max(0, reaction.count - 1);
-                    button.classList.remove('active');
-                    
-                    if (reaction.count === 0) {
-                        delete idea.reactions[reactionType];
-                    }
-                }
-                
-                const countElement = button.querySelector('.reaction-count');
-                if (countElement) {
-                    countElement.textContent = reaction.count;
-                    if (button.classList.contains('active')) {
-                        countElement.style.color = 'white';
-                        countElement.style.fontWeight = '600';
-                    } else {
-                        countElement.style.color = 'rgba(255, 255, 255, 0.7)';
-                        countElement.style.fontWeight = 'normal';
-                    }
-                }
-                
-                renderCurrentIdea();
-                
-            }, 800);
-        }
-
-        function openAddIdeaModal() {
-            if (!currentUser) {
-                tg.showPopup({
-                    title: 'Ошибка',
-                    message: 'Нужно войти в аккаунт Telegram',
-                    buttons: [{ type: 'ok', text: 'Понятно' }]
-                });
-                return;
-            }
-            
-            tg.HapticFeedback.impactOccurred('light');
-            const modal = document.getElementById('addIdeaModal');
-            modal.classList.add('active');
-            
-            document.getElementById('ideaTitle').value = '';
-            document.getElementById('ideaContent').value = '';
-            document.getElementById('titleCharCounter').textContent = '0/15';
-            document.getElementById('titleCharCounter').classList.remove('error');
-            
-            const titleInput = document.getElementById('ideaTitle');
-            titleInput.removeEventListener('input', updateCharCounter);
-            titleInput.addEventListener('input', updateCharCounter);
-        }
-
-        function closeAddIdeaModal() {
-            tg.HapticFeedback.impactOccurred('light');
-            const modal = document.getElementById('addIdeaModal');
-            modal.classList.remove('active');
-        }
-
-        function updateCharCounter() {
-            const titleInput = document.getElementById('ideaTitle');
-            const counter = document.getElementById('titleCharCounter');
-            const charCount = titleInput.value.length;
-            const maxChars = 15;
-            
-            counter.textContent = `${charCount}/${maxChars}`;
-            
-            if (charCount > maxChars) {
-                counter.classList.add('error');
-                titleInput.value = titleInput.value.substring(0, maxChars);
-            } else {
-                counter.classList.remove('error');
-            }
-        }
-
-        function submitIdea() {
-            tg.HapticFeedback.impactOccurred('light');
-            
-            const title = document.getElementById('ideaTitle').value.trim();
-            const content = document.getElementById('ideaContent').value.trim();
-            
-            if (!title || title.length === 0) {
-                tg.showPopup({
-                    title: 'Ошибка',
-                    message: 'Название не может быть пустым',
-                    buttons: [{ type: 'ok', text: 'Понятно' }]
-                });
-                return;
-            }
-            
-            if (title.length > 15) {
-                tg.showPopup({
-                    title: 'Ошибка',
-                    message: 'Название не должно превышать 15 символов',
-                    buttons: [{ type: 'ok', text: 'Понятно' }]
-                });
-                return;
-            }
-            
-            const newIdea = {
-                id: Date.now(),
-                title: title,
-                content: content,
-                author: currentUser ? currentUser.first_name : 'Аноним',
-                timestamp: new Date().toISOString(),
-                reactions: {}
-            };
-            
-            ideas.unshift(newIdea);
-            currentIdeaIndex = 0;
-            renderIdeas();
-            closeAddIdeaModal();
-            
-            tg.showPopup({
-                title: 'Успешно!',
-                message: 'Идея добавлена',
-                buttons: [{ type: 'ok', text: 'Круто' }]
-            });
         }
 
         function openChannel() {
@@ -958,6 +323,295 @@
             tg.HapticFeedback.impactOccurred('light');
             tg.openTelegramLink('https://t.me/request_chibeki_bot');
         }
+
+        async function addTestIdeaIfEmpty() {
+            try {
+                const snapshot = await db.collection('ideas').limit(1).get();
+                if (snapshot.empty) {
+                    // Добавляем тестовую идею
+                    await db.collection('ideas').add({
+                        title: 'Когда дроп?',
+                        content: 'Когда новые чибики уже?',
+                        author: 'Система',
+                        userId: 'system',
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        reactions: {}
+                    });
+                }
+            } catch (error) {
+                console.error('Error checking/adding test idea:', error);
+            }
+        }
+
+        function loadIdeas() {
+            try {
+                unsubscribeIdeas = db.collection('ideas')
+                    .orderBy('timestamp', 'desc')
+                    .onSnapshot((snapshot) => {
+                        ideas = [];
+                        snapshot.forEach((doc) => {
+                            const idea = doc.data();
+                            idea.id = doc.id;
+                            ideas.push(idea);
+                        });
+                        renderIdeas();
+                    }, (error) => {
+                        console.error('Error loading ideas:', error);
+                        tg.showPopup({
+                            title: 'Ошибка',
+                            message: 'Не удалось загрузить идеи',
+                            buttons: [{ type: 'ok', text: 'Понятно' }]
+                        });
+                    });
+            } catch (error) {
+                console.error('Error loading ideas:', error);
+            }
+        }
+
+        function renderIdeas() {
+            const ideasTrack = document.getElementById('ideasTrack');
+            const pagination = document.getElementById('pagination');
+            
+            ideasTrack.innerHTML = '';
+            pagination.innerHTML = '';
+            
+            if (ideas.length === 0) {
+                ideasTrack.innerHTML = '<div class="no-ideas-text">Идей пока нет…</div>';
+                return;
+            }
+            
+            ideas.forEach((idea, index) => {
+                const ideaCard = document.createElement('div');
+                ideaCard.className = 'idea-card';
+                
+                const isAdmin = currentUser && ADMIN_USERNAMES.includes(currentUser.username);
+                const userId = currentUser?.id?.toString();
+                const userLiked = idea.reactions?.like?.users?.includes(userId) || false;
+                
+                ideaCard.innerHTML = `
+                    <div class="idea-header">
+                        <div class="idea-title">${idea.title}</div>
+                        ${isAdmin ? `
+                            <div class="delete-icon" onclick="deleteIdea('${idea.id}')"></div>
+                        ` : ''}
+                    </div>
+                    <div class="idea-content">${idea.content}</div>
+                    <div class="idea-footer">
+                        <div class="reaction-container">
+                            <button class="reaction-btn ${userLiked ? 'active' : ''}" onclick="toggleReaction('${idea.id}')">
+                                <img src="https://stickers.fullyst.com/b9f1c4ec-ff51-507f-a011-b3c035880c92/full/AgADyQcAAuN4BAAB.webp" 
+                                     class="reaction-gif" 
+                                     alt="❤️">
+                                <span class="reaction-count">${idea.reactions?.like?.count || 0}</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                ideasTrack.appendChild(ideaCard);
+                
+                const dot = document.createElement('div');
+                dot.className = `pagination-dot ${index === currentSlide ? 'active' : ''}`;
+                dot.onclick = () => goToSlide(index);
+                pagination.appendChild(dot);
+            });
+            
+            updateSlidePosition();
+        }
+
+        async function toggleReaction(ideaId) {
+            if (!currentUser) {
+                tg.showPopup({
+                    title: 'Ошибка',
+                    message: 'Нужно войти в аккаунт Telegram',
+                    buttons: [{ type: 'ok', text: 'Понятно' }]
+                });
+                return;
+            }
+            
+            try {
+                tg.HapticFeedback.impactOccurred('light');
+                
+                const ideaRef = db.collection('ideas').doc(ideaId);
+                const userId = currentUser.id.toString();
+                
+                const doc = await ideaRef.get();
+                if (!doc.exists) return;
+                
+                const idea = doc.data();
+                if (!idea.reactions) {
+                    idea.reactions = {};
+                }
+                
+                if (!idea.reactions.like) {
+                    idea.reactions.like = {
+                        count: 0,
+                        users: []
+                    };
+                }
+                
+                const reaction = idea.reactions.like;
+                const userIndex = reaction.users.indexOf(userId);
+                
+                // ТОГГЛ: если уже лайкнул - убираем, если нет - добавляем
+                if (userIndex === -1) {
+                    // Добавляем лайк
+                    reaction.users.push(userId);
+                    reaction.count++;
+                } else {
+                    // Убираем лайк
+                    reaction.users.splice(userIndex, 1);
+                    reaction.count = Math.max(0, reaction.count - 1);
+                }
+                
+                // Если лайков 0, удаляем пустой объект
+                if (reaction.count === 0) {
+                    delete idea.reactions.like;
+                }
+                
+                await ideaRef.update({
+                    reactions: idea.reactions
+                });
+                
+            } catch (error) {
+                console.error('Error toggling reaction:', error);
+                tg.showPopup({
+                    title: 'Ошибка',
+                    message: 'Не удалось поставить реакцию',
+                    buttons: [{ type: 'ok', text: 'Понятно' }]
+                });
+            }
+        }
+
+        function deleteIdea(ideaId) {
+            const isAdmin = currentUser && ADMIN_USERNAMES.includes(currentUser.username);
+            
+            if (!isAdmin) {
+                tg.showPopup({
+                    title: 'Доступ запрещен',
+                    message: 'Только администраторы могут удалять идеи',
+                    buttons: [{ type: 'ok', text: 'Понятно' }]
+                });
+                return;
+            }
+            
+            tg.showPopup({
+                title: 'Удалить идею?',
+                message: 'Это действие нельзя отменить. Идея будет удалена для всех пользователей.',
+                buttons: [
+                    {
+                        type: 'destructive',
+                        text: 'Удалить',
+                        id: 'delete'
+                    },
+                    {
+                        type: 'cancel',
+                        text: 'Отмена',
+                        id: 'cancel'
+                    }
+                ]
+            }, async (buttonId) => {
+                if (buttonId === 'delete') {
+                    try {
+                        await db.collection('ideas').doc(ideaId).delete();
+                        tg.showPopup({
+                            title: 'Успешно',
+                            message: 'Идея удалена',
+                            buttons: [{ type: 'ok', text: 'Ок' }]
+                        });
+                    } catch (error) {
+                        console.error('Error deleting idea:', error);
+                        tg.showPopup({
+                            title: 'Ошибка',
+                            message: 'Не удалось удалить идею',
+                            buttons: [{ type: 'ok', text: 'Понятно' }]
+                        });
+                    }
+                }
+            });
+        }
+
+        function setupSwipe() {
+            const container = document.getElementById('ideasContainer');
+            
+            container.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                isDragging = true;
+            });
+            
+            container.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                e.preventDefault();
+            });
+            
+            container.addEventListener('touchend', (e) => {
+                if (!isDragging) return;
+                isDragging = false;
+                
+                const endX = e.changedTouches[0].clientX;
+                const diff = startX - endX;
+                
+                if (Math.abs(diff) > 50) {
+                    if (diff > 0 && currentSlide < ideas.length - 1) {
+                        goToSlide(currentSlide + 1);
+                    } else if (diff < 0 && currentSlide > 0) {
+                        goToSlide(currentSlide - 1);
+                    }
+                }
+            });
+            
+            // Для мыши
+            container.addEventListener('mousedown', (e) => {
+                startX = e.clientX;
+                isDragging = true;
+            });
+            
+            container.addEventListener('mouseup', (e) => {
+                if (!isDragging) return;
+                isDragging = false;
+                
+                const endX = e.clientX;
+                const diff = startX - endX;
+                
+                if (Math.abs(diff) > 50) {
+                    if (diff > 0 && currentSlide < ideas.length - 1) {
+                        goToSlide(currentSlide + 1);
+                    } else if (diff < 0 && currentSlide > 0) {
+                        goToSlide(currentSlide - 1);
+                    }
+                }
+            });
+            
+            container.addEventListener('mouseleave', () => {
+                isDragging = false;
+            });
+        }
+
+        function goToSlide(index) {
+            if (index < 0 || index >= ideas.length) return;
+            
+            currentSlide = index;
+            updateSlidePosition();
+            
+            // Обновляем точки пагинации
+            document.querySelectorAll('.pagination-dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentSlide);
+            });
+        }
+
+        function updateSlidePosition() {
+            const track = document.getElementById('ideasTrack');
+            if (!track) return;
+            
+            track.style.transform = `translateX(-${currentSlide * 100}%)`;
+        }
+
+        // Очистка подписки при разгрузке
+        window.addEventListener('beforeunload', () => {
+            if (unsubscribeIdeas) {
+                unsubscribeIdeas();
+            }
+        });
 
         document.addEventListener('DOMContentLoaded', initTelegramApp);
     </script>
