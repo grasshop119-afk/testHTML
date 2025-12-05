@@ -60,22 +60,6 @@
             width: auto;
         }
 
-        .header-image {
-            position: fixed;
-            top: 52px;
-            left: 0;
-            right: 0;
-            height: 150px;
-            z-index: 99;
-            overflow: hidden;
-        }
-
-        .header-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
         .header-right {
             display: flex;
             align-items: center;
@@ -162,7 +146,7 @@
 
         .main-content {
             position: absolute;
-            top: 202px;
+            top: 52px;
             bottom: 60px;
             left: 0;
             right: 0;
@@ -202,7 +186,7 @@
         .collection-card {
             background: #1A1A1A;
             border-radius: 21px;
-            padding: 16px;
+            padding: 14px;
             margin-bottom: 8px;
             display: flex;
             align-items: center;
@@ -224,6 +208,7 @@
             justify-content: center;
             margin-right: 12px;
             overflow: hidden;
+            flex-shrink: 0;
         }
 
         .collection-icon img {
@@ -234,6 +219,7 @@
 
         .collection-info {
             flex: 1;
+            min-width: 0;
         }
 
         .collection-name {
@@ -241,11 +227,17 @@
             font-weight: 500;
             margin-bottom: 2px;
             color: #FFFFFF;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .collection-stats {
             font-size: 14px;
             color: rgba(255, 255, 255, 0.6);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .collection-badge {
@@ -255,70 +247,7 @@
             border-radius: 12px;
             font-size: 13px;
             font-weight: 600;
-        }
-
-        .articles-container {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .article-card {
-            flex: 1;
-            background: #1A1A1A;
-            border-radius: 21px;
-            padding: 12px;
-            display: flex;
-            align-items: center;
-            transition: background-color 0.15s ease;
-            border: 1px solid #222;
-            min-height: 60px;
-            height: 60px;
-        }
-
-        .article-card:active {
-            background: #222;
-        }
-
-        .article-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            background: var(--accent-color, #007AFF);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 10px;
             flex-shrink: 0;
-        }
-
-        .article-icon img {
-            width: 20px;
-            height: 20px;
-            filter: brightness(0) invert(1);
-        }
-
-        .article-info {
-            flex: 1;
-            overflow: hidden;
-        }
-
-        .article-name {
-            font-size: 14px;
-            font-weight: 500;
-            color: #FFFFFF;
-            margin-bottom: 2px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .article-description {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.6);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
 
         .collection-screen {
@@ -332,6 +261,67 @@
 
         .collection-screen::-webkit-scrollbar {
             display: none;
+        }
+
+        .articles-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .article-card {
+            background: #1A1A1A;
+            border-radius: 21px;
+            padding: 14px;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.15s ease;
+            border: 1px solid #222;
+        }
+
+        .article-card:active {
+            background: #222;
+        }
+
+        .article-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--accent-color, #007AFF);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .article-icon img {
+            width: 28px;
+            height: 28px;
+            filter: brightness(0) invert(1);
+        }
+
+        .article-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .article-name {
+            font-size: 16px;
+            font-weight: 500;
+            color: #FFFFFF;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .article-description {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .chibi-grid {
@@ -474,38 +464,75 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
             display: flex;
-            align-items: center;
+            flex-direction: column;
             justify-content: center;
-            z-index: 9999;
-            transition: opacity 0.5s ease, visibility 0.5s ease;
+            align-items: center;
+            gap: 20px;
+            background-color: #000;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
         }
 
         .preloader.hidden {
             opacity: 0;
-            visibility: hidden;
+            pointer-events: none;
         }
 
-        .loader {
-            width: 48px;
-            height: 48px;
-            border: 4px solid rgba(255, 255, 255, 0.1);
+        .rocket {
+            width: 80px;
+            height: 80px;
+            user-select: none;
+            -webkit-user-drag: none;
+            cursor: default;
+        }
+
+        .loading-wheel {
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(255, 255, 255, 0.2);
             border-radius: 50%;
-            border-top: 4px solid var(--accent-color, #007AFF);
-            animation: spin 1s linear infinite;
+            border-top-color: rgba(255, 255, 255, 0.8);
+            animation: spin 0.8s linear infinite;
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-footer {
+            position: absolute;
+            bottom: 20px;
+            color: rgba(255, 255, 255, 0.3);
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 12px;
+            text-align: center;
+            width: 100%;
+            line-height: 1.5;
+        }
+
+        .loading-footer a {
+            color: rgba(255, 255, 255, 0.43);
+            text-decoration: none;
         }
     </style>
 </head>
 <body>
-    <div class="preloader" id="preloader">
-        <div class="loader"></div>
+    <!-- Экран загрузки -->
+    <div id="loadingScreen" class="preloader">
+        <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Telegram-Animated-Emojis/main/Travel%20and%20Places/Rocket.webp" 
+             alt="Ракета" 
+             class="rocket">
+        <div class="loading-wheel"></div>
+        <div class="loading-footer">
+            Icons by ICONS8<br>
+            Made by <a href="https://t.me/temkazavr" target="_blank">@temkazavr</a>
+        </div>
     </div>
 
     <div class="header">
@@ -518,10 +545,6 @@
         </div>
     </div>
 
-    <div class="header-image">
-        <img src="https://i.ibb.co/XZ7vvqCd/image.png" alt="Header Image">
-    </div>
-
     <div class="footer" id="footer">
         <div class="nav-items">
             <div class="nav-item active" onclick="switchTab('home')">
@@ -531,14 +554,14 @@
                 <span class="nav-label">Чибики</span>
             </div>
             
-            <div class="nav-item" onclick="openAdvent()">
+            <div class="nav-item" onclick="tg.HapticFeedback.impactOccurred('light')">
                 <img src="https://img.icons8.com/?size=100&id=73WhoVlA0pQc&format=png&color=000000" 
                      alt="Адвент" 
                      class="nav-icon">
                 <span class="nav-label">Адвент</span>
             </div>
             
-            <div class="nav-item" onclick="openInfo()">
+            <div class="nav-item" onclick="tg.HapticFeedback.impactOccurred('light')">
                 <img src="https://img.icons8.com/?size=100&id=83180&format=png&color=000000" 
                      alt="Инфо" 
                      class="nav-icon">
@@ -652,6 +675,21 @@
             setupFooter();
         }
 
+        function showPreloader() {
+            const loadingScreen = document.getElementById('loadingScreen');
+            loadingScreen.classList.remove('hidden');
+            
+            const minTime = 2700;
+            const maxTime = 3100;
+            const randomTime = Math.floor(Math.random() * (maxTime - minTime + 1)) + minTime;
+            
+            console.log(`Время загрузки: ${randomTime/1000} секунд`);
+            
+            setTimeout(() => {
+                loadingScreen.classList.add('hidden');
+            }, randomTime);
+        }
+
         function setupFooter() {
             const user = tg.initDataUnsafe?.user;
             if (user && user.photo_url) {
@@ -660,42 +698,11 @@
             }
         }
 
-        function showPreloader() {
-            const preloader = document.getElementById('preloader');
-            preloader.classList.remove('hidden');
-            
-            const randomTime = 800 + Math.random() * 500;
-            
-            setTimeout(() => {
-                preloader.classList.add('hidden');
-            }, randomTime);
-        }
-
         function switchTab(tab) {
             tg.HapticFeedback.impactOccurred('light');
             
             document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.nav-item')[tab === 'home' ? 0 : 2].classList.add('active');
-            
-            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-            
-            document.getElementById(`${tab}Screen`).classList.remove('hidden');
-            currentScreen = tab;
-            
-            if (tab === 'home') {
-                tg.BackButton.hide();
-                document.getElementById('viewToggle').classList.add('hidden');
-                document.getElementById('footer').classList.remove('hidden');
-            }
-        }
-
-        function openAdvent() {
-            tg.HapticFeedback.impactOccurred('light');
-            tg.openTelegramLink('https://t.me/chibeki_bot');
-        }
-
-        function openInfo() {
-            tg.HapticFeedback.impactOccurred('light');
+            document.querySelectorAll('.nav-item')[0].classList.add('active');
         }
 
         function openCollection(type) {
