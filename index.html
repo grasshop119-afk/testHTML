@@ -33,10 +33,11 @@
             width: 100%;
             height: 100%;
             background: #000000;
+            display: none;
         }
 
-        .hidden {
-            display: none;
+        .screen.active {
+            display: block;
         }
 
         .header {
@@ -554,7 +555,7 @@
                 <span class="nav-label">Чибики</span>
             </div>
             
-            <div class="nav-item" onclick="openAdvent()">
+            <div class="nav-item" onclick="switchTab('advent')">
                 <img src="https://img.icons8.com/?size=100&id=73WhoVlA0pQc&format=png&color=000000" 
                      alt="Адвент" 
                      class="nav-icon">
@@ -571,7 +572,7 @@
     </div>
 
     <div class="main-content">
-        <div class="screen main-screen" id="homeScreen">
+        <div class="screen main-screen active" id="homeScreen">
             <div class="section">
                 <div class="section-title">Коллекции</div>
                 
@@ -629,16 +630,31 @@
             </div>
         </div>
 
-        <div class="screen collection-screen hidden" id="commonCollectionScreen">
+        <div class="screen collection-screen" id="commonCollectionScreen">
             <div class="chibi-grid grid-3" id="commonGrid"></div>
         </div>
 
-        <div class="screen collection-screen hidden" id="secretCollectionScreen">
+        <div class="screen collection-screen" id="secretCollectionScreen">
             <div class="chibi-grid grid-3" id="secretGrid"></div>
         </div>
 
-        <div class="screen collection-screen hidden" id="prizeCollectionScreen">
+        <div class="screen collection-screen" id="prizeCollectionScreen">
             <div class="chibi-grid grid-3" id="prizeGrid"></div>
+        </div>
+
+        <div class="screen advent-screen" id="adventScreen">
+            <div class="main-screen">
+                <h1 class="section-title">Адвент-календарь</h1>
+                <div class="advent-description" style="color: rgba(255,255,255,0.7); text-align: center; margin-bottom: 30px;">
+                    Каждый день открывай новый сюрприз!<br>
+                    Собирай эксклюзивные чибики и получай призы.
+                </div>
+                
+                <div style="text-align: center; color: rgba(255,255,255,0.5); padding: 40px;">
+                    Адвент-календарь скоро откроется!<br>
+                    Следи за обновлениями.
+                </div>
+            </div>
         </div>
     </div>
 
@@ -657,6 +673,7 @@
         
         let currentScreen = 'home';
         let currentViewMode = 3;
+        let isInitialLoad = true;
 
         function initTelegramApp() {
             tg.ready();
@@ -671,9 +688,14 @@
             
             tg.BackButton.onClick(goBack);
             
-            showPreloader();
-            loadUserData();
-            setupFooter();
+            if (isInitialLoad) {
+                showPreloader();
+                loadUserData();
+                setupFooter();
+                isInitialLoad = false;
+            } else {
+                document.getElementById('loadingScreen').classList.add('hidden');
+            }
         }
 
         function showPreloader() {
@@ -683,8 +705,6 @@
             const minTime = 2700;
             const maxTime = 3100;
             const randomTime = Math.floor(Math.random() * (maxTime - minTime + 1)) + minTime;
-            
-            console.log(`Время загрузки: ${randomTime/1000} секунд`);
             
             setTimeout(() => {
                 loadingScreen.classList.add('hidden');
@@ -703,21 +723,23 @@
             tg.HapticFeedback.impactOccurred('light');
             
             document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.nav-item')[tab === 'home' ? 0 : 2].classList.add('active');
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             
             if (tab === 'home') {
-                hideAllScreens();
-                document.getElementById('homeScreen').classList.remove('hidden');
+                document.querySelectorAll('.nav-item')[0].classList.add('active');
+                document.getElementById('homeScreen').classList.add('active');
                 currentScreen = 'home';
                 tg.BackButton.hide();
                 document.getElementById('viewToggle').classList.add('hidden');
                 document.getElementById('footer').classList.remove('hidden');
+            } else if (tab === 'advent') {
+                document.querySelectorAll('.nav-item')[1].classList.add('active');
+                document.getElementById('adventScreen').classList.add('active');
+                currentScreen = 'advent';
+                tg.BackButton.hide();
+                document.getElementById('viewToggle').classList.add('hidden');
+                document.getElementById('footer').classList.remove('hidden');
             }
-        }
-
-        function openAdvent() {
-            tg.HapticFeedback.impactOccurred('light');
-            tg.openLink('advent.html');
         }
 
         function openCollection(type) {
@@ -725,8 +747,8 @@
             
             document.getElementById('footer').classList.add('hidden');
             
-            hideAllScreens();
-            document.getElementById(`${type}CollectionScreen`).classList.remove('hidden');
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(`${type}CollectionScreen`).classList.add('active');
             currentScreen = type;
             
             tg.BackButton.show();
@@ -738,17 +760,14 @@
             tg.HapticFeedback.impactOccurred('light');
             
             if (currentScreen === 'common' || currentScreen === 'secret' || currentScreen === 'prize') {
-                hideAllScreens();
-                document.getElementById('homeScreen').classList.remove('hidden');
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                document.getElementById('homeScreen').classList.add('active');
                 currentScreen = 'home';
                 tg.BackButton.hide();
                 document.getElementById('viewToggle').classList.add('hidden');
                 document.getElementById('footer').classList.remove('hidden');
+                document.querySelectorAll('.nav-item')[0].classList.add('active');
             }
-        }
-
-        function hideAllScreens() {
-            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
         }
 
         function toggleViewMode() {
@@ -785,7 +804,7 @@
             
             const url = articles[type];
             if (url) {
-                tg.openLink(url);
+                tg.openTelegramLink(url);
             }
         }
 
