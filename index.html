@@ -215,6 +215,7 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transition: opacity 0.3s ease;
         }
 
         .collection-info {
@@ -352,6 +353,16 @@
             overflow: hidden;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
             border: 1px solid #222;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeInUp 0.4s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .chibi-card:active {
@@ -382,6 +393,7 @@
             height: 100%;
             object-fit: cover;
             display: block;
+            transition: opacity 0.3s ease;
         }
 
         .chibi-info {
@@ -452,6 +464,14 @@
             max-width: 90%;
             max-height: 90%;
             object-fit: contain;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .fullscreen-viewer.active .fullscreen-image {
+            opacity: 1;
+            transform: scale(1);
         }
 
         :root {
@@ -590,7 +610,7 @@
                         <div class="collection-name">Секретные чибики</div>
                         <div class="collection-stats" id="secretStats">Абсолютно секретно</div>
                     </div>
-                    <div class="collection-badge" id="secretBadge">NEW</div>
+                    <div class="collection-badge" id="secretBadge">0 шт</div>
                 </div>
                 
                 <div class="collection-card" onclick="openCollection('prize')" id="prizeCard">
@@ -599,6 +619,7 @@
                         <div class="collection-name">Призовые чибики</div>
                         <div class="collection-stats" id="prizeStats">Твои чибики с розыгрышей</div>
                     </div>
+                    <div class="collection-badge" id="prizeBadge">0 шт</div>
                 </div>
             </div>
 
@@ -617,7 +638,7 @@
                     
                     <div class="article-card" onclick="openArticle('feedback')">
                         <div class="article-icon">
-                            <img src="https://img.icons8.com/?size=100&id=83180&format=png&color=000000" alt="Фидбек">
+                            <img src="https://img.icons8.com/?size=100&id=83194&format=png&color=000000" alt="Фидбек">
                         </div>
                         <div class="article-info">
                             <div class="article-name">Фидбек</div>
@@ -753,11 +774,23 @@
             
             image.src = imageSrc;
             viewer.classList.add('active');
+            
+            setTimeout(() => {
+                image.style.opacity = '1';
+                image.style.transform = 'scale(1)';
+            }, 10);
         }
 
         function closeFullscreen() {
             const viewer = document.getElementById('fullscreenViewer');
-            viewer.classList.remove('active');
+            const image = document.getElementById('fullscreenImage');
+            
+            image.style.opacity = '0';
+            image.style.transform = 'scale(0.9)';
+            
+            setTimeout(() => {
+                viewer.classList.remove('active');
+            }, 300);
         }
 
         function openArticle(type) {
@@ -841,19 +874,23 @@
             
             const commonStats = document.getElementById('commonStats');
             const commonBadge = document.getElementById('commonBadge');
+            const secretBadge = document.getElementById('secretBadge');
+            const prizeBadge = document.getElementById('prizeBadge');
+            
             const commonProgress = userData.common.all.length > 0 ? 
                 Math.round((userData.common.collected.length / userData.common.all.length) * 100) : 0;
             
             commonStats.textContent = `Твоя шедевральная коллекция`;
             commonBadge.textContent = `${commonProgress}%`;
             
+            secretBadge.textContent = `${userData.secret.collected.length} шт`;
+            prizeBadge.textContent = `${userData.prize.collected.length} шт`;
+            
             const secretCard = document.getElementById('secretCard');
             const prizeCard = document.getElementById('prizeCard');
-            const secretBadge = document.getElementById('secretBadge');
             
             if (userData.secret.collected.length > 0) {
                 secretCard.style.display = 'flex';
-                secretBadge.textContent = 'NEW';
             } else {
                 secretCard.style.display = 'none';
             }
@@ -873,7 +910,20 @@
                 const randomChibi = collected[Math.floor(Math.random() * collected.length)];
                 const imageUrl = `https://raw.githubusercontent.com/therootishere00-ux/Chibi-bot/main/chibis/${type}/${randomChibi.replace(/ /g, '_')}.png`;
                 
-                iconElement.innerHTML = `<img src="${imageUrl}" alt="${type}" onerror="this.style.display='none'">`;
+                const img = new Image();
+                img.src = imageUrl;
+                img.alt = type;
+                img.style.opacity = '0';
+                img.onload = function() {
+                    img.style.transition = 'opacity 0.3s ease';
+                    img.style.opacity = '1';
+                };
+                img.onerror = function() {
+                    img.style.display = 'none';
+                };
+                
+                iconElement.innerHTML = '';
+                iconElement.appendChild(img);
             } else {
                 iconElement.innerHTML = `
                     <img src="https://img.icons8.com/?size=100&id=wKLATegpDP1G&format=png&color=000000" alt="Lock" style="filter: invert(0.6); width: 24px; height: 24px;">
@@ -889,11 +939,12 @@
             
             const chibisToShow = (type === 'common') ? data.all : data.collected;
             
-            chibisToShow.forEach((chibiName) => {
+            chibisToShow.forEach((chibiName, index) => {
                 const isCollected = data.collected.includes(chibiName);
                 
                 const card = document.createElement('div');
                 card.className = 'chibi-card';
+                card.style.animationDelay = `${index * 0.05}s`;
                 card.onclick = () => {
                     if (isCollected) {
                         const imageUrl = `https://raw.githubusercontent.com/therootishere00-ux/Chibi-bot/main/chibis/${type}/${chibiName.replace(/ /g, '_')}.png`;
@@ -904,10 +955,22 @@
                 
                 const imageUrl = `https://raw.githubusercontent.com/therootishere00-ux/Chibi-bot/main/chibis/${type}/${chibiName.replace(/ /g, '_')}.png`;
                 
+                const img = new Image();
+                img.src = imageUrl;
+                img.alt = chibiName;
+                img.className = 'chibi-image';
+                img.style.opacity = '0';
+                img.onload = function() {
+                    setTimeout(() => {
+                        img.style.opacity = '1';
+                    }, 100 + (index * 50));
+                };
+                img.onerror = function() {
+                    img.style.display = 'none';
+                };
+                
                 card.innerHTML = `
                     <div class="chibi-image-container">
-                        <img src="${imageUrl}" alt="${chibiName}" class="chibi-image"
-                             onerror="this.style.display='none'">
                     </div>
                     ${isCollected ? `
                         <div class="chibi-info">
@@ -915,6 +978,9 @@
                         </div>
                     ` : ''}
                 `;
+                
+                const imageContainer = card.querySelector('.chibi-image-container');
+                imageContainer.appendChild(img);
                 
                 if (!isCollected && type === 'common') {
                     const lockOverlay = document.createElement('div');
