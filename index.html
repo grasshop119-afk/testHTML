@@ -215,7 +215,6 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: opacity 0.3s ease;
         }
 
         .collection-info {
@@ -353,16 +352,6 @@
             overflow: hidden;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
             border: 1px solid #222;
-            opacity: 0;
-            transform: translateY(10px);
-            animation: fadeInUp 0.4s ease forwards;
-        }
-
-        @keyframes fadeInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         .chibi-card:active {
@@ -393,7 +382,6 @@
             height: 100%;
             object-fit: cover;
             display: block;
-            transition: opacity 0.3s ease;
         }
 
         .chibi-info {
@@ -464,14 +452,6 @@
             max-width: 90%;
             max-height: 90%;
             object-fit: contain;
-            opacity: 0;
-            transform: scale(0.9);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-
-        .fullscreen-viewer.active .fullscreen-image {
-            opacity: 1;
-            transform: scale(1);
         }
 
         :root {
@@ -574,7 +554,7 @@
                 <span class="nav-label">Чибики</span>
             </div>
             
-            <div class="nav-item" onclick="tg.HapticFeedback.impactOccurred('light')">
+            <div class="nav-item" onclick="openAdvent()">
                 <img src="https://img.icons8.com/?size=100&id=73WhoVlA0pQc&format=png&color=000000" 
                      alt="Адвент" 
                      class="nav-icon">
@@ -723,7 +703,21 @@
             tg.HapticFeedback.impactOccurred('light');
             
             document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.nav-item')[0].classList.add('active');
+            document.querySelectorAll('.nav-item')[tab === 'home' ? 0 : 2].classList.add('active');
+            
+            if (tab === 'home') {
+                hideAllScreens();
+                document.getElementById('homeScreen').classList.remove('hidden');
+                currentScreen = 'home';
+                tg.BackButton.hide();
+                document.getElementById('viewToggle').classList.add('hidden');
+                document.getElementById('footer').classList.remove('hidden');
+            }
+        }
+
+        function openAdvent() {
+            tg.HapticFeedback.impactOccurred('light');
+            tg.openLink('advent.html');
         }
 
         function openCollection(type) {
@@ -774,23 +768,11 @@
             
             image.src = imageSrc;
             viewer.classList.add('active');
-            
-            setTimeout(() => {
-                image.style.opacity = '1';
-                image.style.transform = 'scale(1)';
-            }, 10);
         }
 
         function closeFullscreen() {
             const viewer = document.getElementById('fullscreenViewer');
-            const image = document.getElementById('fullscreenImage');
-            
-            image.style.opacity = '0';
-            image.style.transform = 'scale(0.9)';
-            
-            setTimeout(() => {
-                viewer.classList.remove('active');
-            }, 300);
+            viewer.classList.remove('active');
         }
 
         function openArticle(type) {
@@ -910,20 +892,7 @@
                 const randomChibi = collected[Math.floor(Math.random() * collected.length)];
                 const imageUrl = `https://raw.githubusercontent.com/therootishere00-ux/Chibi-bot/main/chibis/${type}/${randomChibi.replace(/ /g, '_')}.png`;
                 
-                const img = new Image();
-                img.src = imageUrl;
-                img.alt = type;
-                img.style.opacity = '0';
-                img.onload = function() {
-                    img.style.transition = 'opacity 0.3s ease';
-                    img.style.opacity = '1';
-                };
-                img.onerror = function() {
-                    img.style.display = 'none';
-                };
-                
-                iconElement.innerHTML = '';
-                iconElement.appendChild(img);
+                iconElement.innerHTML = `<img src="${imageUrl}" alt="${type}" onerror="this.style.display='none'">`;
             } else {
                 iconElement.innerHTML = `
                     <img src="https://img.icons8.com/?size=100&id=wKLATegpDP1G&format=png&color=000000" alt="Lock" style="filter: invert(0.6); width: 24px; height: 24px;">
@@ -939,12 +908,11 @@
             
             const chibisToShow = (type === 'common') ? data.all : data.collected;
             
-            chibisToShow.forEach((chibiName, index) => {
+            chibisToShow.forEach((chibiName) => {
                 const isCollected = data.collected.includes(chibiName);
                 
                 const card = document.createElement('div');
                 card.className = 'chibi-card';
-                card.style.animationDelay = `${index * 0.05}s`;
                 card.onclick = () => {
                     if (isCollected) {
                         const imageUrl = `https://raw.githubusercontent.com/therootishere00-ux/Chibi-bot/main/chibis/${type}/${chibiName.replace(/ /g, '_')}.png`;
@@ -955,22 +923,10 @@
                 
                 const imageUrl = `https://raw.githubusercontent.com/therootishere00-ux/Chibi-bot/main/chibis/${type}/${chibiName.replace(/ /g, '_')}.png`;
                 
-                const img = new Image();
-                img.src = imageUrl;
-                img.alt = chibiName;
-                img.className = 'chibi-image';
-                img.style.opacity = '0';
-                img.onload = function() {
-                    setTimeout(() => {
-                        img.style.opacity = '1';
-                    }, 100 + (index * 50));
-                };
-                img.onerror = function() {
-                    img.style.display = 'none';
-                };
-                
                 card.innerHTML = `
                     <div class="chibi-image-container">
+                        <img src="${imageUrl}" alt="${chibiName}" class="chibi-image"
+                             onerror="this.style.display='none'">
                     </div>
                     ${isCollected ? `
                         <div class="chibi-info">
@@ -978,9 +934,6 @@
                         </div>
                     ` : ''}
                 `;
-                
-                const imageContainer = card.querySelector('.chibi-image-container');
-                imageContainer.appendChild(img);
                 
                 if (!isCollected && type === 'common') {
                     const lockOverlay = document.createElement('div');
