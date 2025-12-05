@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Адвент - Chibeki</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000000;
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 52px;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 100;
+            border-bottom: 0.5px solid #222;
+        }
+
+        .logo {
+            height: 32px;
+            width: auto;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-top: 0.5px solid #222;
+            padding: 0 40px;
+            z-index: 100;
+        }
+
+        .nav-items {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            flex: 1;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .nav-item.active {
+            color: var(--accent-color, #007AFF);
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item .nav-icon {
+            filter: invert(1) opacity(0.7);
+        }
+
+        .nav-item.active .nav-icon {
+            filter: invert(1) sepia(1) saturate(10000%) hue-rotate(200deg) brightness(1.2);
+            opacity: 1;
+        }
+
+        .nav-label {
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: -0.2px;
+        }
+
+        .main-content {
+            position: absolute;
+            top: 52px;
+            bottom: 60px;
+            left: 0;
+            right: 0;
+            overflow-y: auto;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+            padding: 20px;
+        }
+
+        .main-content::-webkit-scrollbar {
+            display: none;
+        }
+
+        .advent-title {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            text-align: center;
+            color: #FFFFFF;
+        }
+
+        .advent-description {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .advent-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+        }
+
+        .advent-message {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.5);
+            text-align: center;
+        }
+
+        :root {
+            --accent-color: #007AFF;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="https://i.ibb.co/zTB331HR/image.png" alt="Chibeki" class="logo">
+        <div class="header-right"></div>
+    </div>
+
+    <div class="main-content">
+        <h1 class="advent-title">Адвент-календарь</h1>
+        <p class="advent-description">
+            Каждый день открывай новый сюрприз!<br>
+            Собирай эксклюзивные чибики и получай призы.
+        </p>
+        
+        <div class="advent-container">
+            <div class="advent-message">
+                Адвент-календарь скоро откроется!<br>
+                Следи за обновлениями.
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="nav-items">
+            <div class="nav-item" onclick="goToHome()">
+                <img src="https://images.icon-icons.com/3832/PNG/512/rocket_icon_234403.png" 
+                     alt="Чибики" 
+                     class="nav-icon">
+                <span class="nav-label">Чибики</span>
+            </div>
+            
+            <div class="nav-item active">
+                <img src="https://img.icons8.com/?size=100&id=73WhoVlA0pQc&format=png&color=000000" 
+                     alt="Адвент" 
+                     class="nav-icon">
+                <span class="nav-label">Адвент</span>
+            </div>
+            
+            <div class="nav-item" onclick="tg.HapticFeedback.impactOccurred('light')">
+                <img src="https://img.icons8.com/?size=100&id=83180&format=png&color=000000" 
+                     alt="Инфо" 
+                     class="nav-icon">
+                <span class="nav-label">Инфо</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        
+        function initTelegramApp() {
+            tg.ready();
+            tg.expand();
+            tg.setHeaderColor('#000000');
+            tg.setBackgroundColor('#000000');
+            
+            if (tg.themeParams.accent_text_color) {
+                const accentColor = tg.themeParams.accent_text_color;
+                document.documentElement.style.setProperty('--accent-color', accentColor);
+            }
+            
+            setupFooter();
+        }
+
+        function setupFooter() {
+            const user = tg.initDataUnsafe?.user;
+            if (user && user.photo_url) {
+                document.querySelector('.nav-item:nth-child(3) .nav-icon').innerHTML = 
+                    `<img src="${user.photo_url}" alt="Avatar" style="width:100%;height:100%;border-radius:50%;">`;
+            }
+        }
+
+        function goToHome() {
+            tg.HapticFeedback.impactOccurred('light');
+            window.location.href = 'index.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', initTelegramApp);
+    </script>
+</body>
+</html>
