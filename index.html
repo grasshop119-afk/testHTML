@@ -26,10 +26,6 @@
             overflow: hidden;
         }
 
-        body.no-animations * {
-            transition: none !important;
-        }
-
         .screen {
             position: absolute;
             top: 0;
@@ -62,6 +58,22 @@
         .logo {
             height: 32px;
             width: auto;
+        }
+
+        .header-image {
+            position: fixed;
+            top: 52px;
+            left: 0;
+            right: 0;
+            height: 150px;
+            z-index: 99;
+            overflow: hidden;
+        }
+
+        .header-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .header-right {
@@ -133,42 +145,13 @@
             transition: all 0.2s ease;
         }
 
-        .nav-item .nav-icon:not(.profile-icon) {
-            filter: brightness(1) invert(1) opacity(0.7);
+        .nav-item .nav-icon {
+            filter: invert(1) opacity(0.7);
         }
 
-        .nav-item.active .nav-icon:not(.profile-icon) {
-            filter: brightness(1) sepia(1) saturate(10000%) hue-rotate(200deg);
+        .nav-item.active .nav-icon {
+            filter: invert(1) sepia(1) saturate(10000%) hue-rotate(200deg) brightness(1.2);
             opacity: 1;
-        }
-
-        .profile-icon {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: all 0.2s ease;
-        }
-
-        .nav-item .profile-icon {
-            background-color: rgba(255, 255, 255, 0.7);
-        }
-
-        .nav-item .profile-icon .profile-inner {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: rgba(0, 0, 0, 0.7);
-        }
-
-        .nav-item.active .profile-icon {
-            background-color: var(--accent-color, #007AFF);
-        }
-
-        .nav-item.active .profile-icon .profile-inner {
-            background-color: #FFFFFF;
         }
 
         .nav-label {
@@ -179,7 +162,7 @@
 
         .main-content {
             position: absolute;
-            top: 52px;
+            top: 202px;
             bottom: 60px;
             left: 0;
             right: 0;
@@ -274,6 +257,70 @@
             font-weight: 600;
         }
 
+        .articles-container {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .article-card {
+            flex: 1;
+            background: #1A1A1A;
+            border-radius: 21px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.15s ease;
+            border: 1px solid #222;
+            min-height: 60px;
+            height: 60px;
+        }
+
+        .article-card:active {
+            background: #222;
+        }
+
+        .article-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--accent-color, #007AFF);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+
+        .article-icon img {
+            width: 20px;
+            height: 20px;
+            filter: brightness(0) invert(1);
+        }
+
+        .article-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .article-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #FFFFFF;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .article-description {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
         .collection-screen {
             padding: 16px;
             padding-top: 68px;
@@ -285,29 +332,6 @@
 
         .collection-screen::-webkit-scrollbar {
             display: none;
-        }
-
-        .development-screen {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            padding: 40px;
-            text-align: center;
-        }
-
-        .development-gif {
-            width: 150px;
-            height: 150px;
-            margin-bottom: 20px;
-        }
-
-        .development-text {
-            font-size: 18px;
-            font-weight: 600;
-            color: #8E8E93;
-            margin-top: 16px;
         }
 
         .chibi-grid {
@@ -413,173 +437,6 @@
             font-weight: 500;
         }
 
-        .profile-screen {
-            padding: 24px 16px;
-            overflow-y: auto;
-            height: calc(100% - 52px);
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-            margin-top: 52px;
-        }
-
-        .profile-screen::-webkit-scrollbar {
-            display: none;
-        }
-
-        .profile-header {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 32px;
-        }
-
-        .profile-avatar {
-            width: 100px;
-            height: 100px;
-            border-radius: 21px;
-            overflow: hidden;
-            margin-bottom: 21px;
-            background: #1A1A1A;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid #222;
-        }
-
-        .profile-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .profile-name {
-            font-size: 20px;
-            font-weight: 600;
-            color: #FFFFFF;
-            margin-bottom: 4px;
-            text-align: center;
-        }
-
-        .profile-username {
-            font-size: 15px;
-            color: rgba(255, 255, 255, 0.7);
-            text-align: center;
-        }
-
-        .divider {
-            height: 0.5px;
-            background: #222;
-            margin: 24px 0;
-        }
-
-        .settings-section {
-            background: #1A1A1A;
-            border-radius: 21px;
-            overflow: hidden;
-            margin-bottom: 24px;
-            border: 1px solid #222;
-        }
-
-        .setting-item {
-            display: flex;
-            align-items: center;
-            padding: 16px;
-            transition: background-color 0.15s ease;
-        }
-
-        .setting-item:active {
-            background: #222;
-        }
-
-        .setting-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 12px;
-            opacity: 0.6;
-        }
-
-        .setting-icon.blue img {
-            filter: invert(0.4) sepia(1) saturate(20) hue-rotate(190deg) brightness(1.2);
-        }
-
-        .setting-icon.purple img {
-            filter: invert(0.4) sepia(1) saturate(20) hue-rotate(250deg) brightness(1.2);
-        }
-
-        .setting-icon.pink img {
-            filter: invert(0.4) sepia(1) saturate(20) hue-rotate(320deg) brightness(1.2);
-        }
-
-        .setting-icon img {
-            width: 20px;
-            height: 20px;
-            opacity: 1;
-        }
-
-        .setting-info {
-            flex: 1;
-        }
-
-        .setting-name {
-            font-size: 16px;
-            font-weight: 500;
-            color: #FFFFFF;
-            margin-bottom: 2px;
-        }
-
-        .setting-description {
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .ios-switch {
-            position: relative;
-            width: 51px;
-            height: 31px;
-        }
-
-        .ios-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .ios-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #3A3B3C;
-            transition: .4s;
-            border-radius: 34px;
-        }
-
-        .ios-slider:before {
-            position: absolute;
-            content: "";
-            height: 27px;
-            width: 27px;
-            left: 2px;
-            bottom: 2px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .ios-slider {
-            background-color: var(--accent-color, #007AFF);
-        }
-
-        input:checked + .ios-slider:before {
-            transform: translateX(20px);
-        }
-
         .fullscreen-viewer {
             position: fixed;
             top: 0;
@@ -661,6 +518,10 @@
         </div>
     </div>
 
+    <div class="header-image">
+        <img src="https://i.ibb.co/XZ7vvqCd/image.png" alt="Header Image">
+    </div>
+
     <div class="footer" id="footer">
         <div class="nav-items">
             <div class="nav-item active" onclick="switchTab('home')">
@@ -670,18 +531,18 @@
                 <span class="nav-label">Чибики</span>
             </div>
             
-            <div class="nav-item" onclick="showDevelopmentAlert()">
+            <div class="nav-item" onclick="openAdvent()">
                 <img src="https://img.icons8.com/?size=100&id=73WhoVlA0pQc&format=png&color=000000" 
-                     alt="???" 
+                     alt="Адвент" 
                      class="nav-icon">
                 <span class="nav-label">Адвент</span>
             </div>
             
-            <div class="nav-item" onclick="switchTab('profile')">
-                <div class="profile-icon">
-                    <div class="profile-inner"></div>
-                </div>
-                <span class="nav-label">Профиль</span>
+            <div class="nav-item" onclick="openInfo()">
+                <img src="https://img.icons8.com/?size=100&id=83180&format=png&color=000000" 
+                     alt="Инфо" 
+                     class="nav-icon">
+                <span class="nav-label">Инфо</span>
             </div>
         </div>
     </div>
@@ -720,80 +581,26 @@
 
             <div class="section">
                 <div class="section-title">Статьи</div>
-                
-                <div class="collection-card" onclick="openArticle('dice')">
-                    <div class="collection-icon">
-                        <img src="https://img.icons8.com/?size=100&id=D9RFWfYE57lW&format=png&color=8E8E93" alt="Статья">
+                <div class="articles-container">
+                    <div class="article-card" onclick="openArticle('dice')">
+                        <div class="article-icon">
+                            <img src="https://img.icons8.com/?size=100&id=83194&format=png&color=000000" alt="Кости">
+                        </div>
+                        <div class="article-info">
+                            <div class="article-name">Кости</div>
+                            <div class="article-description">Расскажем как играть</div>
+                        </div>
                     </div>
-                    <div class="collection-info">
-                        <div class="collection-name">Что такое кости и с чем их едят?</div>
-                        <div class="collection-stats">Шикарный и понятный гайд про азартную игру</div>
+                    
+                    <div class="article-card" onclick="openArticle('feedback')">
+                        <div class="article-icon">
+                            <img src="https://img.icons8.com/?size=100&id=83180&format=png&color=000000" alt="Фидбек">
+                        </div>
+                        <div class="article-info">
+                            <div class="article-name">Фидбек</div>
+                            <div class="article-description">Объясним, как обратиться к админам</div>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="collection-card" onclick="openArticle('help')">
-                    <div class="collection-icon">
-                        <img src="https://img.icons8.com/?size=100&id=D9RFWfYE57lW&format=png&color=8E8E93" alt="Статья">
-                    </div>
-                    <div class="collection-info">
-                        <div class="collection-name">Как обратиться к админам?</div>
-                        <div class="collection-stats">Расскажем как связаться с нами анонимно</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="screen profile-screen hidden" id="profileScreen">
-            <div class="profile-header">
-                <div class="profile-avatar" id="profileAvatar"></div>
-                <div class="profile-name" id="profileName">Имя пользователя</div>
-                <div class="profile-username" id="profileUsername">@username</div>
-            </div>
-
-            <div class="divider"></div>
-
-            <div class="section-title">Внешний вид</div>
-            <div class="settings-section">
-                <div class="setting-item">
-                    <div class="setting-icon blue" style="background-color: rgba(0, 122, 255, 0.6);">
-                        <img src="https://img.icons8.com/?size=100&id=pYnrAZ9TKgwl&format=png&color=000000" alt="Анимации">
-                    </div>
-                    <div class="setting-info">
-                        <div class="setting-name">Плавные анимации</div>
-                    </div>
-                    <label class="ios-switch">
-                        <input type="checkbox" id="smoothAnimations" checked>
-                        <span class="ios-slider"></span>
-                    </label>
-                </div>
-
-                <div class="setting-item">
-                    <div class="setting-icon purple" style="background-color: rgba(175, 82, 222, 0.6);">
-                        <img src="https://img.icons8.com/?size=100&id=MA2u7eOkbJSh&format=png&color=000000" alt="Цвет темы">
-                    </div>
-                    <div class="setting-info">
-                        <div class="setting-name">Цвет как в теме</div>
-                    </div>
-                    <label class="ios-switch">
-                        <input type="checkbox" id="themeColor">
-                        <span class="ios-slider"></span>
-                    </label>
-                </div>
-            </div>
-
-            <div class="section-title">Прочие штуки</div>
-            <div class="settings-section">
-                <div class="setting-item">
-                    <div class="setting-icon pink" style="background-color: rgba(255, 45, 85, 0.6);">
-                        <img src="https://img.icons8.com/?size=100&id=ej7toC9rWoVj&format=png&color=000000" alt="Вибрация">
-                    </div>
-                    <div class="setting-info">
-                        <div class="setting-name">Вибрация</div>
-                    </div>
-                    <label class="ios-switch">
-                        <input type="checkbox" id="vibration" checked>
-                        <span class="ios-slider"></span>
-                    </label>
                 </div>
             </div>
         </div>
@@ -826,49 +633,6 @@
         
         let currentScreen = 'home';
         let currentViewMode = 3;
-        let settings = {
-            smoothAnimations: true,
-            vibration: true,
-            themeColor: false
-        };
-
-        function loadSettings() {
-            const saved = localStorage.getItem('chibekiSettings');
-            if (saved) {
-                settings = { ...settings, ...JSON.parse(saved) };
-            }
-            applySettings();
-        }
-
-        function saveSettings() {
-            localStorage.setItem('chibekiSettings', JSON.stringify(settings));
-            applySettings();
-        }
-
-        function applySettings() {
-            if (document.getElementById('smoothAnimations')) {
-                document.getElementById('smoothAnimations').checked = settings.smoothAnimations;
-            }
-            if (document.getElementById('vibration')) {
-                document.getElementById('vibration').checked = settings.vibration;
-            }
-            if (document.getElementById('themeColor')) {
-                document.getElementById('themeColor').checked = settings.themeColor;
-            }
-            
-            if (settings.themeColor && tg.themeParams.accent_text_color) {
-                const accentColor = tg.themeParams.accent_text_color;
-                document.documentElement.style.setProperty('--accent-color', accentColor);
-            } else {
-                document.documentElement.style.setProperty('--accent-color', '#007AFF');
-            }
-            
-            if (settings.smoothAnimations) {
-                document.body.classList.remove('no-animations');
-            } else {
-                document.body.classList.add('no-animations');
-            }
-        }
 
         function initTelegramApp() {
             tg.ready();
@@ -876,15 +640,24 @@
             tg.setHeaderColor('#000000');
             tg.setBackgroundColor('#000000');
             
+            if (tg.themeParams.accent_text_color) {
+                const accentColor = tg.themeParams.accent_text_color;
+                document.documentElement.style.setProperty('--accent-color', accentColor);
+            }
+            
             tg.BackButton.onClick(goBack);
             
             showPreloader();
-            
-            loadSettings();
             loadUserData();
             setupFooter();
-            setupProfile();
-            setupEventListeners();
+        }
+
+        function setupFooter() {
+            const user = tg.initDataUnsafe?.user;
+            if (user && user.photo_url) {
+                document.querySelector('.nav-item:nth-child(3) .nav-icon').innerHTML = 
+                    `<img src="${user.photo_url}" alt="Avatar" style="width:100%;height:100%;border-radius:50%;">`;
+            }
         }
 
         function showPreloader() {
@@ -898,104 +671,35 @@
             }, randomTime);
         }
 
-        function setupFooter() {
-            const user = tg.initDataUnsafe?.user;
-            const profileIcon = document.querySelector('.nav-item[onclick="switchTab(\'profile\')"] .profile-icon');
-            
-            if (user && user.photo_url) {
-                profileIcon.innerHTML = `<img src="${user.photo_url}" alt="Avatar" style="width:100%;height:100%;border-radius:50%;">`;
-                profileIcon.querySelector('.profile-inner')?.remove();
-            }
-        }
-
-        function setupProfile() {
-            const user = tg.initDataUnsafe?.user;
-            const profileAvatar = document.getElementById('profileAvatar');
-            const profileName = document.getElementById('profileName');
-            const profileUsername = document.getElementById('profileUsername');
-            
-            if (user) {
-                if (user.photo_url) {
-                    profileAvatar.innerHTML = `<img src="${user.photo_url}" alt="Profile Avatar">`;
-                } else {
-                    profileAvatar.innerHTML = '';
-                }
-                
-                profileName.textContent = user.first_name || 'Пользователь';
-                profileUsername.textContent = user.username ? `@${user.username}` : '@username';
-            }
-        }
-
-        function setupEventListeners() {
-            document.getElementById('smoothAnimations').addEventListener('change', function() {
-                settings.smoothAnimations = this.checked;
-                saveSettings();
-                if (settings.vibration) {
-                    tg.HapticFeedback.impactOccurred('light');
-                }
-            });
-
-            document.getElementById('vibration').addEventListener('change', function() {
-                settings.vibration = this.checked;
-                saveSettings();
-            });
-
-            document.getElementById('themeColor').addEventListener('change', function() {
-                settings.themeColor = this.checked;
-                saveSettings();
-                if (settings.vibration) {
-                    tg.HapticFeedback.impactOccurred('light');
-                }
-            });
-        }
-
         function switchTab(tab) {
-            if (settings.vibration) {
-                tg.HapticFeedback.impactOccurred('light');
-            }
+            tg.HapticFeedback.impactOccurred('light');
             
             document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.nav-item')[tab === 'home' ? 0 : tab === 'profile' ? 2 : 1].classList.add('active');
+            document.querySelectorAll('.nav-item')[tab === 'home' ? 0 : 2].classList.add('active');
             
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             
             document.getElementById(`${tab}Screen`).classList.remove('hidden');
             currentScreen = tab;
             
-            if (tab === 'profile') {
-                document.getElementById('viewToggle').classList.add('hidden');
+            if (tab === 'home') {
                 tg.BackButton.hide();
-            } else {
-                if (tab === 'home') {
-                    tg.BackButton.hide();
-                    document.getElementById('viewToggle').classList.add('hidden');
-                    document.getElementById('footer').classList.remove('hidden');
-                }
+                document.getElementById('viewToggle').classList.add('hidden');
+                document.getElementById('footer').classList.remove('hidden');
             }
         }
 
-        function showDevelopmentAlert() {
-            if (settings.vibration) {
-                tg.HapticFeedback.impactOccurred('light');
-            }
-            
-            tg.showPopup({
-                title: 'В разработке',
-                message: 'Скоро здесь что-то будет…',
-                buttons: [
-                    {
-                        type: 'ok',
-                        text: 'Понятно',
-                        id: 'ok'
-                    }
-                ]
-            });
+        function openAdvent() {
+            tg.HapticFeedback.impactOccurred('light');
+            tg.openTelegramLink('https://t.me/chibeki_bot');
+        }
+
+        function openInfo() {
+            tg.HapticFeedback.impactOccurred('light');
         }
 
         function openCollection(type) {
-            if (settings.vibration) {
-                tg.HapticFeedback.impactOccurred('light');
-            }
+            tg.HapticFeedback.impactOccurred('light');
             
             document.getElementById('footer').classList.add('hidden');
             
@@ -1009,13 +713,9 @@
         }
 
         function goBack() {
-            if (settings.vibration) {
-                tg.HapticFeedback.impactOccurred('light');
-            }
+            tg.HapticFeedback.impactOccurred('light');
             
-            if (currentScreen === 'profile') {
-                switchTab('home');
-            } else if (currentScreen === 'common' || currentScreen === 'secret' || currentScreen === 'prize') {
+            if (currentScreen === 'common' || currentScreen === 'secret' || currentScreen === 'prize') {
                 hideAllScreens();
                 document.getElementById('homeScreen').classList.remove('hidden');
                 currentScreen = 'home';
@@ -1030,9 +730,7 @@
         }
 
         function toggleViewMode() {
-            if (settings.vibration) {
-                tg.HapticFeedback.impactOccurred('light');
-            }
+            tg.HapticFeedback.impactOccurred('light');
             
             currentViewMode = currentViewMode === 3 ? 2 : currentViewMode === 2 ? 1 : 3;
             
@@ -1055,69 +753,18 @@
             viewer.classList.remove('active');
         }
 
-        function showBotAlert() {
-            tg.showPopup({
-                title: 'Запусти бота! 🚀',
-                message: 'Чтобы собрать свою коллекцию чибиков, нужно сначала запустить @chibeki_bot',
-                buttons: [
-                    {
-                        type: 'default',
-                        text: 'Запустить бота',
-                        id: 'launch_bot'
-                    },
-                    {
-                        type: 'cancel',
-                        text: 'Позже',
-                        id: 'later'
-                    }
-                ]
-            }, function(buttonId) {
-                if (buttonId === 'launch_bot') {
-                    tg.openTelegramLink('https://t.me/chibeki_bot');
-                }
-            });
-        }
-
         function openArticle(type) {
-            if (settings.vibration) {
-                tg.HapticFeedback.impactOccurred('medium');
-            }
+            tg.HapticFeedback.impactOccurred('medium');
             
             const articles = {
-                dice: {
-                    title: 'Что такое кости и с чем их едят?',
-                    message: 'Шикарный и понятный гайд про азартную игру',
-                    url: 'https://telegra.ph/Kak-rabotayut-kosti--CHIBIKI-11-10'
-                },
-                help: {
-                    title: 'Как обратиться к админам?',
-                    message: 'Расскажем как связаться с нами анонимно',
-                    url: 'https://telegra.ph/Kak-svyazatsya-s-adminami-11-11'
-                }
+                dice: 'https://telegra.ph/Kak-rabotayut-kosti--CHIBIKI-11-10',
+                feedback: 'https://telegra.ph/Kak-svyazatsya-s-adminami-11-11'
             };
             
-            const article = articles[type];
-            
-            tg.showPopup({
-                title: article.title,
-                message: article.message,
-                buttons: [
-                    {
-                        type: 'default',
-                        text: 'Читать',
-                        id: 'read'
-                    },
-                    {
-                        type: 'cancel',
-                        text: 'Отмена',
-                        id: 'cancel'
-                    }
-                ]
-            }, function(buttonId) {
-                if (buttonId === 'read') {
-                    tg.openLink(article.url);
-                }
-            });
+            const url = articles[type];
+            if (url) {
+                tg.openLink(url);
+            }
         }
 
         async function loadUserData() {
@@ -1128,25 +775,12 @@
                 
                 if (user) {
                     await loadUserCollection(user.id);
-                    
-                    if (user.username === 'ya_admin7') {
-                        setTimeout(showBotAlert, 1000);
-                    }
                 }
                 
                 updateMainScreen();
                 
-                const totalChibis = userData.common.collected.length + userData.secret.collected.length + userData.prize.collected.length;
-                if (totalChibis === 0 && user && user.username !== 'ya_admin7') {
-                    setTimeout(showBotAlert, 1000);
-                }
-                
             } catch (error) {
                 console.error('Error loading data:', error);
-                const user = tg.initDataUnsafe?.user;
-                if (user && user.username === 'ya_admin7') {
-                    setTimeout(showBotAlert, 1000);
-                }
             }
         }
 
@@ -1258,9 +892,7 @@
                         const imageUrl = `https://raw.githubusercontent.com/therootishere00-ux/Chibi-bot/main/chibis/${type}/${chibiName.replace(/ /g, '_')}.png`;
                         openFullscreen(imageUrl);
                     }
-                    if (settings.vibration) {
-                        tg.HapticFeedback.impactOccurred('light');
-                    }
+                    tg.HapticFeedback.impactOccurred('light');
                 };
                 
                 const imageUrl = `https://raw.githubusercontent.com/therootishere00-ux/Chibi-bot/main/chibis/${type}/${chibiName.replace(/ /g, '_')}.png`;
