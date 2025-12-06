@@ -73,8 +73,8 @@
 
         .user-avatar-container {
             position: relative;
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             border-radius: 14px;
             border: 1.5px solid var(--accent-color, #007AFF);
             overflow: visible;
@@ -122,7 +122,7 @@
             position: absolute;
             top: 45px;
             right: -5px;
-            background: #000000;
+            background: #1A1A1A;
             border-radius: 8px;
             padding: 8px 12px;
             font-size: 14px;
@@ -148,7 +148,7 @@
             height: 0;
             border-left: 6px solid transparent;
             border-right: 6px solid transparent;
-            border-bottom: 6px solid #000000;
+            border-bottom: 6px solid #1A1A1A;
         }
 
         .main-content {
@@ -286,6 +286,7 @@
             align-items: center;
             transition: background-color 0.15s ease;
             border: 1px solid #222;
+            cursor: pointer;
         }
 
         .article-card:active {
@@ -541,8 +542,8 @@
             }
             
             .user-avatar-container {
-                width: 34px;
-                height: 34px;
+                width: 38px;
+                height: 38px;
                 border-radius: 12px;
             }
             
@@ -564,8 +565,8 @@
             }
             
             .user-avatar-container {
-                width: 32px;
-                height: 32px;
+                width: 36px;
+                height: 36px;
                 border-radius: 10px;
             }
             
@@ -642,7 +643,7 @@
             <div class="section">
                 <div class="section-title">Статьи</div>
                 <div class="articles-container">
-                    <div class="article-card">
+                    <div class="article-card" onclick="openArticle('dice')">
                         <div class="article-icon">
                             <img src="https://img.icons8.com/?size=100&id=83194&format=png&color=000000" alt="Кости">
                         </div>
@@ -652,7 +653,7 @@
                         </div>
                     </div>
                     
-                    <div class="article-card">
+                    <div class="article-card" onclick="openArticle('feedback')">
                         <div class="article-icon">
                             <img src="https://img.icons8.com/?size=100&id=83194&format=png&color=000000" alt="Фидбек">
                         </div>
@@ -709,6 +710,17 @@
             }
             
             tg.BackButton.onClick(goBack);
+            
+            // Добавляем обработчик клика по всему документу для скрытия плашки
+            document.addEventListener('click', function(e) {
+                const tooltip = document.getElementById('eventTooltip');
+                const avatarContainer = document.getElementById('userAvatarContainer');
+                
+                // Если клик не по аватарке и не по плашке, скрываем плашку
+                if (!avatarContainer.contains(e.target) && !tooltip.contains(e.target) && tooltipVisible) {
+                    hideEventTooltip();
+                }
+            });
             
             // Проверяем время последней загрузки
             const lastLoadTime = localStorage.getItem('chibeki_last_load');
@@ -804,18 +816,22 @@
             const tooltip = document.getElementById('eventTooltip');
             
             if (tooltipVisible) {
-                tooltip.classList.remove('show');
-                tooltipVisible = false;
+                hideEventTooltip();
             } else {
                 tooltip.classList.add('show');
                 tooltipVisible = true;
                 
                 // Автоматически скрываем через 3 секунды
                 setTimeout(() => {
-                    tooltip.classList.remove('show');
-                    tooltipVisible = false;
+                    hideEventTooltip();
                 }, 3000);
             }
+        }
+
+        function hideEventTooltip() {
+            const tooltip = document.getElementById('eventTooltip');
+            tooltip.classList.remove('show');
+            tooltipVisible = false;
         }
 
         function switchTab(tab) {
@@ -846,9 +862,7 @@
             gifElement.style.display = 'none';
             
             // Скрываем подсказку если она была открыта
-            const tooltip = document.getElementById('eventTooltip');
-            tooltip.classList.remove('show');
-            tooltipVisible = false;
+            hideEventTooltip();
             
             tg.BackButton.show();
             document.getElementById('viewToggle').classList.remove('hidden');
@@ -898,6 +912,33 @@
         function closeFullscreen() {
             const viewer = document.getElementById('fullscreenViewer');
             viewer.classList.remove('active');
+        }
+
+        function openArticle(type) {
+            tg.HapticFeedback.impactOccurred('medium');
+            
+            console.log('Opening article:', type);
+            
+            const articles = {
+                dice: 'https://telegra.ph/Kak-rabotayut-kosti--CHIBIKI-11-10',
+                feedback: 'https://telegra.ph/Kak-svyazatsya-s-adminami-11-11'
+            };
+            
+            const url = articles[type];
+            if (url) {
+                console.log('Opening URL:', url);
+                // Используем стандартный метод Telegram для открытия ссылок
+                if (tg && tg.openTelegramLink) {
+                    tg.openTelegramLink(url);
+                } else if (tg && tg.openLink) {
+                    tg.openLink(url);
+                } else {
+                    // Если API Telegram не доступно, открываем в новом окне
+                    window.open(url, '_blank');
+                }
+            } else {
+                console.error('Article URL not found for type:', type);
+            }
         }
 
         async function loadUserData() {
