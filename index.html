@@ -24,8 +24,6 @@
             color: white;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             overflow: hidden;
-            height: 100vh;
-            width: 100vw;
         }
 
         .screen {
@@ -57,6 +55,11 @@
             border-bottom: 0.5px solid #222;
         }
 
+        .header.collection-header {
+            background: #000000;
+            backdrop-filter: none;
+        }
+
         .logo {
             height: 32px;
             width: auto;
@@ -79,7 +82,6 @@
             align-items: center;
             justify-content: center;
             background: #000;
-            cursor: pointer;
         }
 
         .user-avatar {
@@ -97,9 +99,7 @@
             height: 30px;
             z-index: 2;
             pointer-events: auto;
-            border-radius: 50%;
-            background: #000;
-            border: 2px solid var(--accent-color, #007AFF);
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
         }
 
         .view-toggle {
@@ -118,64 +118,41 @@
             display: none;
         }
 
-        .user-info-popup {
+        .event-tooltip {
             position: absolute;
-            top: 60px;
-            right: 0;
-            background: rgba(40, 40, 40, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 14px;
-            padding: 16px;
+            top: 45px;
+            right: -5px;
+            background: #000000;
+            border-radius: 8px;
+            padding: 8px 12px;
             font-size: 14px;
-            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+            color: #FFFFFF;
             white-space: nowrap;
             opacity: 0;
-            visibility: hidden;
             pointer-events: none;
             z-index: 1000;
-            min-width: 180px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
-        .user-info-popup.show {
+        .event-tooltip.show {
             opacity: 1;
-            visibility: visible;
-            pointer-events: auto;
         }
 
-        .user-info-popup::before {
+        .event-tooltip::before {
             content: '';
             position: absolute;
-            top: -8px;
-            right: 20px;
-            width: 16px;
-            height: 16px;
-            background: rgba(40, 40, 40, 0.95);
-            transform: rotate(45deg);
-            border-top-left-radius: 4px;
-        }
-
-        .user-name {
-            font-weight: 600;
-            margin-bottom: 4px;
-            color: #FFFFFF;
-        }
-
-        .user-username {
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 12px;
-            font-size: 13px;
-        }
-
-        .event-notification {
-            padding-top: 12px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            color: #FFC767;
-            font-weight: 500;
+            top: -6px;
+            right: 12px;
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-bottom: 6px solid #000000;
         }
 
         .main-content {
-            position: fixed;
+            position: absolute;
             top: 52px;
             bottom: 0;
             left: 0;
@@ -285,7 +262,7 @@
             padding: 16px;
             padding-top: 68px;
             overflow-y: auto;
-            height: 100%;
+            height: 100vh;
             -ms-overflow-style: none;
             scrollbar-width: none;
             background: #000000;
@@ -553,22 +530,6 @@
             text-decoration: none;
         }
 
-        /* Оверлей для клика вне попапа */
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: transparent;
-            z-index: 999;
-            display: none;
-        }
-
-        .overlay.active {
-            display: block;
-        }
-
         /* Адаптив для мобильных */
         @media (max-width: 375px) {
             .collection-card, .article-card, .chibi-card {
@@ -586,15 +547,10 @@
             }
             
             .avatar-gif {
-                width: 28px;
-                height: 28px;
+                width: 26px;
+                height: 26px;
                 bottom: -7px;
                 right: -7px;
-            }
-            
-            .user-info-popup {
-                min-width: 160px;
-                font-size: 13px;
             }
         }
 
@@ -614,15 +570,10 @@
             }
             
             .avatar-gif {
-                width: 26px;
-                height: 26px;
+                width: 24px;
+                height: 24px;
                 bottom: -6px;
                 right: -6px;
-            }
-            
-            .user-info-popup {
-                min-width: 140px;
-                font-size: 12px;
             }
         }
     </style>
@@ -640,21 +591,14 @@
         </div>
     </div>
 
-    <!-- Оверлей для закрытия попапа -->
-    <div class="overlay" id="overlay" onclick="hideUserInfo()"></div>
-
-    <div class="header">
+    <div class="header" id="header">
         <img src="https://i.ibb.co/zTB331HR/image.png" alt="Chibeki" class="logo">
         <div class="header-right">
-            <div class="user-avatar-container" onclick="showUserInfo()">
+            <div class="user-avatar-container" id="userAvatarContainer">
                 <div class="user-avatar" id="userAvatar"></div>
                 <img src="" alt="" class="avatar-gif" id="avatarGif">
             </div>
-            <div class="user-info-popup" id="userInfoPopup">
-                <div class="user-name" id="userName"></div>
-                <div class="user-username" id="userUsername"></div>
-                <div class="event-notification">Новогодний ивент 2025</div>
-            </div>
+            <div class="event-tooltip" id="eventTooltip">NewYear2026</div>
             <img src="https://img.icons8.com/?size=100&id=59801&format=png&color=000000" 
                  class="view-toggle hidden" 
                  id="viewToggle"
@@ -751,14 +695,11 @@
         let currentViewMode = 3;
         let isInitialLoad = true;
         let appLoadedTime = null;
+        let tooltipVisible = false;
 
         function initTelegramApp() {
-            // Переходим в полноэкранный режим
             tg.ready();
             tg.expand();
-            tg.enableClosingConfirmation();
-            
-            // Устанавливаем цвета
             tg.setHeaderColor('#000000');
             tg.setBackgroundColor('#000000');
             
@@ -791,31 +732,6 @@
             // Сохраняем время загрузки
             localStorage.setItem('chibeki_last_load', currentTime.toString());
             appLoadedTime = currentTime;
-            
-            // Настраиваем полноэкранное поведение
-            setupFullscreenBehavior();
-        }
-
-        function setupFullscreenBehavior() {
-            // Обработка изменения ориентации
-            window.addEventListener('resize', handleResize);
-            handleResize();
-            
-            // Предотвращаем масштабирование на iOS
-            document.addEventListener('gesturestart', function(e) {
-                e.preventDefault();
-            });
-            
-            // Предотвращаем выделение текста при долгом нажатии
-            document.addEventListener('contextmenu', function(e) {
-                e.preventDefault();
-            });
-        }
-
-        function handleResize() {
-            // Адаптация к разным размерам экрана
-            const vh = window.innerHeight * 0.01;
-            document.documentElement.style.setProperty('--vh', `${vh}px`);
         }
 
         function showPreloader() {
@@ -835,8 +751,7 @@
             const user = tg.initDataUnsafe?.user;
             const avatarElement = document.getElementById('userAvatar');
             const gifElement = document.getElementById('avatarGif');
-            const userNameElement = document.getElementById('userName');
-            const userUsernameElement = document.getElementById('userUsername');
+            const avatarContainer = document.getElementById('userAvatarContainer');
             
             if (user) {
                 // Устанавливаем аватарку пользователя
@@ -845,7 +760,7 @@
                 } else {
                     // Если нет фото, показываем первую букву username
                     const initial = user.username ? user.username[0].toUpperCase() : 'U';
-                    avatarElement.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;color:#fff;">${initial}</div>`;
+                    avatarElement.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;color:#fff;border-radius:12px;">${initial}</div>`;
                 }
                 
                 // Устанавливаем соответствующую гифку
@@ -856,40 +771,51 @@
                     gifElement.src = 'https://stickers.fullyst.com/0f72a8b7-c353-5e21-9e25-cbaa1f8b8a68/full/AgAD4SIAAm86EEk.webp';
                 }
                 
-                // Заполняем информацию о пользователе для попапа
-                const firstName = user.first_name || '';
-                const lastName = user.last_name || '';
-                const fullName = `${firstName} ${lastName}`.trim() || 'Пользователь';
-                userNameElement.textContent = fullName;
-                userUsernameElement.textContent = username ? `@${username}` : '';
+                // Добавляем обработчик клика на всю область аватарки
+                avatarContainer.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    toggleEventTooltip();
+                });
+                
+                // Также обработчик на гифку отдельно
+                gifElement.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    toggleEventTooltip();
+                });
             } else {
                 // Если нет данных пользователя, показываем дефолтную иконку
                 avatarElement.innerHTML = `<img src="https://img.icons8.com/?size=100&id=83180&format=png&color=000000" alt="User" style="filter: invert(1) opacity(0.7); width:20px;height:20px;">`;
                 gifElement.src = 'https://stickers.fullyst.com/0f72a8b7-c353-5e21-9e25-cbaa1f8b8a68/full/AgAD4SIAAm86EEk.webp';
                 
-                // Дефолтная информация
-                userNameElement.textContent = 'Гость';
-                userUsernameElement.textContent = '';
+                // Добавляем обработчик клика
+                avatarContainer.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    toggleEventTooltip();
+                });
+                
+                gifElement.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    toggleEventTooltip();
+                });
             }
         }
 
-        function showUserInfo() {
-            const popup = document.getElementById('userInfoPopup');
-            const overlay = document.getElementById('overlay');
+        function toggleEventTooltip() {
+            const tooltip = document.getElementById('eventTooltip');
             
-            popup.classList.add('show');
-            overlay.classList.add('active');
-            
-            // Останавливаем всплытие события
-            event.stopPropagation();
-        }
-
-        function hideUserInfo() {
-            const popup = document.getElementById('userInfoPopup');
-            const overlay = document.getElementById('overlay');
-            
-            popup.classList.remove('show');
-            overlay.classList.remove('active');
+            if (tooltipVisible) {
+                tooltip.classList.remove('show');
+                tooltipVisible = false;
+            } else {
+                tooltip.classList.add('show');
+                tooltipVisible = true;
+                
+                // Автоматически скрываем через 3 секунды
+                setTimeout(() => {
+                    tooltip.classList.remove('show');
+                    tooltipVisible = false;
+                }, 3000);
+            }
         }
 
         function switchTab(tab) {
@@ -906,12 +832,23 @@
         function openCollection(type) {
             tg.HapticFeedback.impactOccurred('light');
             
-            // Скрываем попап если открыт
-            hideUserInfo();
-            
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(`${type}CollectionScreen`).classList.add('active');
             currentScreen = type;
+            
+            // Скрываем аватарку и гифку во вкладках коллекций
+            const header = document.getElementById('header');
+            const avatarContainer = document.getElementById('userAvatarContainer');
+            const gifElement = document.getElementById('avatarGif');
+            
+            header.classList.add('collection-header');
+            avatarContainer.style.display = 'none';
+            gifElement.style.display = 'none';
+            
+            // Скрываем подсказку если она была открыта
+            const tooltip = document.getElementById('eventTooltip');
+            tooltip.classList.remove('show');
+            tooltipVisible = false;
             
             tg.BackButton.show();
             document.getElementById('viewToggle').classList.remove('hidden');
@@ -927,6 +864,15 @@
                 currentScreen = 'home';
                 tg.BackButton.hide();
                 document.getElementById('viewToggle').classList.add('hidden');
+                
+                // Показываем аватарку и гифку обратно на главной
+                const header = document.getElementById('header');
+                const avatarContainer = document.getElementById('userAvatarContainer');
+                const gifElement = document.getElementById('avatarGif');
+                
+                header.classList.remove('collection-header');
+                avatarContainer.style.display = 'flex';
+                gifElement.style.display = 'block';
             }
         }
 
@@ -1122,16 +1068,6 @@
                 grid.appendChild(card);
             });
         }
-
-        // Закрытие попапа при клике вне его
-        document.addEventListener('click', function(event) {
-            const popup = document.getElementById('userInfoPopup');
-            const avatarContainer = document.getElementById('userAvatarContainer');
-            
-            if (!popup.contains(event.target) && !avatarContainer.contains(event.target)) {
-                hideUserInfo();
-            }
-        });
 
         document.addEventListener('DOMContentLoaded', initTelegramApp);
     </script>
