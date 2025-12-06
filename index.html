@@ -32,7 +32,6 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: #000000;
             display: none;
         }
 
@@ -46,14 +45,14 @@
             left: 0;
             right: 0;
             height: 52px;
-            background: rgba(0, 0, 0, 0.85);
+            background: #0A2713;
             backdrop-filter: blur(20px);
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 16px;
             z-index: 100;
-            border-bottom: 0.5px solid #222;
+            border-bottom: 0.5px solid #1A5C2F;
         }
 
         .logo {
@@ -88,12 +87,12 @@
             left: 0;
             right: 0;
             height: 60px;
-            background: rgba(0, 0, 0, 0.95);
+            background: rgba(10, 39, 19, 0.95);
             backdrop-filter: blur(20px);
             display: flex;
             justify-content: center;
             align-items: center;
-            border-top: 0.5px solid #222;
+            border-top: 0.5px solid #1A5C2F;
             padding: 0 40px;
             z-index: 100;
         }
@@ -121,7 +120,7 @@
         }
 
         .nav-item.active {
-            color: var(--accent-color, #007AFF);
+            color: var(--accent-color, #FFC767);
         }
 
         .nav-icon {
@@ -135,7 +134,7 @@
         }
 
         .nav-item.active .nav-icon {
-            filter: invert(1) sepia(1) saturate(10000%) hue-rotate(200deg) brightness(1.2);
+            filter: invert(1) sepia(1) saturate(10000%) hue-rotate(30deg) brightness(1.5);
             opacity: 1;
         }
 
@@ -166,6 +165,7 @@
             height: 100%;
             -ms-overflow-style: none;
             scrollbar-width: none;
+            background: #000000;
         }
 
         .main-screen::-webkit-scrollbar {
@@ -242,8 +242,8 @@
         }
 
         .collection-badge {
-            background: var(--accent-color, #007AFF);
-            color: #FFFFFF;
+            background: var(--accent-color, #FFC767);
+            color: #000000;
             padding: 6px 12px;
             border-radius: 12px;
             font-size: 13px;
@@ -258,6 +258,7 @@
             height: 100vh;
             -ms-overflow-style: none;
             scrollbar-width: none;
+            background: #000000;
         }
 
         .collection-screen::-webkit-scrollbar {
@@ -288,7 +289,7 @@
             width: 44px;
             height: 44px;
             border-radius: 12px;
-            background: var(--accent-color, #007AFF);
+            background: var(--accent-color, #FFC767);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -299,7 +300,7 @@
         .article-icon img {
             width: 28px;
             height: 28px;
-            filter: brightness(0) invert(1);
+            filter: brightness(0) invert(0);
         }
 
         .article-info {
@@ -428,6 +429,185 @@
             font-weight: 500;
         }
 
+        /* Адвент стили */
+        .advent-screen {
+            padding: 16px;
+            overflow-y: auto;
+            height: 100%;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+            background: #0A2713;
+            position: relative;
+        }
+
+        .advent-screen::-webkit-scrollbar {
+            display: none;
+        }
+
+        .advent-background {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 400px;
+            background-image: url('https://i.ibb.co/bMDgxHjL/IMG-1779.jpg');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: bottom center;
+            opacity: 0.15;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .advent-header {
+            text-align: center;
+            margin-bottom: 24px;
+            padding: 0 8px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .advent-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #FFFFFF;
+            margin-bottom: 10px;
+            letter-spacing: -0.3px;
+        }
+
+        .advent-subtitle {
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.4;
+        }
+
+        .advent-progress-container {
+            background: #003A23;
+            border-radius: 21px;
+            padding: 20px;
+            margin: 0 8px 24px;
+            position: relative;
+            border: 5px solid #FFC767;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            z-index: 2;
+        }
+
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .progress-number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #FFFFFF;
+        }
+
+        .progress-label {
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #FFC767;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        .next-day-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+        }
+
+        .next-day-timer {
+            font-weight: 600;
+            color: #FFC767;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .advent-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+            padding: 0 8px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .advent-day {
+            aspect-ratio: 1/1;
+            background: #1A1A1A;
+            border-radius: 18px;
+            position: relative;
+            transition: all 0.2s ease;
+            border: 2px solid #222;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .advent-day:active {
+            transform: scale(0.98);
+            background: #222;
+        }
+
+        .advent-day.unlocked {
+            border-color: #FFC767;
+        }
+
+        .day-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .advent-day.locked .day-image {
+            opacity: 0.3;
+            filter: grayscale(1);
+        }
+
+        .advent-info {
+            background: #003A23;
+            border-radius: 21px;
+            padding: 20px;
+            margin: 0 8px 16px;
+            position: relative;
+            border: 5px solid #FFC767;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            z-index: 2;
+        }
+
+        .advent-info-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #FFFFFF;
+            margin-bottom: 8px;
+        }
+
+        .advent-info-text {
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.4;
+        }
+
         .fullscreen-viewer {
             position: fixed;
             top: 0;
@@ -456,7 +636,7 @@
         }
 
         :root {
-            --accent-color: #007AFF;
+            --accent-color: #FFC767;
         }
 
         .preloader {
@@ -521,6 +701,79 @@
             color: rgba(255, 255, 255, 0.43);
             text-decoration: none;
         }
+
+        /* Анимация снежинок */
+        .snow-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .snowflake {
+            position: absolute;
+            top: -10px;
+            width: 2px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            filter: blur(0.5px);
+            animation: snowfall linear infinite;
+        }
+
+        @keyframes snowfall {
+            0% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) translateX(var(--x-end)) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Адаптив для мобильных */
+        @media (max-width: 375px) {
+            .advent-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 10px;
+            }
+            
+            .advent-day {
+                border-radius: 16px;
+            }
+            
+            .advent-background {
+                height: 300px;
+            }
+        }
+
+        @media (max-width: 320px) {
+            .advent-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+            
+            .advent-background {
+                height: 250px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .advent-background {
+                height: 500px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -562,7 +815,7 @@
                 <span class="nav-label">Адвент</span>
             </div>
             
-            <div class="nav-item" onclick="tg.HapticFeedback.impactOccurred('light')">
+            <div class="nav-item" onclick="showInfo()">
                 <img src="https://img.icons8.com/?size=100&id=83180&format=png&color=000000" 
                      alt="Инфо" 
                      class="nav-icon">
@@ -643,16 +896,38 @@
         </div>
 
         <div class="screen advent-screen" id="adventScreen">
-            <div class="main-screen">
-                <h1 class="section-title">Адвент-календарь</h1>
-                <div class="advent-description" style="color: rgba(255,255,255,0.7); text-align: center; margin-bottom: 30px;">
-                    Каждый день открывай новый сюрприз!<br>
-                    Собирай эксклюзивные чибики и получай призы.
+            <div class="advent-background"></div>
+            <div class="snow-container" id="snowContainer"></div>
+            
+            <div class="advent-header">
+                <h1 class="advent-title">Адвент-календарь</h1>
+                <p class="advent-subtitle">Открывай новый сюрприз каждый день декабря</p>
+            </div>
+
+            <div class="advent-progress-container" id="progressContainer">
+                <div class="progress-stats">
+                    <div class="progress-number" id="progressNumber">0</div>
+                    <div class="progress-label">из 31 дня</div>
                 </div>
                 
-                <div style="text-align: center; color: rgba(255,255,255,0.5); padding: 40px;">
-                    Адвент-календарь скоро откроется!<br>
-                    Следи за обновлениями.
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                
+                <div class="next-day-info">
+                    <span>Следующий день через:</span>
+                    <span class="next-day-timer" id="nextDayTimer">--:--:--</span>
+                </div>
+            </div>
+
+            <div class="advent-grid" id="adventGrid">
+                <!-- Дни будут сгенерированы через JavaScript -->
+            </div>
+
+            <div class="advent-info">
+                <div class="advent-info-title">Как это работает?</div>
+                <div class="advent-info-text">
+                    Каждый день в твоем адвент-календаре будет открываться новая ячейка! Мы дарим тебе эти подарки, и не бойся, даже если в один день ты забудешь забрать награду - мы ее не заберем
                 </div>
             </div>
         </div>
@@ -675,10 +950,45 @@
         let currentViewMode = 3;
         let isInitialLoad = true;
 
+        // Адвент-картинки
+        const adventImages = [
+            'https://i.ibb.co/C5zKsgK4/IMG-1687.jpg',
+            'https://i.ibb.co/bR8MPF6J/IMG-1690.jpg',
+            'https://i.ibb.co/JhX9tGv/IMG-1692.jpg',
+            'https://i.ibb.co/h5H778T/IMG-1695.jpg',
+            'https://i.ibb.co/nsBTKgFC/IMG-1705.jpg',
+            'https://i.ibb.co/Y7WwXkrm/IMG-7498.jpg',
+            'https://i.ibb.co/xKvd6FvS/IMG-7505.jpg',
+            'https://i.ibb.co/8gzcjxWy/IMG-7510.jpg',
+            'https://i.ibb.co/qYRS1CD2/IMG-7509.jpg',
+            'https://i.ibb.co/WNxJb82G/IMG-7511.jpg',
+            'https://i.ibb.co/tpxJ4CCd/IMG-7512.jpg',
+            'https://i.ibb.co/35vfdWyL/IMG-7516.jpg',
+            'https://i.ibb.co/fd1WjB7f/IMG-7519.jpg',
+            'https://i.ibb.co/rfL56MGz/IMG-7520.jpg',
+            'https://i.ibb.co/ZRqhhHQG/IMG-7521.jpg',
+            'https://i.ibb.co/v4jvYv6D/IMG-7523.jpg',
+            'https://i.ibb.co/bgfM59B0/IMG-7524.jpg',
+            'https://i.ibb.co/PssNGT29/IMG-7525.jpg',
+            'https://i.ibb.co/B5Sfjj8C/IMG-7526.jpg',
+            'https://i.ibb.co/GQXSwzd5/IMG-7527.jpg',
+            'https://i.ibb.co/TDRSW1wy/2025-12-05-23-19-59.jpg',
+            'https://i.ibb.co/gLzqBHjs/IMG-7530.jpg',
+            'https://i.ibb.co/d4sMb7cn/IMG-7531.jpg',
+            'https://i.ibb.co/GvBWC3qS/IMG-7532.jpg',
+            'https://i.ibb.co/WvSvY0FQ/IMG-7533.jpg',
+            'https://i.ibb.co/FL2p7h67/IMG-7534.jpg',
+            'https://i.ibb.co/mPKrRBj/IMG-7535.jpg',
+            'https://i.ibb.co/WvXGD8mk/IMG-7536.jpg',
+            'https://i.ibb.co/Kzymmj9M/IMG-7537.jpg',
+            'https://i.ibb.co/RpzfrMrY/IMG-7538.jpg',
+            'https://i.ibb.co/mVttwX48/IMG-7539.jpg'
+        ];
+
         function initTelegramApp() {
             tg.ready();
             tg.expand();
-            tg.setHeaderColor('#000000');
+            tg.setHeaderColor('#0A2713');
             tg.setBackgroundColor('#000000');
             
             if (tg.themeParams.accent_text_color) {
@@ -692,9 +1002,44 @@
                 showPreloader();
                 loadUserData();
                 setupFooter();
+                initAdventCalendar();
+                createSnowflakes();
                 isInitialLoad = false;
             } else {
                 document.getElementById('loadingScreen').classList.add('hidden');
+            }
+        }
+
+        function showInfo() {
+            tg.HapticFeedback.impactOccurred('light');
+            tg.showAlert("В разработке", "Скоро здесь что-то будет");
+        }
+
+        function createSnowflakes() {
+            const snowContainer = document.getElementById('snowContainer');
+            const snowflakeCount = 50;
+            
+            for (let i = 0; i < snowflakeCount; i++) {
+                const snowflake = document.createElement('div');
+                snowflake.className = 'snowflake';
+                
+                // Случайные параметры
+                const size = Math.random() * 2 + 1;
+                const left = Math.random() * 100;
+                const duration = Math.random() * 10 + 10;
+                const delay = Math.random() * 5;
+                const xEnd = (Math.random() - 0.5) * 100;
+                
+                // Применяем стили
+                snowflake.style.width = `${size}px`;
+                snowflake.style.height = `${size}px`;
+                snowflake.style.left = `${left}vw`;
+                snowflake.style.animationDuration = `${duration}s`;
+                snowflake.style.animationDelay = `${delay}s`;
+                snowflake.style.opacity = Math.random() * 0.5 + 0.3;
+                snowflake.style.setProperty('--x-end', `${xEnd}px`);
+                
+                snowContainer.appendChild(snowflake);
             }
         }
 
@@ -739,6 +1084,7 @@
                 tg.BackButton.hide();
                 document.getElementById('viewToggle').classList.add('hidden');
                 document.getElementById('footer').classList.remove('hidden');
+                updateAdventTimer();
             }
         }
 
@@ -805,6 +1151,111 @@
             const url = articles[type];
             if (url) {
                 tg.openTelegramLink(url);
+            }
+        }
+
+        // Адвент-календарь функции
+        function initAdventCalendar() {
+            const grid = document.getElementById('adventGrid');
+            grid.innerHTML = '';
+            
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            
+            // Начало адвента - 1 декабря текущего года
+            const startDate = new Date(currentYear, 11, 1); // 1 декабря
+            const endDate = new Date(currentYear, 11, 31); // 31 декабря
+            
+            let unlockedDays = 0;
+            
+            // Если сегодня уже после 31 декабря, показываем все дни
+            if (today > endDate) {
+                unlockedDays = 31;
+            } else if (today >= startDate) {
+                // Рассчитываем сколько дней прошло с 1 декабря
+                unlockedDays = Math.floor((today - startDate) / (1000 * 60 * 60 * 24)) + 1;
+                if (unlockedDays > 31) unlockedDays = 31;
+                if (unlockedDays < 1) unlockedDays = 0;
+            }
+            
+            // Обновляем прогресс
+            updateProgress(unlockedDays);
+            
+            // Создаем ячейки календаря
+            for (let day = 1; day <= 31; day++) {
+                const isUnlocked = day <= unlockedDays;
+                const dayElement = document.createElement('div');
+                dayElement.className = `advent-day ${isUnlocked ? 'unlocked' : 'locked'}`;
+                dayElement.onclick = () => {
+                    if (isUnlocked) {
+                        openFullscreen(adventImages[day - 1]);
+                    }
+                    tg.HapticFeedback.impactOccurred('light');
+                };
+                
+                dayElement.innerHTML = `
+                    <img src="${adventImages[day - 1]}" alt="День ${day}" class="day-image">
+                `;
+                
+                grid.appendChild(dayElement);
+            }
+            
+            // Запускаем таймер для следующего дня
+            if (unlockedDays < 31) {
+                startNextDayTimer(unlockedDays);
+            } else {
+                document.getElementById('nextDayTimer').textContent = 'Все дни открыты!';
+            }
+        }
+
+        function updateProgress(unlockedDays) {
+            const progressNumber = document.getElementById('progressNumber');
+            const progressFill = document.getElementById('progressFill');
+            
+            const percentage = (unlockedDays / 31) * 100;
+            
+            progressNumber.textContent = unlockedDays;
+            progressFill.style.width = `${percentage}%`;
+        }
+
+        function startNextDayTimer(unlockedDays) {
+            const nextDay = unlockedDays + 1;
+            const nextDayDate = new Date(new Date().getFullYear(), 11, nextDay); // Следующий день декабря
+            
+            // Устанавливаем время на 00:00
+            nextDayDate.setHours(0, 0, 0, 0);
+            
+            function updateTimer() {
+                const now = new Date();
+                const timeUntilNextDay = nextDayDate - now;
+                
+                if (timeUntilNextDay <= 0) {
+                    // Время пришло, обновляем календарь
+                    initAdventCalendar();
+                    return;
+                }
+                
+                // Рассчитываем оставшееся время
+                const hours = Math.floor((timeUntilNextDay % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeUntilNextDay % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeUntilNextDay % (1000 * 60)) / 1000);
+                
+                // Форматируем время
+                const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                document.getElementById('nextDayTimer').textContent = formattedTime;
+                
+                // Обновляем каждую секунду
+                setTimeout(updateTimer, 1000);
+            }
+            
+            updateTimer();
+        }
+
+        function updateAdventTimer() {
+            // Если мы на экране адвента, обновляем таймер
+            if (currentScreen === 'advent') {
+                initAdventCalendar();
             }
         }
 
