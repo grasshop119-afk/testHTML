@@ -139,7 +139,7 @@
         .collection-icon {
             width: 44px;
             height: 44px;
-            border-radius: 18px;
+            border-radius: 16px;
             background: #000;
             display: flex;
             align-items: center;
@@ -225,7 +225,7 @@
         .article-icon {
             width: 44px;
             height: 44px;
-            border-radius: 18px;
+            border-radius: 16px;
             background: var(--accent-color, #007AFF);
             display: flex;
             align-items: center;
@@ -323,28 +323,29 @@
             display: block;
         }
 
-        .zoom-button {
+        .chibi-view-toggle {
             position: absolute;
-            bottom: 8px;
+            top: 8px;
             right: 8px;
             width: 32px;
             height: 32px;
             background: rgba(0, 0, 0, 0.6);
-            border-radius: 16px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             border: 1px solid rgba(255, 255, 255, 0.2);
-            opacity: 0;
+            opacity: 0.8;
             transition: opacity 0.2s ease;
+            z-index: 2;
         }
 
-        .chibi-card:hover .zoom-button,
-        .chibi-card:active .zoom-button {
+        .chibi-view-toggle:active {
             opacity: 1;
+            background: rgba(0, 0, 0, 0.8);
         }
 
-        .zoom-button img {
+        .chibi-view-toggle img {
             width: 18px;
             height: 18px;
             filter: invert(1) brightness(2);
@@ -503,11 +504,22 @@
             
             .collection-icon,
             .article-icon {
-                border-radius: 15px;
+                border-radius: 14px;
             }
             
             .collection-badge {
-                border-radius: 15px;
+                border-radius: 16px;
+            }
+            
+            .chibi-view-toggle {
+                width: 28px;
+                height: 28px;
+                border-radius: 8px;
+            }
+            
+            .chibi-view-toggle img {
+                width: 16px;
+                height: 16px;
             }
         }
 
@@ -528,7 +540,20 @@
             }
             
             .collection-badge {
-                border-radius: 12px;
+                border-radius: 14px;
+            }
+            
+            .chibi-view-toggle {
+                width: 26px;
+                height: 26px;
+                top: 6px;
+                right: 6px;
+                border-radius: 7px;
+            }
+            
+            .chibi-view-toggle img {
+                width: 14px;
+                height: 14px;
             }
         }
     </style>
@@ -879,8 +904,8 @@
                         <img src="${imageUrl}" alt="${chibiName}" class="chibi-image"
                              onerror="this.style.display='none'">
                         ${isCollected ? `
-                            <div class="zoom-button" onclick="event.stopPropagation(); openFullscreen('${imageUrl}')">
-                                <img src="https://img.icons8.com/?size=100&id=59801&format=png&color=000000" alt="Увеличить">
+                            <div class="chibi-view-toggle" onclick="event.stopPropagation(); openFullscreen('${imageUrl}')">
+                                <img src="https://img.icons8.com/?size=100&id=59801&format=png&color=000000" alt="Просмотр">
                             </div>
                         ` : ''}
                     </div>
