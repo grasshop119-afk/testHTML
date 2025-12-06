@@ -45,14 +45,21 @@
             left: 0;
             right: 0;
             height: 52px;
-            background: #0A2713;
+            background: rgba(0, 0, 0, 0.85);
             backdrop-filter: blur(20px);
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 16px;
             z-index: 100;
-            border-bottom: 0.5px solid #1A5C2F;
+            border-bottom: 0.5px solid #222;
+            transition: background 0.3s ease, backdrop-filter 0.3s ease;
+        }
+
+        .header.advent-header {
+            background: #081F0F;
+            backdrop-filter: none;
+            border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
         }
 
         .logo {
@@ -87,14 +94,21 @@
             left: 0;
             right: 0;
             height: 60px;
-            background: rgba(10, 39, 19, 0.95);
+            background: rgba(0, 0, 0, 0.95);
             backdrop-filter: blur(20px);
             display: flex;
             justify-content: center;
             align-items: center;
-            border-top: 0.5px solid #1A5C2F;
+            border-top: 0.5px solid #222;
             padding: 0 40px;
             z-index: 100;
+            transition: background 0.3s ease, backdrop-filter 0.3s ease;
+        }
+
+        .footer.advent-footer {
+            background: #081F0F;
+            backdrop-filter: none;
+            border-top: 0.5px solid rgba(255, 255, 255, 0.1);
         }
 
         .footer.hidden {
@@ -120,7 +134,7 @@
         }
 
         .nav-item.active {
-            color: var(--accent-color, #FFC767);
+            color: var(--accent-color, #007AFF);
         }
 
         .nav-icon {
@@ -134,7 +148,7 @@
         }
 
         .nav-item.active .nav-icon {
-            filter: invert(1) sepia(1) saturate(10000%) hue-rotate(30deg) brightness(1.5);
+            filter: invert(1) sepia(1) saturate(10000%) hue-rotate(200deg) brightness(1.2);
             opacity: 1;
         }
 
@@ -242,8 +256,8 @@
         }
 
         .collection-badge {
-            background: var(--accent-color, #FFC767);
-            color: #000000;
+            background: var(--accent-color, #007AFF);
+            color: #FFFFFF;
             padding: 6px 12px;
             border-radius: 12px;
             font-size: 13px;
@@ -289,7 +303,7 @@
             width: 44px;
             height: 44px;
             border-radius: 12px;
-            background: var(--accent-color, #FFC767);
+            background: var(--accent-color, #007AFF);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -300,7 +314,7 @@
         .article-icon img {
             width: 28px;
             height: 28px;
-            filter: brightness(0) invert(0);
+            filter: brightness(0) invert(1);
         }
 
         .article-info {
@@ -436,7 +450,7 @@
             height: 100%;
             -ms-overflow-style: none;
             scrollbar-width: none;
-            background: #0A2713;
+            background: #081F0F;
             position: relative;
         }
 
@@ -444,19 +458,15 @@
             display: none;
         }
 
-        .advent-background {
+        .advent-background-image {
             position: absolute;
-            bottom: 0;
+            bottom: 60px;
             left: 0;
-            right: 0;
-            height: 400px;
-            background-image: url('https://i.ibb.co/bMDgxHjL/IMG-1779.jpg');
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: bottom center;
-            opacity: 0.15;
+            width: 100%;
+            height: auto;
+            z-index: 0;
+            opacity: 0.9;
             pointer-events: none;
-            z-index: 1;
         }
 
         .advent-header {
@@ -464,21 +474,22 @@
             margin-bottom: 24px;
             padding: 0 8px;
             position: relative;
-            z-index: 2;
+            z-index: 1;
         }
 
-        .advent-title {
-            font-size: 22px;
-            font-weight: 600;
-            color: #FFFFFF;
-            margin-bottom: 10px;
-            letter-spacing: -0.3px;
+        .advent-logo {
+            max-width: 280px;
+            width: 100%;
+            height: auto;
+            margin: 0 auto 16px;
+            display: block;
         }
 
         .advent-subtitle {
             font-size: 15px;
             color: rgba(255, 255, 255, 0.7);
             line-height: 1.4;
+            text-align: center;
         }
 
         .advent-progress-container {
@@ -489,7 +500,7 @@
             position: relative;
             border: 5px solid #FFC767;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            z-index: 2;
+            z-index: 99;
         }
 
         .progress-stats {
@@ -542,12 +553,12 @@
 
         .advent-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 12px;
             margin-bottom: 24px;
             padding: 0 8px;
             position: relative;
-            z-index: 2;
+            z-index: 1;
         }
 
         .advent-day {
@@ -558,7 +569,6 @@
             transition: all 0.2s ease;
             border: 2px solid #222;
             overflow: hidden;
-            cursor: pointer;
         }
 
         .advent-day:active {
@@ -582,30 +592,6 @@
         .advent-day.locked .day-image {
             opacity: 0.3;
             filter: grayscale(1);
-        }
-
-        .advent-info {
-            background: #003A23;
-            border-radius: 21px;
-            padding: 20px;
-            margin: 0 8px 16px;
-            position: relative;
-            border: 5px solid #FFC767;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            z-index: 2;
-        }
-
-        .advent-info-title {
-            font-size: 17px;
-            font-weight: 600;
-            color: #FFFFFF;
-            margin-bottom: 8px;
-        }
-
-        .advent-info-text {
-            font-size: 15px;
-            color: rgba(255, 255, 255, 0.9);
-            line-height: 1.4;
         }
 
         .fullscreen-viewer {
@@ -636,7 +622,7 @@
         }
 
         :root {
-            --accent-color: #FFC767;
+            --accent-color: #007AFF;
         }
 
         .preloader {
@@ -702,42 +688,43 @@
             text-decoration: none;
         }
 
-        /* Анимация снежинок */
-        .snow-container {
+        /* Снежинки */
+        .snowflakes {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: 1;
             overflow: hidden;
+        }
+
+        .snowflakes-front {
+            z-index: 5; /* Поверх картинок адвента */
+        }
+
+        .snowflakes-back {
+            z-index: 0; /* Под картинками адвента */
         }
 
         .snowflake {
             position: absolute;
-            top: -10px;
-            width: 2px;
-            height: 2px;
-            background: rgba(255, 255, 255, 0.8);
+            top: -20px;
+            background: white;
             border-radius: 50%;
-            filter: blur(0.5px);
-            animation: snowfall linear infinite;
+            opacity: 0.8;
+            animation-name: fall;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
         }
 
-        @keyframes snowfall {
+        @keyframes fall {
             0% {
-                transform: translateY(0) translateX(0) rotate(0deg);
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
+                transform: translateY(0) rotate(0deg);
+                opacity: 0.8;
             }
             100% {
-                transform: translateY(100vh) translateX(var(--x-end)) rotate(360deg);
+                transform: translateY(100vh) rotate(360deg);
                 opacity: 0;
             }
         }
@@ -745,16 +732,16 @@
         /* Адаптив для мобильных */
         @media (max-width: 375px) {
             .advent-grid {
-                grid-template-columns: repeat(4, 1fr);
+                grid-template-columns: repeat(3, 1fr);
                 gap: 10px;
             }
             
             .advent-day {
                 border-radius: 16px;
             }
-            
-            .advent-background {
-                height: 300px;
+
+            .advent-logo {
+                max-width: 240px;
             }
         }
 
@@ -763,15 +750,9 @@
                 grid-template-columns: repeat(3, 1fr);
                 gap: 8px;
             }
-            
-            .advent-background {
-                height: 250px;
-            }
-        }
 
-        @media (min-width: 768px) {
-            .advent-background {
-                height: 500px;
+            .advent-logo {
+                max-width: 200px;
             }
         }
     </style>
@@ -789,7 +770,7 @@
         </div>
     </div>
 
-    <div class="header">
+    <div class="header" id="header">
         <img src="https://i.ibb.co/zTB331HR/image.png" alt="Chibeki" class="logo">
         <div class="header-right">
             <img src="https://img.icons8.com/?size=100&id=mz2Zw0R3o9Hq&format=png&color=000000" 
@@ -815,7 +796,7 @@
                 <span class="nav-label">Адвент</span>
             </div>
             
-            <div class="nav-item" onclick="showInfo()">
+            <div class="nav-item" onclick="tg.HapticFeedback.impactOccurred('light')">
                 <img src="https://img.icons8.com/?size=100&id=83180&format=png&color=000000" 
                      alt="Инфо" 
                      class="nav-icon">
@@ -896,12 +877,17 @@
         </div>
 
         <div class="screen advent-screen" id="adventScreen">
-            <div class="advent-background"></div>
-            <div class="snow-container" id="snowContainer"></div>
+            <!-- Снежинки (задний слой) -->
+            <div class="snowflakes snowflakes-back" id="snowflakesBack"></div>
+            
+            <!-- Снежинки (передний слой) -->
+            <div class="snowflakes snowflakes-front" id="snowflakesFront"></div>
+            
+            <!-- Фоновая картинка -->
+            <img src="https://i.ibb.co/bMDgxHjL/IMG-1779.jpg" alt="Фоновое изображение" class="advent-background-image">
             
             <div class="advent-header">
-                <h1 class="advent-title">Адвент-календарь</h1>
-                <p class="advent-subtitle">Открывай новый сюрприз каждый день декабря</p>
+                <img src="https://i.ibb.co/99XF65Bn/image.png" alt="Адвент-календарь" class="advent-logo">
             </div>
 
             <div class="advent-progress-container" id="progressContainer">
@@ -922,13 +908,6 @@
 
             <div class="advent-grid" id="adventGrid">
                 <!-- Дни будут сгенерированы через JavaScript -->
-            </div>
-
-            <div class="advent-info">
-                <div class="advent-info-title">Как это работает?</div>
-                <div class="advent-info-text">
-                    Каждый день в твоем адвент-календаре будет открываться новая ячейка! Мы дарим тебе эти подарки, и не бойся, даже если в один день ты забудешь забрать награду - мы ее не заберем
-                </div>
             </div>
         </div>
     </div>
@@ -988,7 +967,7 @@
         function initTelegramApp() {
             tg.ready();
             tg.expand();
-            tg.setHeaderColor('#0A2713');
+            tg.setHeaderColor('#000000');
             tg.setBackgroundColor('#000000');
             
             if (tg.themeParams.accent_text_color) {
@@ -1007,39 +986,6 @@
                 isInitialLoad = false;
             } else {
                 document.getElementById('loadingScreen').classList.add('hidden');
-            }
-        }
-
-        function showInfo() {
-            tg.HapticFeedback.impactOccurred('light');
-            tg.showAlert("В разработке", "Скоро здесь что-то будет");
-        }
-
-        function createSnowflakes() {
-            const snowContainer = document.getElementById('snowContainer');
-            const snowflakeCount = 50;
-            
-            for (let i = 0; i < snowflakeCount; i++) {
-                const snowflake = document.createElement('div');
-                snowflake.className = 'snowflake';
-                
-                // Случайные параметры
-                const size = Math.random() * 2 + 1;
-                const left = Math.random() * 100;
-                const duration = Math.random() * 10 + 10;
-                const delay = Math.random() * 5;
-                const xEnd = (Math.random() - 0.5) * 100;
-                
-                // Применяем стили
-                snowflake.style.width = `${size}px`;
-                snowflake.style.height = `${size}px`;
-                snowflake.style.left = `${left}vw`;
-                snowflake.style.animationDuration = `${duration}s`;
-                snowflake.style.animationDelay = `${delay}s`;
-                snowflake.style.opacity = Math.random() * 0.5 + 0.3;
-                snowflake.style.setProperty('--x-end', `${xEnd}px`);
-                
-                snowContainer.appendChild(snowflake);
             }
         }
 
@@ -1070,6 +1016,9 @@
             document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             
+            const header = document.getElementById('header');
+            const footer = document.getElementById('footer');
+            
             if (tab === 'home') {
                 document.querySelectorAll('.nav-item')[0].classList.add('active');
                 document.getElementById('homeScreen').classList.add('active');
@@ -1077,6 +1026,10 @@
                 tg.BackButton.hide();
                 document.getElementById('viewToggle').classList.add('hidden');
                 document.getElementById('footer').classList.remove('hidden');
+                
+                // Возвращаем стандартные стили шапки и подвала
+                header.classList.remove('advent-header');
+                footer.classList.remove('advent-footer');
             } else if (tab === 'advent') {
                 document.querySelectorAll('.nav-item')[1].classList.add('active');
                 document.getElementById('adventScreen').classList.add('active');
@@ -1085,6 +1038,14 @@
                 document.getElementById('viewToggle').classList.add('hidden');
                 document.getElementById('footer').classList.remove('hidden');
                 updateAdventTimer();
+                
+                // Меняем стили шапки и подвала на адвент
+                header.classList.add('advent-header');
+                footer.classList.add('advent-footer');
+            } else {
+                // Для других вкладок возвращаем стандартные стили
+                header.classList.remove('advent-header');
+                footer.classList.remove('advent-footer');
             }
         }
 
@@ -1099,6 +1060,13 @@
             
             tg.BackButton.show();
             document.getElementById('viewToggle').classList.remove('hidden');
+            
+            // Возвращаем стандартные стили шапки и подвала
+            const header = document.getElementById('header');
+            const footer = document.getElementById('footer');
+            header.classList.remove('advent-header');
+            footer.classList.remove('advent-footer');
+            
             renderCollection(type);
         }
 
@@ -1113,6 +1081,12 @@
                 document.getElementById('viewToggle').classList.add('hidden');
                 document.getElementById('footer').classList.remove('hidden');
                 document.querySelectorAll('.nav-item')[0].classList.add('active');
+                
+                // Возвращаем стандартные стили шапки и подвала
+                const header = document.getElementById('header');
+                const footer = document.getElementById('footer');
+                header.classList.remove('advent-header');
+                footer.classList.remove('advent-footer');
             }
         }
 
@@ -1152,6 +1126,59 @@
             if (url) {
                 tg.openTelegramLink(url);
             }
+        }
+
+        // Создание снежинок
+        function createSnowflakes() {
+            const snowflakesBack = document.getElementById('snowflakesBack');
+            const snowflakesFront = document.getElementById('snowflakesFront');
+            
+            const snowflakeCount = 70;
+            const frontLayerCount = Math.floor(snowflakeCount * 0.4); // 40% снежинок на переднем слое
+            const backLayerCount = snowflakeCount - frontLayerCount; // 60% на заднем слое
+            
+            // Создаем снежинки для заднего слоя
+            for (let i = 0; i < backLayerCount; i++) {
+                createSnowflake(snowflakesBack, i, false);
+            }
+            
+            // Создаем снежинки для переднего слоя
+            for (let i = 0; i < frontLayerCount; i++) {
+                createSnowflake(snowflakesFront, i, true);
+            }
+        }
+
+        function createSnowflake(container, index, isFront) {
+            const snowflake = document.createElement('div');
+            snowflake.className = 'snowflake';
+            
+            // Случайный размер (задний слой - мельче, передний - крупнее)
+            const size = isFront ? 
+                Math.random() * 5 + 2 : // 2-7px для переднего слоя
+                Math.random() * 3 + 1;  // 1-4px для заднего слоя
+            
+            snowflake.style.width = `${size}px`;
+            snowflake.style.height = `${size}px`;
+            
+            // Случайная позиция
+            snowflake.style.left = `${Math.random() * 100}%`;
+            
+            // Случайная прозрачность
+            snowflake.style.opacity = isFront ? 
+                Math.random() * 0.5 + 0.3 : // 0.3-0.8 для переднего слоя
+                Math.random() * 0.4 + 0.2;  // 0.2-0.6 для заднего слоя
+            
+            // Случайная скорость (передний слой - медленнее, задний - быстрее)
+            const duration = isFront ? 
+                Math.random() * 15 + 15 : // 15-30s для переднего слоя
+                Math.random() * 10 + 8;   // 8-18s для заднего слоя
+            
+            snowflake.style.animationDuration = `${duration}s`;
+            
+            // Случайная задержка
+            snowflake.style.animationDelay = `${Math.random() * 5}s`;
+            
+            container.appendChild(snowflake);
         }
 
         // Адвент-календарь функции
