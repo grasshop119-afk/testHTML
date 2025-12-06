@@ -53,13 +53,6 @@
             padding: 0 16px;
             z-index: 100;
             border-bottom: 0.5px solid #222;
-            transition: background 0.3s ease, backdrop-filter 0.3s ease;
-        }
-
-        .header.advent-header {
-            background: #081F0F;
-            backdrop-filter: none;
-            border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
         }
 
         .logo {
@@ -88,80 +81,10 @@
             display: none;
         }
 
-        .footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 60px;
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(20px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-top: 0.5px solid #222;
-            padding: 0 40px;
-            z-index: 100;
-            transition: background 0.3s ease, backdrop-filter 0.3s ease;
-        }
-
-        .footer.advent-footer {
-            background: #081F0F;
-            backdrop-filter: none;
-            border-top: 0.5px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .footer.hidden {
-            display: none;
-        }
-
-        .nav-items {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            text-decoration: none;
-            transition: all 0.2s ease;
-            flex: 1;
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .nav-item.active {
-            color: var(--accent-color, #007AFF);
-        }
-
-        .nav-icon {
-            width: 24px;
-            height: 24px;
-            transition: all 0.2s ease;
-        }
-
-        .nav-item .nav-icon {
-            filter: invert(1) opacity(0.7);
-        }
-
-        .nav-item.active .nav-icon {
-            filter: invert(1) sepia(1) saturate(10000%) hue-rotate(200deg) brightness(1.2);
-            opacity: 1;
-        }
-
-        .nav-label {
-            font-size: 12px;
-            font-weight: 500;
-            letter-spacing: -0.2px;
-        }
-
         .main-content {
             position: absolute;
             top: 52px;
-            bottom: 60px;
+            bottom: 0;
             left: 0;
             right: 0;
             overflow-y: auto;
@@ -200,7 +123,7 @@
 
         .collection-card {
             background: #1A1A1A;
-            border-radius: 21px;
+            border-radius: 27px;
             padding: 14px;
             margin-bottom: 8px;
             display: flex;
@@ -216,7 +139,7 @@
         .collection-icon {
             width: 44px;
             height: 44px;
-            border-radius: 12px;
+            border-radius: 18px;
             background: #000;
             display: flex;
             align-items: center;
@@ -259,7 +182,7 @@
             background: var(--accent-color, #007AFF);
             color: #FFFFFF;
             padding: 6px 12px;
-            border-radius: 12px;
+            border-radius: 18px;
             font-size: 13px;
             font-weight: 600;
             flex-shrink: 0;
@@ -287,7 +210,7 @@
 
         .article-card {
             background: #1A1A1A;
-            border-radius: 21px;
+            border-radius: 27px;
             padding: 14px;
             display: flex;
             align-items: center;
@@ -302,7 +225,7 @@
         .article-icon {
             width: 44px;
             height: 44px;
-            border-radius: 12px;
+            border-radius: 18px;
             background: var(--accent-color, #007AFF);
             display: flex;
             align-items: center;
@@ -360,7 +283,7 @@
 
         .chibi-card {
             background: #1A1A1A;
-            border-radius: 21px;
+            border-radius: 27px;
             display: flex;
             flex-direction: column;
             position: relative;
@@ -400,6 +323,33 @@
             display: block;
         }
 
+        .zoom-button {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            width: 32px;
+            height: 32px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .chibi-card:hover .zoom-button,
+        .chibi-card:active .zoom-button {
+            opacity: 1;
+        }
+
+        .zoom-button img {
+            width: 18px;
+            height: 18px;
+            filter: invert(1) brightness(2);
+        }
+
         .chibi-info {
             padding: 12px 8px 8px;
             position: relative;
@@ -428,6 +378,7 @@
             justify-content: center;
             flex-direction: column;
             backdrop-filter: blur(8px);
+            border-radius: 27px;
         }
 
         .locked-icon {
@@ -441,157 +392,6 @@
             font-size: 12px;
             color: #8E8E93;
             font-weight: 500;
-        }
-
-        /* Адвент стили */
-        .advent-screen {
-            padding: 16px;
-            overflow-y: auto;
-            height: 100%;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-            background: #081F0F;
-            position: relative;
-        }
-
-        .advent-screen::-webkit-scrollbar {
-            display: none;
-        }
-
-        .advent-background-image {
-            position: absolute;
-            bottom: 60px;
-            left: 0;
-            width: 100%;
-            height: auto;
-            z-index: 0;
-            opacity: 0.9;
-            pointer-events: none;
-        }
-
-        .advent-header {
-            text-align: center;
-            margin-bottom: 24px;
-            padding: 0 8px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .advent-logo {
-            max-width: 280px;
-            width: 100%;
-            height: auto;
-            margin: 0 auto 16px;
-            display: block;
-        }
-
-        .advent-subtitle {
-            font-size: 15px;
-            color: rgba(255, 255, 255, 0.7);
-            line-height: 1.4;
-            text-align: center;
-        }
-
-        .advent-progress-container {
-            background: #003A23;
-            border-radius: 21px;
-            padding: 20px;
-            margin: 0 8px 24px;
-            position: relative;
-            border: 5px solid #FFC767;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            z-index: 99;
-        }
-
-        .progress-stats {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-        .progress-number {
-            font-size: 28px;
-            font-weight: 700;
-            color: #FFFFFF;
-        }
-
-        .progress-label {
-            font-size: 15px;
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        .progress-bar {
-            height: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 16px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: #FFC767;
-            border-radius: 4px;
-            transition: width 0.5s ease;
-            width: 0%;
-        }
-
-        .next-day-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 14px;
-        }
-
-        .next-day-timer {
-            font-weight: 600;
-            color: #FFC767;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .advent-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 24px;
-            padding: 0 8px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .advent-day {
-            aspect-ratio: 1/1;
-            background: #1A1A1A;
-            border-radius: 18px;
-            position: relative;
-            transition: all 0.2s ease;
-            border: 2px solid #222;
-            overflow: hidden;
-        }
-
-        .advent-day:active {
-            transform: scale(0.98);
-            background: #222;
-        }
-
-        .advent-day.unlocked {
-            border-color: #FFC767;
-        }
-
-        .day-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-
-        .advent-day.locked .day-image {
-            opacity: 0.3;
-            filter: grayscale(1);
         }
 
         .fullscreen-viewer {
@@ -646,9 +446,10 @@
             pointer-events: none;
         }
 
-        .rocket {
-            width: 80px;
-            height: 80px;
+        .loading-gif {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
             user-select: none;
             -webkit-user-drag: none;
             cursor: default;
@@ -688,71 +489,46 @@
             text-decoration: none;
         }
 
-        /* Снежинки */
-        .snowflakes {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            overflow: hidden;
-        }
-
-        .snowflakes-front {
-            z-index: 5; /* Поверх картинок адвента */
-        }
-
-        .snowflakes-back {
-            z-index: 0; /* Под картинками адвента */
-        }
-
-        .snowflake {
-            position: absolute;
-            top: -20px;
-            background: white;
-            border-radius: 50%;
-            opacity: 0.8;
-            animation-name: fall;
-            animation-timing-function: linear;
-            animation-iteration-count: infinite;
-        }
-
-        @keyframes fall {
-            0% {
-                transform: translateY(0) rotate(0deg);
-                opacity: 0.8;
-            }
-            100% {
-                transform: translateY(100vh) rotate(360deg);
-                opacity: 0;
-            }
-        }
-
         /* Адаптив для мобильных */
         @media (max-width: 375px) {
-            .advent-grid {
-                grid-template-columns: repeat(3, 1fr);
+            .chibi-grid {
                 gap: 10px;
             }
             
-            .advent-day {
-                border-radius: 16px;
+            .collection-card,
+            .article-card,
+            .chibi-card {
+                border-radius: 24px;
             }
-
-            .advent-logo {
-                max-width: 240px;
+            
+            .collection-icon,
+            .article-icon {
+                border-radius: 15px;
+            }
+            
+            .collection-badge {
+                border-radius: 15px;
             }
         }
 
         @media (max-width: 320px) {
-            .advent-grid {
-                grid-template-columns: repeat(3, 1fr);
+            .chibi-grid {
                 gap: 8px;
             }
-
-            .advent-logo {
-                max-width: 200px;
+            
+            .collection-card,
+            .article-card,
+            .chibi-card {
+                border-radius: 21px;
+            }
+            
+            .collection-icon,
+            .article-icon {
+                border-radius: 12px;
+            }
+            
+            .collection-badge {
+                border-radius: 12px;
             }
         }
     </style>
@@ -760,9 +536,9 @@
 <body>
     <!-- Экран загрузки -->
     <div id="loadingScreen" class="preloader">
-        <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Telegram-Animated-Emojis/main/Travel%20and%20Places/Rocket.webp" 
-             alt="Ракета" 
-             class="rocket">
+        <img src="https://stickers.fullyst.com/0f72a8b7-c353-5e21-9e25-cbaa1f8b8a68/full/AgAD4SIAAm86EEk.webp" 
+             alt="Загрузка" 
+             class="loading-gif">
         <div class="loading-wheel"></div>
         <div class="loading-footer">
             Icons by ICONS8<br>
@@ -770,7 +546,7 @@
         </div>
     </div>
 
-    <div class="header" id="header">
+    <div class="header">
         <img src="https://i.ibb.co/zTB331HR/image.png" alt="Chibeki" class="logo">
         <div class="header-right">
             <img src="https://img.icons8.com/?size=100&id=mz2Zw0R3o9Hq&format=png&color=000000" 
@@ -780,32 +556,8 @@
         </div>
     </div>
 
-    <div class="footer" id="footer">
-        <div class="nav-items">
-            <div class="nav-item active" onclick="switchTab('home')">
-                <img src="https://images.icon-icons.com/3832/PNG/512/rocket_icon_234403.png" 
-                     alt="Чибики" 
-                     class="nav-icon">
-                <span class="nav-label">Чибики</span>
-            </div>
-            
-            <div class="nav-item" onclick="switchTab('advent')">
-                <img src="https://img.icons8.com/?size=100&id=73WhoVlA0pQc&format=png&color=000000" 
-                     alt="Адвент" 
-                     class="nav-icon">
-                <span class="nav-label">Адвент</span>
-            </div>
-            
-            <div class="nav-item" onclick="tg.HapticFeedback.impactOccurred('light')">
-                <img src="https://img.icons8.com/?size=100&id=83180&format=png&color=000000" 
-                     alt="Инфо" 
-                     class="nav-icon">
-                <span class="nav-label">Инфо</span>
-            </div>
-        </div>
-    </div>
-
     <div class="main-content">
+        <!-- Главный экран -->
         <div class="screen main-screen active" id="homeScreen">
             <div class="section">
                 <div class="section-title">Коллекции</div>
@@ -864,54 +616,23 @@
             </div>
         </div>
 
+        <!-- Экран обычных чибиков -->
         <div class="screen collection-screen" id="commonCollectionScreen">
             <div class="chibi-grid grid-3" id="commonGrid"></div>
         </div>
 
+        <!-- Экран секретных чибиков -->
         <div class="screen collection-screen" id="secretCollectionScreen">
             <div class="chibi-grid grid-3" id="secretGrid"></div>
         </div>
 
+        <!-- Экран призовых чибиков -->
         <div class="screen collection-screen" id="prizeCollectionScreen">
             <div class="chibi-grid grid-3" id="prizeGrid"></div>
         </div>
-
-        <div class="screen advent-screen" id="adventScreen">
-            <!-- Снежинки (задний слой) -->
-            <div class="snowflakes snowflakes-back" id="snowflakesBack"></div>
-            
-            <!-- Снежинки (передний слой) -->
-            <div class="snowflakes snowflakes-front" id="snowflakesFront"></div>
-            
-            <!-- Фоновая картинка -->
-            <img src="https://i.ibb.co/bMDgxHjL/IMG-1779.jpg" alt="Фоновое изображение" class="advent-background-image">
-            
-            <div class="advent-header">
-                <img src="https://i.ibb.co/99XF65Bn/image.png" alt="Адвент-календарь" class="advent-logo">
-            </div>
-
-            <div class="advent-progress-container" id="progressContainer">
-                <div class="progress-stats">
-                    <div class="progress-number" id="progressNumber">0</div>
-                    <div class="progress-label">из 31 дня</div>
-                </div>
-                
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill"></div>
-                </div>
-                
-                <div class="next-day-info">
-                    <span>Следующий день через:</span>
-                    <span class="next-day-timer" id="nextDayTimer">--:--:--</span>
-                </div>
-            </div>
-
-            <div class="advent-grid" id="adventGrid">
-                <!-- Дни будут сгенерированы через JavaScript -->
-            </div>
-        </div>
     </div>
 
+    <!-- Просмотр в полный экран -->
     <div class="fullscreen-viewer" id="fullscreenViewer" onclick="closeFullscreen()">
         <img src="" alt="" class="fullscreen-image" id="fullscreenImage">
     </div>
@@ -929,41 +650,6 @@
         let currentViewMode = 3;
         let isInitialLoad = true;
 
-        // Адвент-картинки
-        const adventImages = [
-            'https://i.ibb.co/C5zKsgK4/IMG-1687.jpg',
-            'https://i.ibb.co/bR8MPF6J/IMG-1690.jpg',
-            'https://i.ibb.co/JhX9tGv/IMG-1692.jpg',
-            'https://i.ibb.co/h5H778T/IMG-1695.jpg',
-            'https://i.ibb.co/nsBTKgFC/IMG-1705.jpg',
-            'https://i.ibb.co/Y7WwXkrm/IMG-7498.jpg',
-            'https://i.ibb.co/xKvd6FvS/IMG-7505.jpg',
-            'https://i.ibb.co/8gzcjxWy/IMG-7510.jpg',
-            'https://i.ibb.co/qYRS1CD2/IMG-7509.jpg',
-            'https://i.ibb.co/WNxJb82G/IMG-7511.jpg',
-            'https://i.ibb.co/tpxJ4CCd/IMG-7512.jpg',
-            'https://i.ibb.co/35vfdWyL/IMG-7516.jpg',
-            'https://i.ibb.co/fd1WjB7f/IMG-7519.jpg',
-            'https://i.ibb.co/rfL56MGz/IMG-7520.jpg',
-            'https://i.ibb.co/ZRqhhHQG/IMG-7521.jpg',
-            'https://i.ibb.co/v4jvYv6D/IMG-7523.jpg',
-            'https://i.ibb.co/bgfM59B0/IMG-7524.jpg',
-            'https://i.ibb.co/PssNGT29/IMG-7525.jpg',
-            'https://i.ibb.co/B5Sfjj8C/IMG-7526.jpg',
-            'https://i.ibb.co/GQXSwzd5/IMG-7527.jpg',
-            'https://i.ibb.co/TDRSW1wy/2025-12-05-23-19-59.jpg',
-            'https://i.ibb.co/gLzqBHjs/IMG-7530.jpg',
-            'https://i.ibb.co/d4sMb7cn/IMG-7531.jpg',
-            'https://i.ibb.co/GvBWC3qS/IMG-7532.jpg',
-            'https://i.ibb.co/WvSvY0FQ/IMG-7533.jpg',
-            'https://i.ibb.co/FL2p7h67/IMG-7534.jpg',
-            'https://i.ibb.co/mPKrRBj/IMG-7535.jpg',
-            'https://i.ibb.co/WvXGD8mk/IMG-7536.jpg',
-            'https://i.ibb.co/Kzymmj9M/IMG-7537.jpg',
-            'https://i.ibb.co/RpzfrMrY/IMG-7538.jpg',
-            'https://i.ibb.co/mVttwX48/IMG-7539.jpg'
-        ];
-
         function initTelegramApp() {
             tg.ready();
             tg.expand();
@@ -980,9 +666,6 @@
             if (isInitialLoad) {
                 showPreloader();
                 loadUserData();
-                setupFooter();
-                initAdventCalendar();
-                createSnowflakes();
                 isInitialLoad = false;
             } else {
                 document.getElementById('loadingScreen').classList.add('hidden');
@@ -1002,57 +685,8 @@
             }, randomTime);
         }
 
-        function setupFooter() {
-            const user = tg.initDataUnsafe?.user;
-            if (user && user.photo_url) {
-                document.querySelector('.nav-item:nth-child(3) .nav-icon').innerHTML = 
-                    `<img src="${user.photo_url}" alt="Avatar" style="width:100%;height:100%;border-radius:50%;">`;
-            }
-        }
-
-        function switchTab(tab) {
-            tg.HapticFeedback.impactOccurred('light');
-            
-            document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            
-            const header = document.getElementById('header');
-            const footer = document.getElementById('footer');
-            
-            if (tab === 'home') {
-                document.querySelectorAll('.nav-item')[0].classList.add('active');
-                document.getElementById('homeScreen').classList.add('active');
-                currentScreen = 'home';
-                tg.BackButton.hide();
-                document.getElementById('viewToggle').classList.add('hidden');
-                document.getElementById('footer').classList.remove('hidden');
-                
-                // Возвращаем стандартные стили шапки и подвала
-                header.classList.remove('advent-header');
-                footer.classList.remove('advent-footer');
-            } else if (tab === 'advent') {
-                document.querySelectorAll('.nav-item')[1].classList.add('active');
-                document.getElementById('adventScreen').classList.add('active');
-                currentScreen = 'advent';
-                tg.BackButton.hide();
-                document.getElementById('viewToggle').classList.add('hidden');
-                document.getElementById('footer').classList.remove('hidden');
-                updateAdventTimer();
-                
-                // Меняем стили шапки и подвала на адвент
-                header.classList.add('advent-header');
-                footer.classList.add('advent-footer');
-            } else {
-                // Для других вкладок возвращаем стандартные стили
-                header.classList.remove('advent-header');
-                footer.classList.remove('advent-footer');
-            }
-        }
-
         function openCollection(type) {
             tg.HapticFeedback.impactOccurred('light');
-            
-            document.getElementById('footer').classList.add('hidden');
             
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(`${type}CollectionScreen`).classList.add('active');
@@ -1060,13 +694,6 @@
             
             tg.BackButton.show();
             document.getElementById('viewToggle').classList.remove('hidden');
-            
-            // Возвращаем стандартные стили шапки и подвала
-            const header = document.getElementById('header');
-            const footer = document.getElementById('footer');
-            header.classList.remove('advent-header');
-            footer.classList.remove('advent-footer');
-            
             renderCollection(type);
         }
 
@@ -1079,14 +706,6 @@
                 currentScreen = 'home';
                 tg.BackButton.hide();
                 document.getElementById('viewToggle').classList.add('hidden');
-                document.getElementById('footer').classList.remove('hidden');
-                document.querySelectorAll('.nav-item')[0].classList.add('active');
-                
-                // Возвращаем стандартные стили шапки и подвала
-                const header = document.getElementById('header');
-                const footer = document.getElementById('footer');
-                header.classList.remove('advent-header');
-                footer.classList.remove('advent-footer');
             }
         }
 
@@ -1125,164 +744,6 @@
             const url = articles[type];
             if (url) {
                 tg.openTelegramLink(url);
-            }
-        }
-
-        // Создание снежинок
-        function createSnowflakes() {
-            const snowflakesBack = document.getElementById('snowflakesBack');
-            const snowflakesFront = document.getElementById('snowflakesFront');
-            
-            const snowflakeCount = 70;
-            const frontLayerCount = Math.floor(snowflakeCount * 0.4); // 40% снежинок на переднем слое
-            const backLayerCount = snowflakeCount - frontLayerCount; // 60% на заднем слое
-            
-            // Создаем снежинки для заднего слоя
-            for (let i = 0; i < backLayerCount; i++) {
-                createSnowflake(snowflakesBack, i, false);
-            }
-            
-            // Создаем снежинки для переднего слоя
-            for (let i = 0; i < frontLayerCount; i++) {
-                createSnowflake(snowflakesFront, i, true);
-            }
-        }
-
-        function createSnowflake(container, index, isFront) {
-            const snowflake = document.createElement('div');
-            snowflake.className = 'snowflake';
-            
-            // Случайный размер (задний слой - мельче, передний - крупнее)
-            const size = isFront ? 
-                Math.random() * 5 + 2 : // 2-7px для переднего слоя
-                Math.random() * 3 + 1;  // 1-4px для заднего слоя
-            
-            snowflake.style.width = `${size}px`;
-            snowflake.style.height = `${size}px`;
-            
-            // Случайная позиция
-            snowflake.style.left = `${Math.random() * 100}%`;
-            
-            // Случайная прозрачность
-            snowflake.style.opacity = isFront ? 
-                Math.random() * 0.5 + 0.3 : // 0.3-0.8 для переднего слоя
-                Math.random() * 0.4 + 0.2;  // 0.2-0.6 для заднего слоя
-            
-            // Случайная скорость (передний слой - медленнее, задний - быстрее)
-            const duration = isFront ? 
-                Math.random() * 15 + 15 : // 15-30s для переднего слоя
-                Math.random() * 10 + 8;   // 8-18s для заднего слоя
-            
-            snowflake.style.animationDuration = `${duration}s`;
-            
-            // Случайная задержка
-            snowflake.style.animationDelay = `${Math.random() * 5}s`;
-            
-            container.appendChild(snowflake);
-        }
-
-        // Адвент-календарь функции
-        function initAdventCalendar() {
-            const grid = document.getElementById('adventGrid');
-            grid.innerHTML = '';
-            
-            const today = new Date();
-            const currentYear = today.getFullYear();
-            
-            // Начало адвента - 1 декабря текущего года
-            const startDate = new Date(currentYear, 11, 1); // 1 декабря
-            const endDate = new Date(currentYear, 11, 31); // 31 декабря
-            
-            let unlockedDays = 0;
-            
-            // Если сегодня уже после 31 декабря, показываем все дни
-            if (today > endDate) {
-                unlockedDays = 31;
-            } else if (today >= startDate) {
-                // Рассчитываем сколько дней прошло с 1 декабря
-                unlockedDays = Math.floor((today - startDate) / (1000 * 60 * 60 * 24)) + 1;
-                if (unlockedDays > 31) unlockedDays = 31;
-                if (unlockedDays < 1) unlockedDays = 0;
-            }
-            
-            // Обновляем прогресс
-            updateProgress(unlockedDays);
-            
-            // Создаем ячейки календаря
-            for (let day = 1; day <= 31; day++) {
-                const isUnlocked = day <= unlockedDays;
-                const dayElement = document.createElement('div');
-                dayElement.className = `advent-day ${isUnlocked ? 'unlocked' : 'locked'}`;
-                dayElement.onclick = () => {
-                    if (isUnlocked) {
-                        openFullscreen(adventImages[day - 1]);
-                    }
-                    tg.HapticFeedback.impactOccurred('light');
-                };
-                
-                dayElement.innerHTML = `
-                    <img src="${adventImages[day - 1]}" alt="День ${day}" class="day-image">
-                `;
-                
-                grid.appendChild(dayElement);
-            }
-            
-            // Запускаем таймер для следующего дня
-            if (unlockedDays < 31) {
-                startNextDayTimer(unlockedDays);
-            } else {
-                document.getElementById('nextDayTimer').textContent = 'Все дни открыты!';
-            }
-        }
-
-        function updateProgress(unlockedDays) {
-            const progressNumber = document.getElementById('progressNumber');
-            const progressFill = document.getElementById('progressFill');
-            
-            const percentage = (unlockedDays / 31) * 100;
-            
-            progressNumber.textContent = unlockedDays;
-            progressFill.style.width = `${percentage}%`;
-        }
-
-        function startNextDayTimer(unlockedDays) {
-            const nextDay = unlockedDays + 1;
-            const nextDayDate = new Date(new Date().getFullYear(), 11, nextDay); // Следующий день декабря
-            
-            // Устанавливаем время на 00:00
-            nextDayDate.setHours(0, 0, 0, 0);
-            
-            function updateTimer() {
-                const now = new Date();
-                const timeUntilNextDay = nextDayDate - now;
-                
-                if (timeUntilNextDay <= 0) {
-                    // Время пришло, обновляем календарь
-                    initAdventCalendar();
-                    return;
-                }
-                
-                // Рассчитываем оставшееся время
-                const hours = Math.floor((timeUntilNextDay % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((timeUntilNextDay % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((timeUntilNextDay % (1000 * 60)) / 1000);
-                
-                // Форматируем время
-                const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                
-                document.getElementById('nextDayTimer').textContent = formattedTime;
-                
-                // Обновляем каждую секунду
-                setTimeout(updateTimer, 1000);
-            }
-            
-            updateTimer();
-        }
-
-        function updateAdventTimer() {
-            // Если мы на экране адвента, обновляем таймер
-            if (currentScreen === 'advent') {
-                initAdventCalendar();
             }
         }
 
@@ -1410,13 +871,6 @@
                 
                 const card = document.createElement('div');
                 card.className = 'chibi-card';
-                card.onclick = () => {
-                    if (isCollected) {
-                        const imageUrl = `https://raw.githubusercontent.com/therootishere00-ux/Chibi-bot/main/chibis/${type}/${chibiName.replace(/ /g, '_')}.png`;
-                        openFullscreen(imageUrl);
-                    }
-                    tg.HapticFeedback.impactOccurred('light');
-                };
                 
                 const imageUrl = `https://raw.githubusercontent.com/therootishere00-ux/Chibi-bot/main/chibis/${type}/${chibiName.replace(/ /g, '_')}.png`;
                 
@@ -1424,6 +878,11 @@
                     <div class="chibi-image-container">
                         <img src="${imageUrl}" alt="${chibiName}" class="chibi-image"
                              onerror="this.style.display='none'">
+                        ${isCollected ? `
+                            <div class="zoom-button" onclick="event.stopPropagation(); openFullscreen('${imageUrl}')">
+                                <img src="https://img.icons8.com/?size=100&id=59801&format=png&color=000000" alt="Увеличить">
+                            </div>
+                        ` : ''}
                     </div>
                     ${isCollected ? `
                         <div class="chibi-info">
@@ -1431,6 +890,13 @@
                         </div>
                     ` : ''}
                 `;
+                
+                card.onclick = () => {
+                    if (isCollected) {
+                        openFullscreen(imageUrl);
+                    }
+                    tg.HapticFeedback.impactOccurred('light');
+                };
                 
                 if (!isCollected && type === 'common') {
                     const lockOverlay = document.createElement('div');
