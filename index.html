@@ -63,6 +63,37 @@
         .header-right {
             display: flex;
             align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar-container {
+            position: relative;
+            width: 36px;
+            height: 36px;
+            border-radius: 14px;
+            border: 1.5px solid var(--accent-color, #007AFF);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+        }
+
+        .user-avatar {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+        .avatar-gif {
+            position: absolute;
+            bottom: -4px;
+            right: -4px;
+            width: 20px;
+            height: 20px;
+            z-index: 2;
+            pointer-events: auto;
         }
 
         .view-toggle {
@@ -81,67 +112,28 @@
             display: none;
         }
 
-        .footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
+        .event-tooltip {
+            position: absolute;
+            top: 50px;
             right: 0;
-            height: 60px;
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(20px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-top: 0.5px solid #222;
-            padding: 0 40px;
-            z-index: 100;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.9);
+            white-space: nowrap;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
+            z-index: 1000;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .footer.hidden {
-            display: none;
-        }
-
-        .nav-items {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            text-decoration: none;
-            transition: all 0.2s ease;
-            flex: 1;
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .nav-item.active {
-            color: var(--accent-color, #007AFF);
-        }
-
-        .nav-icon {
-            width: 24px;
-            height: 24px;
-            transition: all 0.2s ease;
-        }
-
-        .nav-item .nav-icon {
-            filter: invert(1) opacity(0.7);
-        }
-
-        .nav-item.active .nav-icon {
-            filter: invert(1) sepia(1) saturate(10000%) hue-rotate(200deg) brightness(1.2);
+        .event-tooltip.show {
             opacity: 1;
-        }
-
-        .nav-label {
-            font-size: 12px;
-            font-weight: 500;
-            letter-spacing: -0.2px;
+            transform: translateY(0);
         }
 
         .main-content {
@@ -532,6 +524,17 @@
             .collection-icon, .article-icon {
                 border-radius: 14px;
             }
+            
+            .user-avatar-container {
+                width: 34px;
+                height: 34px;
+                border-radius: 12px;
+            }
+            
+            .avatar-gif {
+                width: 18px;
+                height: 18px;
+            }
         }
 
         @media (max-width: 320px) {
@@ -541,6 +544,17 @@
             
             .collection-icon, .article-icon {
                 border-radius: 12px;
+            }
+            
+            .user-avatar-container {
+                width: 32px;
+                height: 32px;
+                border-radius: 10px;
+            }
+            
+            .avatar-gif {
+                width: 16px;
+                height: 16px;
             }
         }
     </style>
@@ -561,35 +575,15 @@
     <div class="header">
         <img src="https://i.ibb.co/zTB331HR/image.png" alt="Chibeki" class="logo">
         <div class="header-right">
+            <div class="user-avatar-container" id="userAvatarContainer">
+                <div class="user-avatar" id="userAvatar"></div>
+                <img src="" alt="" class="avatar-gif" id="avatarGif">
+            </div>
+            <div class="event-tooltip" id="eventTooltip">Новогодний ивент 2025</div>
             <img src="https://img.icons8.com/?size=100&id=59801&format=png&color=000000" 
                  class="view-toggle hidden" 
                  id="viewToggle"
                  onclick="toggleViewMode()">
-        </div>
-    </div>
-
-    <div class="footer" id="footer">
-        <div class="nav-items">
-            <div class="nav-item active" onclick="switchTab('home')">
-                <img src="https://images.icon-icons.com/3832/PNG/512/rocket_icon_234403.png" 
-                     alt="Чибики" 
-                     class="nav-icon">
-                <span class="nav-label">Чибики</span>
-            </div>
-            
-            <div class="nav-item" onclick="switchTab('advent')">
-                <img src="https://img.icons8.com/?size=100&id=73WhoVlA0pQc&format=png&color=000000" 
-                     alt="Адвент" 
-                     class="nav-icon">
-                <span class="nav-label">Адвент</span>
-            </div>
-            
-            <div class="nav-item" onclick="tg.HapticFeedback.impactOccurred('light')">
-                <img src="https://img.icons8.com/?size=100&id=83180&format=png&color=000000" 
-                     alt="Инфо" 
-                     class="nav-icon">
-                <span class="nav-label">Инфо</span>
-            </div>
         </div>
     </div>
 
@@ -629,7 +623,7 @@
             <div class="section">
                 <div class="section-title">Статьи</div>
                 <div class="articles-container">
-                    <div class="article-card" onclick="openArticle('dice')">
+                    <div class="article-card">
                         <div class="article-icon">
                             <img src="https://img.icons8.com/?size=100&id=83194&format=png&color=000000" alt="Кости">
                         </div>
@@ -639,7 +633,7 @@
                         </div>
                     </div>
                     
-                    <div class="article-card" onclick="openArticle('feedback')">
+                    <div class="article-card">
                         <div class="article-icon">
                             <img src="https://img.icons8.com/?size=100&id=83194&format=png&color=000000" alt="Фидбек">
                         </div>
@@ -704,12 +698,12 @@
                 // Если прошло меньше минуты, пропускаем загрузку
                 document.getElementById('loadingScreen').classList.add('hidden');
                 loadUserData();
-                setupFooter();
+                setupUserAvatar();
                 isInitialLoad = false;
             } else if (isInitialLoad) {
                 showPreloader();
                 loadUserData();
-                setupFooter();
+                setupUserAvatar();
                 isInitialLoad = false;
             } else {
                 document.getElementById('loadingScreen').classList.add('hidden');
@@ -733,34 +727,71 @@
             }, randomTime);
         }
 
-        function setupFooter() {
+        function setupUserAvatar() {
             const user = tg.initDataUnsafe?.user;
-            if (user && user.photo_url) {
-                document.querySelector('.nav-item:nth-child(3) .nav-icon').innerHTML = 
-                    `<img src="${user.photo_url}" alt="Avatar" style="width:100%;height:100%;border-radius:50%;">`;
+            const avatarElement = document.getElementById('userAvatar');
+            const gifElement = document.getElementById('avatarGif');
+            const avatarContainer = document.getElementById('userAvatarContainer');
+            
+            if (user) {
+                // Устанавливаем аватарку пользователя
+                if (user.photo_url) {
+                    avatarElement.innerHTML = `<img src="${user.photo_url}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;">`;
+                } else {
+                    // Если нет фото, показываем первую букву username
+                    const initial = user.username ? user.username[0].toUpperCase() : 'U';
+                    avatarElement.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;color:#fff;">${initial}</div>`;
+                }
+                
+                // Устанавливаем соответствующую гифку
+                const username = user.username || '';
+                if (username.toLowerCase() === 'temkazavr') {
+                    gifElement.src = 'https://stickers.fullyst.com/e7e72911-670d-5946-93e4-3a32dfc3bdbd/full/AgADpWUAAhchkEo.webp';
+                } else {
+                    gifElement.src = 'https://stickers.fullyst.com/0f72a8b7-c353-5e21-9e25-cbaa1f8b8a68/full/AgAD4SIAAm86EEk.webp';
+                }
+                
+                // Добавляем обработчик клика для показа подсказки
+                gifElement.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    showEventTooltip();
+                });
+            } else {
+                // Если нет данных пользователя, показываем дефолтную иконку
+                avatarElement.innerHTML = `<img src="https://img.icons8.com/?size=100&id=83180&format=png&color=000000" alt="User" style="filter: invert(1) opacity(0.7); width:20px;height:20px;">`;
+                gifElement.src = 'https://stickers.fullyst.com/0f72a8b7-c353-5e21-9e25-cbaa1f8b8a68/full/AgAD4SIAAm86EEk.webp';
+                
+                // Добавляем обработчик клика для показа подсказки
+                gifElement.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    showEventTooltip();
+                });
             }
+        }
+
+        function showEventTooltip() {
+            const tooltip = document.getElementById('eventTooltip');
+            tooltip.classList.add('show');
+            
+            // Автоматически скрываем через 3 секунды
+            setTimeout(() => {
+                tooltip.classList.remove('show');
+            }, 3000);
         }
 
         function switchTab(tab) {
             tg.HapticFeedback.impactOccurred('light');
             
-            document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            
             if (tab === 'home') {
-                document.querySelectorAll('.nav-item')[0].classList.add('active');
                 document.getElementById('homeScreen').classList.add('active');
                 currentScreen = 'home';
                 tg.BackButton.hide();
                 document.getElementById('viewToggle').classList.add('hidden');
-                document.getElementById('footer').classList.remove('hidden');
             }
         }
 
         function openCollection(type) {
             tg.HapticFeedback.impactOccurred('light');
-            
-            document.getElementById('footer').classList.add('hidden');
             
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(`${type}CollectionScreen`).classList.add('active');
@@ -780,8 +811,6 @@
                 currentScreen = 'home';
                 tg.BackButton.hide();
                 document.getElementById('viewToggle').classList.add('hidden');
-                document.getElementById('footer').classList.remove('hidden');
-                document.querySelectorAll('.nav-item')[0].classList.add('active');
             }
         }
 
@@ -807,20 +836,6 @@
         function closeFullscreen() {
             const viewer = document.getElementById('fullscreenViewer');
             viewer.classList.remove('active');
-        }
-
-        function openArticle(type) {
-            tg.HapticFeedback.impactOccurred('medium');
-            
-            const articles = {
-                dice: 'https://telegra.ph/Kak-rabotayut-kosti--CHIBIKI-11-10',
-                feedback: 'https://telegra.ph/Kak-svyazatsya-s-adminami-11-11'
-            };
-            
-            const url = articles[type];
-            if (url) {
-                tg.openTelegramLink(url);
-            }
         }
 
         async function loadUserData() {
