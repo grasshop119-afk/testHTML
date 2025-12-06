@@ -81,6 +81,69 @@
             display: none;
         }
 
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-top: 0.5px solid #222;
+            padding: 0 40px;
+            z-index: 100;
+        }
+
+        .footer.hidden {
+            display: none;
+        }
+
+        .nav-items {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            flex: 1;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .nav-item.active {
+            color: var(--accent-color, #007AFF);
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item .nav-icon {
+            filter: invert(1) opacity(0.7);
+        }
+
+        .nav-item.active .nav-icon {
+            filter: invert(1) sepia(1) saturate(10000%) hue-rotate(200deg) brightness(1.2);
+            opacity: 1;
+        }
+
+        .nav-label {
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: -0.2px;
+        }
+
         .main-content {
             position: absolute;
             top: 52px;
@@ -323,34 +386,6 @@
             display: block;
         }
 
-        .chibi-view-toggle {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            width: 32px;
-            height: 32px;
-            background: rgba(0, 0, 0, 0.6);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            opacity: 0.8;
-            transition: opacity 0.2s ease;
-            z-index: 2;
-        }
-
-        .chibi-view-toggle:active {
-            opacity: 1;
-            background: rgba(0, 0, 0, 0.8);
-        }
-
-        .chibi-view-toggle img {
-            width: 18px;
-            height: 18px;
-            filter: invert(1) brightness(2);
-        }
-
         .chibi-info {
             padding: 12px 8px 8px;
             position: relative;
@@ -379,7 +414,6 @@
             justify-content: center;
             flex-direction: column;
             backdrop-filter: blur(8px);
-            border-radius: 27px;
         }
 
         .locked-icon {
@@ -447,10 +481,9 @@
             pointer-events: none;
         }
 
-        .loading-gif {
+        .rocket-gif {
             width: 120px;
             height: 120px;
-            object-fit: contain;
             user-select: none;
             -webkit-user-drag: none;
             cursor: default;
@@ -492,68 +525,22 @@
 
         /* Адаптив для мобильных */
         @media (max-width: 375px) {
-            .chibi-grid {
-                gap: 10px;
-            }
-            
-            .collection-card,
-            .article-card,
-            .chibi-card {
+            .collection-card, .article-card, .chibi-card {
                 border-radius: 24px;
             }
             
-            .collection-icon,
-            .article-icon {
+            .collection-icon, .article-icon {
                 border-radius: 14px;
-            }
-            
-            .collection-badge {
-                border-radius: 16px;
-            }
-            
-            .chibi-view-toggle {
-                width: 28px;
-                height: 28px;
-                border-radius: 8px;
-            }
-            
-            .chibi-view-toggle img {
-                width: 16px;
-                height: 16px;
             }
         }
 
         @media (max-width: 320px) {
-            .chibi-grid {
-                gap: 8px;
-            }
-            
-            .collection-card,
-            .article-card,
-            .chibi-card {
+            .collection-card, .article-card, .chibi-card {
                 border-radius: 21px;
             }
             
-            .collection-icon,
-            .article-icon {
+            .collection-icon, .article-icon {
                 border-radius: 12px;
-            }
-            
-            .collection-badge {
-                border-radius: 14px;
-            }
-            
-            .chibi-view-toggle {
-                width: 26px;
-                height: 26px;
-                top: 6px;
-                right: 6px;
-                border-radius: 7px;
-            }
-            
-            .chibi-view-toggle img {
-                width: 14px;
-                height: 14px;
             }
         }
     </style>
@@ -562,8 +549,8 @@
     <!-- Экран загрузки -->
     <div id="loadingScreen" class="preloader">
         <img src="https://stickers.fullyst.com/0f72a8b7-c353-5e21-9e25-cbaa1f8b8a68/full/AgAD4SIAAm86EEk.webp" 
-             alt="Загрузка" 
-             class="loading-gif">
+             alt="Ракета" 
+             class="rocket-gif">
         <div class="loading-wheel"></div>
         <div class="loading-footer">
             Icons by ICONS8<br>
@@ -574,15 +561,39 @@
     <div class="header">
         <img src="https://i.ibb.co/zTB331HR/image.png" alt="Chibeki" class="logo">
         <div class="header-right">
-            <img src="https://img.icons8.com/?size=100&id=mz2Zw0R3o9Hq&format=png&color=000000" 
+            <img src="https://img.icons8.com/?size=100&id=59801&format=png&color=000000" 
                  class="view-toggle hidden" 
                  id="viewToggle"
                  onclick="toggleViewMode()">
         </div>
     </div>
 
+    <div class="footer" id="footer">
+        <div class="nav-items">
+            <div class="nav-item active" onclick="switchTab('home')">
+                <img src="https://images.icon-icons.com/3832/PNG/512/rocket_icon_234403.png" 
+                     alt="Чибики" 
+                     class="nav-icon">
+                <span class="nav-label">Чибики</span>
+            </div>
+            
+            <div class="nav-item" onclick="switchTab('advent')">
+                <img src="https://img.icons8.com/?size=100&id=73WhoVlA0pQc&format=png&color=000000" 
+                     alt="Адвент" 
+                     class="nav-icon">
+                <span class="nav-label">Адвент</span>
+            </div>
+            
+            <div class="nav-item" onclick="tg.HapticFeedback.impactOccurred('light')">
+                <img src="https://img.icons8.com/?size=100&id=83180&format=png&color=000000" 
+                     alt="Инфо" 
+                     class="nav-icon">
+                <span class="nav-label">Инфо</span>
+            </div>
+        </div>
+    </div>
+
     <div class="main-content">
-        <!-- Главный экран -->
         <div class="screen main-screen active" id="homeScreen">
             <div class="section">
                 <div class="section-title">Коллекции</div>
@@ -641,23 +652,19 @@
             </div>
         </div>
 
-        <!-- Экран обычных чибиков -->
         <div class="screen collection-screen" id="commonCollectionScreen">
             <div class="chibi-grid grid-3" id="commonGrid"></div>
         </div>
 
-        <!-- Экран секретных чибиков -->
         <div class="screen collection-screen" id="secretCollectionScreen">
             <div class="chibi-grid grid-3" id="secretGrid"></div>
         </div>
 
-        <!-- Экран призовых чибиков -->
         <div class="screen collection-screen" id="prizeCollectionScreen">
             <div class="chibi-grid grid-3" id="prizeGrid"></div>
         </div>
     </div>
 
-    <!-- Просмотр в полный экран -->
     <div class="fullscreen-viewer" id="fullscreenViewer" onclick="closeFullscreen()">
         <img src="" alt="" class="fullscreen-image" id="fullscreenImage">
     </div>
@@ -674,6 +681,7 @@
         let currentScreen = 'home';
         let currentViewMode = 3;
         let isInitialLoad = true;
+        let appLoadedTime = null;
 
         function initTelegramApp() {
             tg.ready();
@@ -688,21 +696,36 @@
             
             tg.BackButton.onClick(goBack);
             
-            if (isInitialLoad) {
+            // Проверяем время последней загрузки
+            const lastLoadTime = localStorage.getItem('chibeki_last_load');
+            const currentTime = Date.now();
+            
+            if (lastLoadTime && (currentTime - parseInt(lastLoadTime) < 60000)) {
+                // Если прошло меньше минуты, пропускаем загрузку
+                document.getElementById('loadingScreen').classList.add('hidden');
+                loadUserData();
+                setupFooter();
+                isInitialLoad = false;
+            } else if (isInitialLoad) {
                 showPreloader();
                 loadUserData();
+                setupFooter();
                 isInitialLoad = false;
             } else {
                 document.getElementById('loadingScreen').classList.add('hidden');
             }
+            
+            // Сохраняем время загрузки
+            localStorage.setItem('chibeki_last_load', currentTime.toString());
+            appLoadedTime = currentTime;
         }
 
         function showPreloader() {
             const loadingScreen = document.getElementById('loadingScreen');
             loadingScreen.classList.remove('hidden');
             
-            const minTime = 2700;
-            const maxTime = 3100;
+            const minTime = 1500;
+            const maxTime = 2000;
             const randomTime = Math.floor(Math.random() * (maxTime - minTime + 1)) + minTime;
             
             setTimeout(() => {
@@ -710,8 +733,34 @@
             }, randomTime);
         }
 
+        function setupFooter() {
+            const user = tg.initDataUnsafe?.user;
+            if (user && user.photo_url) {
+                document.querySelector('.nav-item:nth-child(3) .nav-icon').innerHTML = 
+                    `<img src="${user.photo_url}" alt="Avatar" style="width:100%;height:100%;border-radius:50%;">`;
+            }
+        }
+
+        function switchTab(tab) {
+            tg.HapticFeedback.impactOccurred('light');
+            
+            document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            
+            if (tab === 'home') {
+                document.querySelectorAll('.nav-item')[0].classList.add('active');
+                document.getElementById('homeScreen').classList.add('active');
+                currentScreen = 'home';
+                tg.BackButton.hide();
+                document.getElementById('viewToggle').classList.add('hidden');
+                document.getElementById('footer').classList.remove('hidden');
+            }
+        }
+
         function openCollection(type) {
             tg.HapticFeedback.impactOccurred('light');
+            
+            document.getElementById('footer').classList.add('hidden');
             
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(`${type}CollectionScreen`).classList.add('active');
@@ -731,6 +780,8 @@
                 currentScreen = 'home';
                 tg.BackButton.hide();
                 document.getElementById('viewToggle').classList.add('hidden');
+                document.getElementById('footer').classList.remove('hidden');
+                document.querySelectorAll('.nav-item')[0].classList.add('active');
             }
         }
 
@@ -786,6 +837,15 @@
                 
             } catch (error) {
                 console.error('Error loading data:', error);
+                // Заглушки для демонстрации
+                userData.common.all = ['Chibi 1', 'Chibi 2', 'Chibi 3', 'Chibi 4', 'Chibi 5', 'Chibi 6', 'Chibi 7', 'Chibi 8', 'Chibi 9', 'Chibi 10', 'Chibi 11', 'Chibi 12'];
+                userData.secret.all = ['Secret 1', 'Secret 2', 'Secret 3', 'Secret 4'];
+                userData.prize.all = ['Prize 1', 'Prize 2', 'Prize 3'];
+                userData.common.collected = userData.common.all.slice(0, 4);
+                userData.secret.collected = [];
+                userData.prize.collected = [];
+                
+                updateMainScreen();
             }
         }
 
@@ -896,6 +956,13 @@
                 
                 const card = document.createElement('div');
                 card.className = 'chibi-card';
+                card.onclick = () => {
+                    if (isCollected) {
+                        const imageUrl = `https://raw.githubusercontent.com/therootishere00-ux/Chibi-bot/main/chibis/${type}/${chibiName.replace(/ /g, '_')}.png`;
+                        openFullscreen(imageUrl);
+                    }
+                    tg.HapticFeedback.impactOccurred('light');
+                };
                 
                 const imageUrl = `https://raw.githubusercontent.com/therootishere00-ux/Chibi-bot/main/chibis/${type}/${chibiName.replace(/ /g, '_')}.png`;
                 
@@ -903,11 +970,6 @@
                     <div class="chibi-image-container">
                         <img src="${imageUrl}" alt="${chibiName}" class="chibi-image"
                              onerror="this.style.display='none'">
-                        ${isCollected ? `
-                            <div class="chibi-view-toggle" onclick="event.stopPropagation(); openFullscreen('${imageUrl}')">
-                                <img src="https://img.icons8.com/?size=100&id=59801&format=png&color=000000" alt="Просмотр">
-                            </div>
-                        ` : ''}
                     </div>
                     ${isCollected ? `
                         <div class="chibi-info">
@@ -915,13 +977,6 @@
                         </div>
                     ` : ''}
                 `;
-                
-                card.onclick = () => {
-                    if (isCollected) {
-                        openFullscreen(imageUrl);
-                    }
-                    tg.HapticFeedback.impactOccurred('light');
-                };
                 
                 if (!isCollected && type === 'common') {
                     const lockOverlay = document.createElement('div');
