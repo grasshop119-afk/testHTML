@@ -9,7 +9,6 @@
         * {
             -webkit-touch-callout: none;
             -webkit-user-select: none;
-            -khtml-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
@@ -20,16 +19,14 @@
         body {
             margin: 0;
             padding: 0;
-            background: #000000;
+            background: #000;
             color: white;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             overflow: hidden;
         }
 
         .screen {
             position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
             height: 100%;
             display: none;
@@ -56,13 +53,11 @@
         }
 
         .header.collection-header {
-            background: #000000;
-            backdrop-filter: none;
+            background: #000;
         }
 
         .logo {
             height: 32px;
-            width: auto;
         }
 
         .header-right {
@@ -168,15 +163,8 @@
 
         .main-screen {
             padding: 16px;
-            overflow-y: auto;
             height: 100%;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-            background: #000000;
-        }
-
-        .main-screen::-webkit-scrollbar {
-            display: none;
+            background: #000;
         }
 
         .section {
@@ -191,56 +179,72 @@
             color: #FFFFFF;
         }
 
-        .collection-card {
+        .collection-card, .article-card, .chibi-card {
             background: #1A1A1A;
             border-radius: 27px;
-            padding: 14px;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            transition: background-color 0.15s ease;
             border: 1px solid #222;
+            transition: background-color 0.15s ease;
         }
 
-        .collection-card:active {
+        .collection-card:active, .article-card:active {
             background: #222;
         }
 
-        .collection-icon {
+        .collection-card, .article-card {
+            padding: 14px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .collection-icon, .article-icon {
             width: 44px;
             height: 44px;
             border-radius: 16px;
-            background: #000;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-right: 12px;
-            overflow: hidden;
             flex-shrink: 0;
         }
 
-        .collection-icon img {
+        .collection-icon {
+            background: #000;
+            overflow: hidden;
+        }
+
+        .collection-icon img, .chibi-image {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
 
-        .collection-info {
+        .article-icon {
+            background: var(--accent-color, #007AFF);
+        }
+
+        .article-icon img {
+            width: 28px;
+            height: 28px;
+            filter: brightness(0) invert(1);
+        }
+
+        .collection-info, .article-info {
             flex: 1;
             min-width: 0;
         }
 
-        .collection-name {
+        .collection-name, .article-name {
             font-size: 16px;
             font-weight: 500;
-            margin-bottom: 2px;
             color: #FFFFFF;
+            margin-bottom: 2px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        .collection-stats {
+        .collection-stats, .article-description {
             font-size: 14px;
             color: rgba(255, 255, 255, 0.6);
             white-space: nowrap;
@@ -261,77 +265,14 @@
         .collection-screen {
             padding: 16px;
             padding-top: 68px;
-            overflow-y: auto;
             height: 100vh;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-            background: #000000;
-        }
-
-        .collection-screen::-webkit-scrollbar {
-            display: none;
+            background: #000;
         }
 
         .articles-container {
             display: flex;
             flex-direction: column;
             gap: 8px;
-        }
-
-        .article-card {
-            background: #1A1A1A;
-            border-radius: 27px;
-            padding: 14px;
-            display: flex;
-            align-items: center;
-            transition: background-color 0.15s ease;
-            border: 1px solid #222;
-            cursor: pointer;
-        }
-
-        .article-card:active {
-            background: #222;
-        }
-
-        .article-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 16px;
-            background: var(--accent-color, #007AFF);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 12px;
-            flex-shrink: 0;
-        }
-
-        .article-icon img {
-            width: 28px;
-            height: 28px;
-            filter: brightness(0) invert(1);
-        }
-
-        .article-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .article-name {
-            font-size: 16px;
-            font-weight: 500;
-            color: #FFFFFF;
-            margin-bottom: 2px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .article-description {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.6);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
 
         .chibi-grid {
@@ -353,15 +294,11 @@
         }
 
         .chibi-card {
-            background: #1A1A1A;
-            border-radius: 27px;
             display: flex;
             flex-direction: column;
             position: relative;
-            transition: all 0.15s ease;
             overflow: hidden;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-            border: 1px solid #222;
         }
 
         .chibi-card:active {
@@ -385,13 +322,6 @@
 
         .grid-1 .chibi-image-container {
             aspect-ratio: 1/1.2;
-        }
-
-        .chibi-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
         }
 
         .chibi-info {
@@ -492,9 +422,6 @@
         .rocket-gif {
             width: 120px;
             height: 120px;
-            user-select: none;
-            -webkit-user-drag: none;
-            cursor: default;
         }
 
         .loading-wheel {
@@ -507,19 +434,14 @@
         }
 
         @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-            100% {
-                transform: rotate(360deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .loading-footer {
             position: absolute;
             bottom: 20px;
             color: rgba(255, 255, 255, 0.3);
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             font-size: 12px;
             text-align: center;
             width: 100%;
@@ -531,7 +453,6 @@
             text-decoration: none;
         }
 
-        /* Адаптив для мобильных */
         @media (max-width: 375px) {
             .collection-card, .article-card, .chibi-card {
                 border-radius: 24px;
@@ -580,7 +501,6 @@
     </style>
 </head>
 <body>
-    <!-- Экран загрузки -->
     <div id="loadingScreen" class="preloader">
         <img src="https://stickers.fullyst.com/0f72a8b7-c353-5e21-9e25-cbaa1f8b8a68/full/AgAD4SIAAm86EEk.webp" 
              alt="Ракета" 
@@ -695,7 +615,6 @@
         let currentScreen = 'home';
         let currentViewMode = 3;
         let isInitialLoad = true;
-        let appLoadedTime = null;
         let tooltipVisible = false;
 
         function initTelegramApp() {
@@ -705,29 +624,24 @@
             tg.setBackgroundColor('#000000');
             
             if (tg.themeParams.accent_text_color) {
-                const accentColor = tg.themeParams.accent_text_color;
-                document.documentElement.style.setProperty('--accent-color', accentColor);
+                document.documentElement.style.setProperty('--accent-color', tg.themeParams.accent_text_color);
             }
             
             tg.BackButton.onClick(goBack);
             
-            // Добавляем обработчик клика по всему документу для скрытия плашки
             document.addEventListener('click', function(e) {
                 const tooltip = document.getElementById('eventTooltip');
                 const avatarContainer = document.getElementById('userAvatarContainer');
                 
-                // Если клик не по аватарке и не по плашке, скрываем плашку
                 if (!avatarContainer.contains(e.target) && !tooltip.contains(e.target) && tooltipVisible) {
                     hideEventTooltip();
                 }
             });
             
-            // Проверяем время последней загрузки
             const lastLoadTime = localStorage.getItem('chibeki_last_load');
             const currentTime = Date.now();
             
             if (lastLoadTime && (currentTime - parseInt(lastLoadTime) < 60000)) {
-                // Если прошло меньше минуты, пропускаем загрузку
                 document.getElementById('loadingScreen').classList.add('hidden');
                 loadUserData();
                 setupUserAvatar();
@@ -741,22 +655,16 @@
                 document.getElementById('loadingScreen').classList.add('hidden');
             }
             
-            // Сохраняем время загрузки
             localStorage.setItem('chibeki_last_load', currentTime.toString());
-            appLoadedTime = currentTime;
         }
 
         function showPreloader() {
             const loadingScreen = document.getElementById('loadingScreen');
             loadingScreen.classList.remove('hidden');
             
-            const minTime = 1500;
-            const maxTime = 2000;
-            const randomTime = Math.floor(Math.random() * (maxTime - minTime + 1)) + minTime;
-            
             setTimeout(() => {
                 loadingScreen.classList.add('hidden');
-            }, randomTime);
+            }, Math.floor(Math.random() * 501) + 1500);
         }
 
         function setupUserAvatar() {
@@ -766,16 +674,13 @@
             const avatarContainer = document.getElementById('userAvatarContainer');
             
             if (user) {
-                // Устанавливаем аватарку пользователя
                 if (user.photo_url) {
                     avatarElement.innerHTML = `<img src="${user.photo_url}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">`;
                 } else {
-                    // Если нет фото, показываем первую букву username
                     const initial = user.username ? user.username[0].toUpperCase() : 'U';
                     avatarElement.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;color:#fff;border-radius:12px;">${initial}</div>`;
                 }
                 
-                // Устанавливаем соответствующую гифку
                 const username = user.username || '';
                 if (username.toLowerCase() === 'temkazavr') {
                     gifElement.src = 'https://stickers.fullyst.com/e7e72911-670d-5946-93e4-3a32dfc3bdbd/full/AgADpWUAAhchkEo.webp';
@@ -783,23 +688,19 @@
                     gifElement.src = 'https://stickers.fullyst.com/0f72a8b7-c353-5e21-9e25-cbaa1f8b8a68/full/AgAD4SIAAm86EEk.webp';
                 }
                 
-                // Добавляем обработчик клика на всю область аватарки
                 avatarContainer.addEventListener('click', function(e) {
                     e.stopPropagation();
                     toggleEventTooltip();
                 });
                 
-                // Также обработчик на гифку отдельно
                 gifElement.addEventListener('click', function(e) {
                     e.stopPropagation();
                     toggleEventTooltip();
                 });
             } else {
-                // Если нет данных пользователя, показываем дефолтную иконку
                 avatarElement.innerHTML = `<img src="https://img.icons8.com/?size=100&id=83180&format=png&color=000000" alt="User" style="filter: invert(1) opacity(0.7); width:20px;height:20px;">`;
                 gifElement.src = 'https://stickers.fullyst.com/0f72a8b7-c353-5e21-9e25-cbaa1f8b8a68/full/AgAD4SIAAm86EEk.webp';
                 
-                // Добавляем обработчик клика
                 avatarContainer.addEventListener('click', function(e) {
                     e.stopPropagation();
                     toggleEventTooltip();
@@ -821,7 +722,6 @@
                 tooltip.classList.add('show');
                 tooltipVisible = true;
                 
-                // Автоматически скрываем через 3 секунды
                 setTimeout(() => {
                     hideEventTooltip();
                 }, 3000);
@@ -834,17 +734,6 @@
             tooltipVisible = false;
         }
 
-        function switchTab(tab) {
-            tg.HapticFeedback.impactOccurred('light');
-            
-            if (tab === 'home') {
-                document.getElementById('homeScreen').classList.add('active');
-                currentScreen = 'home';
-                tg.BackButton.hide();
-                document.getElementById('viewToggle').classList.add('hidden');
-            }
-        }
-
         function openCollection(type) {
             tg.HapticFeedback.impactOccurred('light');
             
@@ -852,7 +741,6 @@
             document.getElementById(`${type}CollectionScreen`).classList.add('active');
             currentScreen = type;
             
-            // Скрываем аватарку и гифку во вкладках коллекций
             const header = document.getElementById('header');
             const avatarContainer = document.getElementById('userAvatarContainer');
             const gifElement = document.getElementById('avatarGif');
@@ -861,7 +749,6 @@
             avatarContainer.style.display = 'none';
             gifElement.style.display = 'none';
             
-            // Скрываем подсказку если она была открыта
             hideEventTooltip();
             
             tg.BackButton.show();
@@ -879,7 +766,6 @@
                 tg.BackButton.hide();
                 document.getElementById('viewToggle').classList.add('hidden');
                 
-                // Показываем аватарку и гифку обратно на главной
                 const header = document.getElementById('header');
                 const avatarContainer = document.getElementById('userAvatarContainer');
                 const gifElement = document.getElementById('avatarGif');
@@ -917,8 +803,6 @@
         function openArticle(type) {
             tg.HapticFeedback.impactOccurred('medium');
             
-            console.log('Opening article:', type);
-            
             const articles = {
                 dice: 'https://telegra.ph/Kak-rabotayut-kosti--CHIBIKI-11-10',
                 feedback: 'https://telegra.ph/Kak-svyazatsya-s-adminami-11-11'
@@ -926,18 +810,11 @@
             
             const url = articles[type];
             if (url) {
-                console.log('Opening URL:', url);
-                // Используем стандартный метод Telegram для открытия ссылок
-                if (tg && tg.openTelegramLink) {
-                    tg.openTelegramLink(url);
-                } else if (tg && tg.openLink) {
+                if (tg && tg.openLink) {
                     tg.openLink(url);
                 } else {
-                    // Если API Telegram не доступно, открываем в новом окне
                     window.open(url, '_blank');
                 }
-            } else {
-                console.error('Article URL not found for type:', type);
             }
         }
 
@@ -954,8 +831,6 @@
                 updateMainScreen();
                 
             } catch (error) {
-                console.error('Error loading data:', error);
-                // Заглушки для демонстрации
                 userData.common.all = ['Chibi 1', 'Chibi 2', 'Chibi 3', 'Chibi 4', 'Chibi 5', 'Chibi 6', 'Chibi 7', 'Chibi 8', 'Chibi 9', 'Chibi 10', 'Chibi 11', 'Chibi 12'];
                 userData.secret.all = ['Secret 1', 'Secret 2', 'Secret 3', 'Secret 4'];
                 userData.prize.all = ['Prize 1', 'Prize 2', 'Prize 3'];
@@ -972,10 +847,7 @@
                 userData.common.all = ['Chibi 1', 'Chibi 2', 'Chibi 3', 'Chibi 4', 'Chibi 5', 'Chibi 6', 'Chibi 7', 'Chibi 8', 'Chibi 9', 'Chibi 10', 'Chibi 11', 'Chibi 12'];
                 userData.secret.all = ['Secret 1', 'Secret 2', 'Secret 3', 'Secret 4'];
                 userData.prize.all = ['Prize 1', 'Prize 2', 'Prize 3'];
-                
-            } catch (error) {
-                console.error('Error loading chibi lists:', error);
-            }
+            } catch (error) {}
         }
 
         async function loadUserCollection(telegramId) {
@@ -998,12 +870,8 @@
                     if (collection.all_common) userData.common.all = collection.all_common;
                     if (collection.all_secret) userData.secret.all = collection.all_secret;
                     if (collection.all_prize) userData.prize.all = collection.all_prize;
-                    
-                } else {
-                    throw new Error('Failed to load collection');
                 }
             } catch (error) {
-                console.error('Error loading user collection:', error);
                 userData.common.collected = userData.common.all.slice(0, 4);
                 userData.secret.collected = [];
                 userData.prize.collected = [];
@@ -1032,17 +900,8 @@
             const secretCard = document.getElementById('secretCard');
             const prizeCard = document.getElementById('prizeCard');
             
-            if (userData.secret.collected.length > 0) {
-                secretCard.style.display = 'flex';
-            } else {
-                secretCard.style.display = 'none';
-            }
-            
-            if (userData.prize.collected.length > 0) {
-                prizeCard.style.display = 'flex';
-            } else {
-                prizeCard.style.display = 'none';
-            }
+            secretCard.style.display = userData.secret.collected.length > 0 ? 'flex' : 'none';
+            prizeCard.style.display = userData.prize.collected.length > 0 ? 'flex' : 'none';
         }
 
         function updateCollectionIcon(type) {
@@ -1053,11 +912,9 @@
                 const randomChibi = collected[Math.floor(Math.random() * collected.length)];
                 const imageUrl = `https://raw.githubusercontent.com/therootishere00-ux/Chibi-bot/main/chibis/${type}/${randomChibi.replace(/ /g, '_')}.png`;
                 
-                iconElement.innerHTML = `<img src="${imageUrl}" alt="${type}" onerror="this.style.display='none'">`;
+                iconElement.innerHTML = `<img src="${imageUrl}" alt="${type}">`;
             } else {
-                iconElement.innerHTML = `
-                    <img src="https://img.icons8.com/?size=100&id=wKLATegpDP1G&format=png&color=000000" alt="Lock" style="filter: invert(0.6); width: 24px; height: 24px;">
-                `;
+                iconElement.innerHTML = `<img src="https://img.icons8.com/?size=100&id=wKLATegpDP1G&format=png&color=000000" alt="Lock" style="filter: invert(0.6); width: 24px; height: 24px;">`;
             }
         }
 
@@ -1067,7 +924,7 @@
             
             grid.innerHTML = '';
             
-            const chibisToShow = (type === 'common') ? data.all : data.collected;
+            const chibisToShow = type === 'common' ? data.all : data.collected;
             
             chibisToShow.forEach((chibiName) => {
                 const isCollected = data.collected.includes(chibiName);
@@ -1086,8 +943,7 @@
                 
                 card.innerHTML = `
                     <div class="chibi-image-container">
-                        <img src="${imageUrl}" alt="${chibiName}" class="chibi-image"
-                             onerror="this.style.display='none'">
+                        <img src="${imageUrl}" alt="${chibiName}" class="chibi-image">
                     </div>
                     ${isCollected ? `
                         <div class="chibi-info">
