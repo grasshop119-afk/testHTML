@@ -46,6 +46,7 @@
             border-top-color: #fff;
             animation: spin 1s linear infinite;
             margin-bottom: 20px;
+            transition: border-top-color 0.3s ease;
         }
 
         @keyframes spin {
@@ -71,7 +72,7 @@
     <div class="image-container" id="imageContainer">
         <img src="https://i.ibb.co/v4BNsXtK/IMG-1987.jpg" alt="Загрузка">
     </div>
-    <div class="loader"></div>
+    <div class="loader" id="loader"></div>
     <div class="footer-text">
         Made with <span class="chibiki-text">ЧИБИКИ</span>
     </div>
@@ -85,40 +86,73 @@
         tg.expand();
         tg.enableClosingConfirmation();
         
-        // Функция для преобразования цвета в фильтр
-        function colorToFilter(accentColor) {
-            // Преобразуем hex в RGB
-            let r = parseInt(accentColor.slice(1, 3), 16);
-            let g = parseInt(accentColor.slice(3, 5), 16);
-            let b = parseInt(accentColor.slice(5, 7), 16);
+        // Функция для создания CSS фильтра из цвета Telegram
+        function createColorFilter(hexColor) {
+            // Конвертируем hex в HSL для лучшего контроля
+            const hsl = hexToHSL(hexColor);
             
-            // Находим средний оттенок и создаем фильтр
-            // Используем sepia + hue-rotate для перекрашивания
-            const hue = getHueFromRGB(r, g, b);
+            // Создаем фильтр на основе HSL
+            // 1. Сначала делаем изображение черно-белым (grayscale 100%)
+            // 2. Поворачиваем hue на нужный оттенок
+            // 3. Настраиваем насыщенность
+            // 4. Корректируем яркость
             
-            // Рассчитываем насыщенность на основе разницы каналов
-            const max = Math.max(r, g, b);
-            const min = Math.min(r, g, b);
-            const saturation = max === 0 ? 0 : (max - min) / max;
+            let filter = '';
             
-            // Создаем фильтр с акцентным цветом
-            return `sepia(1) hue-rotate(${hue}deg) saturate(${1 + saturation * 2}) brightness(1.1)`;
+            // Делаем изображение черно-белым (сепия 100% работает как хорошая база для перекраски)
+            filter += 'sepia(1) ';
+            
+            // Поворачиваем hue на значение цвета пользователя
+            filter += `hue-rotate(${hsl.h}deg) `;
+            
+            // Настраиваем насыщенность (Telegram цвета часто слишком насыщенные, уменьшаем немного)
+            const saturation = Math.min(hsl.s * 1.5, 2.0);
+            filter += `saturate(${saturation}) `;
+            
+            // Корректируем яркость на основе lightness
+            const brightness = 0.9 + (hsl.l / 100) * 0.3;
+            filter += `brightness(${brightness}) `;
+            
+            // Добавляем немного контраста для лучшей видимости
+            filter += 'contrast(1.1)';
+            
+            return filter;
         }
         
-        // Функция для получения hue из RGB
-        function getHueFromRGB(r, g, b) {
+        // Функция конвертации HEX в HSL
+        function hexToHSL(hex) {
+            // Убираем # если есть
+            hex = hex.replace(/^#/, '');
+            
+            // Парсим HEX
+            let r, g, b;
+            if (hex.length === 3) {
+                r = parseInt(hex[0] + hex[0], 16);
+                g = parseInt(hex[1] + hex[1], 16);
+                b = parseInt(hex[2] + hex[2], 16);
+            } else {
+                r = parseInt(hex.substring(0, 2), 16);
+                g = parseInt(hex.substring(2, 4), 16);
+                b = parseInt(hex.substring(4, 6), 16);
+            }
+            
+            // Конвертируем в диапазон 0-1
             r /= 255;
             g /= 255;
             b /= 255;
             
+            // Находим min, max и lightness
             const max = Math.max(r, g, b);
             const min = Math.min(r, g, b);
-            let h = 0;
+            let h, s, l = (max + min) / 2;
             
+            // Рассчитываем hue и saturation
             if (max === min) {
-                h = 0;
+                h = s = 0; // achromatic
             } else {
                 const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                
                 switch (max) {
                     case r: h = (g - b) / d + (g < b ? 6 : 0); break;
                     case g: h = (b - r) / d + 2; break;
@@ -127,15 +161,19 @@
                 h /= 6;
             }
             
-            return Math.round(h * 360);
+            return {
+                h: Math.round(h * 360),
+                s: Math.round(s * 100),
+                l: Math.round(l * 100)
+            };
         }
         
-        // Получаем тему Telegram и применяем цвет
+        // Основная функция применения цвета
         function applyThemeColor() {
             const themeParams = tg.themeParams;
             let accentColor;
             
-            // Проверяем, есть ли акцентный цвет в теме
+            // Приоритеты получения цвета из темы Telegram
             if (themeParams.accent_text_color) {
                 accentColor = themeParams.accent_text_color;
             } else if (themeParams.button_color) {
@@ -143,17 +181,21 @@
             } else if (themeParams.link_color) {
                 accentColor = themeParams.link_color;
             } else {
-                // Цвет по умолчанию (синий Telegram)
+                // Цвет по умолчанию Telegram
                 accentColor = '#3390ec';
             }
             
             // Применяем фильтр к изображению
             const imageContainer = document.getElementById('imageContainer');
-            imageContainer.style.filter = colorToFilter(accentColor);
+            imageContainer.style.filter = createColorFilter(accentColor);
             
-            // Также меняем цвет лоадера на акцентный
-            const loader = document.querySelector('.loader');
+            // Меняем цвет лоадера
+            const loader = document.getElementById('loader');
             loader.style.borderTopColor = accentColor;
+            
+            // Для дебага (можно удалить)
+            console.log('Applied color:', accentColor);
+            console.log('Applied filter:', createColorFilter(accentColor));
         }
         
         // Обработчик изменения темы
@@ -163,15 +205,25 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Даем время на инициализацию Telegram Web App
             setTimeout(applyThemeColor, 100);
+            
+            // Проверяем, доступны ли параметры темы
+            setTimeout(() => {
+                if (!tg.themeParams || Object.keys(tg.themeParams).length === 0) {
+                    console.log('Theme params not available, using fallback');
+                    const imageContainer = document.getElementById('imageContainer');
+                    imageContainer.style.filter = createColorFilter('#3390ec');
+                }
+            }, 300);
         });
         
-        // Если Telegram Web App не загрузился, используем цвет по умолчанию
+        // Fallback если Telegram Web App не загрузился
         setTimeout(function() {
             if (!window.Telegram || !window.Telegram.WebApp) {
+                console.log('Telegram Web App not detected, using default filter');
                 const imageContainer = document.getElementById('imageContainer');
-                imageContainer.style.filter = 'sepia(1) hue-rotate(190deg) saturate(2.5)';
+                imageContainer.style.filter = createColorFilter('#3390ec');
             }
-        }, 500);
+        }, 1000);
     </script>
 </body>
 </html>
