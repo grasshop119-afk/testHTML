@@ -2,228 +2,232 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Загрузка</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --tg-bg: var(--tg-theme-bg-color, #000000);
+            --tg-accent: var(--tg-theme-button-color, #007AFF);
+            --tg-text: var(--tg-theme-text-color, #ffffff);
+            --nav-bg: rgba(255, 255, 255, 0.1);
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --tg-safe-h: 60px; 
         }
 
         body {
-            background-color: #000;
+            margin: 0;
+            background-color: var(--tg-bg);
+            color: var(--tg-text);
+            font-family: -apple-system, sans-serif;
             height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Контейнер заголовка с учетом системных кнопок */
+        .header-container {
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            font-family: Arial, sans-serif;
-            overflow: hidden;
+            padding: calc(var(--safe-top) + var(--tg-safe-h)) 25px 10px;
         }
 
-        .image-container {
-            width: 80px;
-            height: 80px;
-            border-radius: 19px;
-            overflow: hidden;
-            margin-bottom: 25px;
-            transition: filter 0.3s ease;
+        .header {
+            font-size: 34px;
+            font-weight: 900;
+            letter-spacing: -1.5px;
+            text-transform: uppercase;
         }
 
-        .image-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-
-        .loader {
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-            transition: border-top-color 0.3s ease;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .footer-text {
+        .nav-wrapper {
             position: fixed;
-            bottom: 30px;
-            color: rgba(255, 255, 255, 0.35);
-            font-size: 14px;
-            font-weight: normal;
-            text-align: center;
-            width: 100%;
+            bottom: calc(30px + var(--safe-bottom));
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
         }
 
-        .chibiki-text {
-            color: rgba(255, 255, 255, 0.45);
+        .nav-island {
+            position: relative;
+            width: 240px;
+            height: 60px;
+            background: var(--nav-bg);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-radius: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            border: 1px solid rgba(255,255,255,0.08);
         }
+
+        .blob {
+            position: absolute;
+            width: 46px;
+            height: 46px;
+            background: var(--tg-accent);
+            border-radius: 50%;
+            z-index: 0;
+            top: 50%;
+            margin-top: -23px;
+            left: 15px;
+            transition: left 0.5s cubic-bezier(0.19, 1, 0.22, 1), 
+                        border-radius 0.3s ease, 
+                        transform 0.3s ease;
+        }
+
+        /* Деформация при движении (важно: !important чтобы перебивать инлайновые стили) */
+        .stretch-right {
+            border-radius: 40% 70% 70% 40% / 50% 50% 50% 50% !important;
+            transform: scaleX(1.18) !important;
+        }
+
+        .stretch-left {
+            border-radius: 70% 40% 40% 70% / 50% 50% 50% 50% !important;
+            transform: scaleX(1.18) !important;
+        }
+
+        .nav-item {
+            position: relative;
+            width: 50px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .nav-item img {
+            width: 26px;
+            height: 26px;
+            filter: invert(1);
+            opacity: 0.3;
+            transition: opacity 0.3s ease;
+        }
+
+        .nav-item.active img { opacity: 1; }
+
+        .avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background-color: #333;
+            background-size: cover;
+            background-position: center;
+            opacity: 0.4;
+        }
+
+        .active .avatar { opacity: 1; }
     </style>
 </head>
 <body>
-    <div class="image-container" id="imageContainer">
-        <img src="https://i.ibb.co/v4BNsXtK/IMG-1987.jpg" alt="Загрузка">
+
+    <div class="header-container">
+        <div class="header" id="title">ДЛЯ ТЕБЯ</div>
     </div>
-    <div class="loader" id="loader"></div>
-    <div class="footer-text">
-        Made with <span class="chibiki-text">ЧИБИКИ</span>
+
+    <div class="nav-wrapper">
+        <div class="nav-island">
+            <div class="blob" id="blob"></div>
+            
+            <div class="nav-item" id="tab-0" onclick="move(0)">
+                <img src="https://cdn-icons-png.flaticon.com/512/6997/6997164.png" alt="home">
+            </div>
+            
+            <div class="nav-item" id="tab-1" onclick="move(1)">
+                <img src="https://cdn-icons-png.flaticon.com/512/8025/8025278.png" alt="search">
+            </div>
+            
+            <div class="nav-item" id="tab-2" onclick="move(2)">
+                <div class="avatar" id="pfp"></div>
+            </div>
+        </div>
     </div>
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
-        // Инициализация Telegram Web App
         const tg = window.Telegram.WebApp;
-        
-        // Инициализируем приложение
+        tg.ready();
         tg.expand();
-        tg.enableClosingConfirmation();
-        
-        // Функция для создания CSS фильтра из цвета Telegram
-        function createColorFilter(hexColor) {
-            // Конвертируем hex в HSL для лучшего контроля
-            const hsl = hexToHSL(hexColor);
-            
-            // Создаем фильтр на основе HSL
-            // 1. Сначала делаем изображение черно-белым (grayscale 100%)
-            // 2. Поворачиваем hue на нужный оттенок
-            // 3. Настраиваем насыщенность
-            // 4. Корректируем яркость
-            
-            let filter = '';
-            
-            // Делаем изображение черно-белым (сепия 100% работает как хорошая база для перекраски)
-            filter += 'sepia(1) ';
-            
-            // Поворачиваем hue на значение цвета пользователя
-            filter += `hue-rotate(${hsl.h}deg) `;
-            
-            // Настраиваем насыщенность (Telegram цвета часто слишком насыщенные, уменьшаем немного)
-            const saturation = Math.min(hsl.s * 1.5, 2.0);
-            filter += `saturate(${saturation}) `;
-            
-            // Корректируем яркость на основе lightness
-            const brightness = 0.9 + (hsl.l / 100) * 0.3;
-            filter += `brightness(${brightness}) `;
-            
-            // Добавляем немного контраста для лучшей видимости
-            filter += 'contrast(1.1)';
-            
-            return filter;
-        }
-        
-        // Функция конвертации HEX в HSL
-        function hexToHSL(hex) {
-            // Убираем # если есть
-            hex = hex.replace(/^#/, '');
-            
-            // Парсим HEX
-            let r, g, b;
-            if (hex.length === 3) {
-                r = parseInt(hex[0] + hex[0], 16);
-                g = parseInt(hex[1] + hex[1], 16);
-                b = parseInt(hex[2] + hex[2], 16);
-            } else {
-                r = parseInt(hex.substring(0, 2), 16);
-                g = parseInt(hex.substring(2, 4), 16);
-                b = parseInt(hex.substring(4, 6), 16);
-            }
-            
-            // Конвертируем в диапазон 0-1
-            r /= 255;
-            g /= 255;
-            b /= 255;
-            
-            // Находим min, max и lightness
-            const max = Math.max(r, g, b);
-            const min = Math.min(r, g, b);
-            let h, s, l = (max + min) / 2;
-            
-            // Рассчитываем hue и saturation
-            if (max === min) {
-                h = s = 0; // achromatic
-            } else {
-                const d = max - min;
-                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-                
-                switch (max) {
-                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-                    case g: h = (b - r) / d + 2; break;
-                    case b: h = (r - g) / d + 4; break;
-                }
-                h /= 6;
-            }
-            
-            return {
-                h: Math.round(h * 360),
-                s: Math.round(s * 100),
-                l: Math.round(l * 100)
-            };
-        }
-        
-        // Основная функция применения цвета
-        function applyThemeColor() {
-            const themeParams = tg.themeParams;
-            let accentColor;
-            
-            // Приоритеты получения цвета из темы Telegram
-            if (themeParams.accent_text_color) {
-                accentColor = themeParams.accent_text_color;
-            } else if (themeParams.button_color) {
-                accentColor = themeParams.button_color;
-            } else if (themeParams.link_color) {
-                accentColor = themeParams.link_color;
-            } else {
-                // Цвет по умолчанию Telegram
-                accentColor = '#3390ec';
-            }
-            
-            // Применяем фильтр к изображению
-            const imageContainer = document.getElementById('imageContainer');
-            imageContainer.style.filter = createColorFilter(accentColor);
-            
-            // Меняем цвет лоадера
-            const loader = document.getElementById('loader');
-            loader.style.borderTopColor = accentColor;
-            
-            // Для дебага (можно удалить)
-            console.log('Applied color:', accentColor);
-            console.log('Applied filter:', createColorFilter(accentColor));
-        }
-        
-        // Обработчик изменения темы
-        tg.onEvent('themeChanged', applyThemeColor);
-        
-        // Применяем цвет при загрузке
-        document.addEventListener('DOMContentLoaded', function() {
-            // Даем время на инициализацию Telegram Web App
-            setTimeout(applyThemeColor, 100);
-            
-            // Проверяем, доступны ли параметры темы
-            setTimeout(() => {
-                if (!tg.themeParams || Object.keys(tg.themeParams).length === 0) {
-                    console.log('Theme params not available, using fallback');
-                    const imageContainer = document.getElementById('imageContainer');
-                    imageContainer.style.filter = createColorFilter('#3390ec');
-                }
-            }, 300);
+        if (tg.requestFullscreen) tg.requestFullscreen();
+
+        // ВКЛЮЧАЕМ ТУ САМУЮ КНОПКУ НАСТРОЕК
+        tg.SettingsButton.show();
+        tg.SettingsButton.onClick(() => {
+            tg.HapticFeedback.impactOccurred('heavy');
+            // Здесь мы будем открывать меню "Новый сторис"
+            tg.showPopup({
+                title: 'Создать',
+                message: 'Что вы хотите опубликовать сегодня?',
+                buttons: [
+                    {id: 'story', type: 'default', text: 'Новый сторис'},
+                    {id: 'post', type: 'default', text: 'Новый пост'},
+                    {type: 'cancel', text: 'Отмена'}
+                ]
+            }, (buttonId) => {
+                if(buttonId === 'story') alert('Запуск камеры...');
+            });
         });
-        
-        // Fallback если Telegram Web App не загрузился
-        setTimeout(function() {
-            if (!window.Telegram || !window.Telegram.WebApp) {
-                console.log('Telegram Web App not detected, using default filter');
-                const imageContainer = document.getElementById('imageContainer');
-                imageContainer.style.filter = createColorFilter('#3390ec');
+
+        const blob = document.getElementById('blob');
+        const items = document.querySelectorAll('.nav-item');
+        let currentIndex = -1;
+
+        function move(index) {
+            const targetItem = document.getElementById(`tab-${index}`);
+            
+            if (index === currentIndex) {
+                // Микро-деформация при повторном нажатии
+                const r = () => Math.floor(Math.random() * 8 + 46); 
+                blob.style.borderRadius = `${r()}% ${100-r()}% ${r()}% ${100-r()}% / ${100-r()}% ${r()}% ${100-r()}% ${r()}%`;
+                blob.style.transform = `scale(1.04)`;
+                
+                setTimeout(() => {
+                    blob.style.borderRadius = ''; 
+                    blob.style.transform = '';
+                }, 200);
+                
+                tg.HapticFeedback.notificationOccurred('success');
+                return;
             }
-        }, 1000);
+
+            items.forEach(item => item.classList.remove('active'));
+            blob.classList.remove('stretch-right', 'stretch-left');
+
+            if (currentIndex !== -1) {
+                if (index > currentIndex) blob.classList.add('stretch-right');
+                else blob.classList.add('stretch-left');
+            }
+
+            const targetX = targetItem.offsetLeft + (targetItem.offsetWidth / 2) - (blob.offsetWidth / 2);
+            blob.style.left = `${targetX}px`;
+            
+            targetItem.classList.add('active');
+            currentIndex = index;
+
+            // Завершение деформации еще чуть раньше (180ms)
+            setTimeout(() => {
+                blob.classList.remove('stretch-right', 'stretch-left');
+            }, 180);
+
+            if (currentIndex !== -1) tg.HapticFeedback.impactOccurred('medium');
+        }
+
+        const lang = tg.initDataUnsafe.user?.language_code || 'en';
+        const t = { ru: "ДЛЯ ТЕБЯ", zh: "为你推荐", en: "FOR YOU" };
+        document.getElementById('title').innerText = t[lang] || t.en;
+
+        if (tg.initDataUnsafe.user?.photo_url) {
+            document.getElementById('pfp').style.backgroundImage = `url(${tg.initDataUnsafe.user.photo_url})`;
+        }
+
+        window.onload = () => {
+            setTimeout(() => move(0), 50);
+        };
     </script>
 </body>
 </html>
