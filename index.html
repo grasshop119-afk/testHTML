@@ -2,431 +2,384 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Telegram Mini App UI</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Premium Mini App</title>
     <style>
         :root {
-            --tg-theme-bg-color: #000000;
-            --tg-theme-secondary-bg-color: #1c1c1d;
-            --tg-theme-text-color: #ffffff;
-            --tg-theme-hint-color: rgba(255, 255, 255, 0.55);
-            --tg-theme-link-color: #248bfe;
-            --tg-theme-button-color: #248bfe;
-            --tg-theme-button-text-color: #ffffff;
-            --accent-color: #248bfe;
+            --tg-bg: var(--tg-theme-bg-color, #000000);
+            --tg-secondary-bg: var(--tg-theme-secondary-bg-color, #1c1c1d);
+            --tg-accent: var(--tg-theme-button-color, #007AFF);
+            --tg-text: var(--tg-theme-text-color, #ffffff);
+            --tg-hint: var(--tg-theme-hint-color, #8e8e93);
+            --nav-bg: rgba(255, 255, 255, 0.1);
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --tg-safe-h: 50px;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             margin: 0;
             padding: 0;
+            background-color: var(--tg-bg);
+            color: var(--tg-text);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--tg-theme-bg-color);
-            color: var(--tg-theme-text-color);
-            overflow-x: hidden;
-            -webkit-tap-highlight-color: transparent;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            user-select: none;
         }
 
-        /* Анимация заголовка */
+        /* --- HEADER SECTION --- */
         .header-container {
-            padding: 16px;
-            height: 40px;
+            padding: calc(var(--safe-top) + 20px) 20px 10px;
+            height: 80px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            position: relative;
+            z-index: 10;
         }
 
         .header-text {
-            position: absolute;
-            font-size: 17px;
-            font-weight: 600;
-            transition: opacity 0.8s ease, transform 0.8s ease;
-            opacity: 0;
-            transform: translateY(10px);
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            text-transform: uppercase;
+            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .header-text.active {
-            opacity: 0.55; /* Твоя настройка прозрачности */
+        .header-welcome {
+            opacity: 0.55;
+        }
+
+        .header-fade-out {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        .header-fade-in {
+            opacity: 1;
             transform: translateY(0);
         }
 
-        .header-text.faq-mode {
-            opacity: 1; /* FAQ обычно ярче, но оставим по логике */
-        }
-
-        /* Вкладки/Страницы */
-        .page {
+        /* --- CONTENT SYSTEM --- */
+        .content-view {
+            flex: 1;
+            position: relative;
+            overflow-y: auto;
+            padding: 0 20px;
+            transition: opacity 0.3s ease;
             display: none;
-            padding: 0 16px 100px 16px;
-            animation: fadeIn 0.3s ease;
+            padding-bottom: 120px; /* Space for nav island */
         }
 
-        .page.active {
+        .content-view.active {
             display: block;
+            animation: fadeIn 0.4s ease forwards;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Стили профиля в стиле TG */
-        .profile-section {
+        /* --- SEARCH TAB --- */
+        .search-container {
+            margin-top: 10px;
+        }
+
+        .search-bar {
+            width: 100%;
+            background: var(--tg-secondary-bg);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 15px;
+            color: var(--tg-text);
+            font-size: 17px;
+            outline: none;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .search-bar::placeholder {
+            color: var(--tg-hint);
+        }
+
+        /* --- PROFILE TAB --- */
+        .profile-card {
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-top: 20px;
-            padding: 20px;
-            background: var(--tg-theme-secondary-bg-color);
-            border-radius: 20px;
+            margin-top: 40px;
         }
 
         .profile-avatar {
-            width: 80px;
-            height: 80px;
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #62bcf9 0%, #248bfe 100%);
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            font-weight: bold;
+            background: var(--tg-secondary-bg);
+            background-size: cover;
+            background-position: center;
+            margin-bottom: 15px;
+            border: 3px solid var(--tg-accent);
         }
 
         .profile-name {
-            font-size: 20px;
+            font-size: 24px;
             font-weight: 700;
             margin-bottom: 4px;
         }
 
         .profile-username {
-            font-size: 14px;
-            color: var(--tg-theme-hint-color);
-        }
-
-        /* Поиск как отдельная страница */
-        #search-page {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--tg-theme-bg-color);
-            z-index: 1000;
-            transform: translateY(100%);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            padding: 0;
-            display: block; /* Управляется через transform */
-        }
-
-        #search-page.open {
-            transform: translateY(0);
-        }
-
-        .search-header {
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .search-title {
-            font-size: 28px;
-            font-weight: 800;
-            margin-left: 8px;
-        }
-
-        .search-input-container {
-            width: 90%;
-            margin: 0 auto;
-            position: relative;
-        }
-
-        .search-input {
-            width: 100%;
-            background: var(--tg-theme-secondary-bg-color);
-            border: none;
-            border-radius: 12px;
-            padding: 12px 16px;
-            color: white;
-            font-size: 17px;
-            outline: none;
-            box-sizing: border-box;
-        }
-
-        .search-close {
-            position: absolute;
-            right: 16px;
-            top: 16px;
-            color: var(--tg-theme-link-color);
-            font-weight: 500;
-            cursor: pointer;
-        }
-
-        /* Основная панель кнопок (Wallet style) */
-        .action-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            margin: 20px 0;
-        }
-
-        .action-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .action-icon {
-            width: 48px;
-            height: 48px;
-            background: var(--tg-theme-secondary-bg-color);
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            transition: transform 0.1s;
-        }
-
-        .action-icon:active {
-            transform: scale(0.9);
-        }
-
-        .action-label {
-            font-size: 12px;
-            color: var(--tg-theme-link-color);
-        }
-
-        /* Таббар (нижняя панель) */
-        .tab-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 65px;
-            background: rgba(28, 28, 29, 0.85);
-            backdrop-filter: blur(20px);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            border-top: 0.5px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: env(safe-area-inset-bottom);
-            z-index: 999;
-        }
-
-        .tab-item {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            color: #8e8e93;
-            transition: color 0.2s;
-            cursor: pointer;
-        }
-
-        .tab-item.active {
-            color: var(--accent-color);
-        }
-
-        /* Твой Share Button (без потемнения) */
-        .share-btn {
-            background: #248bfe;
-            color: white;
-            border: none;
-            padding: 14px;
-            border-radius: 12px;
-            width: 100%;
-            font-weight: 600;
             font-size: 16px;
-            margin-top: 20px;
-        }
-        
-        .share-btn:active {
-            /* Оставляем ярким, согласно твоим инструкциям */
-            opacity: 1;
+            color: var(--tg-accent);
+            font-weight: 500;
         }
 
-        /* Пустые состояния как на скринах */
-        .empty-state {
+        /* --- NAV ISLAND (STRICTLY PRESERVED) --- */
+        .nav-wrapper {
+            position: fixed;
+            bottom: calc(30px + var(--safe-bottom));
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+        }
+
+        .nav-island {
+            position: relative;
+            width: 240px;
+            height: 60px;
+            background: var(--nav-bg);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-radius: 30px;
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .blob {
+            position: absolute;
+            width: 46px;
+            height: 46px;
+            background: var(--tg-accent);
+            border-radius: 50%;
+            z-index: 0;
+            top: 50%;
+            margin-top: -23px;
+            left: 15px;
+            transition: left 0.5s cubic-bezier(0.19, 1, 0.22, 1), 
+                        border-radius 0.3s ease, 
+                        transform 0.3s ease;
+        }
+
+        .stretch-right {
+            border-radius: 40% 70% 70% 40% / 50% 50% 50% 50% !important;
+            transform: scaleX(1.18) !important;
+        }
+
+        .stretch-left {
+            border-radius: 70% 40% 40% 70% / 50% 50% 50% 50% !important;
+            transform: scaleX(1.18) !important;
+        }
+
+        .nav-item {
+            position: relative;
+            width: 50px;
+            height: 100%;
+            display: flex;
             align-items: center;
             justify-content: center;
-            margin-top: 60px;
-            color: var(--tg-theme-hint-color);
+            z-index: 2;
+            cursor: pointer;
+        }
+
+        .nav-item img {
+            width: 26px;
+            height: 26px;
+            filter: invert(1);
+            opacity: 0.3;
+            transition: opacity 0.3s ease;
+        }
+
+        .nav-item.active img { opacity: 1; }
+
+        .pfp-mini {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background-color: #333;
+            background-size: cover;
+            background-position: center;
+            opacity: 0.4;
+        }
+
+        .active .pfp-mini { opacity: 1; }
+
+        /* Infrastructure */
+        .placeholder-text {
+            color: var(--tg-hint);
             text-align: center;
+            margin-top: 50px;
+            font-size: 14px;
         }
-
-        .duck-img {
-            width: 100px;
-            height: 100px;
-            margin-bottom: 16px;
-        }
-
     </style>
 </head>
 <body>
 
-    <div class="header-container">
-        <div id="welcome-text" class="header-text active">С возвращением</div>
-        <div id="faq-text" class="header-text">FAQ</div>
+    <div class="header-container" id="header-box">
+        <div class="header-text header-welcome" id="main-title">С ВОЗВРАЩЕНИЕМ</div>
     </div>
 
-    <div id="main-page" class="page active">
-        <div class="action-grid">
-            <div class="action-item">
-                <div class="action-icon">🚀</div>
-                <div class="action-label">Перевести</div>
-            </div>
-            <div class="action-item">
-                <div class="action-icon">➕</div>
-                <div class="action-label">Пополнить</div>
-            </div>
-            <div class="action-item">
-                <div class="action-icon">⬆️</div>
-                <div class="action-label">Вывести</div>
-            </div>
-            <div class="action-item">
-                <div class="action-icon">🔄</div>
-                <div class="action-label">Обменять</div>
-            </div>
+    <div id="view-0" class="content-view active">
+        <div class="placeholder-text">
+            Здесь будет ваш основной контент.<br>
+            Интерфейс адаптирован под системные цвета Telegram.
         </div>
-
-        <div style="background: #1c1c1d; padding: 16px; border-radius: 16px; margin-bottom: 16px;">
-            <div style="color: #8e8e93; font-size: 14px;">Мой баланс</div>
-            <div style="font-size: 32px; font-weight: 800; margin-top: 4px;">$ 1,240.50</div>
-        </div>
-
-        <button class="share-btn">Поделиться результатом</button>
     </div>
 
-    <div id="profile-page" class="page">
-        <div class="profile-section">
-            <div class="profile-avatar" id="user-avatar">?</div>
+    <div id="view-1" class="content-view">
+        <div class="search-container">
+            <input type="text" class="search-bar" placeholder="Поиск по приложению..." id="search-input">
+        </div>
+        <div class="placeholder-text">Начните вводить текст для поиска</div>
+    </div>
+
+    <div id="view-2" class="content-view">
+        <div class="profile-card">
+            <div class="profile-avatar" id="user-avatar"></div>
             <div class="profile-name" id="user-name">Telegram User</div>
             <div class="profile-username" id="user-handle">@username</div>
         </div>
+    </div>
 
-        <div style="margin-top: 24px;">
-            <div style="padding: 12px; border-bottom: 0.5px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between;">
-                <span>Уведомления</span>
-                <span style="color: var(--tg-theme-link-color);">Вкл.</span>
+    <div class="nav-wrapper">
+        <div class="nav-island">
+            <div class="blob" id="blob"></div>
+            
+            <div class="nav-item" id="tab-0" onclick="switchTab(0)">
+                <img src="https://cdn-icons-png.flaticon.com/512/6997/6997164.png" alt="home">
             </div>
-            <div style="padding: 12px; border-bottom: 0.5px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between;">
-                <span>Язык</span>
-                <span style="color: var(--tg-theme-hint-color);">Русский</span>
+            
+            <div class="nav-item" id="tab-1" onclick="switchTab(1)">
+                <img src="https://cdn-icons-png.flaticon.com/512/8025/8025278.png" alt="search">
+            </div>
+            
+            <div class="nav-item" id="tab-2" onclick="switchTab(2)">
+                <div class="pfp-mini" id="nav-pfp"></div>
             </div>
         </div>
     </div>
 
-    <div id="history-page" class="page">
-        <div class="empty-state">
-            <div class="duck-img">🦆</div>
-            <h3>У вас пока нет транзакций</h3>
-            <p>Все ваши операции будут<br>отображаться здесь.</p>
-        </div>
-    </div>
-
-    <div id="search-page">
-        <div class="search-header">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span class="search-title">Поиск</span>
-                <span class="search-close" onclick="toggleSearch(false)">Закрыть</span>
-            </div>
-            <div class="search-input-container">
-                <input type="text" class="search-input" placeholder="Поиск активов..." autofocus>
-            </div>
-        </div>
-        <div class="empty-state">
-            <div class="duck-img">🔍</div>
-            <p>Начните вводить название...</p>
-        </div>
-    </div>
-
-    <nav class="tab-bar">
-        <div class="tab-item active" onclick="showPage('main-page', this)">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-            <span style="font-size: 10px;">Главная</span>
-        </div>
-        <div class="tab-item" onclick="toggleSearch(true)">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-            <span style="font-size: 10px;">Поиск</span>
-        </div>
-        <div class="tab-item" onclick="showPage('history-page', this)">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
-            <span style="font-size: 10px;">История</span>
-        </div>
-        <div class="tab-item" onclick="showPage('profile-page', this)">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-            <span style="font-size: 10px;">Профиль</span>
-        </div>
-    </nav>
-
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         const tg = window.Telegram.WebApp;
+        tg.ready();
         tg.expand();
 
         // 1. Анимация заголовка
+        const titleElement = document.getElementById('main-title');
         setTimeout(() => {
-            const welcome = document.getElementById('welcome-text');
-            const faq = document.getElementById('faq-text');
-            
-            welcome.classList.remove('active');
-            
+            titleElement.classList.add('header-fade-out');
             setTimeout(() => {
-                faq.classList.add('active');
-                faq.classList.add('faq-mode');
-            }, 800);
+                titleElement.innerText = 'FAQ';
+                titleElement.classList.remove('header-welcome', 'header-fade-out');
+                titleElement.classList.add('header-fade-in');
+            }, 600);
         }, 3000);
 
-        // 2. Переключение страниц
-        function showPage(pageId, element) {
-            // Скрываем все страницы
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            // Показываем нужную
-            document.getElementById(pageId).classList.add('active');
+        // 2. Данные пользователя
+        const user = tg.initDataUnsafe?.user;
+        if (user) {
+            document.getElementById('user-name').innerText = `${user.first_name} ${user.last_name || ''}`;
+            document.getElementById('user-handle').innerText = user.username ? `@${user.username}` : '';
+            if (user.photo_url) {
+                document.getElementById('user-avatar').style.backgroundImage = `url(${user.photo_url})`;
+                document.getElementById('nav-pfp').style.backgroundImage = `url(${user.photo_url})`;
+            }
+        }
+
+        // 3. Логика переключения вкладок
+        const blob = document.getElementById('blob');
+        const items = document.querySelectorAll('.nav-item');
+        const views = document.querySelectorAll('.content-view');
+        const headerBox = document.getElementById('header-box');
+        let currentIndex = -1;
+
+        function switchTab(index) {
+            if (index === currentIndex) {
+                tg.HapticFeedback.impactOccurred('light');
+                return;
+            }
+
+            // Управление Blob (твоя механика)
+            const targetItem = document.getElementById(`tab-${index}`);
+            blob.classList.remove('stretch-right', 'stretch-left');
             
-            // Обновляем таббар
-            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-            element.classList.add('active');
+            if (currentIndex !== -1) {
+                if (index > currentIndex) blob.classList.add('stretch-right');
+                else blob.classList.add('stretch-left');
+            }
 
-            // Легкая вибрация при переключении (механика ТГ)
-            tg.HapticFeedback.selectionChanged();
+            const targetX = targetItem.offsetLeft + (targetItem.offsetWidth / 2) - (blob.offsetWidth / 2);
+            blob.style.left = `${targetX}px`;
+            
+            items.forEach(item => item.classList.remove('active'));
+            targetItem.classList.add('active');
+
+            // Управление Контентом
+            views.forEach(v => v.classList.remove('active'));
+            document.getElementById(`view-${index}`).classList.add('active');
+
+            // Управление Заголовком (для профиля скрываем, для поиска меняем)
+            updateHeader(index);
+
+            currentIndex = index;
+            setTimeout(() => blob.classList.remove('stretch-right', 'stretch-left'), 200);
+            tg.HapticFeedback.impactOccurred('medium');
         }
 
-        // 3. Управление поиском (отдельный слой)
-        function toggleSearch(open) {
-            const searchPage = document.getElementById('search-page');
-            if (open) {
-                searchPage.classList.add('open');
-                tg.HapticFeedback.impactOccurred('medium');
-                // Фокус на ввод через небольшую задержку для плавности
-                setTimeout(() => {
-                    searchPage.querySelector('input').focus();
-                }, 300);
+        function updateHeader(index) {
+            if (index === 2) { // Профиль
+                headerBox.style.display = 'none';
             } else {
-                searchPage.classList.remove('open');
-                searchPage.querySelector('input').blur();
+                headerBox.style.display = 'flex';
+                if (index === 1) { // Поиск
+                    titleElement.innerText = 'ПОИСК';
+                    titleElement.classList.remove('header-welcome');
+                    titleElement.style.opacity = "1";
+                } else { // Главная / FAQ
+                    // Если анимация уже прошла, оставляем FAQ
+                    if (titleElement.innerText !== 'С ВОЗВРАЩЕНИЕМ') {
+                        titleElement.innerText = 'FAQ';
+                    }
+                }
             }
         }
 
-        // 4. Настройка данных профиля из Telegram
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            const user = tg.initDataUnsafe.user;
-            document.getElementById('user-name').textContent = `${user.first_name} ${user.last_name || ''}`;
-            document.getElementById('user-handle').textContent = user.username ? `@${user.username}` : 'ID: ' + user.id;
-            if (user.first_name) {
-                document.getElementById('user-avatar').textContent = user.first_name.charAt(0);
-            }
-        }
+        // Инициализация
+        window.onload = () => {
+            switchTab(0);
+            
+            // Настройка MainButton для примера (как в Wallet)
+            tg.MainButton.setParams({
+                text: 'ПОДТВЕРДИТЬ',
+                color: tg.themeParams.button_color,
+                text_color: tg.themeParams.button_text_color
+            });
+        };
 
-        // Сообщаем ТГ, что приложение готово
-        tg.ready();
+        // Обработка фокуса поиска
+        const searchInput = document.getElementById('search-input');
+        searchInput.addEventListener('focus', () => {
+            tg.HapticFeedback.impactOccurred('light');
+        });
+
     </script>
 </body>
 </html>
