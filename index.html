@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --tg-bg: var(--tg-theme-bg-color, #000000);
@@ -18,7 +19,8 @@
             margin: 0;
             background-color: var(--tg-bg);
             color: var(--tg-text);
-            font-family: -apple-system, sans-serif;
+            /* Устанавливаем Montserrat основным шрифтом */
+            font-family: 'Montserrat', -apple-system, sans-serif;
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -27,21 +29,27 @@
 
         .header-container {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
             padding: calc(var(--safe-top) + var(--tg-safe-h)) 25px 10px;
         }
 
         .header {
-            font-size: 34px;
+            font-size: 28px;
             font-weight: 900;
-            letter-spacing: -1.5px;
+            letter-spacing: -0.5px;
             text-transform: uppercase;
+            line-height: 1.2;
         }
+
+        .welcome-text { opacity: 0.7; }
+        .user-name { opacity: 1; }
 
         .nav-wrapper {
             position: fixed;
-            bottom: calc(30px + var(--safe-bottom));
+            /* Опустили чуть ниже (было 30px) */
+            bottom: calc(20px + var(--safe-bottom));
             left: 50%;
             transform: translateX(-50%);
             z-index: 1000;
@@ -49,7 +57,8 @@
 
         .nav-island {
             position: relative;
-            width: 240px;
+            /* Сделали чуть уже (было 240px) */
+            width: 210px;
             height: 60px;
             background: var(--nav-bg);
             backdrop-filter: blur(25px);
@@ -125,7 +134,10 @@
 <body>
 
     <div class="header-container">
-        <div class="header" id="title">ДЛЯ ТЕБЯ</div>
+        <div class="header" id="title">
+            <span class="welcome-text" id="welcome-phrase">С возвращением,</span><br>
+            <span class="user-name" id="user-name">Гость</span>!
+        </div>
     </div>
 
     <div class="nav-wrapper">
@@ -153,11 +165,9 @@
         tg.expand();
         if (tg.requestFullscreen) tg.requestFullscreen();
 
-        // Кнопка в меню есть, но ничего не делает
         tg.SettingsButton.show();
         tg.SettingsButton.onClick(() => {
             tg.HapticFeedback.impactOccurred('light');
-            // Здесь пока пусто
         });
 
         const blob = document.getElementById('blob');
@@ -202,9 +212,18 @@
             if (currentIndex !== -1) tg.HapticFeedback.impactOccurred('medium');
         }
 
+        // Логика приветствия и локализации
         const lang = tg.initDataUnsafe.user?.language_code || 'en';
-        const t = { ru: "ДЛЯ ТЕБЯ", zh: "为你推荐", en: "FOR YOU" };
-        document.getElementById('title').innerText = t[lang] || t.en;
+        const firstName = tg.initDataUnsafe.user?.first_name || (lang === 'ru' ? 'Друг' : 'Guest');
+        
+        const welcomePhrases = {
+            ru: "С возвращением,",
+            en: "Welcome back,",
+            zh: "欢迎回来,"
+        };
+
+        document.getElementById('welcome-phrase').innerText = welcomePhrases[lang] || welcomePhrases.en;
+        document.getElementById('user-name').innerText = firstName;
 
         if (tg.initDataUnsafe.user?.photo_url) {
             document.getElementById('pfp').style.backgroundImage = `url(${tg.initDataUnsafe.user.photo_url})`;
