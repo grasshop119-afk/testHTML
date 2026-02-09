@@ -9,6 +9,7 @@
             --tg-bg: var(--tg-theme-bg-color, #000000);
             --tg-accent: var(--tg-theme-button-color, #007AFF);
             --tg-text: var(--tg-theme-text-color, #ffffff);
+            --tg-hint: var(--tg-theme-hint-color, #aaaaaa);
             --nav-bg: rgba(255, 255, 255, 0.1);
             --safe-top: env(safe-area-inset-top, 0px);
             --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -19,7 +20,6 @@
             margin: 0;
             background-color: var(--tg-bg);
             color: var(--tg-text);
-            /* Устанавливаем Montserrat основным шрифтом */
             font-family: 'Montserrat', -apple-system, sans-serif;
             height: 100vh;
             display: flex;
@@ -27,12 +27,11 @@
             overflow: hidden;
         }
 
+        /* Заголовок с плавным переходом */
         .header-container {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: flex-start;
             padding: calc(var(--safe-top) + var(--tg-safe-h)) 25px 10px;
+            height: 80px;
+            transition: opacity 0.3s ease;
         }
 
         .header {
@@ -43,12 +42,72 @@
             line-height: 1.2;
         }
 
-        .welcome-text { opacity: 0.7; }
+        .welcome-text { opacity: 0.55; }
         .user-name { opacity: 1; }
 
+        /* Контейнеры страниц */
+        .pages-container {
+            flex: 1;
+            position: relative;
+        }
+
+        .page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 0 25px;
+            box-sizing: border-box;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform: translateY(10px);
+        }
+
+        .page.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        /* Поиск */
+        .search-input {
+            width: 100%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 15px;
+            padding: 12px 15px;
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 16px;
+            outline: none;
+        }
+
+        /* Профиль */
+        .profile-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .big-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: #333;
+            background-size: cover;
+            margin-bottom: 15px;
+            border: 3px solid var(--tg-accent);
+        }
+
+        .profile-name { font-size: 22px; font-weight: 700; }
+        .profile-username { font-size: 16px; opacity: 0.5; margin-top: 4px; }
+
+        /* Навигация */
         .nav-wrapper {
             position: fixed;
-            /* Опустили чуть ниже (было 30px) */
             bottom: calc(20px + var(--safe-bottom));
             left: 50%;
             transform: translateX(-50%);
@@ -57,7 +116,6 @@
 
         .nav-island {
             position: relative;
-            /* Сделали чуть уже (было 240px) */
             width: 210px;
             height: 60px;
             background: var(--nav-bg);
@@ -81,20 +139,11 @@
             top: 50%;
             margin-top: -23px;
             left: 15px;
-            transition: left 0.5s cubic-bezier(0.19, 1, 0.22, 1), 
-                        border-radius 0.3s ease, 
-                        transform 0.3s ease;
+            transition: left 0.5s cubic-bezier(0.19, 1, 0.22, 1), border-radius 0.3s ease, transform 0.3s ease;
         }
 
-        .stretch-right {
-            border-radius: 40% 70% 70% 40% / 50% 50% 50% 50% !important;
-            transform: scaleX(1.18) !important;
-        }
-
-        .stretch-left {
-            border-radius: 70% 40% 40% 70% / 50% 50% 50% 50% !important;
-            transform: scaleX(1.18) !important;
-        }
+        .stretch-right { border-radius: 40% 70% 70% 40% / 50% 50% 50% 50% !important; transform: scaleX(1.18) !important; }
+        .stretch-left { border-radius: 70% 40% 40% 70% / 50% 50% 50% 50% !important; transform: scaleX(1.18) !important; }
 
         .nav-item {
             position: relative;
@@ -108,7 +157,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        .nav-item img {
+        .nav-item img, .avatar-small {
             width: 26px;
             height: 26px;
             filter: invert(1);
@@ -116,44 +165,53 @@
             transition: opacity 0.3s ease;
         }
 
-        .nav-item.active img { opacity: 1; }
-
-        .avatar {
-            width: 28px;
-            height: 28px;
+        .avatar-small {
             border-radius: 50%;
-            background-color: #333;
+            filter: none;
             background-size: cover;
-            background-position: center;
-            opacity: 0.4;
         }
 
-        .active .avatar { opacity: 1; }
+        .nav-item.active img, .nav-item.active .avatar-small { opacity: 1; }
     </style>
 </head>
 <body>
 
-    <div class="header-container">
-        <div class="header" id="title">
+    <div class="header-container" id="header-container">
+        <div class="header" id="header-text">
             <span class="welcome-text" id="welcome-phrase">С возвращением,</span><br>
             <span class="user-name" id="user-name">Гость</span>!
+        </div>
+    </div>
+
+    <div class="pages-container">
+        <div class="page active" id="page-0">
+            <p style="opacity: 0.5;">Контент главной страницы...</p>
+        </div>
+
+        <div class="page" id="page-1">
+            <input type="text" class="search-input" placeholder="Поиск...">
+        </div>
+
+        <div class="page" id="page-2">
+            <div class="profile-content">
+                <div class="big-avatar" id="big-pfp"></div>
+                <div class="profile-name" id="prof-name">User Name</div>
+                <div class="profile-username" id="prof-user">@username</div>
+            </div>
         </div>
     </div>
 
     <div class="nav-wrapper">
         <div class="nav-island">
             <div class="blob" id="blob"></div>
-            
             <div class="nav-item" id="tab-0" onclick="move(0)">
                 <img src="https://cdn-icons-png.flaticon.com/512/6997/6997164.png" alt="home">
             </div>
-            
             <div class="nav-item" id="tab-1" onclick="move(1)">
                 <img src="https://cdn-icons-png.flaticon.com/512/8025/8025278.png" alt="search">
             </div>
-            
             <div class="nav-item" id="tab-2" onclick="move(2)">
-                <div class="avatar" id="pfp"></div>
+                <div class="avatar-small" id="pfp-small" style="background-color: #333;"></div>
             </div>
         </div>
     </div>
@@ -163,37 +221,56 @@
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
-        if (tg.requestFullscreen) tg.requestFullscreen();
-
-        tg.SettingsButton.show();
-        tg.SettingsButton.onClick(() => {
-            tg.HapticFeedback.impactOccurred('light');
-        });
 
         const blob = document.getElementById('blob');
         const items = document.querySelectorAll('.nav-item');
+        const headerContainer = document.getElementById('header-container');
+        const headerText = document.getElementById('header-text');
         let currentIndex = -1;
 
+        // Данные пользователя
+        const user = tg.initDataUnsafe.user;
+        const name = user?.first_name || "Друг";
+        const username = user?.username ? `@${user.username}` : "";
+        const photo = user?.photo_url;
+
+        // Установка данных
+        document.getElementById('user-name').innerText = name;
+        document.getElementById('prof-name').innerText = name;
+        document.getElementById('prof-user').innerText = username;
+        if(photo) {
+            document.getElementById('pfp-small').style.backgroundImage = `url(${photo})`;
+            document.getElementById('big-pfp').style.backgroundImage = `url(${photo})`;
+        }
+
         function move(index) {
-            const targetItem = document.getElementById(`tab-${index}`);
-            
             if (index === currentIndex) {
-                const r = () => Math.floor(Math.random() * 8 + 46); 
-                blob.style.borderRadius = `${r()}% ${100-r()}% ${r()}% ${100-r()}% / ${100-r()}% ${r()}% ${100-r()}% ${r()}%`;
-                blob.style.transform = `scale(1.04)`;
-                
-                setTimeout(() => {
-                    blob.style.borderRadius = ''; 
-                    blob.style.transform = '';
-                }, 200);
-                
                 tg.HapticFeedback.notificationOccurred('success');
                 return;
             }
 
+            // Переключение активного класса у иконок
             items.forEach(item => item.classList.remove('active'));
-            blob.classList.remove('stretch-right', 'stretch-left');
+            document.getElementById(`tab-${index}`).classList.add('active');
 
+            // Переключение страниц
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(`page-${index}`).classList.add('active');
+
+            // Логика заголовка
+            if (index === 0) {
+                headerContainer.style.opacity = "1";
+                headerText.innerHTML = `<span class="welcome-text">С возвращением,</span><br><span class="user-name">${name}</span>!`;
+            } else if (index === 1) {
+                headerContainer.style.opacity = "1";
+                headerText.innerHTML = `ПОИСК`;
+            } else {
+                headerContainer.style.opacity = "0"; // Скрываем для профиля
+            }
+
+            // Движение блоба
+            const targetItem = document.getElementById(`tab-${index}`);
+            blob.classList.remove('stretch-right', 'stretch-left');
             if (currentIndex !== -1) {
                 if (index > currentIndex) blob.classList.add('stretch-right');
                 else blob.classList.add('stretch-left');
@@ -201,37 +278,13 @@
 
             const targetX = targetItem.offsetLeft + (targetItem.offsetWidth / 2) - (blob.offsetWidth / 2);
             blob.style.left = `${targetX}px`;
-            
-            targetItem.classList.add('active');
             currentIndex = index;
 
-            setTimeout(() => {
-                blob.classList.remove('stretch-right', 'stretch-left');
-            }, 180);
-
-            if (currentIndex !== -1) tg.HapticFeedback.impactOccurred('medium');
+            setTimeout(() => blob.classList.remove('stretch-right', 'stretch-left'), 180);
+            tg.HapticFeedback.impactOccurred('medium');
         }
 
-        // Логика приветствия и локализации
-        const lang = tg.initDataUnsafe.user?.language_code || 'en';
-        const firstName = tg.initDataUnsafe.user?.first_name || (lang === 'ru' ? 'Друг' : 'Guest');
-        
-        const welcomePhrases = {
-            ru: "С возвращением,",
-            en: "Welcome back,",
-            zh: "欢迎回来,"
-        };
-
-        document.getElementById('welcome-phrase').innerText = welcomePhrases[lang] || welcomePhrases.en;
-        document.getElementById('user-name').innerText = firstName;
-
-        if (tg.initDataUnsafe.user?.photo_url) {
-            document.getElementById('pfp').style.backgroundImage = `url(${tg.initDataUnsafe.user.photo_url})`;
-        }
-
-        window.onload = () => {
-            setTimeout(() => move(0), 50);
-        };
+        window.onload = () => setTimeout(() => move(0), 50);
     </script>
 </body>
 </html>
