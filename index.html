@@ -25,7 +25,6 @@
             overflow: hidden;
         }
 
-        /* Контейнер заголовка с учетом системных кнопок */
         .header-container {
             display: flex;
             justify-content: space-between;
@@ -78,7 +77,6 @@
                         transform 0.3s ease;
         }
 
-        /* Деформация при движении (важно: !important чтобы перебивать инлайновые стили) */
         .stretch-right {
             border-radius: 40% 70% 70% 40% / 50% 50% 50% 50% !important;
             transform: scaleX(1.18) !important;
@@ -155,22 +153,11 @@
         tg.expand();
         if (tg.requestFullscreen) tg.requestFullscreen();
 
-        // ВКЛЮЧАЕМ ТУ САМУЮ КНОПКУ НАСТРОЕК
+        // Кнопка в меню есть, но ничего не делает
         tg.SettingsButton.show();
         tg.SettingsButton.onClick(() => {
-            tg.HapticFeedback.impactOccurred('heavy');
-            // Здесь мы будем открывать меню "Новый сторис"
-            tg.showPopup({
-                title: 'Создать',
-                message: 'Что вы хотите опубликовать сегодня?',
-                buttons: [
-                    {id: 'story', type: 'default', text: 'Новый сторис'},
-                    {id: 'post', type: 'default', text: 'Новый пост'},
-                    {type: 'cancel', text: 'Отмена'}
-                ]
-            }, (buttonId) => {
-                if(buttonId === 'story') alert('Запуск камеры...');
-            });
+            tg.HapticFeedback.impactOccurred('light');
+            // Здесь пока пусто
         });
 
         const blob = document.getElementById('blob');
@@ -181,7 +168,6 @@
             const targetItem = document.getElementById(`tab-${index}`);
             
             if (index === currentIndex) {
-                // Микро-деформация при повторном нажатии
                 const r = () => Math.floor(Math.random() * 8 + 46); 
                 blob.style.borderRadius = `${r()}% ${100-r()}% ${r()}% ${100-r()}% / ${100-r()}% ${r()}% ${100-r()}% ${r()}%`;
                 blob.style.transform = `scale(1.04)`;
@@ -209,7 +195,6 @@
             targetItem.classList.add('active');
             currentIndex = index;
 
-            // Завершение деформации еще чуть раньше (180ms)
             setTimeout(() => {
                 blob.classList.remove('stretch-right', 'stretch-left');
             }, 180);
