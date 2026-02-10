@@ -27,7 +27,7 @@
             padding: 0;
             background-color: var(--tg-bg);
             color: var(--tg-text);
-            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Montserrat', -apple-system, sans-serif;
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -43,14 +43,14 @@
             z-index: 10;
         }
 
-        .header-text {
+        .welcome-text {
             font-size: 28px;
             font-weight: 800;
             letter-spacing: -0.5px;
-            color: var(--tg-text);
+            line-height: 1.2;
         }
 
-        .greeting-light {
+        .welcome-light {
             opacity: 0.5;
             font-weight: 400;
         }
@@ -60,7 +60,7 @@
             flex: 1;
             position: relative;
             overflow-y: auto;
-            padding: 0 20px;
+            padding: 20px;
             display: none;
             padding-bottom: 120px;
         }
@@ -75,7 +75,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* --- NAV ISLAND (ОБНОВЛЕННЫЙ) --- */
+        /* --- NAV ISLAND --- */
         .nav-wrapper {
             position: fixed;
             bottom: calc(30px + var(--safe-bottom));
@@ -86,7 +86,7 @@
 
         .nav-island {
             position: relative;
-            width: 210px; /* Уменьшенная ширина */
+            width: 200px; /* Сузили подвал */
             height: 60px;
             background: var(--nav-bg);
             backdrop-filter: blur(25px);
@@ -114,7 +114,6 @@
                         transform 0.3s ease;
         }
 
-        /* Твои эффекты растяжения */
         .stretch-right {
             border-radius: 40% 70% 70% 40% / 50% 50% 50% 50% !important;
             transform: scaleX(1.18) !important;
@@ -156,35 +155,42 @@
             opacity: 0.4;
         }
 
-        .active .pfp-mini { opacity: 1; }
+        .active .pfp-mini { 
+            opacity: 1; 
+            border: 1px solid rgba(255,255,255,0.5);
+        }
 
-        /* Вспомогательный текст */
-        .empty-state {
-            color: var(--tg-hint);
-            margin-top: 40px;
-            font-size: 14px;
+        /* --- UTILS --- */
+        .search-bar {
+            width: 100%;
+            background: var(--tg-secondary-bg);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 12px 15px;
+            color: var(--tg-text);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 17px;
+            outline: none;
         }
     </style>
 </head>
 <body>
 
-    <div class="header-container">
-        <div class="header-text" id="greeting-box">
-            <span class="greeting-light">Привет,</span> <span id="user-first-name">Пользователь</span>!
-        </div>
-    </div>
-
     <div id="view-0" class="content-view active">
-        <div class="empty-state">Главный экран</div>
-    </div>
+        <div class="header-container">
+            <div class="welcome-text">
+                <span class="welcome-light">Привет,</span><br>
+                <span id="user-greeting-name">Пользователь</span>!
+            </div>
+        </div>
+        </div>
 
     <div id="view-1" class="content-view">
-        <div class="empty-state">Поиск</div>
-    </div>
+        <input type="text" class="search-bar" placeholder="Поиск..." id="search-input">
+        </div>
 
     <div id="view-2" class="content-view">
-        <div class="empty-state">Профиль пользователя</div>
-    </div>
+        </div>
 
     <div class="nav-wrapper">
         <div class="nav-island">
@@ -213,57 +219,53 @@
         // Данные пользователя
         const user = tg.initDataUnsafe?.user;
         if (user) {
-            document.getElementById('user-first-name').innerText = user.first_name;
+            document.getElementById('user-greeting-name').innerText = user.first_name;
             if (user.photo_url) {
                 document.getElementById('nav-pfp').style.backgroundImage = `url(${user.photo_url})`;
             }
         }
 
+        // Логика переключения вкладок
         const blob = document.getElementById('blob');
         const items = document.querySelectorAll('.nav-item');
         const views = document.querySelectorAll('.content-view');
-        let currentIndex = -1;
+        let currentIndex = 0;
 
         function switchTab(index) {
-            // Если нажали на ту же самую вкладку
             if (index === currentIndex) {
-                // Другой тип вибрации для повторного нажатия
+                // Повторное нажатие — другая вибрация (Rigid)
                 tg.HapticFeedback.notificationOccurred('warning'); 
+                // Или tg.HapticFeedback.impactOccurred('rigid');
                 return;
             }
 
-            // Механика Blob
             const targetItem = document.getElementById(`tab-${index}`);
             blob.classList.remove('stretch-right', 'stretch-left');
             
-            if (currentIndex !== -1) {
-                if (index > currentIndex) blob.classList.add('stretch-right');
-                else blob.classList.add('stretch-left');
-            }
+            if (index > currentIndex) blob.classList.add('stretch-right');
+            else blob.classList.add('stretch-left');
 
             const targetX = targetItem.offsetLeft + (targetItem.offsetWidth / 2) - (blob.offsetWidth / 2);
             blob.style.left = `${targetX}px`;
             
-            // Смена активных классов
             items.forEach(item => item.classList.remove('active'));
             targetItem.classList.add('active');
 
-            // Смена контента
             views.forEach(v => v.classList.remove('active'));
             document.getElementById(`view-${index}`).classList.add('active');
 
             currentIndex = index;
-            
-            // Сброс растяжения
             setTimeout(() => blob.classList.remove('stretch-right', 'stretch-left'), 200);
             
-            // Вибрация при переключении
+            // Обычное переключение — Medium
             tg.HapticFeedback.impactOccurred('medium');
         }
 
-        // Инициализация первой вкладки
+        // Инициализация позиции блоба
         window.onload = () => {
-            switchTab(0);
+            const initialTab = document.getElementById('tab-0');
+            const targetX = initialTab.offsetLeft + (initialTab.offsetWidth / 2) - (blob.offsetWidth / 2);
+            blob.style.left = `${targetX}px`;
         };
     </script>
 </body>
