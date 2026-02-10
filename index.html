@@ -27,7 +27,7 @@
             padding: 0;
             background-color: var(--tg-bg);
             color: var(--tg-text);
-            font-family: 'Montserrat', -apple-system, sans-serif;
+            font-family: 'Montserrat', sans-serif;
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -38,21 +38,35 @@
         /* --- HEADER SECTION --- */
         .header-container {
             padding: calc(var(--safe-top) + 20px) 20px 10px;
+            height: 80px;
             display: flex;
             align-items: center;
-            z-index: 10;
+            position: relative;
         }
 
-        .welcome-text {
-            font-size: 28px;
+        .typewriter-box {
+            font-size: 26px;
             font-weight: 800;
-            letter-spacing: -0.5px;
-            line-height: 1.2;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            transition: opacity 0.6s ease, transform 0.6s ease;
         }
 
         .welcome-light {
             opacity: 0.5;
             font-weight: 400;
+            margin-right: 6px;
+        }
+
+        .fade-out {
+            opacity: 0;
+            transform: translateY(-5px);
+        }
+
+        .fade-in {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         /* --- CONTENT SYSTEM --- */
@@ -67,12 +81,6 @@
 
         .content-view.active {
             display: block;
-            animation: fadeIn 0.4s ease forwards;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
         /* --- NAV ISLAND --- */
@@ -86,7 +94,7 @@
 
         .nav-island {
             position: relative;
-            width: 200px; /* Сузили подвал */
+            width: 200px;
             height: 60px;
             background: var(--nav-bg);
             backdrop-filter: blur(25px);
@@ -109,20 +117,11 @@
             top: 50%;
             margin-top: -23px;
             left: 12px;
-            transition: left 0.5s cubic-bezier(0.19, 1, 0.22, 1), 
-                        border-radius 0.3s ease, 
-                        transform 0.3s ease;
+            transition: left 0.5s cubic-bezier(0.19, 1, 0.22, 1), transform 0.3s ease;
         }
 
-        .stretch-right {
-            border-radius: 40% 70% 70% 40% / 50% 50% 50% 50% !important;
-            transform: scaleX(1.18) !important;
-        }
-
-        .stretch-left {
-            border-radius: 70% 40% 40% 70% / 50% 50% 50% 50% !important;
-            transform: scaleX(1.18) !important;
-        }
+        .stretch-right { transform: scaleX(1.18) !important; }
+        .stretch-left { transform: scaleX(1.18) !important; }
 
         .nav-item {
             position: relative;
@@ -132,7 +131,6 @@
             align-items: center;
             justify-content: center;
             z-index: 2;
-            cursor: pointer;
         }
 
         .nav-item img {
@@ -155,55 +153,29 @@
             opacity: 0.4;
         }
 
-        .active .pfp-mini { 
-            opacity: 1; 
-            border: 1px solid rgba(255,255,255,0.5);
-        }
-
-        /* --- UTILS --- */
-        .search-bar {
-            width: 100%;
-            background: var(--tg-secondary-bg);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 12px;
-            padding: 12px 15px;
-            color: var(--tg-text);
-            font-family: 'Montserrat', sans-serif;
-            font-size: 17px;
-            outline: none;
-        }
+        .active .pfp-mini { opacity: 1; }
     </style>
 </head>
 <body>
 
     <div id="view-0" class="content-view active">
         <div class="header-container">
-            <div class="welcome-text">
-                <span class="welcome-light">Привет,</span><br>
-                <span id="user-greeting-name">Пользователь</span>!
-            </div>
+            <div id="header-text" class="typewriter-box"></div>
         </div>
-        </div>
+    </div>
 
-    <div id="view-1" class="content-view">
-        <input type="text" class="search-bar" placeholder="Поиск..." id="search-input">
-        </div>
-
-    <div id="view-2" class="content-view">
-        </div>
+    <div id="view-1" class="content-view"></div>
+    <div id="view-2" class="content-view"></div>
 
     <div class="nav-wrapper">
         <div class="nav-island">
             <div class="blob" id="blob"></div>
-            
             <div class="nav-item" id="tab-0" onclick="switchTab(0)">
                 <img src="https://cdn-icons-png.flaticon.com/512/6997/6997164.png" alt="home">
             </div>
-            
             <div class="nav-item" id="tab-1" onclick="switchTab(1)">
                 <img src="https://cdn-icons-png.flaticon.com/512/8025/8025278.png" alt="search">
             </div>
-            
             <div class="nav-item" id="tab-2" onclick="switchTab(2)">
                 <div class="pfp-mini" id="nav-pfp"></div>
             </div>
@@ -216,16 +188,55 @@
         tg.ready();
         tg.expand();
 
-        // Данные пользователя
-        const user = tg.initDataUnsafe?.user;
-        if (user) {
-            document.getElementById('user-greeting-name').innerText = user.first_name;
-            if (user.photo_url) {
-                document.getElementById('nav-pfp').style.backgroundImage = `url(${user.photo_url})`;
-            }
+        const headerElement = document.getElementById('header-text');
+        
+        // 1. Получение и обрезка имени
+        let userName = tg.initDataUnsafe?.user?.first_name || "User";
+        if (userName.length > 10) {
+            userName = userName.substring(0, 10) + "...";
         }
 
-        // Логика переключения вкладок
+        if (tg.initDataUnsafe?.user?.photo_url) {
+            document.getElementById('nav-pfp').style.backgroundImage = `url(${tg.initDataUnsafe.user.photo_url})`;
+        }
+
+        // 2. Эффект печати
+        async function runTypewriter() {
+            const part1 = "Привет,";
+            const part2 = ` ${userName}!`;
+            
+            // Печатаем "Привет,"
+            let currentText = "";
+            headerElement.innerHTML = `<span class="welcome-light" id="p1"></span><span id="p2"></span>`;
+            const p1 = document.getElementById('p1');
+            const p2 = document.getElementById('p2');
+
+            for (let char of part1) {
+                p1.textContent += char;
+                await new Promise(r => setTimeout(r, 70));
+            }
+
+            // Пауза после запятой
+            await new Promise(r => setTimeout(r, 300));
+
+            // Печатаем имя
+            for (let char of part2) {
+                p2.textContent += char;
+                await new Promise(r => setTimeout(r, 70));
+            }
+
+            // 3. Смена на FAQ через 4 секунды
+            setTimeout(() => {
+                headerElement.classList.add('fade-out');
+                setTimeout(() => {
+                    headerElement.innerHTML = "FAQ";
+                    headerElement.classList.remove('fade-out');
+                    headerElement.classList.add('fade-in');
+                }, 600);
+            }, 4000);
+        }
+
+        // 4. Логика табов
         const blob = document.getElementById('blob');
         const items = document.querySelectorAll('.nav-item');
         const views = document.querySelectorAll('.content-view');
@@ -233,9 +244,7 @@
 
         function switchTab(index) {
             if (index === currentIndex) {
-                // Повторное нажатие — другая вибрация (Rigid)
-                tg.HapticFeedback.notificationOccurred('warning'); 
-                // Или tg.HapticFeedback.impactOccurred('rigid');
+                tg.HapticFeedback.impactOccurred('rigid'); // Вибрация при повторном клике
                 return;
             }
 
@@ -256,16 +265,14 @@
 
             currentIndex = index;
             setTimeout(() => blob.classList.remove('stretch-right', 'stretch-left'), 200);
-            
-            // Обычное переключение — Medium
             tg.HapticFeedback.impactOccurred('medium');
         }
 
-        // Инициализация позиции блоба
         window.onload = () => {
+            runTypewriter();
+            // Центрируем блоб изначально
             const initialTab = document.getElementById('tab-0');
-            const targetX = initialTab.offsetLeft + (initialTab.offsetWidth / 2) - (blob.offsetWidth / 2);
-            blob.style.left = `${targetX}px`;
+            blob.style.left = `${initialTab.offsetLeft + (initialTab.offsetWidth / 2) - (blob.offsetWidth / 2)}px`;
         };
     </script>
 </body>
