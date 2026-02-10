@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Premium Mini App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --tg-bg: var(--tg-theme-bg-color, #000000);
@@ -14,7 +15,6 @@
             --nav-bg: rgba(255, 255, 255, 0.1);
             --safe-top: env(safe-area-inset-top, 0px);
             --safe-bottom: env(safe-area-inset-bottom, 0px);
-            --tg-safe-h: 50px;
         }
 
         * {
@@ -27,7 +27,7 @@
             padding: 0;
             background-color: var(--tg-bg);
             color: var(--tg-text);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -38,32 +38,21 @@
         /* --- HEADER SECTION --- */
         .header-container {
             padding: calc(var(--safe-top) + 20px) 20px 10px;
-            height: 80px;
             display: flex;
             align-items: center;
             z-index: 10;
         }
 
         .header-text {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: 800;
             letter-spacing: -0.5px;
-            text-transform: uppercase;
-            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--tg-text);
         }
 
-        .header-welcome {
-            opacity: 0.55;
-        }
-
-        .header-fade-out {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-
-        .header-fade-in {
-            opacity: 1;
-            transform: translateY(0);
+        .greeting-light {
+            opacity: 0.5;
+            font-weight: 400;
         }
 
         /* --- CONTENT SYSTEM --- */
@@ -72,9 +61,8 @@
             position: relative;
             overflow-y: auto;
             padding: 0 20px;
-            transition: opacity 0.3s ease;
             display: none;
-            padding-bottom: 120px; /* Space for nav island */
+            padding-bottom: 120px;
         }
 
         .content-view.active {
@@ -87,59 +75,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* --- SEARCH TAB --- */
-        .search-container {
-            margin-top: 10px;
-        }
-
-        .search-bar {
-            width: 100%;
-            background: var(--tg-secondary-bg);
-            border: none;
-            border-radius: 12px;
-            padding: 12px 15px;
-            color: var(--tg-text);
-            font-size: 17px;
-            outline: none;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .search-bar::placeholder {
-            color: var(--tg-hint);
-        }
-
-        /* --- PROFILE TAB --- */
-        .profile-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 40px;
-        }
-
-        .profile-avatar {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: var(--tg-secondary-bg);
-            background-size: cover;
-            background-position: center;
-            margin-bottom: 15px;
-            border: 3px solid var(--tg-accent);
-        }
-
-        .profile-name {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .profile-username {
-            font-size: 16px;
-            color: var(--tg-accent);
-            font-weight: 500;
-        }
-
-        /* --- NAV ISLAND (STRICTLY PRESERVED) --- */
+        /* --- NAV ISLAND (ОБНОВЛЕННЫЙ) --- */
         .nav-wrapper {
             position: fixed;
             bottom: calc(30px + var(--safe-bottom));
@@ -150,7 +86,7 @@
 
         .nav-island {
             position: relative;
-            width: 240px;
+            width: 210px; /* Уменьшенная ширина */
             height: 60px;
             background: var(--nav-bg);
             backdrop-filter: blur(25px);
@@ -159,7 +95,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 15px;
+            padding: 0 12px;
             border: 1px solid rgba(255,255,255,0.08);
         }
 
@@ -172,12 +108,13 @@
             z-index: 0;
             top: 50%;
             margin-top: -23px;
-            left: 15px;
+            left: 12px;
             transition: left 0.5s cubic-bezier(0.19, 1, 0.22, 1), 
                         border-radius 0.3s ease, 
                         transform 0.3s ease;
         }
 
+        /* Твои эффекты растяжения */
         .stretch-right {
             border-radius: 40% 70% 70% 40% / 50% 50% 50% 50% !important;
             transform: scaleX(1.18) !important;
@@ -200,8 +137,8 @@
         }
 
         .nav-item img {
-            width: 26px;
-            height: 26px;
+            width: 24px;
+            height: 24px;
             filter: invert(1);
             opacity: 0.3;
             transition: opacity 0.3s ease;
@@ -210,8 +147,8 @@
         .nav-item.active img { opacity: 1; }
 
         .pfp-mini {
-            width: 28px;
-            height: 28px;
+            width: 26px;
+            height: 26px;
             border-radius: 50%;
             background-color: #333;
             background-size: cover;
@@ -221,41 +158,32 @@
 
         .active .pfp-mini { opacity: 1; }
 
-        /* Infrastructure */
-        .placeholder-text {
+        /* Вспомогательный текст */
+        .empty-state {
             color: var(--tg-hint);
-            text-align: center;
-            margin-top: 50px;
+            margin-top: 40px;
             font-size: 14px;
         }
     </style>
 </head>
 <body>
 
-    <div class="header-container" id="header-box">
-        <div class="header-text header-welcome" id="main-title">С ВОЗВРАЩЕНИЕМ</div>
+    <div class="header-container">
+        <div class="header-text" id="greeting-box">
+            <span class="greeting-light">Привет,</span> <span id="user-first-name">Пользователь</span>!
+        </div>
     </div>
 
     <div id="view-0" class="content-view active">
-        <div class="placeholder-text">
-            Здесь будет ваш основной контент.<br>
-            Интерфейс адаптирован под системные цвета Telegram.
-        </div>
+        <div class="empty-state">Главный экран</div>
     </div>
 
     <div id="view-1" class="content-view">
-        <div class="search-container">
-            <input type="text" class="search-bar" placeholder="Поиск по приложению..." id="search-input">
-        </div>
-        <div class="placeholder-text">Начните вводить текст для поиска</div>
+        <div class="empty-state">Поиск</div>
     </div>
 
     <div id="view-2" class="content-view">
-        <div class="profile-card">
-            <div class="profile-avatar" id="user-avatar"></div>
-            <div class="profile-name" id="user-name">Telegram User</div>
-            <div class="profile-username" id="user-handle">@username</div>
-        </div>
+        <div class="empty-state">Профиль пользователя</div>
     </div>
 
     <div class="nav-wrapper">
@@ -282,42 +210,29 @@
         tg.ready();
         tg.expand();
 
-        // 1. Анимация заголовка
-        const titleElement = document.getElementById('main-title');
-        setTimeout(() => {
-            titleElement.classList.add('header-fade-out');
-            setTimeout(() => {
-                titleElement.innerText = 'FAQ';
-                titleElement.classList.remove('header-welcome', 'header-fade-out');
-                titleElement.classList.add('header-fade-in');
-            }, 600);
-        }, 3000);
-
-        // 2. Данные пользователя
+        // Данные пользователя
         const user = tg.initDataUnsafe?.user;
         if (user) {
-            document.getElementById('user-name').innerText = `${user.first_name} ${user.last_name || ''}`;
-            document.getElementById('user-handle').innerText = user.username ? `@${user.username}` : '';
+            document.getElementById('user-first-name').innerText = user.first_name;
             if (user.photo_url) {
-                document.getElementById('user-avatar').style.backgroundImage = `url(${user.photo_url})`;
                 document.getElementById('nav-pfp').style.backgroundImage = `url(${user.photo_url})`;
             }
         }
 
-        // 3. Логика переключения вкладок
         const blob = document.getElementById('blob');
         const items = document.querySelectorAll('.nav-item');
         const views = document.querySelectorAll('.content-view');
-        const headerBox = document.getElementById('header-box');
         let currentIndex = -1;
 
         function switchTab(index) {
+            // Если нажали на ту же самую вкладку
             if (index === currentIndex) {
-                tg.HapticFeedback.impactOccurred('light');
+                // Другой тип вибрации для повторного нажатия
+                tg.HapticFeedback.notificationOccurred('warning'); 
                 return;
             }
 
-            // Управление Blob (твоя механика)
+            // Механика Blob
             const targetItem = document.getElementById(`tab-${index}`);
             blob.classList.remove('stretch-right', 'stretch-left');
             
@@ -329,57 +244,27 @@
             const targetX = targetItem.offsetLeft + (targetItem.offsetWidth / 2) - (blob.offsetWidth / 2);
             blob.style.left = `${targetX}px`;
             
+            // Смена активных классов
             items.forEach(item => item.classList.remove('active'));
             targetItem.classList.add('active');
 
-            // Управление Контентом
+            // Смена контента
             views.forEach(v => v.classList.remove('active'));
             document.getElementById(`view-${index}`).classList.add('active');
 
-            // Управление Заголовком (для профиля скрываем, для поиска меняем)
-            updateHeader(index);
-
             currentIndex = index;
+            
+            // Сброс растяжения
             setTimeout(() => blob.classList.remove('stretch-right', 'stretch-left'), 200);
+            
+            // Вибрация при переключении
             tg.HapticFeedback.impactOccurred('medium');
         }
 
-        function updateHeader(index) {
-            if (index === 2) { // Профиль
-                headerBox.style.display = 'none';
-            } else {
-                headerBox.style.display = 'flex';
-                if (index === 1) { // Поиск
-                    titleElement.innerText = 'ПОИСК';
-                    titleElement.classList.remove('header-welcome');
-                    titleElement.style.opacity = "1";
-                } else { // Главная / FAQ
-                    // Если анимация уже прошла, оставляем FAQ
-                    if (titleElement.innerText !== 'С ВОЗВРАЩЕНИЕМ') {
-                        titleElement.innerText = 'FAQ';
-                    }
-                }
-            }
-        }
-
-        // Инициализация
+        // Инициализация первой вкладки
         window.onload = () => {
             switchTab(0);
-            
-            // Настройка MainButton для примера (как в Wallet)
-            tg.MainButton.setParams({
-                text: 'ПОДТВЕРДИТЬ',
-                color: tg.themeParams.button_color,
-                text_color: tg.themeParams.button_text_color
-            });
         };
-
-        // Обработка фокуса поиска
-        const searchInput = document.getElementById('search-input');
-        searchInput.addEventListener('focus', () => {
-            tg.HapticFeedback.impactOccurred('light');
-        });
-
     </script>
 </body>
 </html>
