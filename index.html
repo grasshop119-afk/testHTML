@@ -2,119 +2,148 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, vertical-align=middle, viewport-fit=cover">
-    <title>Guild FAQ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>SWGOH Guild FAQ</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: #000000;
-            --secondary-bg: #1C1C1E;
-            --text-color: #FFFFFF;
-            --secondary-text: #8E8E93;
-            --accent-color: #0A84FF;
-            --separator-color: #38383A;
+            /* Берем цвета напрямую из Telegram */
+            --tg-bg: var(--tg-theme-bg-color, #000000);
+            --tg-sec-bg: var(--tg-theme-secondary-bg-color, #1c1c1e);
+            --tg-text: var(--tg-theme-text-color, #ffffff);
+            --tg-hint: var(--tg-theme-hint-color, #8e8e93);
+            --tg-link: var(--tg-theme-link-color, #0a84ff);
+            --tg-button: var(--tg-theme-button-color, #0a84ff);
+            --tg-button-text: var(--tg-theme-button-text-color, #ffffff);
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            background-color: var(--tg-bg);
+            color: var(--tg-text);
             margin: 0;
             padding: 0;
-            line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
+            /* Исправление Safe Area для всех телефонов */
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+            -webkit-user-select: none;
+            user-select: none;
         }
 
-        /* Header в стиле Apple */
+        /* Фиксированный заголовок */
         header {
-            padding: 60px 16px 10px 16px; /* Отступ сверху для Fullscreen */
+            padding: 12px 16px;
             position: sticky;
             top: 0;
-            background: rgba(0, 0, 0, 0.8);
+            background: var(--tg-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
         }
 
         h1 {
-            font-size: 34px;
+            font-size: 32px;
             font-weight: 700;
             margin: 0;
             letter-spacing: -0.5px;
         }
 
         .container {
-            padding: 16px;
+            padding: 0 16px 100px 16px;
         }
 
-        /* Модульные карточки для разного контента */
-        .card {
-            background-color: var(--secondary-bg);
+        /* Виджеты SWGOH (Энка и Аналитика) */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background-color: var(--tg-sec-bg);
+            padding: 16px;
             border-radius: 12px;
-            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--tg-hint);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--tg-link); /* Акцент из темы ТГ */
+        }
+
+        /* Карточки контента */
+        .card {
+            background-color: var(--tg-sec-bg);
+            border-radius: 12px;
+            margin-bottom: 16px;
             overflow: hidden;
         }
 
         .card-header {
-            padding: 12px 16px;
+            padding: 12px 16px 4px 16px;
             font-size: 13px;
             text-transform: uppercase;
-            color: var(--secondary-text);
-            font-weight: 500;
+            color: var(--tg-hint);
         }
 
         .card-content {
-            padding: 0 16px 16px 16px;
+            padding: 12px 16px;
         }
 
-        /* Список (для сокращений) */
+        /* Списки и Таблицы */
         .list-item {
             display: flex;
             justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 0.5px solid var(--separator-color);
+            padding: 10px 0;
+            border-bottom: 0.5px solid var(--tg-hint);
+            opacity: 0.9;
         }
         .list-item:last-child { border-bottom: none; }
-        
-        .term { font-weight: 600; color: var(--accent-color); }
-        .definition { color: var(--text-color); text-align: right; }
 
-        /* Таблицы (на легенд) */
-        .table-wrapper {
-            overflow-x: auto;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-        }
-        th { text-align: left; color: var(--secondary-text); padding: 8px 0; }
-        td { padding: 10px 0; border-top: 0.5px solid var(--separator-color); }
+        .table-wrapper { overflow-x: auto; margin-top: 8px; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        td { padding: 8px 0; border-top: 0.5px solid var(--tg-hint); }
 
-        /* Изображения (жетоны и т.д.) */
         .faq-image {
             width: 100%;
             border-radius: 8px;
-            display: block;
             margin-top: 10px;
         }
 
-        /* Кнопка "Share" из твоих настроек */
-        .share-button {
-            background-color: var(--accent-color);
-            color: white;
+        /* Кнопка в стиле Telegram */
+        .tg-button {
+            background-color: var(--tg-button);
+            color: var(--tg-button-text);
             border: none;
-            padding: 12px;
+            padding: 14px;
             border-radius: 10px;
             width: 100%;
+            font-size: 16px;
             font-weight: 600;
-            margin-top: 20px;
+            margin-top: 10px;
             cursor: pointer;
-            transition: opacity 0.2s;
+            transition: transform 0.1s ease;
         }
-        /* Твое пожелание: не темнеет при наведении/нажатии */
-        .share-button:active, .share-button:hover {
-            opacity: 1; 
+
+        /* Твое условие: не темнеет при нажатии, но добавим легкий клик */
+        .tg-button:active {
+            transform: scale(0.98);
         }
 
     </style>
@@ -127,69 +156,65 @@
 
     <div class="container">
         
-        <div class="card">
-            <div class="card-header">Сленг гильдии</div>
-            <div class="card-content">
-                <div class="list-item">
-                    <span class="term">ГвГ</span>
-                    <span class="definition">Гильдия против Гильдии</span>
-                </div>
-                <div class="list-item">
-                    <span class="term">КП</span>
-                    <span class="definition">Конста пати (постоянная группа)</span>
-                </div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-label">Энергия (600)</span>
+                <span class="stat-value" id="energy-val">580/600</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Аналитика</span>
+                <span class="stat-value">Top 10%</span>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-header">Тир-лист легенд</div>
+            <div class="card-header">Словарь SWGOH</div>
+            <div class="card-content">
+                <div class="list-item"><span>Энка</span><span style="color:var(--tg-link)">Энергия</span></div>
+                <div class="list-item"><span>Релик</span><span style="color:var(--tg-link)">Relic Level</span></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">Требования на Легенд</div>
             <div class="card-content">
                 <div class="table-wrapper">
                     <table>
-                        <thead>
-                            <tr>
-                                <th>Герой</th>
-                                <th>Роль</th>
-                                <th>Оценка</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Артур</td>
-                                <td>Танк</td>
-                                <td>S+</td>
-                            </tr>
-                            <tr>
-                                <td>Мерлин</td>
-                                <td>Маг</td>
-                                <td>S</td>
-                            </tr>
-                        </tbody>
+                        <tr><td>Кеноби</td><td>R8</td><td>2100 очков</td></tr>
+                        <tr><td>Вейдер</td><td>R7</td><td>1850 очков</td></tr>
                     </table>
                 </div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-header">График жетонов</div>
+            <div class="card-header">Даты жетонов ГВ</div>
             <div class="card-content">
-                <p style="font-size: 14px; margin-bottom: 8px;">Актуальное расписание на февраль:</p>
-                <img src="https://via.placeholder.com/400x200" alt="Жетоны" class="faq-image">
+                <img src="https://via.placeholder.com/400x150/1c1c1e/ffffff?text=Token+Calendar" class="faq-image">
             </div>
         </div>
 
-        <button class="share-button">Поделиться с сокланом</button>
+        <button class="tg-button" id="main-action">Поделиться в чате</button>
 
     </div>
 
     <script>
-        // Инициализация Telegram Web App
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Расширяем на весь экран
         
-        // Установка цвета статус-бара
-        tg.setHeaderColor('#000000');
-        tg.setBackgroundColor('#000000');
+        // Принудительно расширяем и сообщаем ТГ, что мы готовы
+        tg.ready();
+        tg.expand();
+
+        // Адаптация темы
+        document.body.style.backgroundColor = tg.backgroundColor;
+        
+        // Настройка главной кнопки (если захочешь юзать системную кнопку ТГ внизу)
+        // tg.MainButton.setText("ЗАКРЫТЬ").show();
+
+        // Обработка кнопки "Share" (твое пожелание по отсутствию затемнения в CSS выше)
+        document.getElementById('main-action').addEventListener('click', () => {
+            tg.sendData("share_clicked"); // Пример отправки данных боту
+        });
     </script>
 </body>
 </html>
