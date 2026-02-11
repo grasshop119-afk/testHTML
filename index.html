@@ -3,218 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SWGOH Guild FAQ</title>
+    <title>SWGOH Guild App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            /* Берем цвета напрямую из Telegram */
             --tg-bg: var(--tg-theme-bg-color, #000000);
             --tg-sec-bg: var(--tg-theme-secondary-bg-color, #1c1c1e);
             --tg-text: var(--tg-theme-text-color, #ffffff);
             --tg-hint: var(--tg-theme-hint-color, #8e8e93);
-            --tg-link: var(--tg-theme-link-color, #0a84ff);
-            --tg-button: var(--tg-theme-button-color, #0a84ff);
-            --tg-button-text: var(--tg-theme-button-text-color, #ffffff);
+            --tg-accent: var(--tg-theme-button-color, #0a84ff);
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--tg-bg);
             color: var(--tg-text);
             margin: 0;
             padding: 0;
-            /* Исправление Safe Area для всех телефонов */
-            padding-top: env(safe-area-inset-top);
-            padding-bottom: env(safe-area-inset-bottom);
-            padding-left: env(safe-area-inset-left);
-            padding-right: env(safe-area-inset-right);
-            -webkit-user-select: none;
-            user-select: none;
+            padding-bottom: calc(80px + env(safe-area-inset-bottom)); /* Место под таб-бар */
+            overflow-x: hidden;
         }
 
-        /* Фиксированный заголовок */
+        /* Fullscreen Header */
         header {
-            padding: 12px 16px;
-            position: sticky;
-            top: 0;
+            padding: calc(20px + env(safe-area-inset-top)) 20px 10px;
             background: var(--tg-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
         }
 
-        h1 {
-            font-size: 32px;
-            font-weight: 700;
-            margin: 0;
-            letter-spacing: -0.5px;
-        }
+        h1 { font-size: 34px; font-weight: 700; margin: 0; }
 
-        .container {
-            padding: 0 16px 100px 16px;
-        }
+        .content-section { display: none; padding: 0 16px; animation: fadeIn 0.3s ease; }
+        .content-section.active { display: block; }
 
-        /* Виджеты SWGOH (Энка и Аналитика) */
-        .stats-grid {
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Энергия и Аналитика - Apple Style Widgets */
+        .widget-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
-            margin-bottom: 24px;
+            margin-top: 10px;
         }
 
-        .stat-card {
-            background-color: var(--tg-sec-bg);
+        .widget {
+            background: var(--tg-sec-bg);
+            border-radius: 16px;
             padding: 16px;
-            border-radius: 12px;
             display: flex;
             flex-direction: column;
-            gap: 4px;
         }
 
-        .stat-label {
-            font-size: 12px;
-            color: var(--tg-hint);
-            text-transform: uppercase;
-            font-weight: 600;
-        }
+        .widget-label { font-size: 12px; color: var(--tg-hint); font-weight: 600; text-transform: uppercase; }
+        .widget-value { font-size: 24px; font-weight: 700; margin-top: 4px; color: var(--tg-accent); }
 
-        .stat-value {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--tg-link); /* Акцент из темы ТГ */
-        }
-
-        /* Карточки контента */
-        .card {
-            background-color: var(--tg-sec-bg);
+        /* Списки и карточки */
+        .apple-list {
+            background: var(--tg-sec-bg);
             border-radius: 12px;
-            margin-bottom: 16px;
+            margin-top: 20px;
             overflow: hidden;
         }
 
-        .card-header {
-            padding: 12px 16px 4px 16px;
-            font-size: 13px;
-            text-transform: uppercase;
-            color: var(--tg-hint);
-        }
-
-        .card-content {
+        .list-row {
             padding: 12px 16px;
-        }
-
-        /* Списки и Таблицы */
-        .list-item {
             display: flex;
             justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 0.5px solid var(--tg-hint);
-            opacity: 0.9;
+            align-items: center;
+            border-bottom: 0.5px solid rgba(142, 142, 147, 0.2);
         }
-        .list-item:last-child { border-bottom: none; }
+        .list-row:last-child { border-bottom: none; }
 
-        .table-wrapper { overflow-x: auto; margin-top: 8px; }
-        table { width: 100%; border-collapse: collapse; font-size: 14px; }
-        td { padding: 8px 0; border-top: 0.5px solid var(--tg-hint); }
+        /* Нижняя панель навигации (Tab Bar) */
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: calc(60px + env(safe-area-inset-bottom));
+            background: rgba(28, 28, 30, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            display: flex;
+            justify-content: space-around;
+            padding-bottom: env(safe-area-inset-bottom);
+            border-top: 0.5px solid rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+        }
 
-        .faq-image {
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--tg-hint);
+            text-decoration: none;
+            font-size: 10px;
+            width: 25%;
+        }
+
+        .tab-item.active { color: var(--tg-accent); }
+
+        .tab-icon { font-size: 24px; margin-bottom: 4px; }
+
+        /* Таблицы для легенд */
+        .data-table {
             width: 100%;
-            border-radius: 8px;
+            border-collapse: collapse;
             margin-top: 10px;
         }
-
-        /* Кнопка в стиле Telegram */
-        .tg-button {
-            background-color: var(--tg-button);
-            color: var(--tg-button-text);
-            border: none;
-            padding: 14px;
-            border-radius: 10px;
-            width: 100%;
-            font-size: 16px;
-            font-weight: 600;
-            margin-top: 10px;
-            cursor: pointer;
-            transition: transform 0.1s ease;
-        }
-
-        /* Твое условие: не темнеет при нажатии, но добавим легкий клик */
-        .tg-button:active {
-            transform: scale(0.98);
-        }
+        .data-table td { padding: 12px 0; border-bottom: 0.5px solid var(--tg-hint); font-size: 15px; }
 
     </style>
 </head>
 <body>
 
     <header>
-        <h1>FAQ</h1>
+        <h1 id="page-title">Главная</h1>
     </header>
 
-    <div class="container">
+    <div id="home" class="content-section active">
+        <div class="widget-row">
+            <div class="widget">
+                <span class="widget-label">Энергия</span>
+                <span class="widget-value">600/600</span>
+            </div>
+            <div class="widget">
+                <span class="widget-label">Аналитика</span>
+                <span class="widget-value">Top 5</span>
+            </div>
+        </div>
         
-        <div class="stats-grid">
-            <div class="stat-card">
-                <span class="stat-label">Энергия (600)</span>
-                <span class="stat-value" id="energy-val">580/600</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-label">Аналитика</span>
-                <span class="stat-value">Top 10%</span>
+        <div class="apple-list">
+            <div class="list-row">
+                <span>Статус гильдии</span>
+                <span style="color: #34C759;">Активна</span>
             </div>
         </div>
-
-        <div class="card">
-            <div class="card-header">Словарь SWGOH</div>
-            <div class="card-content">
-                <div class="list-item"><span>Энка</span><span style="color:var(--tg-link)">Энергия</span></div>
-                <div class="list-item"><span>Релик</span><span style="color:var(--tg-link)">Relic Level</span></div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">Требования на Легенд</div>
-            <div class="card-content">
-                <div class="table-wrapper">
-                    <table>
-                        <tr><td>Кеноби</td><td>R8</td><td>2100 очков</td></tr>
-                        <tr><td>Вейдер</td><td>R7</td><td>1850 очков</td></tr>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">Даты жетонов ГВ</div>
-            <div class="card-content">
-                <img src="https://via.placeholder.com/400x150/1c1c1e/ffffff?text=Token+Calendar" class="faq-image">
-            </div>
-        </div>
-
-        <button class="tg-button" id="main-action">Поделиться в чате</button>
-
     </div>
+
+    <div id="faq" class="content-section">
+        <div class="apple-list">
+            <div class="list-row"><b>ГвГ</b> <span style="color: var(--tg-hint)">Территориальные войны</span></div>
+            <div class="list-row"><b>ВГ</b> <span style="color: var(--tg-hint)">Война гильдий</span></div>
+        </div>
+    </div>
+
+    <div id="media" class="content-section">
+        <div class="widget-label">Требования на легенд</div>
+        <table class="data-table">
+            <tr><td>Лея Органа</td><td style="text-align: right;">Relic 8</td></tr>
+            <tr><td>Джабба Хатт</td><td style="text-align: right;">Relic 7</td></tr>
+        </table>
+        <img src="https://via.placeholder.com/400x200/1c1c1e/ffffff?text=Token+Calendar" style="width:100%; border-radius:12px; margin-top:20px;">
+    </div>
+
+    <nav class="tab-bar">
+        <div class="tab-item active" onclick="switchTab('home', 'Главная', this)">
+            <span class="tab-icon">🏠</span>
+            <span>Инфо</span>
+        </div>
+        <div class="tab-item" onclick="switchTab('faq', 'База знаний', this)">
+            <span class="tab-icon">📖</span>
+            <span>FAQ</span>
+        </div>
+        <div class="tab-item" onclick="switchTab('media', 'Гайды', this)">
+            <span class="tab-icon">📊</span>
+            <span>Таблицы</span>
+        </div>
+    </nav>
 
     <script>
         const tg = window.Telegram.WebApp;
         
-        // Принудительно расширяем и сообщаем ТГ, что мы готовы
+        // Включаем полноэкранный режим правильно
         tg.ready();
-        tg.expand();
+        if (tg.requestFullscreen) {
+            tg.requestFullscreen();
+        } else {
+            tg.expand();
+        }
 
-        // Адаптация темы
-        document.body.style.backgroundColor = tg.backgroundColor;
-        
-        // Настройка главной кнопки (если захочешь юзать системную кнопку ТГ внизу)
-        // tg.MainButton.setText("ЗАКРЫТЬ").show();
+        // Применяем цвета темы
+        tg.setHeaderColor(tg.themeParams.bg_color);
+        tg.setBackgroundColor(tg.themeParams.bg_color);
 
-        // Обработка кнопки "Share" (твое пожелание по отсутствию затемнения в CSS выше)
-        document.getElementById('main-action').addEventListener('click', () => {
-            tg.sendData("share_clicked"); // Пример отправки данных боту
-        });
+        // Функция переключения вкладок
+        function switchTab(tabId, title, el) {
+            // Скрываем все секции
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            // Показываем нужную
+            document.getElementById(tabId).classList.add('active');
+            // Меняем заголовок
+            document.getElementById('page-title').innerText = title;
+            // Обновляем активную иконку
+            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            
+            // Легкая вибрация при клике (Apple style)
+            tg.HapticFeedback.impactOccurred('light');
+        }
     </script>
 </body>
 </html>
