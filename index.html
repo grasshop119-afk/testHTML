@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SWGOH Guild Premium</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&display=swap" rel="stylesheet">
+    <title>SWGOH Guild FAQ</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -13,282 +12,211 @@
             --tg-text: var(--tg-theme-text-color, #ffffff);
             --tg-hint: var(--tg-theme-hint-color, #8e8e93);
             --tg-accent: var(--tg-theme-button-color, #0a84ff);
-            --nav-bg: rgba(255, 255, 255, 0.08);
-            --safe-top: env(safe-area-inset-top, 0px);
-            --safe-bottom: env(safe-area-inset-bottom, 0px);
-        }
-
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            margin: 0;
-            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--tg-bg);
             color: var(--tg-text);
-            font-family: 'Montserrat', -apple-system, sans-serif;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            /* Исправляем застревание заголовка */
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: calc(30px + env(safe-area-inset-bottom));
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* --- HEADER --- */
+        /* Apple Header - Большой жирный заголовок */
         header {
-            padding: calc(var(--safe-top) + 30px) 20px 10px; /* Чуть ниже заголовок */
-            z-index: 10;
+            padding: 20px 16px 10px 16px;
+            background-color: var(--tg-bg);
         }
 
         h1 {
-            font-size: 32px;
+            font-size: 34px;
             font-weight: 800;
             margin: 0;
             letter-spacing: -0.5px;
         }
 
-        /* --- CONTENT VIEWS --- */
-        .content-view {
-            flex: 1;
-            overflow-y: auto;
+        .container {
+            padding: 0 16px;
+        }
+
+        /* Виджет Энергии (крупная плашка) */
+        .energy-widget {
+            background: linear-gradient(135deg, var(--tg-accent), #5856D6);
+            border-radius: 20px;
             padding: 20px;
-            display: none;
-            padding-bottom: 140px; /* Запас под остров */
-        }
-
-        .content-view.active {
-            display: block;
-            animation: fadeIn 0.4s ease forwards;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* --- CARDS & TABLES --- */
-        .card {
-            background: var(--tg-sec-bg);
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 16px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .card-title {
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--tg-hint);
-            text-transform: uppercase;
-            margin-bottom: 12px;
-            display: block;
-        }
-
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .data-table td {
-            padding: 10px 0;
-            border-bottom: 0.5px solid rgba(255,255,255,0.1);
-            font-size: 15px;
-        }
-        .data-table tr:last-child td { border-bottom: none; }
-
-        .search-bar {
-            width: 100%;
-            background: var(--tg-sec-bg);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 12px;
-            padding: 14px 15px;
-            color: var(--tg-text);
-            font-size: 17px;
-            outline: none;
-        }
-
-        /* --- NAV ISLAND (FROM YOUR CODE) --- */
-        .nav-wrapper {
-            position: fixed;
-            bottom: calc(20px + var(--safe-bottom)); /* Чуть ниже как просил */
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1000;
-        }
-
-        .nav-island {
-            position: relative;
-            width: 220px;
-            height: 64px;
-            background: var(--nav-bg);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border-radius: 32px;
+            margin-bottom: 25px;
+            color: white;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 10px;
-            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        .blob {
-            position: absolute;
-            width: 48px;
-            height: 48px;
-            background: var(--tg-accent);
-            border-radius: 50%;
-            z-index: 0;
-            top: 50%;
-            margin-top: -24px;
-            left: 10px;
-            transition: left 0.5s cubic-bezier(0.19, 1, 0.22, 1), 
-                        border-radius 0.3s ease, 
-                        transform 0.3s ease;
+        .energy-info h2 { margin: 0; font-size: 14px; opacity: 0.8; text-transform: uppercase; }
+        .energy-info p { margin: 5px 0 0 0; font-size: 32px; font-weight: 800; }
+
+        /* Секции-плашки */
+        .section-label {
+            font-size: 13px;
+            color: var(--tg-hint);
+            text-transform: uppercase;
+            margin: 0 0 8px 16px;
+            font-weight: 500;
         }
 
-        .stretch-right {
-            border-radius: 40% 70% 70% 40% / 50% 50% 50% 50% !important;
-            transform: scaleX(1.18) !important;
+        .apple-card {
+            background-color: var(--tg-sec-bg);
+            border-radius: 14px;
+            margin-bottom: 25px;
+            overflow: hidden;
         }
 
-        .stretch-left {
-            border-radius: 70% 40% 40% 70% / 50% 50% 50% 50% !important;
-            transform: scaleX(1.18) !important;
-        }
-
-        .nav-item {
-            position: relative;
-            width: 60px;
-            height: 100%;
+        /* Строки внутри плашек */
+        .row {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            z-index: 2;
+            padding: 14px 16px;
+            border-bottom: 0.5px solid rgba(142, 142, 147, 0.2);
+            font-size: 17px;
+        }
+
+        .row:last-child { border-bottom: none; }
+
+        .row-label { font-weight: 400; }
+        .row-value { color: var(--tg-hint); }
+
+        /* Стили для таблиц внутри плашек */
+        .table-container {
+            padding: 16px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 15px;
+        }
+
+        th { text-align: left; color: var(--tg-hint); font-weight: 400; padding-bottom: 8px; }
+        td { padding: 10px 0; border-top: 0.5px solid rgba(142, 142, 147, 0.2); }
+
+        /* Фото-контент */
+        .image-container {
+            width: 100%;
+            line-height: 0;
+        }
+
+        .image-container img {
+            width: 100%;
+            display: block;
+        }
+
+        /* Кнопка Share (как ты просил: без затемнения) */
+        .share-btn {
+            background-color: var(--tg-accent);
+            color: #fff;
+            border: none;
+            width: 100%;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 600;
+            margin-top: 10px;
             cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
         }
-
-        .nav-item img {
-            width: 24px;
-            height: 24px;
-            filter: invert(1);
-            opacity: 0.3;
-            transition: opacity 0.3s ease;
-        }
-
-        .nav-item.active img { opacity: 1; }
 
     </style>
 </head>
 <body>
 
     <header>
-        <h1 id="page-title">FAQ</h1>
+        <h1>FAQ</h1>
     </header>
 
-    <div id="view-0" class="content-view active">
-        <div class="card">
-            <span class="card-title">База знаний</span>
-            <table class="data-table">
-                <tr><td>Сленг гильдии</td><td style="text-align:right; color:var(--tg-accent)">→</td></tr>
-                <tr><td>Правила ВГ</td><td style="text-align:right; color:var(--tg-accent)">→</td></tr>
-                <tr><td>Дейли купоны</td><td style="text-align:right; color:var(--tg-accent)">600</td></tr>
-            </table>
-        </div>
-    </div>
-
-    <div id="view-1" class="content-view">
-        <input type="text" class="search-bar" placeholder="Поиск по легендам..." id="search-input">
-        <p style="color: var(--tg-hint); text-align: center; margin-top: 20px;">Начни вводить название юнита</p>
-    </div>
-
-    <div id="view-2" class="content-view">
-        <div class="card">
-            <span class="card-title">Текущая активность</span>
-            <div style="font-size: 24px; font-weight: 800; color: var(--tg-accent);">Top 5%</div>
-            <p style="margin: 5px 0 0; font-size: 14px; color: var(--tg-hint);">По данным SWGOH.gg</p>
-        </div>
-    </div>
-
-    <div class="nav-wrapper">
-        <div class="nav-island">
-            <div class="blob" id="blob"></div>
-            
-            <div class="nav-item active" id="tab-0" onclick="switchTab(0, 'FAQ')">
-                <img src="https://cdn-icons-png.flaticon.com/512/6997/6997164.png" alt="home">
+    <div class="container">
+        
+        <div class="energy-widget">
+            <div class="energy-info">
+                <h2>Купоны энергии</h2>
+                <p>600 / 600</p>
             </div>
-            
-            <div class="nav-item" id="tab-1" onclick="switchTab(1, 'Поиск')">
-                <img src="https://cdn-icons-png.flaticon.com/512/8025/8025278.png" alt="search">
+            <div style="font-size: 40px;">⚡️</div>
+        </div>
+
+        <div class="section-label">Словарь гильдии</div>
+        <div class="apple-card">
+            <div class="row">
+                <span class="row-label">ГвГ</span>
+                <span class="row-value">Territory Wars</span>
             </div>
-            
-            <div class="nav-item" id="tab-2" onclick="switchTab(2, 'Аналитика')">
-                <img src="https://cdn-icons-png.flaticon.com/512/7640/7640102.png" alt="analytics">
+            <div class="row">
+                <span class="row-label">ВГ</span>
+                <span class="row-value">Territory Battles</span>
             </div>
         </div>
+
+        <div class="section-label">Требования на легенд</div>
+        <div class="apple-card">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>Персонаж</th><th>Релик</th><th>Очки</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Leia Organa</td><td>R8</td><td>2500</td></tr>
+                        <tr><td>Jabba the Hutt</td><td>R7</td><td>2200</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="section-label">График жетонов</div>
+        <div class="apple-card">
+            <div class="image-container">
+                <img src="https://via.placeholder.com/600x300/1c1c1e/8E8E93?text=TOKEN+CALENDAR+PHOTO" alt="Calendar">
+            </div>
+        </div>
+
+        <button class="share-btn" onclick="handleShare()">Поделиться</button>
+
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.ready();
         
-        // Попытка войти в настоящий Fullscreen
-        if (tg.requestFullscreen) {
-            tg.requestFullscreen();
-        } else {
-            tg.expand();
-        }
+        // 1. Правильная инициализация Fullscreen
+        tg.ready();
+        tg.expand();
+        if (tg.requestFullscreen) tg.requestFullscreen();
 
-        // Цвета темы
+        // 2. Настройка интерфейса под цвета ТГ
         tg.setHeaderColor(tg.themeParams.bg_color);
         tg.setBackgroundColor(tg.themeParams.bg_color);
 
-        let currentIndex = 0;
-        const blob = document.getElementById('blob');
-        const items = document.querySelectorAll('.nav-item');
-        const views = document.querySelectorAll('.content-view');
+        // 3. Механика подтверждения закрытия (чтобы не потерять данные)
+        tg.enableClosingConfirmation();
 
-        function switchTab(index, title) {
-            if (index === currentIndex) {
-                tg.HapticFeedback.notificationOccurred('warning');
-                return;
-            }
+        // 4. Системная кнопка ТГ (MainButton)
+        tg.MainButton.setText("НАПИСАТЬ ОФИЦЕРУ")
+            .show()
+            .onClick(() => {
+                tg.HapticFeedback.notificationOccurred('success');
+                tg.close(); // Или переход по ссылке
+            });
 
-            // Анимация блоба
-            const targetItem = document.getElementById(`tab-${index}`);
-            blob.classList.remove('stretch-right', 'stretch-left');
-            
-            if (index > currentIndex) blob.classList.add('stretch-right');
-            else blob.classList.add('stretch-left');
-
-            const targetX = targetItem.offsetLeft + (targetItem.offsetWidth / 2) - (blob.offsetWidth / 2);
-            blob.style.left = `${targetX}px`;
-            
-            // Переключение вкладок
-            items.forEach(item => item.classList.remove('active'));
-            targetItem.classList.add('active');
-
-            // Переключение контента
-            views.forEach(v => v.classList.remove('active'));
-            document.getElementById(`view-${index}`).classList.add('active');
-            
-            // Смена заголовка
-            document.getElementById('page-title').innerText = title;
-
-            currentIndex = index;
-            
-            // Тайминг деформации оставляем как в оригинале (200мс)
-            setTimeout(() => blob.classList.remove('stretch-right', 'stretch-left'), 200);
-            
+        function handleShare() {
+            // Легкая вибрация в стиле Apple
             tg.HapticFeedback.impactOccurred('medium');
+            
+            // Здесь можно вызвать нативное окно шаринга ТГ
+            tg.switchInlineQuery("Глянь FAQ нашей гильдии!");
         }
-
-        // Центрируем блоб при загрузке
-        window.onload = () => {
-            const initialTab = document.getElementById('tab-0');
-            const targetX = initialTab.offsetLeft + (initialTab.offsetWidth / 2) - (blob.offsetWidth / 2);
-            blob.style.left = `${targetX}px`;
-        };
     </script>
 </body>
 </html>
