@@ -2,221 +2,147 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SWGOH Guild FAQ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Guild FAQ</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --tg-bg: var(--tg-theme-bg-color, #000000);
-            --tg-sec-bg: var(--tg-theme-secondary-bg-color, #1c1c1e);
-            --tg-text: var(--tg-theme-text-color, #ffffff);
-            --tg-hint: var(--tg-theme-hint-color, #8e8e93);
-            --tg-accent: var(--tg-theme-button-color, #0a84ff);
+            --bg-color: #000000; /* Глубокий черный в стиле Apple */
+            --secondary-bg: #1c1c1e;
+            --text-color: #ffffff;
+            --hint-color: rgba(255, 255, 255, 0.6);
+            /* Используем переменную темы Telegram для акцента */
+            --accent-color: var(--tg-theme-button-color, #007aff); 
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--tg-bg);
-            color: var(--tg-text);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
             padding: 0;
-            /* Исправляем застревание заголовка */
-            padding-top: env(safe-area-inset-top);
-            padding-bottom: calc(30px + env(safe-area-inset-bottom));
-            -webkit-font-smoothing: antialiased;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* Apple Header - Большой жирный заголовок */
-        header {
-            padding: 20px 16px 10px 16px;
-            background-color: var(--tg-bg);
+        /* Шапка */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 16px;
+            position: sticky;
+            top: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 10;
         }
 
-        h1 {
+        .header h1 {
             font-size: 34px;
-            font-weight: 800;
+            font-weight: 700;
             margin: 0;
             letter-spacing: -0.5px;
         }
 
-        .container {
+        .user-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px; /* Тот самый квадратик с закруглением */
+            border: 2px solid var(--accent-color);
+            background-size: cover;
+            background-position: center;
+            background-color: var(--secondary-bg);
+        }
+
+        /* Контейнер для плашек */
+        .list-container {
             padding: 0 16px;
         }
 
-        /* Виджет Энергии (крупная плашка) */
-        .energy-widget {
-            background: linear-gradient(135deg, var(--tg-accent), #5856D6);
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 25px;
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-
-        .energy-info h2 { margin: 0; font-size: 14px; opacity: 0.8; text-transform: uppercase; }
-        .energy-info p { margin: 5px 0 0 0; font-size: 32px; font-weight: 800; }
-
-        /* Секции-плашки */
-        .section-label {
-            font-size: 13px;
-            color: var(--tg-hint);
-            text-transform: uppercase;
-            margin: 0 0 8px 16px;
-            font-weight: 500;
-        }
-
-        .apple-card {
-            background-color: var(--tg-sec-bg);
-            border-radius: 14px;
-            margin-bottom: 25px;
-            overflow: hidden;
-        }
-
-        /* Строки внутри плашек */
-        .row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .cell {
+            background-color: var(--secondary-bg);
+            border-radius: 12px;
             padding: 14px 16px;
-            border-bottom: 0.5px solid rgba(142, 142, 147, 0.2);
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+
+        .cell:active {
+            background-color: #2c2c2e; /* Легкий отклик при нажатии */
+        }
+
+        .cell-title {
             font-size: 17px;
+            font-weight: 400;
+            order: 2; /* Название справа */
         }
 
-        .row:last-child { border-bottom: none; }
-
-        .row-label { font-weight: 400; }
-        .row-value { color: var(--tg-hint); }
-
-        /* Стили для таблиц внутри плашек */
-        .table-container {
-            padding: 16px;
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 15px;
-        }
-
-        th { text-align: left; color: var(--tg-hint); font-weight: 400; padding-bottom: 8px; }
-        td { padding: 10px 0; border-top: 0.5px solid rgba(142, 142, 147, 0.2); }
-
-        /* Фото-контент */
-        .image-container {
-            width: 100%;
-            line-height: 0;
-        }
-
-        .image-container img {
-            width: 100%;
-            display: block;
-        }
-
-        /* Кнопка Share (как ты просил: без затемнения) */
-        .share-btn {
-            background-color: var(--tg-accent);
-            color: #fff;
-            border: none;
-            width: 100%;
-            padding: 16px;
-            border-radius: 14px;
+        .cell-chevron {
             font-size: 17px;
-            font-weight: 600;
-            margin-top: 10px;
-            cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
+            color: var(--hint-color);
+            order: 1; /* Шеврон слева */
+            transform: rotate(0deg); /* Можно повернуть если нужно */
         }
 
+        /* Скрываем скроллбар, но оставляем функционал */
+        body::-webkit-scrollbar {
+            display: none;
+        }
     </style>
 </head>
 <body>
 
-    <header>
+    <header class="header">
         <h1>FAQ</h1>
+        <div id="user-avatar" class="user-avatar"></div>
     </header>
 
-    <div class="container">
-        
-        <div class="energy-widget">
-            <div class="energy-info">
-                <h2>Купоны энергии</h2>
-                <p>600 / 600</p>
-            </div>
-            <div style="font-size: 40px;">⚡️</div>
+    <main class="list-container">
+        <div class="cell" onclick="handleCellClick('Правила гильдии')">
+            <span class="cell-title">Правила гильдии</span>
+            <span class="cell-chevron">‹</span>
         </div>
 
-        <div class="section-label">Словарь гильдии</div>
-        <div class="apple-card">
-            <div class="row">
-                <span class="row-label">ГвГ</span>
-                <span class="row-value">Territory Wars</span>
-            </div>
-            <div class="row">
-                <span class="row-label">ВГ</span>
-                <span class="row-value">Territory Battles</span>
-            </div>
+        <div class="cell" onclick="handleCellClick('Сокращения (Сленг)')">
+            <span class="cell-title">Алфавит сокращений</span>
+            <span class="cell-chevron">‹</span>
         </div>
 
-        <div class="section-label">Требования на легенд</div>
-        <div class="apple-card">
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr><th>Персонаж</th><th>Релик</th><th>Очки</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>Leia Organa</td><td>R8</td><td>2500</td></tr>
-                        <tr><td>Jabba the Hutt</td><td>R7</td><td>2200</td></tr>
-                    </tbody>
-                </table>
-            </div>
+        <div class="cell" onclick="handleCellClick('Требования к рейдам')">
+            <span class="cell-title">Инфа по рейдам</span>
+            <span class="cell-chevron">‹</span>
         </div>
-
-        <div class="section-label">График жетонов</div>
-        <div class="apple-card">
-            <div class="image-container">
-                <img src="https://via.placeholder.com/600x300/1c1c1e/8E8E93?text=TOKEN+CALENDAR+PHOTO" alt="Calendar">
-            </div>
-        </div>
-
-        <button class="share-btn" onclick="handleShare()">Поделиться</button>
-
-    </div>
+    </main>
 
     <script>
+        // Инициализация Telegram Mini App
         const tg = window.Telegram.WebApp;
-        
-        // 1. Правильная инициализация Fullscreen
-        tg.ready();
-        tg.expand();
-        if (tg.requestFullscreen) tg.requestFullscreen();
+        tg.expand(); // Расширяем на весь экран
 
-        // 2. Настройка интерфейса под цвета ТГ
-        tg.setHeaderColor(tg.themeParams.bg_color);
-        tg.setBackgroundColor(tg.themeParams.bg_color);
-
-        // 3. Механика подтверждения закрытия (чтобы не потерять данные)
-        tg.enableClosingConfirmation();
-
-        // 4. Системная кнопка ТГ (MainButton)
-        tg.MainButton.setText("НАПИСАТЬ ОФИЦЕРУ")
-            .show()
-            .onClick(() => {
-                tg.HapticFeedback.notificationOccurred('success');
-                tg.close(); // Или переход по ссылке
-            });
-
-        function handleShare() {
-            // Легкая вибрация в стиле Apple
-            tg.HapticFeedback.impactOccurred('medium');
-            
-            // Здесь можно вызвать нативное окно шаринга ТГ
-            tg.switchInlineQuery("Глянь FAQ нашей гильдии!");
+        // Настройка аватара пользователя
+        const avatarDiv = document.getElementById('user-avatar');
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            const user = tg.initDataUnsafe.user;
+            if (user.photo_url) {
+                avatarDiv.style.backgroundImage = `url('${user.photo_url}')`;
+            }
         }
+
+        // Функция клика с тактильной отдачей
+        function handleCellClick(name) {
+            // Легкая вибрация при нажатии (механика Telegram)
+            tg.HapticFeedback.impactOccurred('light');
+            
+            console.log("Выбрано:", name);
+            // Тут позже добавим логику открытия контента
+        }
+
+        // Сообщаем Telegram, что приложение готово
+        tg.ready();
     </script>
 </body>
 </html>
