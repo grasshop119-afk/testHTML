@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Premium Mini App</title>
+    <title>Premium Mini App - Wheel Nav</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -11,15 +11,11 @@
             --tg-secondary-bg: var(--tg-theme-secondary-bg-color, #1c1c1d);
             --tg-accent: var(--tg-theme-button-color, #007AFF);
             --tg-text: var(--tg-theme-text-color, #ffffff);
-            --tg-hint: var(--tg-theme-hint-color, #8e8e93);
             --nav-bg: rgba(255, 255, 255, 0.1);
-            --safe-top: env(safe-area-inset-top, 0px);
             --safe-bottom: env(safe-area-inset-bottom, 0px);
-        }
-
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
+            
+            /* Параметры колеса */
+            --wheel-size: 800px; 
         }
 
         body {
@@ -27,273 +23,205 @@
             padding: 0;
             background-color: var(--tg-bg);
             color: var(--tg-text);
-            font-family: 'Montserrat', -apple-system, sans-serif;
+            font-family: 'Montserrat', sans-serif;
             height: 100vh;
-            display: flex;
-            flex-direction: column;
             overflow: hidden;
-            user-select: none;
         }
 
-        /* --- HEADER SECTION --- */
-        .header-container {
-            padding: calc(var(--safe-top) + 20px) 20px 10px;
-            display: flex;
-            align-items: center;
-            z-index: 10;
-        }
-
-        .welcome-text {
-            font-size: 28px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            line-height: 1.2;
-        }
-
-        .welcome-light {
-            opacity: 0.5;
-            font-weight: 400;
-        }
-
-        /* --- CONTENT SYSTEM --- */
+        /* Контентные окна */
         .content-view {
-            flex: 1;
-            position: relative;
-            overflow-y: auto;
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 120px;
             padding: 20px;
             display: none;
-            padding-bottom: 150px;
+            overflow-y: auto;
         }
+        .content-view.active { display: block; animation: fadeIn 0.4s ease; }
 
-        .content-view.active {
-            display: block;
-            animation: fadeIn 0.4s ease forwards;
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* --- ARC NAVIGATION --- */
-        .nav-wrapper {
+        /* --- THE WHEEL SYSTEM --- */
+        .nav-container {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: calc(85px + var(--safe-bottom));
+            bottom: calc(-1 * (var(--wheel-size) - 100px)); /* Оставляем 100px сверху */
+            left: 50%;
+            transform: translateX(-50%);
+            width: var(--wheel-size);
+            height: var(--wheel-size);
             z-index: 1000;
-            overflow: hidden; /* Чтобы дуга не вылазила визуально за границы */
         }
 
-        .nav-arc-bg {
+        .wheel-disk {
             position: absolute;
-            bottom: calc(-100px); /* Уводим низ круга глубже */
-            left: -50%;
-            right: -50%;
-            height: 200px;
+            width: 100%;
+            height: 100%;
             background: var(--nav-bg);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
-            border-radius: 50% 50% 0 0; /* Создаем дугу сверху */
-            border: 1px solid rgba(255,255,255,0.08);
-            z-index: 1;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.6s cubic-bezier(0.19, 1, 0.22, 1);
         }
 
-        .nav-content {
+        /* Блоб, который "ездит" по кромке */
+        .wheel-blob {
             position: absolute;
-            bottom: var(--safe-bottom);
+            top: -5px; /* Чуть выше кромки */
             left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 400px;
-            height: 70px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            padding: 0 30px;
-            z-index: 2;
-        }
-
-        .blob {
-            position: absolute;
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             background: var(--tg-accent);
             border-radius: 50%;
-            z-index: 0;
-            top: 50%;
-            margin-top: -25px;
-            left: 0;
-            transition: left 0.5s cubic-bezier(0.19, 1, 0.22, 1), 
-                        border-radius 0.2s ease, 
-                        transform 0.2s ease;
+            transform: translateX(-50%);
+            z-index: 5;
+            transition: transform 0.2s ease, border-radius 0.2s ease;
         }
 
-        /* Быстрая деформация */
-        .stretch-right {
-            border-radius: 40% 70% 70% 40% / 50% 50% 50% 50% !important;
-            transform: scaleX(1.15) !important;
-        }
+        .stretch-right { border-radius: 40% 70% 70% 40% / 50%; transform: translateX(-50%) scaleX(1.2); }
+        .stretch-left { border-radius: 70% 40% 40% 70% / 50%; transform: translateX(-50%) scaleX(1.2); }
 
-        .stretch-left {
-            border-radius: 70% 40% 40% 70% / 50% 50% 50% 50% !important;
-            transform: scaleX(1.15) !important;
-        }
-
+        /* Иконки на колесе */
         .nav-item {
-            position: relative;
-            width: 60px;
-            height: 100%;
+            position: absolute;
+            top: 15px; /* Расстояние от края диска */
+            left: 50%;
+            width: 50px;
+            height: 50px;
+            margin-left: -25px;
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 2;
+            transform-origin: center calc(var(--wheel-size) / 2 - 15px);
             cursor: pointer;
+            z-index: 10;
         }
 
-        .nav-item img {
+        .nav-item img, .nav-item .pfp-mini {
             width: 24px;
             height: 24px;
             filter: invert(1);
-            opacity: 0.3;
-            transition: opacity 0.3s ease, transform 0.3s ease;
+            opacity: 0.4;
+            transition: opacity 0.3s, transform 0.3s;
         }
 
-        .nav-item.active img { 
-            opacity: 1; 
-            transform: translateY(-2px); 
+        .nav-item.active img, .nav-item.active .pfp-mini {
+            opacity: 1;
+            transform: scale(1.2);
         }
 
         .pfp-mini {
-            width: 28px;
-            height: 28px;
             border-radius: 50%;
-            background-color: #333;
             background-size: cover;
-            background-position: center;
-            opacity: 0.4;
-            transition: all 0.3s ease;
-        }
-
-        .nav-item.active .pfp-mini { 
-            opacity: 1; 
-            border: 2px solid white;
-            transform: scale(1.1);
-        }
-
-        /* --- UTILS --- */
-        .search-bar {
-            width: 100%;
-            background: var(--tg-secondary-bg);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 12px;
-            padding: 12px 15px;
-            color: var(--tg-text);
-            font-family: 'Montserrat', sans-serif;
-            font-size: 17px;
-            outline: none;
+            filter: none !important; /* Для аватарок отменяем инверсию */
         }
     </style>
 </head>
 <body>
 
-    <div id="view-0" class="content-view active">
-        <div class="header-container">
-            <div class="welcome-text">
-                <span class="welcome-light">Привет,</span><br>
-                <span id="user-greeting-name">Пользователь</span>!
-            </div>
-        </div>
-    </div>
+    <div id="view-0" class="content-view active"><h1>Главная</h1></div>
+    <div id="view-1" class="content-view"><h1>Поиск</h1></div>
+    <div id="view-2" class="content-view"><h1>Профиль</h1></div>
+    <div id="view-3" class="content-view"><h1>Настройки</h1></div>
+    <div id="view-4" class="content-view"><h1>Уведомления</h1></div>
 
-    <div id="view-1" class="content-view">
-        <input type="text" class="search-bar" placeholder="Поиск..." id="search-input">
-    </div>
-
-    <div id="view-2" class="content-view">
-    </div>
-
-    <div class="nav-wrapper">
-        <div class="nav-arc-bg"></div>
-        <div class="nav-content">
-            <div class="blob" id="blob"></div>
-            
-            <div class="nav-item active" id="tab-0" onclick="switchTab(0)">
-                <img src="https://cdn-icons-png.flaticon.com/512/6997/6997164.png" alt="home">
+    <div class="nav-container">
+        <div class="wheel-blob" id="blob"></div>
+        <div class="wheel-disk" id="wheel">
             </div>
-            
-            <div class="nav-item" id="tab-1" onclick="switchTab(1)">
-                <img src="https://cdn-icons-png.flaticon.com/512/8025/8025278.png" alt="search">
-            </div>
-            
-            <div class="nav-item" id="tab-2" onclick="switchTab(2)">
-                <div class="pfp-mini" id="nav-pfp"></div>
-            </div>
-        </div>
     </div>
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         const tg = window.Telegram.WebApp;
-        tg.ready();
         tg.expand();
 
-        // Данные пользователя
-        const user = tg.initDataUnsafe?.user;
-        if (user) {
-            document.getElementById('user-greeting-name').innerText = user.first_name;
-            if (user.photo_url) {
-                document.getElementById('nav-pfp').style.backgroundImage = `url(${user.photo_url})`;
-            }
-        }
-
-        // Логика переключения вкладок
+        const wheel = document.getElementById('wheel');
         const blob = document.getElementById('blob');
-        const items = document.querySelectorAll('.nav-item');
-        const views = document.querySelectorAll('.content-view');
+        
+        // Массив иконок (можно добавлять сколько угодно)
+        const menuItems = [
+            { icon: 'https://cdn-icons-png.flaticon.com/512/6997/6997164.png', type: 'img' },
+            { icon: 'https://cdn-icons-png.flaticon.com/512/8025/8025278.png', type: 'img' },
+            { icon: '', type: 'pfp' }, // Профиль
+            { icon: 'https://cdn-icons-png.flaticon.com/512/2040/2040504.png', type: 'img' },
+            { icon: 'https://cdn-icons-png.flaticon.com/512/3602/3602145.png', type: 'img' }
+        ];
+
         let currentIndex = 0;
+        const angleStep = 15; // Угол между иконками (в градусах)
+
+        // Инициализация колеса
+        function initWheel() {
+            menuItems.forEach((item, index) => {
+                const el = document.createElement('div');
+                el.className = 'nav-item';
+                el.id = `tab-${index}`;
+                
+                // Рассчитываем угол так, чтобы 0-я иконка была по центру (сверху)
+                const angle = index * angleStep;
+                el.style.transform = `rotate(${angle}deg)`;
+
+                if (item.type === 'pfp') {
+                    const pfp = document.createElement('div');
+                    pfp.className = 'pfp-mini';
+                    pfp.id = 'nav-pfp';
+                    pfp.style.backgroundColor = '#555';
+                    if (tg.initDataUnsafe?.user?.photo_url) {
+                        pfp.style.backgroundImage = `url(${tg.initDataUnsafe.user.photo_url})`;
+                    }
+                    el.appendChild(pfp);
+                } else {
+                    const img = document.createElement('img');
+                    img.src = item.icon;
+                    el.appendChild(img);
+                }
+
+                el.onclick = () => switchTab(index);
+                wheel.appendChild(el);
+            });
+            
+            updateActiveState();
+        }
 
         function switchTab(index) {
             if (index === currentIndex) {
-                tg.HapticFeedback.notificationOccurred('warning'); 
+                tg.HapticFeedback.notificationOccurred('warning');
                 return;
             }
 
-            const targetItem = document.getElementById(`tab-${index}`);
+            // Деформация блоба
             blob.classList.remove('stretch-right', 'stretch-left');
-            
-            // Определяем направление деформации
             if (index > currentIndex) blob.classList.add('stretch-right');
             else blob.classList.add('stretch-left');
-
-            // Позиционируем блоб относительно nav-content
-            const targetX = targetItem.offsetLeft + (targetItem.offsetWidth / 2) - (blob.offsetWidth / 2);
-            blob.style.left = `${targetX}px`;
             
-            items.forEach(item => item.classList.remove('active'));
-            targetItem.classList.add('active');
+            // Вращаем само колесо
+            const rotation = -index * angleStep;
+            wheel.style.transform = `rotate(${rotation}deg)`;
 
+            // Переключаем контент (для примера переключаем по id если есть)
+            const views = document.querySelectorAll('.content-view');
             views.forEach(v => v.classList.remove('active'));
-            document.getElementById(`view-${index}`).classList.add('active');
+            if (document.getElementById(`view-${index}`)) {
+                document.getElementById(`view-${index}`).classList.add('active');
+            }
 
             currentIndex = index;
+            updateActiveState();
 
-            // Конец деформации чуть раньше (150мс вместо 200мс)
-            setTimeout(() => blob.classList.remove('stretch-right', 'stretch-left'), 150);
-            
+            setTimeout(() => {
+                blob.classList.remove('stretch-right', 'stretch-left');
+            }, 150);
+
             tg.HapticFeedback.impactOccurred('medium');
         }
 
-        // Инициализация позиции блоба
-        function initBlob() {
-            const initialTab = document.getElementById('tab-0');
-            const targetX = initialTab.offsetLeft + (initialTab.offsetWidth / 2) - (blob.offsetWidth / 2);
-            blob.style.left = `${targetX}px`;
+        function updateActiveState() {
+            document.querySelectorAll('.nav-item').forEach((item, idx) => {
+                item.classList.toggle('active', idx === currentIndex);
+            });
         }
 
-        window.onload = initBlob;
-        window.onresize = initBlob;
+        initWheel();
     </script>
 </body>
 </html>
