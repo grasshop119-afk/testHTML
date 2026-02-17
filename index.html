@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Premium Mini App - Circular Nav</title>
+    <title>Premium Wheel Nav</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --tg-bg: var(--tg-theme-bg-color, #000000);
-            --tg-secondary-bg: var(--tg-theme-secondary-bg-color, #1c1c1d);
             --tg-accent: var(--tg-theme-button-color, #007AFF);
             --tg-text: var(--tg-theme-text-color, #ffffff);
             --nav-bg: rgba(255, 255, 255, 0.1);
-            --safe-bottom: env(safe-area-inset-bottom, 0px);
-            
-            /* Параметры колеса */
-            --wheel-size: 600px; /* Уменьшил диаметр для более крутой дуги */
+            --wheel-size: 600px;
         }
 
         * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
+            /* Запрет выделения */
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: pan-y; /* Разрешаем вертикальный скролл контента, но не системные жесты */
         }
 
         body {
@@ -31,72 +31,70 @@
             font-family: 'Montserrat', sans-serif;
             height: 100vh;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .header-container {
-            padding: calc(env(safe-area-inset-top) + 20px) 20px 10px;
         }
 
         .content-view {
-            flex: 1;
+            position: absolute;
+            inset: 0;
             padding: 20px;
             display: none;
-            overflow-y: auto;
+            padding-bottom: 180px;
         }
-        .content-view.active { display: block; animation: fadeIn 0.4s ease; }
+        .content-view.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* --- CIRCULAR NAVIGATION --- */
+        /* --- WHEEL SYSTEM --- */
         .nav-wrapper {
             position: fixed;
-            /* Приподнимаем круг выше */
-            bottom: calc(-1 * (var(--wheel-size) - 140px) - var(--safe-bottom)); 
+            bottom: calc(-1 * (var(--wheel-size) - 150px));
             left: 50%;
             transform: translateX(-50%);
             width: var(--wheel-size);
             height: var(--wheel-size);
             z-index: 1000;
-            pointer-events: none; /* Чтобы пустые области не мешали кликам */
         }
 
         .wheel-disk {
             position: absolute;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             background: var(--nav-bg);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
             border-radius: 50%;
-            border: 1px solid rgba(255,255,255,0.12);
-            transition: transform 0.6s cubic-bezier(0.19, 1, 0.22, 1);
-            pointer-events: auto;
+            border: 1px solid rgba(255,255,255,0.1);
             z-index: 1;
+            transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
         }
 
-        /* Блоб зафиксирован в верхней точке круга */
         .wheel-blob {
             position: absolute;
-            top: 15px; /* Регулировка положения на кромке */
+            top: 15px;
             left: 50%;
-            width: 50px;
-            height: 50px;
+            width: 54px;
+            height: 54px;
             background: var(--tg-accent);
             border-radius: 50%;
             transform: translateX(-50%);
             z-index: 2;
-            transition: transform 0.2s ease, border-radius 0.2s ease;
+            transition: transform 0.15s ease, border-radius 0.15s ease;
+            pointer-events: none;
         }
 
-        /* Деформация блоба (заканчивается быстро, как просил) */
-        .stretch-right { border-radius: 40% 70% 70% 40% / 50%; transform: translateX(-50%) scaleX(1.25); }
-        .stretch-left { border-radius: 70% 40% 40% 70% / 50%; transform: translateX(-50%) scaleX(1.25); }
+        .stretch-right { border-radius: 40% 70% 70% 40% / 50%; transform: translateX(-50%) scaleX(1.2); }
+        .stretch-left { border-radius: 70% 40% 40% 70% / 50%; transform: translateX(-50%) scaleX(1.2); }
+
+        /* Контейнер для иконок поверх диска */
+        .icons-container {
+            position: absolute;
+            inset: 0;
+            z-index: 3;
+            transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            pointer-events: none; /* Клики пролетают сквозь него на диск */
+        }
 
         .nav-item {
             position: absolute;
-            top: 15px; 
+            top: 17px;
             left: 50%;
             width: 50px;
             height: 50px;
@@ -104,66 +102,56 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            /* Точка вращения — центр большого круга */
-            transform-origin: center calc(var(--wheel-size) / 2 - 15px);
-            cursor: pointer;
-            z-index: 10;
+            transform-origin: center calc(var(--wheel-size) / 2 - 17px);
+            pointer-events: auto; /* А иконки можно кликать */
         }
 
         .nav-item img, .pfp-mini {
-            width: 24px;
-            height: 24px;
+            width: 26px;
+            height: 26px;
             filter: invert(1);
-            opacity: 0.35;
-            transition: opacity 0.3s, transform 0.3s, filter 0.3s;
+            opacity: 0.3;
+            transition: all 0.3s ease;
+            -webkit-user-drag: none;
         }
 
         .nav-item.active img, .nav-item.active .pfp-mini {
             opacity: 1;
-            transform: scale(1.15);
+            transform: scale(1.2);
+            filter: invert(1) drop-shadow(0 0 5px rgba(255,255,255,0.3));
         }
 
         .pfp-mini {
             border-radius: 50%;
             background-size: cover;
-            background-position: center;
-            filter: grayscale(1) contrast(1.2); /* Чтобы вписаться в стиль иконок */
+            filter: grayscale(1);
         }
-        
-        .nav-item.active .pfp-mini {
-            filter: none;
-            border: 1px solid white;
-        }
+        .nav-item.active .pfp-mini { filter: none; border: 2px solid white; }
     </style>
 </head>
 <body>
 
-    <div id="view-0" class="content-view active">
-        <div class="header-container">
-            <h1 style="margin:0">Главная</h1>
-        </div>
-    </div>
+    <div id="view-0" class="content-view active"><h1>Дом</h1></div>
     <div id="view-1" class="content-view"><h1>Поиск</h1></div>
     <div id="view-2" class="content-view"><h1>Профиль</h1></div>
     <div id="view-3" class="content-view"><h1>Настройки</h1></div>
-    <div id="view-4" class="content-view"><h1>Чат</h1></div>
+    <div id="view-4" class="content-view"><h1>Сообщения</h1></div>
 
-    <div class="nav-wrapper">
+    <div class="nav-wrapper" id="navWrapper">
         <div class="wheel-blob" id="blob"></div>
-        <div class="wheel-disk" id="wheel">
-            </div>
+        <div class="wheel-disk" id="wheelDisk"></div>
+        <div class="icons-container" id="iconsContainer"></div>
     </div>
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         const tg = window.Telegram.WebApp;
-        tg.ready();
         tg.expand();
 
-        const wheel = document.getElementById('wheel');
+        const disk = document.getElementById('wheelDisk');
+        const iconContainer = document.getElementById('iconsContainer');
         const blob = document.getElementById('blob');
         
-        // Можешь добавлять сюда сколько угодно объектов
         const menuItems = [
             { icon: 'https://cdn-icons-png.flaticon.com/512/6997/6997164.png', type: 'img' },
             { icon: 'https://cdn-icons-png.flaticon.com/512/8025/8025278.png', type: 'img' },
@@ -173,26 +161,22 @@
         ];
 
         let currentIndex = 0;
-        const angleStep = 22; // Расстояние между иконками в градусах
+        const angleStep = 25;
+        let currentRotation = 0;
+        let startX = 0;
+        let isDragging = false;
+        let startRotation = 0;
 
-        function initWheel() {
+        function init() {
             menuItems.forEach((item, index) => {
                 const el = document.createElement('div');
                 el.className = 'nav-item';
-                el.id = `tab-${index}`;
+                el.style.transform = `rotate(${index * angleStep}deg)`;
                 
-                // Угол поворота иконки относительно центра круга
-                const angle = index * angleStep;
-                el.style.transform = `rotate(${angle}deg)`;
-
                 if (item.type === 'pfp') {
                     const pfp = document.createElement('div');
                     pfp.className = 'pfp-mini';
-                    pfp.id = 'nav-pfp';
-                    pfp.style.backgroundColor = '#333';
-                    if (tg.initDataUnsafe?.user?.photo_url) {
-                        pfp.style.backgroundImage = `url(${tg.initDataUnsafe.user.photo_url})`;
-                    }
+                    if (tg.initDataUnsafe?.user?.photo_url) pfp.style.backgroundImage = `url(${tg.initDataUnsafe.user.photo_url})`;
                     el.appendChild(pfp);
                 } else {
                     const img = document.createElement('img');
@@ -200,53 +184,84 @@
                     el.appendChild(img);
                 }
 
-                el.onclick = () => switchTab(index);
-                wheel.appendChild(el);
+                el.onclick = (e) => {
+                    if (!isDragging) switchTab(index);
+                };
+                iconContainer.appendChild(el);
             });
-            
-            updateActiveState();
+            updateActive(0);
         }
 
         function switchTab(index) {
-            if (index === currentIndex) {
-                tg.HapticFeedback.notificationOccurred('warning');
-                return;
-            }
-
-            // Визуальный эффект деформации блоба
             blob.classList.remove('stretch-right', 'stretch-left');
             if (index > currentIndex) blob.classList.add('stretch-right');
-            else blob.classList.add('stretch-left');
-            
-            // Крутим диск в обратную сторону, чтобы иконка стала по центру
-            const rotation = -index * angleStep;
-            wheel.style.transform = `rotate(${rotation}deg)`;
-
-            // Переключение вьюх
-            const views = document.querySelectorAll('.content-view');
-            views.forEach(v => v.classList.remove('active'));
-            if (document.getElementById(`view-${index}`)) {
-                document.getElementById(`view-${index}`).classList.add('active');
-            }
+            else if (index < currentIndex) blob.classList.add('stretch-left');
 
             currentIndex = index;
-            updateActiveState();
+            currentRotation = -index * angleStep;
+            applyRotation();
+            updateActive(index);
 
-            // Конец анимации растяжения (быстрый)
-            setTimeout(() => {
-                blob.classList.remove('stretch-right', 'stretch-left');
-            }, 150);
-
+            setTimeout(() => blob.classList.remove('stretch-right', 'stretch-left'), 150);
             tg.HapticFeedback.impactOccurred('medium');
         }
 
-        function updateActiveState() {
-            document.querySelectorAll('.nav-item').forEach((item, idx) => {
-                item.classList.toggle('active', idx === currentIndex);
-            });
+        function applyRotation() {
+            disk.style.transform = `rotate(${currentRotation}deg)`;
+            iconContainer.style.transform = `rotate(${currentRotation}deg)`;
         }
 
-        initWheel();
+        function updateActive(index) {
+            document.querySelectorAll('.nav-item').forEach((item, i) => {
+                item.classList.toggle('active', i === index);
+            });
+            const views = document.querySelectorAll('.content-view');
+            views.forEach((v, i) => v.classList.toggle('active', i === index));
+        }
+
+        // Логика свайпов
+        const wrapper = document.getElementById('navWrapper');
+
+        wrapper.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            startRotation = currentRotation;
+            isDragging = true;
+            disk.style.transition = 'none';
+            iconContainer.style.transition = 'none';
+        });
+
+        window.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            const moveX = e.touches[0].clientX - startX;
+            // Чувствительность вращения
+            const sensitivity = 0.15; 
+            currentRotation = startRotation + (moveX * sensitivity);
+            applyRotation();
+            
+            // Определяем "подсвеченную" иконку на лету
+            const nearestIndex = Math.round(-currentRotation / angleStep);
+            if (nearestIndex >= 0 && nearestIndex < menuItems.length) {
+                if (nearestIndex !== currentIndex) {
+                    currentIndex = nearestIndex;
+                    updateActive(currentIndex);
+                    tg.HapticFeedback.selectionChanged();
+                }
+            }
+        });
+
+        window.addEventListener('touchend', () => {
+            if (!isDragging) return;
+            isDragging = false;
+            
+            disk.style.transition = 'transform 0.5s cubic-bezier(0.19, 1, 0.22, 1)';
+            iconContainer.style.transition = 'transform 0.5s cubic-bezier(0.19, 1, 0.22, 1)';
+            
+            // Примагничивание к ближайшей иконке
+            const nearestIndex = Math.max(0, Math.min(menuItems.length - 1, Math.round(-currentRotation / angleStep)));
+            switchTab(nearestIndex);
+        });
+
+        init();
     </script>
 </body>
 </html>
