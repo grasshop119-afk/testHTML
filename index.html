@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Premium Mini App - Wheel Nav</title>
+    <title>Premium Mini App - Circular Nav</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -15,7 +15,12 @@
             --safe-bottom: env(safe-area-inset-bottom, 0px);
             
             /* Параметры колеса */
-            --wheel-size: 800px; 
+            --wheel-size: 600px; /* Уменьшил диаметр для более крутой дуги */
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -26,29 +31,35 @@
             font-family: 'Montserrat', sans-serif;
             height: 100vh;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* Контентные окна */
+        .header-container {
+            padding: calc(env(safe-area-inset-top) + 20px) 20px 10px;
+        }
+
         .content-view {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 120px;
+            flex: 1;
             padding: 20px;
             display: none;
             overflow-y: auto;
         }
         .content-view.active { display: block; animation: fadeIn 0.4s ease; }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- THE WHEEL SYSTEM --- */
-        .nav-container {
+        /* --- CIRCULAR NAVIGATION --- */
+        .nav-wrapper {
             position: fixed;
-            bottom: calc(-1 * (var(--wheel-size) - 100px)); /* Оставляем 100px сверху */
+            /* Приподнимаем круг выше */
+            bottom: calc(-1 * (var(--wheel-size) - 140px) - var(--safe-bottom)); 
             left: 50%;
             transform: translateX(-50%);
             width: var(--wheel-size);
             height: var(--wheel-size);
             z-index: 1000;
+            pointer-events: none; /* Чтобы пустые области не мешали кликам */
         }
 
         .wheel-disk {
@@ -59,31 +70,33 @@
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
             border-radius: 50%;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.12);
             transition: transform 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+            pointer-events: auto;
+            z-index: 1;
         }
 
-        /* Блоб, который "ездит" по кромке */
+        /* Блоб зафиксирован в верхней точке круга */
         .wheel-blob {
             position: absolute;
-            top: -5px; /* Чуть выше кромки */
+            top: 15px; /* Регулировка положения на кромке */
             left: 50%;
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             background: var(--tg-accent);
             border-radius: 50%;
             transform: translateX(-50%);
-            z-index: 5;
+            z-index: 2;
             transition: transform 0.2s ease, border-radius 0.2s ease;
         }
 
-        .stretch-right { border-radius: 40% 70% 70% 40% / 50%; transform: translateX(-50%) scaleX(1.2); }
-        .stretch-left { border-radius: 70% 40% 40% 70% / 50%; transform: translateX(-50%) scaleX(1.2); }
+        /* Деформация блоба (заканчивается быстро, как просил) */
+        .stretch-right { border-radius: 40% 70% 70% 40% / 50%; transform: translateX(-50%) scaleX(1.25); }
+        .stretch-left { border-radius: 70% 40% 40% 70% / 50%; transform: translateX(-50%) scaleX(1.25); }
 
-        /* Иконки на колесе */
         .nav-item {
             position: absolute;
-            top: 15px; /* Расстояние от края диска */
+            top: 15px; 
             left: 50%;
             width: 50px;
             height: 50px;
@@ -91,40 +104,51 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            /* Точка вращения — центр большого круга */
             transform-origin: center calc(var(--wheel-size) / 2 - 15px);
             cursor: pointer;
             z-index: 10;
         }
 
-        .nav-item img, .nav-item .pfp-mini {
+        .nav-item img, .pfp-mini {
             width: 24px;
             height: 24px;
             filter: invert(1);
-            opacity: 0.4;
-            transition: opacity 0.3s, transform 0.3s;
+            opacity: 0.35;
+            transition: opacity 0.3s, transform 0.3s, filter 0.3s;
         }
 
         .nav-item.active img, .nav-item.active .pfp-mini {
             opacity: 1;
-            transform: scale(1.2);
+            transform: scale(1.15);
         }
 
         .pfp-mini {
             border-radius: 50%;
             background-size: cover;
-            filter: none !important; /* Для аватарок отменяем инверсию */
+            background-position: center;
+            filter: grayscale(1) contrast(1.2); /* Чтобы вписаться в стиль иконок */
+        }
+        
+        .nav-item.active .pfp-mini {
+            filter: none;
+            border: 1px solid white;
         }
     </style>
 </head>
 <body>
 
-    <div id="view-0" class="content-view active"><h1>Главная</h1></div>
+    <div id="view-0" class="content-view active">
+        <div class="header-container">
+            <h1 style="margin:0">Главная</h1>
+        </div>
+    </div>
     <div id="view-1" class="content-view"><h1>Поиск</h1></div>
     <div id="view-2" class="content-view"><h1>Профиль</h1></div>
     <div id="view-3" class="content-view"><h1>Настройки</h1></div>
-    <div id="view-4" class="content-view"><h1>Уведомления</h1></div>
+    <div id="view-4" class="content-view"><h1>Чат</h1></div>
 
-    <div class="nav-container">
+    <div class="nav-wrapper">
         <div class="wheel-blob" id="blob"></div>
         <div class="wheel-disk" id="wheel">
             </div>
@@ -133,31 +157,31 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         const tg = window.Telegram.WebApp;
+        tg.ready();
         tg.expand();
 
         const wheel = document.getElementById('wheel');
         const blob = document.getElementById('blob');
         
-        // Массив иконок (можно добавлять сколько угодно)
+        // Можешь добавлять сюда сколько угодно объектов
         const menuItems = [
             { icon: 'https://cdn-icons-png.flaticon.com/512/6997/6997164.png', type: 'img' },
             { icon: 'https://cdn-icons-png.flaticon.com/512/8025/8025278.png', type: 'img' },
-            { icon: '', type: 'pfp' }, // Профиль
+            { icon: '', type: 'pfp' },
             { icon: 'https://cdn-icons-png.flaticon.com/512/2040/2040504.png', type: 'img' },
             { icon: 'https://cdn-icons-png.flaticon.com/512/3602/3602145.png', type: 'img' }
         ];
 
         let currentIndex = 0;
-        const angleStep = 15; // Угол между иконками (в градусах)
+        const angleStep = 22; // Расстояние между иконками в градусах
 
-        // Инициализация колеса
         function initWheel() {
             menuItems.forEach((item, index) => {
                 const el = document.createElement('div');
                 el.className = 'nav-item';
                 el.id = `tab-${index}`;
                 
-                // Рассчитываем угол так, чтобы 0-я иконка была по центру (сверху)
+                // Угол поворота иконки относительно центра круга
                 const angle = index * angleStep;
                 el.style.transform = `rotate(${angle}deg)`;
 
@@ -165,7 +189,7 @@
                     const pfp = document.createElement('div');
                     pfp.className = 'pfp-mini';
                     pfp.id = 'nav-pfp';
-                    pfp.style.backgroundColor = '#555';
+                    pfp.style.backgroundColor = '#333';
                     if (tg.initDataUnsafe?.user?.photo_url) {
                         pfp.style.backgroundImage = `url(${tg.initDataUnsafe.user.photo_url})`;
                     }
@@ -189,16 +213,16 @@
                 return;
             }
 
-            // Деформация блоба
+            // Визуальный эффект деформации блоба
             blob.classList.remove('stretch-right', 'stretch-left');
             if (index > currentIndex) blob.classList.add('stretch-right');
             else blob.classList.add('stretch-left');
             
-            // Вращаем само колесо
+            // Крутим диск в обратную сторону, чтобы иконка стала по центру
             const rotation = -index * angleStep;
             wheel.style.transform = `rotate(${rotation}deg)`;
 
-            // Переключаем контент (для примера переключаем по id если есть)
+            // Переключение вьюх
             const views = document.querySelectorAll('.content-view');
             views.forEach(v => v.classList.remove('active'));
             if (document.getElementById(`view-${index}`)) {
@@ -208,6 +232,7 @@
             currentIndex = index;
             updateActiveState();
 
+            // Конец анимации растяжения (быстрый)
             setTimeout(() => {
                 blob.classList.remove('stretch-right', 'stretch-left');
             }, 150);
