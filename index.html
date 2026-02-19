@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Smooth Premium Nav</title>
+    <title>Jelly Premium Nav</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -11,9 +11,8 @@
             --tg-accent: var(--tg-theme-button-color, #007AFF);
             --tg-text: var(--tg-theme-text-color, #ffffff);
             --nav-bg: rgba(255, 255, 255, 0.12);
-            --island-w: 180px;
-            --island-h: 64px;
-            --expanded-w: 90vw; /* Разрастается почти на всю ширину, но не до краев */
+            --island-w: 200px;
+            --expanded-w: 90vw;
         }
 
         * {
@@ -34,19 +33,32 @@
             overflow: hidden;
         }
 
+        /* Контент */
+        .content-view {
+            position: absolute;
+            inset: 0;
+            display: none;
+            padding: 20px;
+            justify-content: center;
+            align-items: center;
+        }
+        .content-view.active { display: flex; animation: fadeIn 0.2s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
         /* --- NAVIGATION --- */
-        .nav-wrapper {
+        .nav-container {
             position: fixed;
             bottom: calc(30px + env(safe-area-inset-bottom));
             left: 50%;
             transform: translateX(-50%);
             width: var(--island-w);
-            height: var(--island-h);
+            height: 64px;
             z-index: 1000;
-            transition: width 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+            /* Мармеладный переход всей панели */
+            transition: width 0.4s cubic-bezier(0.3, 1.4, 0.4, 1);
         }
 
-        .nav-wrapper.expanded {
+        .nav-container.expanded {
             width: var(--expanded-w);
         }
 
@@ -58,6 +70,7 @@
             -webkit-backdrop-filter: blur(25px);
             border-radius: 32px;
             border: 1px solid rgba(255,255,255,0.08);
+            z-index: 1;
         }
 
         .blob {
@@ -70,35 +83,44 @@
             border-radius: 50%;
             transform: translate(-50%, -50%);
             z-index: 2;
-            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            /* Блоб перемещается быстро и плавно */
+            transition: left 0.3s cubic-bezier(0.3, 1.4, 0.4, 1), 
+                        width 0.3s ease, height 0.3s ease;
         }
 
-        .icons-container {
+        /* Контейнер иконок */
+        .icons-box {
             position: absolute;
             inset: 0;
             z-index: 3;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            gap: 20px; /* Расстояние в обычном режиме */
+            transition: gap 0.4s cubic-bezier(0.3, 1.4, 0.4, 1), 
+                        transform 0.4s cubic-bezier(0.1, 0.9, 0.2, 1);
+        }
+
+        .nav-container.expanded .icons-box {
+            gap: 60px; /* Расстояние в развернутом режиме */
         }
 
         .nav-item {
-            position: absolute;
-            width: 60px;
-            height: 60px;
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: opacity 0.3s, transform 0.3s;
+            position: relative;
+            transition: transform 0.2s ease;
         }
 
         .nav-item img, .pfp-mini {
             width: 24px;
             height: 24px;
             filter: invert(1);
-            opacity: 0.3;
-            transition: 0.3s;
+            opacity: 0.35;
+            transition: opacity 0.3s, transform 0.3s;
         }
 
         .nav-item.active img, .nav-item.active .pfp-mini {
@@ -108,36 +130,25 @@
 
         .pfp-mini { border-radius: 50%; background-size: cover; filter: grayscale(1); background-color: #444; }
         .nav-item.active .pfp-mini { filter: none; border: 1.5px solid white; }
-
-        .content-view {
-            position: absolute;
-            inset: 0;
-            display: none;
-            padding: 20px;
-            justify-content: center;
-            align-items: center;
-        }
-        .content-view.active { display: flex; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <div id="view-0" class="content-view active"><h1>Главная</h1></div>
+    <div id="view-0" class="content-view active"><h1>Дом</h1></div>
     <div id="view-1" class="content-view"><h1>Поиск</h1></div>
     <div id="view-2" class="content-view"><h1>Профиль</h1></div>
 
-    <div class="nav-wrapper" id="navWrapper">
+    <div class="nav-container" id="navMain">
         <div class="nav-bg"></div>
-        <div class="blob" id="blob"></div>
-        <div class="icons-container" id="iconBox">
-            <div class="nav-item active" id="tab-0" onclick="handleTap(0)">
+        <div class="blob" id="activeBlob"></div>
+        <div class="icons-box" id="iconsBox">
+            <div class="nav-item active" onclick="handleTap(0)">
                 <img src="https://cdn-icons-png.flaticon.com/512/6997/6997164.png">
             </div>
-            <div class="nav-item" id="tab-1" onclick="handleTap(1)">
+            <div class="nav-item" onclick="handleTap(1)">
                 <img src="https://cdn-icons-png.flaticon.com/512/8025/8025278.png">
             </div>
-            <div class="nav-item" id="tab-2" onclick="handleTap(2)">
+            <div class="nav-item" onclick="handleTap(2)">
                 <div class="pfp-mini" id="nav-pfp"></div>
             </div>
         </div>
@@ -148,61 +159,69 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        const wrapper = document.getElementById('navWrapper');
-        const iconBox = document.getElementById('iconBox');
-        const blob = document.getElementById('blob');
+        const nav = document.getElementById('navMain');
+        const box = document.getElementById('iconsBox');
+        const blob = document.getElementById('activeBlob');
         const items = document.querySelectorAll('.nav-item');
         
         let currentIndex = 0;
         let isExpanded = false;
         let pressTimer;
         let startX = 0;
-        let currentPos = 0;
-        const spacing = 80; // Расстояние между иконками в развернутом виде
+        let currentScrollX = 0;
 
         if (tg.initDataUnsafe?.user?.photo_url) {
             document.getElementById('nav-pfp').style.backgroundImage = `url(${tg.initDataUnsafe.user.photo_url})`;
         }
 
-        // Позиционирование иконок
-        function layoutIcons() {
-            items.forEach((item, i) => {
-                if (isExpanded) {
-                    item.style.left = `calc(50% + ${i * spacing}px - 30px)`;
-                    item.style.transform = 'none';
-                } else {
-                    const islandSpacing = 55;
-                    const offset = (i - 1) * islandSpacing;
-                    item.style.left = `calc(50% + ${offset}px - 30px)`;
-                    item.style.transform = 'none';
-                }
-            });
+        // Управление положением блоба
+        function updateBlobPos() {
+            if (isExpanded) {
+                blob.style.left = '50%';
+            } else {
+                const activeItem = items[currentIndex];
+                const boxRect = box.getBoundingClientRect();
+                const itemRect = activeItem.getBoundingClientRect();
+                const relativeLeft = itemRect.left - boxRect.left + (itemRect.width / 2);
+                blob.style.left = `${relativeLeft}px`;
+            }
         }
 
-        wrapper.addEventListener('touchstart', (e) => {
+        nav.addEventListener('touchstart', (e) => {
             startX = e.touches[0].clientX;
-            pressTimer = setTimeout(() => activateExpanded(), 300);
+            pressTimer = setTimeout(() => {
+                isExpanded = true;
+                nav.classList.add('expanded');
+                tg.HapticFeedback.impactOccurred('medium');
+                updateBlobPos();
+                // Фиксируем смещение, чтобы активная иконка была в центре
+                syncScroll();
+            }, 300);
         });
 
         window.addEventListener('touchmove', (e) => {
             const moveX = e.touches[0].clientX - startX;
-            
-            if (isExpanded) {
-                let targetX = moveX - (currentIndex * spacing);
-                
-                // Сопротивление на границах
-                const minX = -(items.length - 1) * spacing;
-                const maxX = 0;
-                
-                if (targetX > maxX) targetX *= 0.3;
-                else if (targetX < minX) targetX = minX + (targetX - minX) * 0.3;
 
-                currentPos = targetX;
-                iconBox.style.transform = `translateX(${currentPos}px)`;
+            if (isExpanded) {
+                // Движение МЕЖДУ иконками
+                const sensitivity = 0.8;
+                const gapWidth = 100; // Примерное расстояние между центрами в expanded
                 
-                const nearestIndex = Math.max(0, Math.min(items.length - 1, Math.round(-currentPos / spacing)));
-                if (nearestIndex !== currentIndex) {
-                    currentIndex = nearestIndex;
+                let targetX = (moveX * sensitivity) - (currentIndex * gapWidth);
+                
+                // Эластичность на краях
+                const maxX = 0;
+                const minX = -(items.length - 1) * gapWidth;
+                if (targetX > maxX) targetX *= 0.3;
+                if (targetX < minX) targetX = minX + (targetX - minX) * 0.3;
+
+                currentScrollX = targetX;
+                box.style.transform = `translateX(${currentScrollX}px)`;
+
+                // Переключение иконок под пальцем
+                const nearest = Math.max(0, Math.min(items.length - 1, Math.round(-currentScrollX / gapWidth)));
+                if (nearest !== currentIndex) {
+                    currentIndex = nearest;
                     updateActive(currentIndex);
                     tg.HapticFeedback.selectionChanged();
                 }
@@ -213,50 +232,22 @@
 
         window.addEventListener('touchend', () => {
             clearTimeout(pressTimer);
-            if (isExpanded) deactivateExpanded();
+            if (isExpanded) {
+                isExpanded = false;
+                nav.classList.remove('expanded');
+                box.style.transform = 'translateX(0)';
+                updateBlobPos();
+                tg.HapticFeedback.impactOccurred('light');
+            }
         });
 
         function handleTap(index) {
             if (!isExpanded) {
                 currentIndex = index;
                 updateActive(index);
-                moveBlob(index);
+                updateBlobPos();
                 tg.HapticFeedback.impactOccurred('light');
             }
-        }
-
-        function activateExpanded() {
-            isExpanded = true;
-            wrapper.classList.add('expanded');
-            tg.HapticFeedback.impactOccurred('medium');
-            
-            layoutIcons();
-            currentPos = -currentIndex * spacing;
-            iconBox.style.transition = 'transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1)';
-            iconBox.style.transform = `translateX(${currentPos}px)`;
-            blob.style.left = '50%';
-        }
-
-        function deactivateExpanded() {
-            isExpanded = false;
-            wrapper.classList.remove('expanded');
-            
-            iconBox.style.transition = 'transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1)';
-            iconBox.style.transform = `translateX(0)`;
-            
-            setTimeout(() => {
-                layoutIcons();
-                moveBlob(currentIndex);
-            }, 50);
-            
-            tg.HapticFeedback.impactOccurred('light');
-        }
-
-        function moveBlob(index) {
-            if (isExpanded) return;
-            const target = items[index];
-            blob.style.left = target.style.left;
-            blob.style.transform = 'translate(30px, -50%)'; // Центрируем в иконке 60px
         }
 
         function updateActive(index) {
@@ -264,9 +255,15 @@
             document.querySelectorAll('.content-view').forEach((v, i) => v.classList.toggle('active', i === index));
         }
 
+        function syncScroll() {
+            const gapWidth = 100;
+            currentScrollX = -currentIndex * gapWidth;
+            box.style.transform = `translateX(${currentScrollX}px)`;
+        }
+
+        // Инициализация
         window.onload = () => {
-            layoutIcons();
-            moveBlob(0);
+            setTimeout(updateBlobPos, 100);
         };
     </script>
 </body>
