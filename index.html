@@ -3,17 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>RATIO - Ultimate Experience</title>
+    <title>RATIO - Living UI</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --tg-bg: #000000;
             --tg-accent: #007AFF; 
+            --tg-green: #34C759;
+            --tg-red: #FF3B30;
             --tg-star: #FFD700;
-            --tg-up: #34C759;
-            --tg-down: #FF3B30;
+            --tg-text: #ffffff;
+            --tg-hint: #8e8e93;
+            --nav-bg: rgba(255, 255, 255, 0.08);
             --card-bg: #111112;
-            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-top: env(safe-area-inset-top, 20px);
             --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
 
@@ -22,31 +25,26 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Кастомный плавный скроллбар */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { 
-            background: rgba(255,255,255,0.1); 
-            border-radius: 10px; 
-        }
-
         body {
             margin: 0;
             padding: 0;
             background-color: var(--tg-bg);
-            color: #fff;
+            color: var(--tg-text);
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
             height: 100vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            user-select: none;
         }
 
-        /* --- HEADER --- */
+        /* --- HEADER С ОТСТУПОМ ПОД ЧЕЛКУ --- */
         .app-header {
             position: fixed;
-            top: 0; left: 0; right: 0;
-            padding: calc(var(--safe-top) + 15px) 20px 20px;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: calc(var(--safe-top) + 10px) 20px 20px;
             background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
@@ -57,24 +55,43 @@
             border-bottom: 0.5px solid rgba(255,255,255,0.1);
         }
 
-        .logo { font-family: 'Montserrat'; font-weight: 800; font-size: 22px; }
+        .logo {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+            font-size: 22px;
+            letter-spacing: -1px;
+        }
 
         /* --- CONTENT --- */
         .content-view {
             flex: 1;
             overflow-y: auto;
-            padding: calc(var(--safe-top) + 95px) 16px 180px;
+            padding: calc(var(--safe-top) + 90px) 16px 180px;
+            display: none;
+            /* Плавный скролл */
             scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
         }
+        
+        /* Стилизация скроллбара (тонкий и плавный) */
+        .content-view::-webkit-scrollbar { width: 4px; }
+        .content-view::-webkit-scrollbar-track { background: transparent; }
+        .content-view::-webkit-scrollbar-thumb { 
+            background: rgba(255,255,255,0.1); 
+            border-radius: 10px; 
+        }
+
+        .content-view.active { display: block; animation: fadeIn 0.4s ease; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* --- GOSSIP CARD --- */
         .gossip-card {
             background: var(--card-bg);
             border-radius: 28px;
-            padding: 16px;
+            padding: 14px;
             margin-bottom: 20px;
             border: 0.5px solid rgba(255,255,255,0.08);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
         .card-inner-header {
@@ -87,12 +104,12 @@
             margin-bottom: 18px;
         }
 
-        .gossip-tag { font-size: 12px; font-weight: 700; color: #8e8e93; }
+        .gossip-tag { font-size: 12px; font-weight: 700; color: var(--tg-hint); }
 
-        /* КРУПНЫЙ ТАЙМЕР */
+        /* УВЕЛИЧЕННЫЙ ТАЙМЕР */
         .timer-wrap {
             position: relative;
-            width: 44px;
+            width: 44px; /* Крупнее */
             height: 44px;
             display: flex;
             align-items: center;
@@ -108,122 +125,133 @@
 
         .timer-wrap circle {
             fill: none;
-            stroke-width: 4; /* Толще контур */
-            stroke-linecap: round; /* Скругленные концы */
+            stroke-width: 3.5; /* Толще контур */
+            stroke-linecap: round; /* Закругленные края прогресса */
         }
 
-        .timer-bg { stroke: rgba(255,255,255,0.1); }
+        .timer-bg { stroke: rgba(255,255,255,0.12); }
         .timer-progress {
             stroke: var(--tg-accent);
             stroke-dasharray: 100;
-            stroke-dashoffset: 100; /* Изначально пусто */
+            stroke-dashoffset: 100; /* Начинаем с пустого */
             transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .timer-label { font-size: 11px; font-weight: 800; color: var(--tg-accent); }
+        .timer-label { font-size: 11px; font-weight: 800; color: var(--tg-accent); z-index: 1; }
 
         .gossip-content {
             font-size: 16px;
             line-height: 1.5;
             text-align: justify;
-            margin: 0 8px 20px;
+            padding: 0 10px;
+            margin-bottom: 20px;
         }
 
-        /* --- FOOTER ACTIONS --- */
+        /* --- ACTIONS --- */
         .card-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding-top: 15px;
-            border-top: 0.5px solid rgba(255,255,255,0.08);
+            border-top: 0.5px solid rgba(255,255,255,0.06);
         }
 
-        .vote-controls {
+        .vote-section {
             display: flex;
             align-items: center;
-            gap: 18px;
-            background: rgba(255,255,255,0.05);
+            gap: 15px;
+            background: rgba(255,255,255,0.04);
             padding: 8px 16px;
             border-radius: 100px;
         }
 
-        .vote-btn {
-            background: none; border: none; padding: 0;
-            cursor: pointer; transition: 0.2s;
+        .v-btn {
+            background: none;
+            border: none;
+            display: flex;
+            transition: all 0.3s ease;
         }
+        .v-btn img { width: 20px; height: 20px; filter: invert(1); opacity: 0.5; transition: 0.3s; }
 
-        .vote-btn img { width: 20px; height: 20px; filter: invert(1); transition: 0.3s; }
+        /* Состояния кнопок */
+        .v-btn.up.active img { filter: invert(0) sepia(1) saturate(1000%) hue-rotate(80deg); opacity: 1; }
+        .v-btn.down.active img { filter: invert(0) sepia(1) saturate(1000%) hue-rotate(320deg); opacity: 1; }
+        .v-btn:active { transform: scale(1.4); }
 
-        /* Цвета при активации */
-        .vote-btn.up-active img { filter: invert(48%) sepia(79%) saturate(2476%) hue-rotate(86deg) brightness(118%) contrast(119%); }
-        .vote-btn.down-active img { filter: invert(27%) sepia(91%) saturate(7152%) hue-rotate(354deg) brightness(99%) contrast(114%); }
+        .vote-count { font-size: 15px; font-weight: 700; min-width: 30px; text-align: center; }
 
-        .vote-count { font-size: 15px; font-weight: 700; min-width: 25px; text-align: center; }
-
-        /* РЕСПЕКТ С ЧАСТИЦАМИ */
-        .respect-container { position: relative; }
-        
-        .star-donate-btn {
+        /* РЕСПЕКТ КНОПКА */
+        .respect-btn {
+            position: relative;
             background: rgba(255, 215, 0, 0.1);
             border: none;
-            padding: 10px 18px;
+            padding: 10px 20px;
             border-radius: 100px;
             color: var(--tg-star);
-            font-size: 14px; font-weight: 700;
-            display: flex; align-items: center; gap: 8px;
-            transition: 0.2s;
+            font-weight: 800;
+            font-size: 13px;
+            overflow: visible;
         }
 
-        .star-donate-btn:active { transform: scale(0.9); background: rgba(255, 215, 0, 0.2); }
-
-        /* ЧАСТИЦЫ */
+        /* Частицы */
         .particle {
             position: absolute;
-            width: 4px; height: 4px;
+            width: 4px;
+            height: 4px;
             background: var(--tg-star);
             border-radius: 50%;
             pointer-events: none;
             opacity: 0;
         }
 
-        /* ТВОЙ ПОДВАЛ */
+        @keyframes explode {
+            0% { transform: translate(0,0); opacity: 1; }
+            100% { transform: translate(var(--x), var(--y)); opacity: 0; }
+        }
+
+        /* --- ПОДВАЛ (ТВОЙ) --- */
         .nav-wrapper {
             position: fixed;
             bottom: calc(30px + var(--safe-bottom));
-            left: 50%; transform: translateX(-50%);
+            left: 50%;
+            transform: translateX(-50%);
             z-index: 2000;
         }
-
         .nav-island {
             position: relative;
             width: 220px; height: 60px;
-            background: rgba(255,255,255,0.08);
+            background: var(--nav-bg);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
             border-radius: 30px;
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 0 10px; border: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 10px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
-
         .blob {
             position: absolute;
             width: 44px; height: 44px;
             background: var(--tg-accent);
             border-radius: 50%;
+            z-index: 0;
             top: 50%; margin-top: -22px;
-            left: 10px; transition: left 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            left: 10px;
+            transition: left 0.5s cubic-bezier(0.19, 1, 0.22, 1);
         }
-
         .nav-item { position: relative; width: 50px; height: 100%; display: flex; align-items: center; justify-content: center; z-index: 2; }
         .nav-item img { width: 22px; height: 22px; filter: invert(1); opacity: 0.3; }
         .nav-item.active img { opacity: 1; }
+        .pfp-mini { width: 24px; height: 24px; border-radius: 50%; background-size: cover; opacity: 0.4; }
+        .active .pfp-mini { opacity: 1; border: 1px solid white; }
     </style>
 </head>
 <body>
 
     <header class="app-header">
         <div class="logo">RATIO.</div>
-        <div style="font-size: 13px; font-weight: 600; color: var(--tg-accent);">Сплетни МСК</div>
+        <div style="font-size: 13px; opacity: 0.6; font-weight: 600;">Сплетни</div>
     </header>
 
     <div id="view-0" class="content-view active">
@@ -234,40 +262,81 @@
                 <div class="timer-wrap">
                     <svg viewBox="0 0 36 36">
                         <circle class="timer-bg" cx="18" cy="18" r="16"></circle>
-                        <circle class="timer-progress" id="progress-1" cx="18" cy="18" r="16" style="stroke-dashoffset: 100;"></circle>
+                        <circle class="timer-progress" cx="18" cy="18" r="16" data-target="30"></circle>
                     </svg>
-                    <span class="timer-label">18ч</span>
+                    <span class="timer-label">14ч</span>
                 </div>
             </div>
-            <p class="gossip-content">
-                Говорят, Марина из 10-А специально завалила тест по химии, чтобы ходить на дополнительные занятия к молодому практиканту. План капкан!
-            </p>
+            <div class="card-body">
+                <p class="gossip-content">
+                    Поговаривают, что один десятиклассник решил запустить стартап прямо на уроках истории. Если это взлетит, мы все будем сидеть в этом приложении вместо подготовки к ЕГЭ.
+                </p>
+            </div>
             <div class="card-footer">
-                <div class="vote-controls">
-                    <button class="vote-btn" onclick="vote(this, 'up')">
+                <div class="vote-section">
+                    <button class="v-btn up" onclick="handleVote(this, 1)">
                         <img src="https://cdn-icons-png.flaticon.com/512/8000/8000325.png">
                     </button>
                     <span class="vote-count">0</span>
-                    <button class="vote-btn" onclick="vote(this, 'down')">
+                    <button class="v-btn down" onclick="handleVote(this, -1)">
                         <img src="https://cdn-icons-png.flaticon.com/512/8000/8000314.png">
                     </button>
                 </div>
-                <div class="respect-container">
-                    <button class="star-donate-btn" onclick="createParticles(this); payStars(5);">
-                        <span>Респект</span>
+                <button class="respect-btn" onclick="createRespectEffect(this)">
+                    Респект
+                </button>
+            </div>
+        </div>
+
+        <div class="gossip-card" id="card-2">
+            <div class="card-inner-header">
+                <span class="gossip-tag">Сплетня #1004</span>
+                <div class="timer-wrap">
+                    <svg viewBox="0 0 36 36">
+                        <circle class="timer-bg" cx="18" cy="18" r="16"></circle>
+                        <circle class="timer-progress" cx="18" cy="18" r="16" data-target="80" style="stroke: var(--tg-red);"></circle>
+                    </svg>
+                    <span class="timer-label" style="color: var(--tg-red);">2ч</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="gossip-content">
+                    Вчера в раздевалке кто-то оставил кроссовки 48-го размера. Теперь полшколы ищет этого Гулливера, чтобы позвать в баскетбольную сборную.
+                </p>
+            </div>
+            <div class="card-footer">
+                <div class="vote-section">
+                    <button class="v-btn up" onclick="handleVote(this, 1)">
+                        <img src="https://cdn-icons-png.flaticon.com/512/8000/8000325.png">
+                    </button>
+                    <span class="vote-count">-5</span>
+                    <button class="v-btn down" onclick="handleVote(this, -1)">
+                        <img src="https://cdn-icons-png.flaticon.com/512/8000/8000314.png">
                     </button>
                 </div>
+                <button class="respect-btn" onclick="createRespectEffect(this)">
+                    Респект
+                </button>
             </div>
         </div>
 
     </div>
 
+    <div id="view-1" class="content-view"></div>
+    <div id="view-2" class="content-view"></div>
+
     <div class="nav-wrapper">
         <div class="nav-island">
             <div class="blob" id="blob"></div>
-            <div class="nav-item active" onclick="switchTab(0, this)"><img src="https://cdn-icons-png.flaticon.com/512/6997/6997164.png"></div>
-            <div class="nav-item" onclick="switchTab(1, this)"><img src="https://cdn-icons-png.flaticon.com/512/8025/8025278.png"></div>
-            <div class="nav-item" onclick="switchTab(2, this)"><div style="width:24px; height:24px; background:#333; border-radius:50%"></div></div>
+            <div class="nav-item active" id="tab-0" onclick="switchTab(0)">
+                <img src="https://cdn-icons-png.flaticon.com/512/6997/6997164.png">
+            </div>
+            <div class="nav-item" id="tab-1" onclick="switchTab(1)">
+                <img src="https://cdn-icons-png.flaticon.com/512/8025/8025278.png">
+            </div>
+            <div class="nav-item" id="tab-2" onclick="switchTab(2)">
+                <div class="pfp-mini" style="background-image: url('https://api.dicebear.com/7.x/avataaars/svg?seed=Milo'); opacity: 1;"></div>
+            </div>
         </div>
     </div>
 
@@ -277,78 +346,81 @@
         tg.ready();
         tg.expand();
 
-        // 1. Анимация кругов при входе
-        window.onload = () => {
+        // 1. Плавный запуск кругов при входе
+        function initTimers() {
             setTimeout(() => {
-                document.getElementById('progress-1').style.strokeDashoffset = "30"; // Убывание до 30%
-            }, 500);
-        };
-
-        // 2. Логика голосования (Цвета и Счет)
-        function vote(btn, type) {
-            const container = btn.closest('.vote-controls');
-            const countSpan = container.querySelector('.vote-count');
-            let currentCount = parseInt(countSpan.innerText);
-
-            if (type === 'up') {
-                if (btn.classList.toggle('up-active')) {
-                    currentCount++;
-                    tg.HapticFeedback.impactOccurred('medium');
-                } else {
-                    currentCount--;
-                }
-                container.querySelector('.vote-btn:last-child').classList.remove('down-active');
-            } else {
-                if (btn.classList.toggle('down-active')) {
-                    currentCount--;
-                    tg.HapticFeedback.impactOccurred('light');
-                } else {
-                    currentCount++;
-                }
-                container.querySelector('.vote-btn:first-child').classList.remove('up-active');
-            }
-            countSpan.innerText = currentCount;
+                document.querySelectorAll('.timer-progress').forEach(circle => {
+                    const target = circle.getAttribute('data-target');
+                    circle.style.strokeDashoffset = target;
+                });
+            }, 300);
         }
 
-        // 3. Золотые частицы (Respect Effect)
-        function createParticles(btn) {
-            const container = btn.parentElement;
+        // 2. Логика голосования
+        function handleVote(btn, val) {
+            const section = btn.closest('.vote-section');
+            const countEl = section.querySelector('.vote-count');
+            const allBtns = section.querySelectorAll('.v-btn');
+            
+            let current = parseInt(countEl.innerText);
+
+            if (btn.classList.contains('active')) {
+                btn.classList.remove('active');
+                countEl.innerText = current - val;
+            } else {
+                allBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                countEl.innerText = current + val;
+                tg.HapticFeedback.impactOccurred('light');
+            }
+        }
+
+        // 3. Золотые частицы (Эффект Респекта)
+        function createRespectEffect(btn) {
+            tg.HapticFeedback.notificationOccurred('success');
+            
             for (let i = 0; i < 12; i++) {
                 const p = document.createElement('div');
                 p.className = 'particle';
-                container.appendChild(p);
-
-                const angle = Math.random() * Math.PI * 2;
-                const dist = 30 + Math.random() * 50;
-                const x = Math.cos(angle) * dist;
-                const y = Math.sin(angle) * dist;
-
-                p.animate([
-                    { transform: 'translate(0,0) scale(1)', opacity: 1 },
-                    { transform: `translate(${x}px, ${y}px) scale(0)`, opacity: 0 }
-                ], { duration: 800, easing: 'cubic-bezier(0, .9, .57, 1)' });
-
-                setTimeout(() => p.remove(), 800);
+                const x = (Math.random() - 0.5) * 100;
+                const y = (Math.random() - 0.5) * 100;
+                p.style.setProperty('--x', `${x}px`);
+                p.style.setProperty('--y', `${y}px`);
+                p.style.left = '50%';
+                p.style.top = '50%';
+                p.style.animation = `explode 0.6s ease-out forwards`;
+                btn.appendChild(p);
+                setTimeout(() => p.remove(), 600);
             }
-        }
-
-        // 4. Реальный вызов оплаты (Invoice)
-        function payStars(amount) {
-            // В продакшене тут должен быть fetch к твоему бэкенду, который вернет invoice_url
-            // const invoiceUrl = await fetch('/create-invoice', { amount });
-            // tg.openInvoice(invoiceUrl, (status) => { ... });
             
-            tg.showConfirm(`Поддержать автора на ${amount} звезд?`);
+            // Вызов реального окна ТГ (пример с суммой 5 звезд)
+            // tg.openInvoice('YOUR_INVOICE_URL'); 
         }
 
-        // 5. Навигация (твой блоб)
-        function switchTab(idx, el) {
-            const blob = document.getElementById('blob');
-            blob.style.left = `${el.offsetLeft}px`;
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            el.classList.add('active');
-            tg.HapticFeedback.impactOccurred('soft');
+        // 4. Твоя навигация
+        const blob = document.getElementById('blob');
+        let currentIndex = 0;
+
+        function switchTab(index) {
+            if (index === currentIndex) return;
+            const targetItem = document.getElementById(`tab-${index}`);
+            blob.style.left = `${targetItem.offsetLeft + (targetItem.offsetWidth / 2) - (blob.offsetWidth / 2)}px`;
+            
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            targetItem.classList.add('active');
+
+            document.querySelectorAll('.content-view').forEach(v => v.classList.remove('active'));
+            document.getElementById(`view-${index}`).classList.add('active');
+
+            currentIndex = index;
+            tg.HapticFeedback.impactOccurred('medium');
         }
+
+        window.onload = () => {
+            initTimers();
+            const initialTab = document.getElementById('tab-0');
+            blob.style.left = `${initialTab.offsetLeft + (initialTab.offsetWidth / 2) - (blob.offsetWidth / 2)}px`;
+        };
     </script>
 </body>
 </html>
