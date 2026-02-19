@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Jelly Wheel Nav</title>
+    <title>Jelly Morph Nav</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --tg-bg: var(--tg-theme-bg-color, #000000);
             --tg-accent: var(--tg-theme-button-color, #007AFF);
             --tg-text: var(--tg-theme-text-color, #ffffff);
-            --nav-bg: rgba(255, 255, 255, 0.12);
-            --island-w: 220px;
-            --island-h: 64px;
-            --wheel-r: 250px; /* Радиус изгиба */
+            --nav-bg: rgba(255, 255, 255, 0.15);
+            --island-w: 200px;
+            --island-h: 60px;
+            --expanded-w: 320px;
         }
 
         * {
@@ -43,51 +43,49 @@
             width: var(--island-w);
             height: var(--island-h);
             z-index: 1000;
-            /* Мармеладная анимация: быстрая, но с отскоком */
+            /* Мармеладный переход */
             transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        /* Состояние дуги */
-        .nav-wrapper.active-wheel {
-            width: 320px;
-            height: 120px;
-            bottom: calc(20px + env(safe-area-inset-bottom));
+        .nav-wrapper.expanded {
+            width: var(--expanded-w);
+            height: 100px;
+            bottom: calc(30px + env(safe-area-inset-bottom));
         }
 
         .nav-bg {
             position: absolute;
             inset: 0;
             background: var(--nav-bg);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border-radius: 32px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 30px;
             border: 1px solid rgba(255,255,255,0.1);
-            transition: inherit;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        .nav-wrapper.active-wheel .nav-bg {
-            border-radius: 60px 60px 40px 40px;
+        .nav-wrapper.expanded .nav-bg {
+            border-radius: 50% 50% 35px 35px / 20px 20px 35px 35px;
             transform: scaleY(1.1);
         }
 
         .blob {
             position: absolute;
-            top: 50%;
+            top: 7px;
             left: 50%;
-            width: 48px;
-            height: 48px;
+            width: 46px;
+            height: 46px;
             background: var(--tg-accent);
             border-radius: 50%;
-            transform: translate(-50%, -50%);
+            transform: translateX(-50%);
             z-index: 2;
             transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-            pointer-events: none;
         }
 
-        .nav-wrapper.active-wheel .blob {
-            top: 20px;
-            width: 56px;
-            height: 56px;
+        .nav-wrapper.expanded .blob {
+            top: -10px; /* Выпрыгивает чуть выше в дуге */
+            width: 52px;
+            height: 52px;
         }
 
         .icons-container {
@@ -97,62 +95,78 @@
             display: flex;
             justify-content: space-around;
             align-items: center;
-            padding: 0 12px;
-            transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            padding: 0 15px;
+            transition: transform 0.4s cubic-bezier(0.2, 0, 0.2, 1);
         }
 
         .nav-item {
+            position: relative;
             width: 50px;
             height: 50px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: all 0.4s ease;
+        }
+
+        .nav-wrapper.expanded .nav-item {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            margin-left: -25px;
+            /* Выгибаем по дуге */
+            transform-origin: center 250px; 
         }
 
         .nav-item img, .pfp-mini {
             width: 24px;
             height: 24px;
             filter: invert(1);
-            opacity: 0.4;
-            transition: all 0.3s ease;
+            opacity: 0.3;
+            transition: 0.3s;
         }
 
         .nav-item.active img, .nav-item.active .pfp-mini {
             opacity: 1;
-            transform: scale(1.15);
+            transform: scale(1.1);
         }
 
-        .pfp-mini { border-radius: 50%; background-size: cover; filter: grayscale(1); }
-        .nav-item.active .pfp-mini { filter: none; }
+        .pfp-mini { border-radius: 50%; background-size: cover; filter: grayscale(1); background-color: #444; }
+        .nav-item.active .pfp-mini { filter: none; border: 1px solid white; }
 
-        /* Логика изгиба иконок */
-        .nav-wrapper.active-wheel .nav-item {
+        .content-view {
             position: absolute;
-            top: 20px;
-            left: 50%;
-            margin-left: -25px;
-            /* Вращаем вокруг точки ниже панели */
-            transform-origin: center var(--wheel-r);
+            inset: 0;
+            display: none;
+            padding: 20px;
+            justify-content: center;
+            align-items: center;
         }
+        .content-view.active { display: flex; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <div class="nav-wrapper" id="navMain">
+    <div id="view-0" class="content-view active"><h1>Главная</h1></div>
+    <div id="view-1" class="content-view"><h1>Поиск</h1></div>
+    <div id="view-2" class="content-view"><h1>Профиль</h1></div>
+    <div id="view-3" class="content-view"><h1>Настройки</h1></div>
+
+    <div class="nav-wrapper" id="navWrapper">
         <div class="nav-bg"></div>
         <div class="blob" id="blob"></div>
-        <div class="icons-container" id="iconsWrap">
-            <div class="nav-item active" id="tab-0" onclick="tapTab(0)">
+        <div class="icons-container" id="iconBox">
+            <div class="nav-item active" id="tab-0" onclick="handleTap(0)">
                 <img src="https://cdn-icons-png.flaticon.com/512/6997/6997164.png">
             </div>
-            <div class="nav-item" id="tab-1" onclick="tapTab(1)">
+            <div class="nav-item" id="tab-1" onclick="handleTap(1)">
                 <img src="https://cdn-icons-png.flaticon.com/512/8025/8025278.png">
             </div>
-            <div class="nav-item" id="tab-2" onclick="tapTab(2)">
-                <div class="pfp-mini" id="nav-pfp" style="background-color: #444;"></div>
+            <div class="nav-item" id="tab-2" onclick="handleTap(2)">
+                <div class="pfp-mini" id="nav-pfp"></div>
             </div>
-            <div class="nav-item" id="tab-3" onclick="tapTab(3)">
+            <div class="nav-item" id="tab-3" onclick="handleTap(3)">
                 <img src="https://cdn-icons-png.flaticon.com/512/2040/2040504.png">
             </div>
         </div>
@@ -163,105 +177,116 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        const nav = document.getElementById('navMain');
-        const wrap = document.getElementById('iconsWrap');
+        const wrapper = document.getElementById('navWrapper');
+        const iconBox = document.getElementById('iconBox');
         const blob = document.getElementById('blob');
         const items = document.querySelectorAll('.nav-item');
         
         let currentIndex = 0;
-        let isWheel = false;
+        let isExpanded = false;
         let pressTimer;
         let startX = 0;
-        let currentRot = 0;
-        const step = 28; // Градус между иконками
+        let currentRotation = 0;
+        const angleStep = 22;
 
         if (tg.initDataUnsafe?.user?.photo_url) {
             document.getElementById('nav-pfp').style.backgroundImage = `url(${tg.initDataUnsafe.user.photo_url})`;
         }
 
-        nav.addEventListener('touchstart', (e) => {
+        // Взаимодействие
+        wrapper.addEventListener('touchstart', (e) => {
             startX = e.touches[0].clientX;
-            pressTimer = setTimeout(activate, 300);
+            pressTimer = setTimeout(() => activateJelly(), 300);
         });
 
         window.addEventListener('touchmove', (e) => {
-            if (isWheel) {
-                let diff = (e.touches[0].clientX - startX) * 0.25;
-                let targetRot = diff - (currentIndex * step);
-                
-                // Ограничители (крайние точки)
+            const moveX = e.touches[0].clientX - startX;
+            
+            if (isExpanded) {
+                // Логика вращения с сопротивлением (Elastic)
+                let targetRot = (moveX * 0.25) - (currentIndex * angleStep);
                 const maxRot = 0;
-                const minRot = -(items.length - 1) * step;
+                const minRot = -(items.length - 1) * angleStep;
+
+                if (targetRot > maxRot) {
+                    targetRot = maxRot + (targetRot - maxRot) * 0.3; // Сопротивление справа
+                } else if (targetRot < minRot) {
+                    targetRot = minRot + (targetRot - minRot) * 0.3; // Сопротивление слева
+                }
+
+                currentRotation = targetRot;
+                iconBox.style.transform = `rotate(${currentRotation}deg)`;
                 
-                // Плавная блокировка
-                if (targetRot > maxRot) targetRot = maxRot;
-                if (targetRot < minRot) targetRot = minRot;
-
-                currentRot = targetRot;
-                wrap.style.transform = `rotate(${currentRot}deg)`;
-
-                const nearest = Math.max(0, Math.min(items.length - 1, Math.round(-currentRot / step)));
-                if (nearest !== currentIndex) {
-                    currentIndex = nearest;
-                    updateItems(currentIndex);
+                // Вибрация при прохождении пунктов
+                const nearestIndex = Math.max(0, Math.min(items.length - 1, Math.round(-currentRotation / angleStep)));
+                if (nearestIndex !== currentIndex) {
+                    currentIndex = nearestIndex;
+                    updateActive(currentIndex);
                     tg.HapticFeedback.selectionChanged();
                 }
             } else {
-                if (Math.abs(e.touches[0].clientX - startX) > 10) clearTimeout(pressTimer);
+                if (Math.abs(moveX) > 10) clearTimeout(pressTimer);
             }
         });
 
         window.addEventListener('touchend', () => {
             clearTimeout(pressTimer);
-            if (isWheel) deactivate();
+            if (isExpanded) deactivateJelly();
         });
 
-        function activate() {
-            isWheel = true;
-            nav.classList.add('active-wheel');
-            tg.HapticFeedback.notificationOccurred('warning'); // Мягкий вибро-отклик
-
-            items.forEach((item, i) => {
-                item.style.transform = `rotate(${i * step}deg)`;
-            });
-
-            currentRot = -currentIndex * step;
-            wrap.style.transform = `rotate(${currentRot}deg)`;
-            blob.style.left = '50%';
-        }
-
-        function deactivate() {
-            isWheel = false;
-            nav.classList.remove('active-wheel');
-            
-            items.forEach(item => item.style.transform = `rotate(0deg)`);
-            wrap.style.transform = `rotate(0deg)`;
-            
-            setTimeout(() => {
-                if (!isWheel) repositionBlob(currentIndex);
-            }, 50);
-        }
-
-        function tapTab(i) {
-            if (!isWheel) {
-                currentIndex = i;
-                repositionBlob(i);
-                updateItems(i);
+        function handleTap(index) {
+            if (!isExpanded) {
+                currentIndex = index;
+                updateActive(index);
+                moveBlob(index);
                 tg.HapticFeedback.impactOccurred('light');
             }
         }
 
-        function repositionBlob(i) {
-            const item = items[i];
-            const x = item.offsetLeft + (item.offsetWidth / 2);
+        function activateJelly() {
+            isExpanded = true;
+            wrapper.classList.add('expanded');
+            tg.HapticFeedback.impactOccurred('medium');
+            
+            items.forEach((item, i) => {
+                item.style.transform = `rotate(${i * angleStep}deg)`;
+            });
+            
+            currentRotation = -currentIndex * angleStep;
+            iconBox.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            iconBox.style.transform = `rotate(${currentRotation}deg)`;
+            blob.style.left = '50%';
+        }
+
+        function deactivateJelly() {
+            isExpanded = false;
+            wrapper.classList.remove('expanded');
+            
+            // Плавный возврат
+            iconBox.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            iconBox.style.transform = `rotate(0deg)`;
+            
+            setTimeout(() => {
+                items.forEach(item => item.style.transform = 'none');
+                moveBlob(currentIndex);
+            }, 100);
+            
+            tg.HapticFeedback.impactOccurred('light');
+        }
+
+        function moveBlob(index) {
+            if (isExpanded) return;
+            const target = document.getElementById(`tab-${index}`);
+            const x = target.offsetLeft + (target.offsetWidth / 2);
             blob.style.left = `${x}px`;
         }
 
-        function updateItems(idx) {
-            items.forEach((item, i) => item.classList.toggle('active', i === idx));
+        function updateActive(index) {
+            items.forEach((item, i) => item.classList.toggle('active', i === index));
+            document.querySelectorAll('.content-view').forEach((v, i) => v.classList.toggle('active', i === index));
         }
 
-        window.onload = () => repositionBlob(0);
+        window.onload = () => moveBlob(0);
     </script>
 </body>
 </html>
