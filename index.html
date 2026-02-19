@@ -3,17 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>RATIO - Сплетни</title>
+    <title>RATIO - Apple Style</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --tg-bg: #000000;
             --tg-secondary-bg: #1c1c1d;
-            --tg-accent: #007AFF; /* Apple Blue */
+            --tg-accent: #007AFF; 
+            --tg-star: #f4b400;
             --tg-text: #ffffff;
             --tg-hint: #8e8e93;
-            --nav-bg: rgba(28, 28, 29, 0.7);
-            --card-bg: #121212;
+            --nav-bg: rgba(255, 255, 255, 0.08);
+            --card-bg: #111112;
             --safe-top: env(safe-area-inset-top, 0px);
             --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
@@ -28,7 +29,7 @@
             padding: 0;
             background-color: var(--tg-bg);
             color: var(--tg-text);
-            font-family: 'Montserrat', -apple-system, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -36,174 +37,208 @@
             user-select: none;
         }
 
-        /* --- FIXED HEADER WITH BLUR --- */
+        /* --- HEADER С БЛЮРОМ --- */
         .app-header {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            padding: calc(var(--safe-top) + 15px) 20px 15px;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            padding: calc(var(--safe-top) + 15px) 20px 20px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             z-index: 1000;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            /* Плавный переход прозрачности внизу */
-            mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-            -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+            border-bottom: 0.5px solid rgba(255,255,255,0.1);
         }
 
         .logo {
+            font-family: 'Montserrat', sans-serif;
             font-weight: 800;
-            font-size: 22px;
-            letter-spacing: -1px;
+            font-size: 20px;
+            letter-spacing: -0.5px;
+            color: #fff;
+        }
+
+        .city-badge {
+            font-size: 13px;
+            font-weight: 500;
             color: var(--tg-accent);
+            background: rgba(0, 122, 255, 0.1);
+            padding: 5px 12px;
+            border-radius: 100px;
         }
 
-        .city-tag {
-            font-size: 12px;
-            font-weight: 600;
-            background: var(--tg-secondary-bg);
-            padding: 6px 12px;
-            border-radius: 20px;
-            color: var(--tg-hint);
-        }
-
-        /* --- CONTENT AREA --- */
+        /* --- CONTENT SYSTEM --- */
         .content-view {
             flex: 1;
             overflow-y: auto;
-            padding: calc(var(--safe-top) + 80px) 16px 150px; /* Отступ под шапку и подвал */
+            padding: calc(var(--safe-top) + 85px) 16px 160px;
             display: none;
-            scrollbar-width: none; /* Firefox */
+            scrollbar-width: none;
         }
-        .content-view::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+        .content-view::-webkit-scrollbar { display: none; }
 
         .content-view.active {
             display: block;
-            animation: fadeIn 0.4s ease forwards;
+            animation: appleFade 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* --- GOSSIP CARD --- */
+        @keyframes appleFade {
+            from { opacity: 0; transform: scale(0.98) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* --- GOSSIP CARD (APPLE STYLE) --- */
         .gossip-card {
             background: var(--card-bg);
-            border-radius: 28px;
+            border-radius: 24px;
             padding: 12px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 16px;
+            border: 0.5px solid rgba(255,255,255,0.1);
         }
 
-        .card-header {
-            background: rgba(255,255,255,0.03);
-            border-radius: 18px;
-            padding: 10px 15px;
+        .card-inner-header {
+            background: rgba(255,255,255,0.04);
+            border-radius: 16px;
+            padding: 10px 14px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
-        .gossip-id {
-            font-size: 12px;
+        .gossip-tag {
+            font-size: 11px;
             font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
             color: var(--tg-hint);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
         }
 
-        /* Таймер в круге */
-        .timer-box {
+        /* Таймер круглый */
+        .timer-wrap {
             position: relative;
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .timer-box svg {
+        .timer-wrap svg {
             position: absolute;
             transform: rotate(-90deg);
-            width: 100%;
-            height: 100%;
+            width: 32px;
+            height: 32px;
         }
 
-        .timer-box circle {
+        .timer-wrap circle {
             fill: none;
-            stroke-width: 3;
-            stroke-linecap: round;
+            stroke-width: 2.5;
         }
 
-        .bg-circle { stroke: rgba(255,255,255,0.1); }
-        .progress-circle {
+        .timer-bg { stroke: rgba(255,255,255,0.08); }
+        .timer-progress {
             stroke: var(--tg-accent);
             stroke-dasharray: 100;
-            stroke-dashoffset: 25; /* Пример убывания */
-            transition: stroke-dashoffset 1s linear;
+            stroke-dashoffset: 40;
+            transition: 1s linear;
         }
 
-        .time-text {
-            font-size: 10px;
-            font-weight: 700;
+        .timer-label {
+            font-size: 9px;
+            font-weight: 800;
             color: var(--tg-accent);
         }
 
         .card-body {
-            padding: 0 10px 20px;
+            padding: 0 12px 16px;
+        }
+
+        .gossip-content {
+            font-size: 15px;
+            line-height: 1.45;
+            font-weight: 400;
+            color: #ffffff;
+            text-align: justify; /* Центрировано по ширине */
+            margin: 0;
+        }
+
+        /* --- ACTIONS (Стрелки и Звезды) --- */
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 6px 4px;
+            border-top: 0.5px solid rgba(255,255,255,0.06);
+        }
+
+        .vote-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: rgba(255,255,255,0.03);
+            padding: 6px 14px;
+            border-radius: 100px;
+        }
+
+        .vote-btn {
+            background: none;
+            border: none;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease;
+        }
+
+        .vote-btn:active { transform: scale(1.3); }
+
+        .vote-btn img {
+            width: 18px;
+            height: 18px;
+            filter: invert(1);
+        }
+
+        .vote-count {
+            font-size: 14px;
+            font-weight: 600;
+            min-width: 20px;
             text-align: center;
         }
 
-        .gossip-text {
-            font-size: 17px;
-            line-height: 1.5;
-            font-weight: 500;
-            color: #efefef;
-        }
-
-        .read-more {
-            color: var(--tg-accent);
-            font-size: 14px;
-            margin-top: 10px;
-            display: block;
-        }
-
-        /* --- ACTIONS --- */
-        .card-footer {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            border-top: 1px solid rgba(255,255,255,0.05);
-            padding-top: 15px;
-            padding-bottom: 5px;
-        }
-
-        .action-btn {
-            background: none;
+        /* Кнопка Звезды ТГ */
+        .star-donate-btn {
+            background: rgba(244, 180, 0, 0.1);
             border: none;
-            color: white;
+            padding: 8px 14px;
+            border-radius: 100px;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 4px;
-            opacity: 0.6;
+            gap: 6px;
             transition: all 0.2s ease;
         }
 
-        .action-btn:active {
-            transform: scale(0.9);
-            opacity: 1;
+        .star-donate-btn:active {
+            background: rgba(244, 180, 0, 0.25);
+            transform: scale(0.95);
         }
 
-        .action-btn.star {
-            color: #FFD700;
-            opacity: 1;
+        .star-icon {
+            width: 16px;
+            height: 16px;
         }
 
-        .action-btn svg { width: 22px; height: 22px; }
+        .star-label {
+            color: var(--tg-star);
+            font-size: 13px;
+            font-weight: 700;
+        }
 
-        /* --- ТВОЙ ПОДВАЛ (MODIFIED) --- */
+        /* --- ТВОЙ ПОДВАЛ (С БЛОБОМ) --- */
         .nav-wrapper {
             position: fixed;
             bottom: calc(30px + var(--safe-bottom));
@@ -214,30 +249,29 @@
 
         .nav-island {
             position: relative;
-            width: 240px; 
-            height: 64px;
+            width: 220px; 
+            height: 60px;
             background: var(--nav-bg);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
-            border-radius: 32px;
+            border-radius: 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 15px;
+            padding: 0 10px;
             border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         .blob {
             position: absolute;
-            width: 48px;
-            height: 48px;
+            width: 44px;
+            height: 44px;
             background: var(--tg-accent);
             border-radius: 50%;
             z-index: 0;
             top: 50%;
-            margin-top: -24px;
-            left: 15px;
+            margin-top: -22px;
+            left: 10px;
             transition: left 0.5s cubic-bezier(0.19, 1, 0.22, 1), transform 0.3s ease;
         }
 
@@ -252,101 +286,99 @@
         }
 
         .nav-item img {
-            width: 24px;
-            height: 24px;
+            width: 22px;
+            height: 22px;
             filter: invert(1);
-            opacity: 0.4;
+            opacity: 0.3;
             transition: 0.3s opacity;
         }
 
         .nav-item.active img { opacity: 1; }
 
         .pfp-mini {
-            width: 28px;
-            height: 28px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             background: #333;
             background-size: cover;
             opacity: 0.4;
         }
-        .active .pfp-mini { opacity: 1; border: 1.5px solid white; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .active .pfp-mini { opacity: 1; border: 1px solid white; }
     </style>
 </head>
 <body>
 
     <header class="app-header">
         <div class="logo">RATIO.</div>
-        <div class="city-tag">📍 Москва</div>
+        <div class="city-badge">Москва</div>
     </header>
 
     <div id="view-0" class="content-view active">
         
         <div class="gossip-card">
-            <div class="card-header">
-                <span class="gossip-id">Сплетня #8291</span>
-                <div class="timer-box">
-                    <svg viewBox="0 0 36 36">
-                        <circle class="bg-circle" cx="18" cy="18" r="16"></circle>
-                        <circle class="progress-circle" cx="18" cy="18" r="16" style="stroke-dashoffset: 30;"></circle>
+            <div class="card-inner-header">
+                <span class="gossip-tag">Сплетня #4201</span>
+                <div class="timer-wrap">
+                    <svg viewBox="0 0 32 32">
+                        <circle class="timer-bg" cx="16" cy="16" r="14"></circle>
+                        <circle class="timer-progress" cx="16" cy="16" r="14" style="stroke-dashoffset: 20;"></circle>
                     </svg>
-                    <span class="time-text">14ч</span>
+                    <span class="timer-label">12ч</span>
                 </div>
             </div>
             <div class="card-body">
-                <p class="gossip-text">
-                    Говорят, что завуч по воспитательной работе сама вела тот анонимный паблик с мемами про учителей... 🤫
+                <p class="gossip-content">
+                    Говорят, что на следующей неделе в столовой вместо сосисок в тесте будут давать только протеиновые батончики, потому что физрук выиграл тендер на поставку питания. Это конец эпохи.
                 </p>
-                <span class="read-more">Читать дальше</span>
             </div>
             <div class="card-footer">
-                <button class="action-btn">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
-                    <span>124</span>
-                </button>
-                <button class="action-btn star">
-                    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
-                    <span>Send Star</span>
-                </button>
-                <button class="action-btn">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    <span>3</span>
+                <div class="vote-controls">
+                    <button class="vote-btn" onclick="haptic('light')">
+                        <img src="https://cdn-icons-png.flaticon.com/512/8000/8000325.png" alt="up">
+                    </button>
+                    <span class="vote-count">128</span>
+                    <button class="vote-btn" onclick="haptic('light')">
+                        <img src="https://cdn-icons-png.flaticon.com/512/8000/8000314.png" alt="down">
+                    </button>
+                </div>
+
+                <button class="star-donate-btn" onclick="payStars(5)">
+                    <img src="https://telegram.org/img/t_logo.png" class="star-icon" alt="star">
+                    <span class="star-label">Респект</span>
                 </button>
             </div>
         </div>
 
         <div class="gossip-card">
-            <div class="card-header">
-                <span class="gossip-id">Сплетня #1042</span>
-                <div class="timer-box">
-                    <svg viewBox="0 0 36 36">
-                        <circle class="bg-circle" cx="18" cy="18" r="16"></circle>
-                        <circle class="progress-circle" cx="18" cy="18" r="16" style="stroke-dashoffset: 75;"></circle>
+            <div class="card-inner-header">
+                <span class="gossip-tag">Сплетня #3398</span>
+                <div class="timer-wrap">
+                    <svg viewBox="0 0 32 32">
+                        <circle class="timer-bg" cx="16" cy="16" r="14"></circle>
+                        <circle class="timer-progress" cx="16" cy="16" r="14" style="stroke-dashoffset: 85; stroke: #ff3b30;"></circle>
                     </svg>
-                    <span class="time-text" style="color: #ff3b30;">2ч</span>
+                    <span class="timer-label" style="color: #ff3b30;">1ч</span>
                 </div>
             </div>
             <div class="card-body">
-                <p class="gossip-text">
-                    В столовой сосиску в тесте теперь продают только тем, кто сдал 500 рублей на шторы. Это вообще легально?
+                <p class="gossip-content">
+                    Кто-то видел, как историк заходил в кабинет химии с букетом цветов и коробкой конфет. Кажется, нас ждет очень добрая контрольная в четверг... или наоборот.
                 </p>
             </div>
             <div class="card-footer">
-                <button class="action-btn">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
-                    <span>45</span>
-                </button>
-                <button class="action-btn star">
-                    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
-                    <span>Send Star</span>
-                </button>
-                <button class="action-btn">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    <span>12</span>
+                <div class="vote-controls">
+                    <button class="vote-btn" onclick="haptic('light')">
+                        <img src="https://cdn-icons-png.flaticon.com/512/8000/8000325.png" alt="up">
+                    </button>
+                    <span class="vote-count">56</span>
+                    <button class="vote-btn" onclick="haptic('light')">
+                        <img src="https://cdn-icons-png.flaticon.com/512/8000/8000314.png" alt="down">
+                    </button>
+                </div>
+
+                <button class="star-donate-btn" onclick="payStars(10)">
+                    <img src="https://telegram.org/img/t_logo.png" class="star-icon" alt="star">
+                    <span class="star-label">10 Звезд</span>
                 </button>
             </div>
         </div>
@@ -354,11 +386,15 @@
     </div>
 
     <div id="view-1" class="content-view">
-        <h2 style="text-align: center; margin-top: 50px; opacity: 0.3;">Скоро: Мнения</h2>
+        <div style="text-align: center; margin-top: 100px;">
+            <p style="opacity: 0.3; font-size: 14px;">Поиск мнений города...</p>
+        </div>
     </div>
 
     <div id="view-2" class="content-view">
-        <h2 style="text-align: center; margin-top: 50px; opacity: 0.3;">Твой профиль</h2>
+        <div style="text-align: center; margin-top: 100px;">
+            <p style="opacity: 0.3; font-size: 14px;">Твой профиль и звезды</p>
+        </div>
     </div>
 
     <div class="nav-wrapper">
@@ -371,7 +407,7 @@
                 <img src="https://cdn-icons-png.flaticon.com/512/8025/8025278.png" alt="search">
             </div>
             <div class="nav-item" id="tab-2" onclick="switchTab(2)">
-                <div class="pfp-mini" id="nav-pfp" style="background-image: url('https://api.dicebear.com/7.x/avataaars/svg?seed=Lucky'); opacity: 1;"></div>
+                <div class="pfp-mini" id="nav-pfp" style="background-image: url('https://api.dicebear.com/7.x/avataaars/svg?seed=Felix'); opacity: 1;"></div>
             </div>
         </div>
     </div>
@@ -381,8 +417,22 @@
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
-        tg.enableClosingConfirmation();
 
+        // Логика доната (Showcase)
+        function payStars(amount) {
+            tg.HapticFeedback.notificationOccurred('success');
+            
+            // В реальном боте здесь должен быть URL счета, сгенерированный BotFather/API
+            // tg.openInvoice(invoice_url, (status) => { ... });
+            
+            tg.showAlert(`Вы выбрали донат: ${amount} звезд! \n\nВ реальной версии здесь откроется окно оплаты Telegram Stars.`);
+        }
+
+        function haptic(type) {
+            if (type === 'light') tg.HapticFeedback.impactOccurred('light');
+        }
+
+        // Навигация
         const blob = document.getElementById('blob');
         const items = document.querySelectorAll('.nav-item');
         const views = document.querySelectorAll('.content-view');
@@ -405,7 +455,6 @@
             tg.HapticFeedback.impactOccurred('medium');
         }
 
-        // Центрируем блоб при загрузке
         window.onload = () => {
             const initialTab = document.getElementById('tab-0');
             const targetX = initialTab.offsetLeft + (initialTab.offsetWidth / 2) - (blob.offsetWidth / 2);
