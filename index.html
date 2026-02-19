@@ -3,17 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>RATIO - Apple Style</title>
+    <title>RATIO - Ultimate Experience</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --tg-bg: #000000;
-            --tg-secondary-bg: #1c1c1d;
             --tg-accent: #007AFF; 
-            --tg-star: #f4b400;
-            --tg-text: #ffffff;
-            --tg-hint: #8e8e93;
-            --nav-bg: rgba(255, 255, 255, 0.08);
+            --tg-star: #FFD700;
+            --tg-up: #34C759;
+            --tg-down: #FF3B30;
             --card-bg: #111112;
             --safe-top: env(safe-area-inset-top, 0px);
             --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -24,29 +22,34 @@
             -webkit-tap-highlight-color: transparent;
         }
 
+        /* Кастомный плавный скроллбар */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { 
+            background: rgba(255,255,255,0.1); 
+            border-radius: 10px; 
+        }
+
         body {
             margin: 0;
             padding: 0;
             background-color: var(--tg-bg);
-            color: var(--tg-text);
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
             height: 100vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            user-select: none;
         }
 
-        /* --- HEADER С БЛЮРОМ --- */
+        /* --- HEADER --- */
         .app-header {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
+            top: 0; left: 0; right: 0;
             padding: calc(var(--safe-top) + 15px) 20px 20px;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             z-index: 1000;
             display: flex;
             justify-content: space-between;
@@ -54,75 +57,43 @@
             border-bottom: 0.5px solid rgba(255,255,255,0.1);
         }
 
-        .logo {
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 800;
-            font-size: 20px;
-            letter-spacing: -0.5px;
-            color: #fff;
-        }
+        .logo { font-family: 'Montserrat'; font-weight: 800; font-size: 22px; }
 
-        .city-badge {
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--tg-accent);
-            background: rgba(0, 122, 255, 0.1);
-            padding: 5px 12px;
-            border-radius: 100px;
-        }
-
-        /* --- CONTENT SYSTEM --- */
+        /* --- CONTENT --- */
         .content-view {
             flex: 1;
             overflow-y: auto;
-            padding: calc(var(--safe-top) + 85px) 16px 160px;
-            display: none;
-            scrollbar-width: none;
-        }
-        .content-view::-webkit-scrollbar { display: none; }
-
-        .content-view.active {
-            display: block;
-            animation: appleFade 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: calc(var(--safe-top) + 95px) 16px 180px;
+            scroll-behavior: smooth;
         }
 
-        @keyframes appleFade {
-            from { opacity: 0; transform: scale(0.98) translateY(10px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-
-        /* --- GOSSIP CARD (APPLE STYLE) --- */
+        /* --- GOSSIP CARD --- */
         .gossip-card {
             background: var(--card-bg);
-            border-radius: 24px;
-            padding: 12px;
-            margin-bottom: 16px;
-            border: 0.5px solid rgba(255,255,255,0.1);
+            border-radius: 28px;
+            padding: 16px;
+            margin-bottom: 20px;
+            border: 0.5px solid rgba(255,255,255,0.08);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
         .card-inner-header {
-            background: rgba(255,255,255,0.04);
-            border-radius: 16px;
-            padding: 10px 14px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 12px 18px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
+            margin-bottom: 18px;
         }
 
-        .gossip-tag {
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--tg-hint);
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-        }
+        .gossip-tag { font-size: 12px; font-weight: 700; color: #8e8e93; }
 
-        /* Таймер круглый */
+        /* КРУПНЫЙ ТАЙМЕР */
         .timer-wrap {
             position: relative;
-            width: 32px;
-            height: 32px;
+            width: 44px;
+            height: 44px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -131,284 +102,172 @@
         .timer-wrap svg {
             position: absolute;
             transform: rotate(-90deg);
-            width: 32px;
-            height: 32px;
+            width: 100%;
+            height: 100%;
         }
 
         .timer-wrap circle {
             fill: none;
-            stroke-width: 2.5;
+            stroke-width: 4; /* Толще контур */
+            stroke-linecap: round; /* Скругленные концы */
         }
 
-        .timer-bg { stroke: rgba(255,255,255,0.08); }
+        .timer-bg { stroke: rgba(255,255,255,0.1); }
         .timer-progress {
             stroke: var(--tg-accent);
             stroke-dasharray: 100;
-            stroke-dashoffset: 40;
-            transition: 1s linear;
+            stroke-dashoffset: 100; /* Изначально пусто */
+            transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .timer-label {
-            font-size: 9px;
-            font-weight: 800;
-            color: var(--tg-accent);
-        }
-
-        .card-body {
-            padding: 0 12px 16px;
-        }
+        .timer-label { font-size: 11px; font-weight: 800; color: var(--tg-accent); }
 
         .gossip-content {
-            font-size: 15px;
-            line-height: 1.45;
-            font-weight: 400;
-            color: #ffffff;
-            text-align: justify; /* Центрировано по ширине */
-            margin: 0;
+            font-size: 16px;
+            line-height: 1.5;
+            text-align: justify;
+            margin: 0 8px 20px;
         }
 
-        /* --- ACTIONS (Стрелки и Звезды) --- */
+        /* --- FOOTER ACTIONS --- */
         .card-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 6px 4px;
-            border-top: 0.5px solid rgba(255,255,255,0.06);
+            padding-top: 15px;
+            border-top: 0.5px solid rgba(255,255,255,0.08);
         }
 
         .vote-controls {
             display: flex;
             align-items: center;
-            gap: 16px;
-            background: rgba(255,255,255,0.03);
-            padding: 6px 14px;
+            gap: 18px;
+            background: rgba(255,255,255,0.05);
+            padding: 8px 16px;
             border-radius: 100px;
         }
 
         .vote-btn {
-            background: none;
-            border: none;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.2s ease;
+            background: none; border: none; padding: 0;
+            cursor: pointer; transition: 0.2s;
         }
 
-        .vote-btn:active { transform: scale(1.3); }
+        .vote-btn img { width: 20px; height: 20px; filter: invert(1); transition: 0.3s; }
 
-        .vote-btn img {
-            width: 18px;
-            height: 18px;
-            filter: invert(1);
-        }
+        /* Цвета при активации */
+        .vote-btn.up-active img { filter: invert(48%) sepia(79%) saturate(2476%) hue-rotate(86deg) brightness(118%) contrast(119%); }
+        .vote-btn.down-active img { filter: invert(27%) sepia(91%) saturate(7152%) hue-rotate(354deg) brightness(99%) contrast(114%); }
 
-        .vote-count {
-            font-size: 14px;
-            font-weight: 600;
-            min-width: 20px;
-            text-align: center;
-        }
+        .vote-count { font-size: 15px; font-weight: 700; min-width: 25px; text-align: center; }
 
-        /* Кнопка Звезды ТГ */
+        /* РЕСПЕКТ С ЧАСТИЦАМИ */
+        .respect-container { position: relative; }
+        
         .star-donate-btn {
-            background: rgba(244, 180, 0, 0.1);
+            background: rgba(255, 215, 0, 0.1);
             border: none;
-            padding: 8px 14px;
+            padding: 10px 18px;
             border-radius: 100px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.2s ease;
-        }
-
-        .star-donate-btn:active {
-            background: rgba(244, 180, 0, 0.25);
-            transform: scale(0.95);
-        }
-
-        .star-icon {
-            width: 16px;
-            height: 16px;
-        }
-
-        .star-label {
             color: var(--tg-star);
-            font-size: 13px;
-            font-weight: 700;
+            font-size: 14px; font-weight: 700;
+            display: flex; align-items: center; gap: 8px;
+            transition: 0.2s;
         }
 
-        /* --- ТВОЙ ПОДВАЛ (С БЛОБОМ) --- */
+        .star-donate-btn:active { transform: scale(0.9); background: rgba(255, 215, 0, 0.2); }
+
+        /* ЧАСТИЦЫ */
+        .particle {
+            position: absolute;
+            width: 4px; height: 4px;
+            background: var(--tg-star);
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        /* ТВОЙ ПОДВАЛ */
         .nav-wrapper {
             position: fixed;
             bottom: calc(30px + var(--safe-bottom));
-            left: 50%;
-            transform: translateX(-50%);
+            left: 50%; transform: translateX(-50%);
             z-index: 2000;
         }
 
         .nav-island {
             position: relative;
-            width: 220px; 
-            height: 60px;
-            background: var(--nav-bg);
+            width: 220px; height: 60px;
+            background: rgba(255,255,255,0.08);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
             border-radius: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 10px;
-            border: 1px solid rgba(255,255,255,0.1);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 10px; border: 1px solid rgba(255,255,255,0.1);
         }
 
         .blob {
             position: absolute;
-            width: 44px;
-            height: 44px;
+            width: 44px; height: 44px;
             background: var(--tg-accent);
             border-radius: 50%;
-            z-index: 0;
-            top: 50%;
-            margin-top: -22px;
-            left: 10px;
-            transition: left 0.5s cubic-bezier(0.19, 1, 0.22, 1), transform 0.3s ease;
+            top: 50%; margin-top: -22px;
+            left: 10px; transition: left 0.5s cubic-bezier(0.19, 1, 0.22, 1);
         }
 
-        .nav-item {
-            position: relative;
-            width: 50px;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2;
-        }
-
-        .nav-item img {
-            width: 22px;
-            height: 22px;
-            filter: invert(1);
-            opacity: 0.3;
-            transition: 0.3s opacity;
-        }
-
+        .nav-item { position: relative; width: 50px; height: 100%; display: flex; align-items: center; justify-content: center; z-index: 2; }
+        .nav-item img { width: 22px; height: 22px; filter: invert(1); opacity: 0.3; }
         .nav-item.active img { opacity: 1; }
-
-        .pfp-mini {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: #333;
-            background-size: cover;
-            opacity: 0.4;
-        }
-        .active .pfp-mini { opacity: 1; border: 1px solid white; }
     </style>
 </head>
 <body>
 
     <header class="app-header">
         <div class="logo">RATIO.</div>
-        <div class="city-badge">Москва</div>
+        <div style="font-size: 13px; font-weight: 600; color: var(--tg-accent);">Сплетни МСК</div>
     </header>
 
     <div id="view-0" class="content-view active">
         
-        <div class="gossip-card">
+        <div class="gossip-card" id="card-1">
             <div class="card-inner-header">
-                <span class="gossip-tag">Сплетня #4201</span>
+                <span class="gossip-tag">Сплетня #7721</span>
                 <div class="timer-wrap">
-                    <svg viewBox="0 0 32 32">
-                        <circle class="timer-bg" cx="16" cy="16" r="14"></circle>
-                        <circle class="timer-progress" cx="16" cy="16" r="14" style="stroke-dashoffset: 20;"></circle>
+                    <svg viewBox="0 0 36 36">
+                        <circle class="timer-bg" cx="18" cy="18" r="16"></circle>
+                        <circle class="timer-progress" id="progress-1" cx="18" cy="18" r="16" style="stroke-dashoffset: 100;"></circle>
                     </svg>
-                    <span class="timer-label">12ч</span>
+                    <span class="timer-label">18ч</span>
                 </div>
             </div>
-            <div class="card-body">
-                <p class="gossip-content">
-                    Говорят, что на следующей неделе в столовой вместо сосисок в тесте будут давать только протеиновые батончики, потому что физрук выиграл тендер на поставку питания. Это конец эпохи.
-                </p>
-            </div>
+            <p class="gossip-content">
+                Говорят, Марина из 10-А специально завалила тест по химии, чтобы ходить на дополнительные занятия к молодому практиканту. План капкан!
+            </p>
             <div class="card-footer">
                 <div class="vote-controls">
-                    <button class="vote-btn" onclick="haptic('light')">
-                        <img src="https://cdn-icons-png.flaticon.com/512/8000/8000325.png" alt="up">
+                    <button class="vote-btn" onclick="vote(this, 'up')">
+                        <img src="https://cdn-icons-png.flaticon.com/512/8000/8000325.png">
                     </button>
-                    <span class="vote-count">128</span>
-                    <button class="vote-btn" onclick="haptic('light')">
-                        <img src="https://cdn-icons-png.flaticon.com/512/8000/8000314.png" alt="down">
-                    </button>
-                </div>
-
-                <button class="star-donate-btn" onclick="payStars(5)">
-                    <img src="https://telegram.org/img/t_logo.png" class="star-icon" alt="star">
-                    <span class="star-label">Респект</span>
-                </button>
-            </div>
-        </div>
-
-        <div class="gossip-card">
-            <div class="card-inner-header">
-                <span class="gossip-tag">Сплетня #3398</span>
-                <div class="timer-wrap">
-                    <svg viewBox="0 0 32 32">
-                        <circle class="timer-bg" cx="16" cy="16" r="14"></circle>
-                        <circle class="timer-progress" cx="16" cy="16" r="14" style="stroke-dashoffset: 85; stroke: #ff3b30;"></circle>
-                    </svg>
-                    <span class="timer-label" style="color: #ff3b30;">1ч</span>
-                </div>
-            </div>
-            <div class="card-body">
-                <p class="gossip-content">
-                    Кто-то видел, как историк заходил в кабинет химии с букетом цветов и коробкой конфет. Кажется, нас ждет очень добрая контрольная в четверг... или наоборот.
-                </p>
-            </div>
-            <div class="card-footer">
-                <div class="vote-controls">
-                    <button class="vote-btn" onclick="haptic('light')">
-                        <img src="https://cdn-icons-png.flaticon.com/512/8000/8000325.png" alt="up">
-                    </button>
-                    <span class="vote-count">56</span>
-                    <button class="vote-btn" onclick="haptic('light')">
-                        <img src="https://cdn-icons-png.flaticon.com/512/8000/8000314.png" alt="down">
+                    <span class="vote-count">0</span>
+                    <button class="vote-btn" onclick="vote(this, 'down')">
+                        <img src="https://cdn-icons-png.flaticon.com/512/8000/8000314.png">
                     </button>
                 </div>
-
-                <button class="star-donate-btn" onclick="payStars(10)">
-                    <img src="https://telegram.org/img/t_logo.png" class="star-icon" alt="star">
-                    <span class="star-label">10 Звезд</span>
-                </button>
+                <div class="respect-container">
+                    <button class="star-donate-btn" onclick="createParticles(this); payStars(5);">
+                        <span>Респект</span>
+                    </button>
+                </div>
             </div>
         </div>
 
-    </div>
-
-    <div id="view-1" class="content-view">
-        <div style="text-align: center; margin-top: 100px;">
-            <p style="opacity: 0.3; font-size: 14px;">Поиск мнений города...</p>
-        </div>
-    </div>
-
-    <div id="view-2" class="content-view">
-        <div style="text-align: center; margin-top: 100px;">
-            <p style="opacity: 0.3; font-size: 14px;">Твой профиль и звезды</p>
-        </div>
     </div>
 
     <div class="nav-wrapper">
         <div class="nav-island">
             <div class="blob" id="blob"></div>
-            <div class="nav-item active" id="tab-0" onclick="switchTab(0)">
-                <img src="https://cdn-icons-png.flaticon.com/512/6997/6997164.png" alt="home">
-            </div>
-            <div class="nav-item" id="tab-1" onclick="switchTab(1)">
-                <img src="https://cdn-icons-png.flaticon.com/512/8025/8025278.png" alt="search">
-            </div>
-            <div class="nav-item" id="tab-2" onclick="switchTab(2)">
-                <div class="pfp-mini" id="nav-pfp" style="background-image: url('https://api.dicebear.com/7.x/avataaars/svg?seed=Felix'); opacity: 1;"></div>
-            </div>
+            <div class="nav-item active" onclick="switchTab(0, this)"><img src="https://cdn-icons-png.flaticon.com/512/6997/6997164.png"></div>
+            <div class="nav-item" onclick="switchTab(1, this)"><img src="https://cdn-icons-png.flaticon.com/512/8025/8025278.png"></div>
+            <div class="nav-item" onclick="switchTab(2, this)"><div style="width:24px; height:24px; background:#333; border-radius:50%"></div></div>
         </div>
     </div>
 
@@ -418,48 +277,78 @@
         tg.ready();
         tg.expand();
 
-        // Логика доната (Showcase)
-        function payStars(amount) {
-            tg.HapticFeedback.notificationOccurred('success');
-            
-            // В реальном боте здесь должен быть URL счета, сгенерированный BotFather/API
-            // tg.openInvoice(invoice_url, (status) => { ... });
-            
-            tg.showAlert(`Вы выбрали донат: ${amount} звезд! \n\nВ реальной версии здесь откроется окно оплаты Telegram Stars.`);
-        }
-
-        function haptic(type) {
-            if (type === 'light') tg.HapticFeedback.impactOccurred('light');
-        }
-
-        // Навигация
-        const blob = document.getElementById('blob');
-        const items = document.querySelectorAll('.nav-item');
-        const views = document.querySelectorAll('.content-view');
-        let currentIndex = 0;
-
-        function switchTab(index) {
-            if (index === currentIndex) return;
-
-            const targetItem = document.getElementById(`tab-${index}`);
-            const targetX = targetItem.offsetLeft + (targetItem.offsetWidth / 2) - (blob.offsetWidth / 2);
-            blob.style.left = `${targetX}px`;
-            
-            items.forEach(item => item.classList.remove('active'));
-            targetItem.classList.add('active');
-
-            views.forEach(v => v.classList.remove('active'));
-            document.getElementById(`view-${index}`).classList.add('active');
-
-            currentIndex = index;
-            tg.HapticFeedback.impactOccurred('medium');
-        }
-
+        // 1. Анимация кругов при входе
         window.onload = () => {
-            const initialTab = document.getElementById('tab-0');
-            const targetX = initialTab.offsetLeft + (initialTab.offsetWidth / 2) - (blob.offsetWidth / 2);
-            blob.style.left = `${targetX}px`;
+            setTimeout(() => {
+                document.getElementById('progress-1').style.strokeDashoffset = "30"; // Убывание до 30%
+            }, 500);
         };
+
+        // 2. Логика голосования (Цвета и Счет)
+        function vote(btn, type) {
+            const container = btn.closest('.vote-controls');
+            const countSpan = container.querySelector('.vote-count');
+            let currentCount = parseInt(countSpan.innerText);
+
+            if (type === 'up') {
+                if (btn.classList.toggle('up-active')) {
+                    currentCount++;
+                    tg.HapticFeedback.impactOccurred('medium');
+                } else {
+                    currentCount--;
+                }
+                container.querySelector('.vote-btn:last-child').classList.remove('down-active');
+            } else {
+                if (btn.classList.toggle('down-active')) {
+                    currentCount--;
+                    tg.HapticFeedback.impactOccurred('light');
+                } else {
+                    currentCount++;
+                }
+                container.querySelector('.vote-btn:first-child').classList.remove('up-active');
+            }
+            countSpan.innerText = currentCount;
+        }
+
+        // 3. Золотые частицы (Respect Effect)
+        function createParticles(btn) {
+            const container = btn.parentElement;
+            for (let i = 0; i < 12; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                container.appendChild(p);
+
+                const angle = Math.random() * Math.PI * 2;
+                const dist = 30 + Math.random() * 50;
+                const x = Math.cos(angle) * dist;
+                const y = Math.sin(angle) * dist;
+
+                p.animate([
+                    { transform: 'translate(0,0) scale(1)', opacity: 1 },
+                    { transform: `translate(${x}px, ${y}px) scale(0)`, opacity: 0 }
+                ], { duration: 800, easing: 'cubic-bezier(0, .9, .57, 1)' });
+
+                setTimeout(() => p.remove(), 800);
+            }
+        }
+
+        // 4. Реальный вызов оплаты (Invoice)
+        function payStars(amount) {
+            // В продакшене тут должен быть fetch к твоему бэкенду, который вернет invoice_url
+            // const invoiceUrl = await fetch('/create-invoice', { amount });
+            // tg.openInvoice(invoiceUrl, (status) => { ... });
+            
+            tg.showConfirm(`Поддержать автора на ${amount} звезд?`);
+        }
+
+        // 5. Навигация (твой блоб)
+        function switchTab(idx, el) {
+            const blob = document.getElementById('blob');
+            blob.style.left = `${el.offsetLeft}px`;
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            tg.HapticFeedback.impactOccurred('soft');
+        }
     </script>
 </body>
 </html>
