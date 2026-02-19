@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Premium Wheel Fixed</title>
+    <title>iOS Morphing Nav</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -11,16 +11,17 @@
             --tg-accent: var(--tg-theme-button-color, #007AFF);
             --tg-text: var(--tg-theme-text-color, #ffffff);
             --nav-bg: rgba(255, 255, 255, 0.12);
-            --wheel-size: 600px;
+            --wheel-size: 700px;
+            --island-w: 220px;
+            --island-h: 60px;
         }
 
-        /* Полный запрет выделения и масштабирования через CSS */
         * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
             user-select: none;
             -webkit-user-select: none;
-            touch-action: none; /* Блокируем системные жесты, включая зум */
+            touch-action: none;
         }
 
         body {
@@ -31,8 +32,6 @@
             font-family: 'Montserrat', sans-serif;
             height: 100vh;
             overflow: hidden;
-            position: fixed; /* Дополнительная защита от скролла всей страницы */
-            width: 100%;
         }
 
         .content-view {
@@ -40,90 +39,111 @@
             inset: 0;
             padding: 20px;
             display: none;
-            padding-bottom: 180px;
-            touch-action: pan-y; /* Разрешаем вертикальный скролл только внутри контента */
+            padding-bottom: 120px;
+            touch-action: pan-y;
         }
         .content-view.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* --- WHEEL SYSTEM --- */
-        .nav-wrapper {
+        /* --- NAVIGATION SYSTEM --- */
+        .nav-container {
             position: fixed;
-            bottom: calc(-1 * (var(--wheel-size) - 150px));
+            bottom: calc(30px + env(safe-area-inset-bottom));
             left: 50%;
             transform: translateX(-50%);
-            width: var(--wheel-size);
-            height: var(--wheel-size);
+            width: var(--island-w);
+            height: var(--island-h);
             z-index: 1000;
+            transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1);
         }
 
-        .wheel-disk {
+        /* Состояние "Колесо" при удержании */
+        .nav-container.active-wheel {
+            width: var(--wheel-size);
+            height: var(--wheel-size);
+            bottom: calc(-1 * (var(--wheel-size) - 150px));
+        }
+
+        .nav-bg {
             position: absolute;
             inset: 0;
             background: var(--nav-bg);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
-            border-radius: 50%;
+            border-radius: 30px; /* Изначально как остров */
             border: 1px solid rgba(255,255,255,0.1);
-            z-index: 1;
-            transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            transition: border-radius 0.6s cubic-bezier(0.19, 1, 0.22, 1);
         }
 
-        .wheel-blob {
+        .nav-container.active-wheel .nav-bg {
+            border-radius: 50%;
+        }
+
+        .blob {
             position: absolute;
-            top: 15px;
+            top: 7px;
             left: 50%;
-            width: 56px;
-            height: 56px;
+            width: 46px;
+            height: 46px;
             background: var(--tg-accent);
             border-radius: 50%;
             transform: translateX(-50%);
             z-index: 2;
-            pointer-events: none;
-            /* Деформация удалена */
+            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
         }
 
-        .icons-container {
+        /* Скрываем блоб или меняем его позицию в режиме колеса, если нужно */
+        .nav-container.active-wheel .blob {
+            top: 15px;
+            width: 54px;
+            height: 54px;
+        }
+
+        .icons-wrapper {
             position: absolute;
             inset: 0;
             z-index: 3;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 10px;
             transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-            pointer-events: none;
         }
 
         .nav-item {
-            position: absolute;
-            top: 18px;
-            left: 50%;
+            position: relative;
             width: 50px;
             height: 50px;
-            margin-left: -25px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transform-origin: center calc(var(--wheel-size) / 2 - 18px);
-            pointer-events: auto;
+            transition: transform 0.6s cubic-bezier(0.19, 1, 0.22, 1);
         }
 
         .nav-item img, .pfp-mini {
-            width: 26px;
-            height: 26px;
+            width: 24px;
+            height: 24px;
             filter: invert(1);
-            opacity: 0.35;
+            opacity: 0.4;
             transition: all 0.3s ease;
         }
 
         .nav-item.active img, .nav-item.active .pfp-mini {
             opacity: 1;
-            transform: scale(1.2);
+            transform: scale(1.1);
         }
 
-        .pfp-mini {
-            border-radius: 50%;
-            background-size: cover;
-            filter: grayscale(1);
+        .pfp-mini { border-radius: 50%; background-size: cover; filter: grayscale(1); }
+        .nav-item.active .pfp-mini { filter: none; }
+
+        /* Геометрия иконок в режиме колеса */
+        .nav-container.active-wheel .nav-item {
+            position: absolute;
+            top: 17px;
+            left: 50%;
+            margin-left: -25px;
+            transform-origin: center calc(var(--wheel-size) / 2 - 17px);
         }
-        .nav-item.active .pfp-mini { filter: none; border: 2px solid white; }
     </style>
 </head>
 <body>
@@ -131,13 +151,21 @@
     <div id="view-0" class="content-view active"><h1>Главная</h1></div>
     <div id="view-1" class="content-view"><h1>Поиск</h1></div>
     <div id="view-2" class="content-view"><h1>Профиль</h1></div>
-    <div id="view-3" class="content-view"><h1>Настройки</h1></div>
-    <div id="view-4" class="content-view"><h1>Чат</h1></div>
 
-    <div class="nav-wrapper" id="navWrapper">
-        <div class="wheel-blob"></div>
-        <div class="wheel-disk" id="wheelDisk"></div>
-        <div class="icons-container" id="iconsContainer"></div>
+    <div class="nav-container" id="mainNav">
+        <div class="nav-bg"></div>
+        <div class="blob" id="blob"></div>
+        <div class="icons-wrapper" id="iconsWrapper">
+            <div class="nav-item active" id="tab-0" onclick="handleTap(0)">
+                <img src="https://cdn-icons-png.flaticon.com/512/6997/6997164.png">
+            </div>
+            <div class="nav-item" id="tab-1" onclick="handleTap(1)">
+                <img src="https://cdn-icons-png.flaticon.com/512/8025/8025278.png">
+            </div>
+            <div class="nav-item" id="tab-2" onclick="handleTap(2)">
+                <div class="pfp-mini" id="nav-pfp" style="background-color: #555;"></div>
+            </div>
+        </div>
     </div>
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -145,109 +173,109 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        const disk = document.getElementById('wheelDisk');
-        const iconContainer = document.getElementById('iconsContainer');
-        const wrapper = document.getElementById('navWrapper');
+        const nav = document.getElementById('mainNav');
+        const iconsWrapper = document.getElementById('iconsWrapper');
+        const blob = document.getElementById('blob');
+        const items = document.querySelectorAll('.nav-item');
         
-        const menuItems = [
-            { icon: 'https://cdn-icons-png.flaticon.com/512/6997/6997164.png', type: 'img' },
-            { icon: 'https://cdn-icons-png.flaticon.com/512/8025/8025278.png', type: 'img' },
-            { icon: '', type: 'pfp' },
-            { icon: 'https://cdn-icons-png.flaticon.com/512/2040/2040504.png', type: 'img' },
-            { icon: 'https://cdn-icons-png.flaticon.com/512/3602/3602145.png', type: 'img' }
-        ];
-
         let currentIndex = 0;
-        const angleStep = 25;
-        let currentRotation = 0;
+        let isWheelMode = false;
+        let pressTimer;
         let startX = 0;
-        let isDragging = false;
-        let startRotation = 0;
+        let currentRotation = 0;
+        const angleStep = 30;
 
-        function init() {
-            menuItems.forEach((item, index) => {
-                const el = document.createElement('div');
-                el.className = 'nav-item';
-                el.style.transform = `rotate(${index * angleStep}deg)`;
-                
-                if (item.type === 'pfp') {
-                    const pfp = document.createElement('div');
-                    pfp.className = 'pfp-mini';
-                    if (tg.initDataUnsafe?.user?.photo_url) pfp.style.backgroundImage = `url(${tg.initDataUnsafe.user.photo_url})`;
-                    el.appendChild(pfp);
-                } else {
-                    const img = document.createElement('img');
-                    img.src = item.icon;
-                    el.appendChild(img);
-                }
-
-                el.onclick = () => { if (!isDragging) switchTab(index); };
-                iconContainer.appendChild(el);
-            });
-            updateActive(0);
+        // Настройка аватара
+        if (tg.initDataUnsafe?.user?.photo_url) {
+            document.getElementById('nav-pfp').style.backgroundImage = `url(${tg.initDataUnsafe.user.photo_url})`;
         }
 
-        function switchTab(index) {
-            currentIndex = index;
-            currentRotation = -index * angleStep;
-            applyRotation();
-            updateActive(index);
-            tg.HapticFeedback.impactOccurred('medium');
-        }
+        // --- ЛОГИКА ТАПА И УДЕРЖАНИЯ ---
 
-        function applyRotation() {
-            disk.style.transform = `rotate(${currentRotation}deg)`;
-            iconContainer.style.transform = `rotate(${currentRotation}deg)`;
-        }
-
-        function updateActive(index) {
-            document.querySelectorAll('.nav-item').forEach((item, i) => {
-                item.classList.toggle('active', i === index);
-            });
-            document.querySelectorAll('.content-view').forEach((v, i) => {
-                v.classList.toggle('active', i === index);
-            });
-        }
-
-        // Логика свайпов с вибрацией за каждую иконку
-        wrapper.addEventListener('touchstart', (e) => {
+        nav.addEventListener('touchstart', (e) => {
             startX = e.touches[0].clientX;
-            startRotation = currentRotation;
-            isDragging = true;
-            disk.style.transition = 'none';
-            iconContainer.style.transition = 'none';
+            // Таймер для Long Press
+            pressTimer = setTimeout(() => {
+                activateWheelMode();
+            }, 350); 
         });
 
         window.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
-            const moveX = e.touches[0].clientX - startX;
-            const sensitivity = 0.15; 
-            currentRotation = startRotation + (moveX * sensitivity);
-            applyRotation();
-            
-            // Расчет индекса в реальном времени
-            const nearestIndex = Math.max(0, Math.min(menuItems.length - 1, Math.round(-currentRotation / angleStep)));
-            
-            // Вибрация ТОЛЬКО в момент смены активной иконки под пальцем
-            if (nearestIndex !== currentIndex) {
-                currentIndex = nearestIndex;
-                updateActive(currentIndex);
-                tg.HapticFeedback.selectionChanged(); // Та самая вибрация "щелчок"
+            if (isWheelMode) {
+                const moveX = e.touches[0].clientX - startX;
+                currentRotation = (moveX * 0.2) - (currentIndex * angleStep);
+                iconsWrapper.style.transform = `rotate(${currentRotation}deg)`;
+                
+                // Вибрация при прокрутке
+                const nearestIndex = Math.max(0, Math.min(items.length - 1, Math.round(-currentRotation / angleStep)));
+                if (nearestIndex !== currentIndex) {
+                    currentIndex = nearestIndex;
+                    updateUI(currentIndex);
+                    tg.HapticFeedback.selectionChanged();
+                }
+            } else {
+                // Если палец двинулся слишком сильно до активации — отменяем Long Press
+                if (Math.abs(e.touches[0].clientX - startX) > 10) clearTimeout(pressTimer);
             }
         });
 
         window.addEventListener('touchend', () => {
-            if (!isDragging) return;
-            isDragging = false;
-            
-            disk.style.transition = 'transform 0.5s cubic-bezier(0.19, 1, 0.22, 1)';
-            iconContainer.style.transition = 'transform 0.5s cubic-bezier(0.19, 1, 0.22, 1)';
-            
-            const nearestIndex = Math.max(0, Math.min(menuItems.length - 1, Math.round(-currentRotation / angleStep)));
-            switchTab(nearestIndex);
+            clearTimeout(pressTimer);
+            if (isWheelMode) deactivateWheelMode();
         });
 
-        init();
+        function handleTap(index) {
+            if (!isWheelMode) {
+                currentIndex = index;
+                updateUI(index);
+                moveBlob(index);
+                tg.HapticFeedback.impactOccurred('light');
+            }
+        }
+
+        function activateWheelMode() {
+            isWheelMode = true;
+            nav.classList.add('active-wheel');
+            tg.HapticFeedback.notificationOccurred('success'); // Вибрация активации
+            
+            // Расставляем иконки по кругу
+            items.forEach((item, i) => {
+                item.style.transform = `rotate(${i * angleStep}deg)`;
+            });
+            
+            currentRotation = -currentIndex * angleStep;
+            iconsWrapper.style.transform = `rotate(${currentRotation}deg)`;
+            blob.style.left = '50%'; // Центрируем блоб
+        }
+
+        function deactivateWheelMode() {
+            isWheelMode = false;
+            nav.classList.remove('active-wheel');
+            
+            // Возвращаем иконки в ряд
+            items.forEach((item) => {
+                item.style.transform = `rotate(0deg)`;
+            });
+            iconsWrapper.style.transform = `rotate(0deg)`;
+            
+            moveBlob(currentIndex);
+            updateUI(currentIndex);
+        }
+
+        function moveBlob(index) {
+            if (isWheelMode) return;
+            const targetItem = document.getElementById(`tab-${index}`);
+            const targetX = targetItem.offsetLeft + (targetItem.offsetWidth / 2);
+            blob.style.left = `${targetX}px`;
+        }
+
+        function updateUI(index) {
+            items.forEach((item, i) => item.classList.toggle('active', i === index));
+            document.querySelectorAll('.content-view').forEach((v, i) => v.classList.toggle('active', i === index));
+        }
+
+        // Начальное положение блоба
+        window.onload = () => moveBlob(0);
     </script>
 </body>
 </html>
