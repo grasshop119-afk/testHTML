@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Jelly Morph Nav</title>
+    <title>Smooth Premium Nav</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --tg-bg: var(--tg-theme-bg-color, #000000);
             --tg-accent: var(--tg-theme-button-color, #007AFF);
             --tg-text: var(--tg-theme-text-color, #ffffff);
-            --nav-bg: rgba(255, 255, 255, 0.15);
-            --island-w: 200px;
-            --island-h: 60px;
-            --expanded-w: 320px;
+            --nav-bg: rgba(255, 255, 255, 0.12);
+            --island-w: 180px;
+            --island-h: 64px;
+            --expanded-w: 90vw; /* Разрастается почти на всю ширину, но не до краев */
         }
 
         * {
@@ -37,55 +37,40 @@
         /* --- NAVIGATION --- */
         .nav-wrapper {
             position: fixed;
-            bottom: calc(40px + env(safe-area-inset-bottom));
+            bottom: calc(30px + env(safe-area-inset-bottom));
             left: 50%;
             transform: translateX(-50%);
             width: var(--island-w);
             height: var(--island-h);
             z-index: 1000;
-            /* Мармеладный переход */
-            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: width 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
         .nav-wrapper.expanded {
             width: var(--expanded-w);
-            height: 100px;
-            bottom: calc(30px + env(safe-area-inset-bottom));
         }
 
         .nav-bg {
             position: absolute;
             inset: 0;
             background: var(--nav-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 30px;
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .nav-wrapper.expanded .nav-bg {
-            border-radius: 50% 50% 35px 35px / 20px 20px 35px 35px;
-            transform: scaleY(1.1);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-radius: 32px;
+            border: 1px solid rgba(255,255,255,0.08);
         }
 
         .blob {
             position: absolute;
-            top: 7px;
+            top: 50%;
             left: 50%;
-            width: 46px;
-            height: 46px;
+            width: 48px;
+            height: 48px;
             background: var(--tg-accent);
             border-radius: 50%;
-            transform: translateX(-50%);
+            transform: translate(-50%, -50%);
             z-index: 2;
-            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .nav-wrapper.expanded .blob {
-            top: -10px; /* Выпрыгивает чуть выше в дуге */
-            width: 52px;
-            height: 52px;
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
         .icons-container {
@@ -93,29 +78,19 @@
             inset: 0;
             z-index: 3;
             display: flex;
-            justify-content: space-around;
             align-items: center;
-            padding: 0 15px;
-            transition: transform 0.4s cubic-bezier(0.2, 0, 0.2, 1);
+            justify-content: center;
+            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
         .nav-item {
-            position: relative;
-            width: 50px;
-            height: 50px;
+            position: absolute;
+            width: 60px;
+            height: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.4s ease;
-        }
-
-        .nav-wrapper.expanded .nav-item {
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            margin-left: -25px;
-            /* Выгибаем по дуге */
-            transform-origin: center 250px; 
+            transition: opacity 0.3s, transform 0.3s;
         }
 
         .nav-item img, .pfp-mini {
@@ -132,7 +107,7 @@
         }
 
         .pfp-mini { border-radius: 50%; background-size: cover; filter: grayscale(1); background-color: #444; }
-        .nav-item.active .pfp-mini { filter: none; border: 1px solid white; }
+        .nav-item.active .pfp-mini { filter: none; border: 1.5px solid white; }
 
         .content-view {
             position: absolute;
@@ -151,7 +126,6 @@
     <div id="view-0" class="content-view active"><h1>Главная</h1></div>
     <div id="view-1" class="content-view"><h1>Поиск</h1></div>
     <div id="view-2" class="content-view"><h1>Профиль</h1></div>
-    <div id="view-3" class="content-view"><h1>Настройки</h1></div>
 
     <div class="nav-wrapper" id="navWrapper">
         <div class="nav-bg"></div>
@@ -165,9 +139,6 @@
             </div>
             <div class="nav-item" id="tab-2" onclick="handleTap(2)">
                 <div class="pfp-mini" id="nav-pfp"></div>
-            </div>
-            <div class="nav-item" id="tab-3" onclick="handleTap(3)">
-                <img src="https://cdn-icons-png.flaticon.com/512/2040/2040504.png">
             </div>
         </div>
     </div>
@@ -186,39 +157,50 @@
         let isExpanded = false;
         let pressTimer;
         let startX = 0;
-        let currentRotation = 0;
-        const angleStep = 22;
+        let currentPos = 0;
+        const spacing = 80; // Расстояние между иконками в развернутом виде
 
         if (tg.initDataUnsafe?.user?.photo_url) {
             document.getElementById('nav-pfp').style.backgroundImage = `url(${tg.initDataUnsafe.user.photo_url})`;
         }
 
-        // Взаимодействие
+        // Позиционирование иконок
+        function layoutIcons() {
+            items.forEach((item, i) => {
+                if (isExpanded) {
+                    item.style.left = `calc(50% + ${i * spacing}px - 30px)`;
+                    item.style.transform = 'none';
+                } else {
+                    const islandSpacing = 55;
+                    const offset = (i - 1) * islandSpacing;
+                    item.style.left = `calc(50% + ${offset}px - 30px)`;
+                    item.style.transform = 'none';
+                }
+            });
+        }
+
         wrapper.addEventListener('touchstart', (e) => {
             startX = e.touches[0].clientX;
-            pressTimer = setTimeout(() => activateJelly(), 300);
+            pressTimer = setTimeout(() => activateExpanded(), 300);
         });
 
         window.addEventListener('touchmove', (e) => {
             const moveX = e.touches[0].clientX - startX;
             
             if (isExpanded) {
-                // Логика вращения с сопротивлением (Elastic)
-                let targetRot = (moveX * 0.25) - (currentIndex * angleStep);
-                const maxRot = 0;
-                const minRot = -(items.length - 1) * angleStep;
-
-                if (targetRot > maxRot) {
-                    targetRot = maxRot + (targetRot - maxRot) * 0.3; // Сопротивление справа
-                } else if (targetRot < minRot) {
-                    targetRot = minRot + (targetRot - minRot) * 0.3; // Сопротивление слева
-                }
-
-                currentRotation = targetRot;
-                iconBox.style.transform = `rotate(${currentRotation}deg)`;
+                let targetX = moveX - (currentIndex * spacing);
                 
-                // Вибрация при прохождении пунктов
-                const nearestIndex = Math.max(0, Math.min(items.length - 1, Math.round(-currentRotation / angleStep)));
+                // Сопротивление на границах
+                const minX = -(items.length - 1) * spacing;
+                const maxX = 0;
+                
+                if (targetX > maxX) targetX *= 0.3;
+                else if (targetX < minX) targetX = minX + (targetX - minX) * 0.3;
+
+                currentPos = targetX;
+                iconBox.style.transform = `translateX(${currentPos}px)`;
+                
+                const nearestIndex = Math.max(0, Math.min(items.length - 1, Math.round(-currentPos / spacing)));
                 if (nearestIndex !== currentIndex) {
                     currentIndex = nearestIndex;
                     updateActive(currentIndex);
@@ -231,7 +213,7 @@
 
         window.addEventListener('touchend', () => {
             clearTimeout(pressTimer);
-            if (isExpanded) deactivateJelly();
+            if (isExpanded) deactivateExpanded();
         });
 
         function handleTap(index) {
@@ -243,42 +225,38 @@
             }
         }
 
-        function activateJelly() {
+        function activateExpanded() {
             isExpanded = true;
             wrapper.classList.add('expanded');
             tg.HapticFeedback.impactOccurred('medium');
             
-            items.forEach((item, i) => {
-                item.style.transform = `rotate(${i * angleStep}deg)`;
-            });
-            
-            currentRotation = -currentIndex * angleStep;
-            iconBox.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
-            iconBox.style.transform = `rotate(${currentRotation}deg)`;
+            layoutIcons();
+            currentPos = -currentIndex * spacing;
+            iconBox.style.transition = 'transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1)';
+            iconBox.style.transform = `translateX(${currentPos}px)`;
             blob.style.left = '50%';
         }
 
-        function deactivateJelly() {
+        function deactivateExpanded() {
             isExpanded = false;
             wrapper.classList.remove('expanded');
             
-            // Плавный возврат
-            iconBox.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
-            iconBox.style.transform = `rotate(0deg)`;
+            iconBox.style.transition = 'transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1)';
+            iconBox.style.transform = `translateX(0)`;
             
             setTimeout(() => {
-                items.forEach(item => item.style.transform = 'none');
+                layoutIcons();
                 moveBlob(currentIndex);
-            }, 100);
+            }, 50);
             
             tg.HapticFeedback.impactOccurred('light');
         }
 
         function moveBlob(index) {
             if (isExpanded) return;
-            const target = document.getElementById(`tab-${index}`);
-            const x = target.offsetLeft + (target.offsetWidth / 2);
-            blob.style.left = `${x}px`;
+            const target = items[index];
+            blob.style.left = target.style.left;
+            blob.style.transform = 'translate(30px, -50%)'; // Центрируем в иконке 60px
         }
 
         function updateActive(index) {
@@ -286,7 +264,10 @@
             document.querySelectorAll('.content-view').forEach((v, i) => v.classList.toggle('active', i === index));
         }
 
-        window.onload = () => moveBlob(0);
+        window.onload = () => {
+            layoutIcons();
+            moveBlob(0);
+        };
     </script>
 </body>
 </html>
