@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Jelly Premium Nav</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&display=swap" rel="stylesheet">
+    <title>RATIO - Сплетни</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --tg-bg: var(--tg-theme-bg-color, #000000);
-            --tg-accent: var(--tg-theme-button-color, #007AFF);
-            --tg-text: var(--tg-theme-text-color, #ffffff);
-            --nav-bg: rgba(255, 255, 255, 0.12);
-            --island-w: 200px;
-            --expanded-w: 90vw;
+            --tg-bg: #000000;
+            --tg-secondary-bg: #1c1c1d;
+            --tg-accent: #007AFF; /* Apple Blue */
+            --tg-text: #ffffff;
+            --tg-hint: #8e8e93;
+            --nav-bg: rgba(28, 28, 29, 0.7);
+            --card-bg: #121212;
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
 
         * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: none;
         }
 
         body {
@@ -28,128 +28,350 @@
             padding: 0;
             background-color: var(--tg-bg);
             color: var(--tg-text);
-            font-family: 'Montserrat', sans-serif;
+            font-family: 'Montserrat', -apple-system, sans-serif;
             height: 100vh;
+            display: flex;
+            flex-direction: column;
             overflow: hidden;
+            user-select: none;
         }
 
-        /* Контент */
-        .content-view {
-            position: absolute;
-            inset: 0;
-            display: none;
-            padding: 20px;
-            justify-content: center;
-            align-items: center;
-        }
-        .content-view.active { display: flex; animation: fadeIn 0.2s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* --- NAVIGATION --- */
-        .nav-container {
+        /* --- FIXED HEADER WITH BLUR --- */
+        .app-header {
             position: fixed;
-            bottom: calc(30px + env(safe-area-inset-bottom));
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: calc(var(--safe-top) + 15px) 20px 15px;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            /* Плавный переход прозрачности внизу */
+            mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 22px;
+            letter-spacing: -1px;
+            color: var(--tg-accent);
+        }
+
+        .city-tag {
+            font-size: 12px;
+            font-weight: 600;
+            background: var(--tg-secondary-bg);
+            padding: 6px 12px;
+            border-radius: 20px;
+            color: var(--tg-hint);
+        }
+
+        /* --- CONTENT AREA --- */
+        .content-view {
+            flex: 1;
+            overflow-y: auto;
+            padding: calc(var(--safe-top) + 80px) 16px 150px; /* Отступ под шапку и подвал */
+            display: none;
+            scrollbar-width: none; /* Firefox */
+        }
+        .content-view::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+
+        .content-view.active {
+            display: block;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        /* --- GOSSIP CARD --- */
+        .gossip-card {
+            background: var(--card-bg);
+            border-radius: 28px;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .card-header {
+            background: rgba(255,255,255,0.03);
+            border-radius: 18px;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .gossip-id {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--tg-hint);
+        }
+
+        /* Таймер в круге */
+        .timer-box {
+            position: relative;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .timer-box svg {
+            position: absolute;
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+
+        .timer-box circle {
+            fill: none;
+            stroke-width: 3;
+            stroke-linecap: round;
+        }
+
+        .bg-circle { stroke: rgba(255,255,255,0.1); }
+        .progress-circle {
+            stroke: var(--tg-accent);
+            stroke-dasharray: 100;
+            stroke-dashoffset: 25; /* Пример убывания */
+            transition: stroke-dashoffset 1s linear;
+        }
+
+        .time-text {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--tg-accent);
+        }
+
+        .card-body {
+            padding: 0 10px 20px;
+            text-align: center;
+        }
+
+        .gossip-text {
+            font-size: 17px;
+            line-height: 1.5;
+            font-weight: 500;
+            color: #efefef;
+        }
+
+        .read-more {
+            color: var(--tg-accent);
+            font-size: 14px;
+            margin-top: 10px;
+            display: block;
+        }
+
+        /* --- ACTIONS --- */
+        .card-footer {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 15px;
+            padding-bottom: 5px;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            opacity: 0.6;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:active {
+            transform: scale(0.9);
+            opacity: 1;
+        }
+
+        .action-btn.star {
+            color: #FFD700;
+            opacity: 1;
+        }
+
+        .action-btn svg { width: 22px; height: 22px; }
+
+        /* --- ТВОЙ ПОДВАЛ (MODIFIED) --- */
+        .nav-wrapper {
+            position: fixed;
+            bottom: calc(30px + var(--safe-bottom));
             left: 50%;
             transform: translateX(-50%);
-            width: var(--island-w);
+            z-index: 2000;
+        }
+
+        .nav-island {
+            position: relative;
+            width: 240px; 
             height: 64px;
-            z-index: 1000;
-            /* Мармеладный переход всей панели */
-            transition: width 0.4s cubic-bezier(0.3, 1.4, 0.4, 1);
-        }
-
-        .nav-container.expanded {
-            width: var(--expanded-w);
-        }
-
-        .nav-bg {
-            position: absolute;
-            inset: 0;
             background: var(--nav-bg);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
             border-radius: 32px;
-            border: 1px solid rgba(255,255,255,0.08);
-            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         .blob {
             position: absolute;
-            top: 50%;
-            left: 50%;
             width: 48px;
             height: 48px;
             background: var(--tg-accent);
             border-radius: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 2;
-            /* Блоб перемещается быстро и плавно */
-            transition: left 0.3s cubic-bezier(0.3, 1.4, 0.4, 1), 
-                        width 0.3s ease, height 0.3s ease;
-        }
-
-        /* Контейнер иконок */
-        .icons-box {
-            position: absolute;
-            inset: 0;
-            z-index: 3;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 20px; /* Расстояние в обычном режиме */
-            transition: gap 0.4s cubic-bezier(0.3, 1.4, 0.4, 1), 
-                        transform 0.4s cubic-bezier(0.1, 0.9, 0.2, 1);
-        }
-
-        .nav-container.expanded .icons-box {
-            gap: 60px; /* Расстояние в развернутом режиме */
+            z-index: 0;
+            top: 50%;
+            margin-top: -24px;
+            left: 15px;
+            transition: left 0.5s cubic-bezier(0.19, 1, 0.22, 1), transform 0.3s ease;
         }
 
         .nav-item {
-            width: 40px;
-            height: 40px;
+            position: relative;
+            width: 50px;
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
-            transition: transform 0.2s ease;
+            z-index: 2;
         }
 
-        .nav-item img, .pfp-mini {
+        .nav-item img {
             width: 24px;
             height: 24px;
             filter: invert(1);
-            opacity: 0.35;
-            transition: opacity 0.3s, transform 0.3s;
+            opacity: 0.4;
+            transition: 0.3s opacity;
         }
 
-        .nav-item.active img, .nav-item.active .pfp-mini {
-            opacity: 1;
-            transform: scale(1.1);
-        }
+        .nav-item.active img { opacity: 1; }
 
-        .pfp-mini { border-radius: 50%; background-size: cover; filter: grayscale(1); background-color: #444; }
-        .nav-item.active .pfp-mini { filter: none; border: 1.5px solid white; }
+        .pfp-mini {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #333;
+            background-size: cover;
+            opacity: 0.4;
+        }
+        .active .pfp-mini { opacity: 1; border: 1.5px solid white; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
 
-    <div id="view-0" class="content-view active"><h1>Дом</h1></div>
-    <div id="view-1" class="content-view"><h1>Поиск</h1></div>
-    <div id="view-2" class="content-view"><h1>Профиль</h1></div>
+    <header class="app-header">
+        <div class="logo">RATIO.</div>
+        <div class="city-tag">📍 Москва</div>
+    </header>
 
-    <div class="nav-container" id="navMain">
-        <div class="nav-bg"></div>
-        <div class="blob" id="activeBlob"></div>
-        <div class="icons-box" id="iconsBox">
-            <div class="nav-item active" onclick="handleTap(0)">
-                <img src="https://cdn-icons-png.flaticon.com/512/6997/6997164.png">
+    <div id="view-0" class="content-view active">
+        
+        <div class="gossip-card">
+            <div class="card-header">
+                <span class="gossip-id">Сплетня #8291</span>
+                <div class="timer-box">
+                    <svg viewBox="0 0 36 36">
+                        <circle class="bg-circle" cx="18" cy="18" r="16"></circle>
+                        <circle class="progress-circle" cx="18" cy="18" r="16" style="stroke-dashoffset: 30;"></circle>
+                    </svg>
+                    <span class="time-text">14ч</span>
+                </div>
             </div>
-            <div class="nav-item" onclick="handleTap(1)">
-                <img src="https://cdn-icons-png.flaticon.com/512/8025/8025278.png">
+            <div class="card-body">
+                <p class="gossip-text">
+                    Говорят, что завуч по воспитательной работе сама вела тот анонимный паблик с мемами про учителей... 🤫
+                </p>
+                <span class="read-more">Читать дальше</span>
             </div>
-            <div class="nav-item" onclick="handleTap(2)">
-                <div class="pfp-mini" id="nav-pfp"></div>
+            <div class="card-footer">
+                <button class="action-btn">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                    <span>124</span>
+                </button>
+                <button class="action-btn star">
+                    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
+                    <span>Send Star</span>
+                </button>
+                <button class="action-btn">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    <span>3</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="gossip-card">
+            <div class="card-header">
+                <span class="gossip-id">Сплетня #1042</span>
+                <div class="timer-box">
+                    <svg viewBox="0 0 36 36">
+                        <circle class="bg-circle" cx="18" cy="18" r="16"></circle>
+                        <circle class="progress-circle" cx="18" cy="18" r="16" style="stroke-dashoffset: 75;"></circle>
+                    </svg>
+                    <span class="time-text" style="color: #ff3b30;">2ч</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="gossip-text">
+                    В столовой сосиску в тесте теперь продают только тем, кто сдал 500 рублей на шторы. Это вообще легально?
+                </p>
+            </div>
+            <div class="card-footer">
+                <button class="action-btn">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                    <span>45</span>
+                </button>
+                <button class="action-btn star">
+                    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
+                    <span>Send Star</span>
+                </button>
+                <button class="action-btn">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    <span>12</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="view-1" class="content-view">
+        <h2 style="text-align: center; margin-top: 50px; opacity: 0.3;">Скоро: Мнения</h2>
+    </div>
+
+    <div id="view-2" class="content-view">
+        <h2 style="text-align: center; margin-top: 50px; opacity: 0.3;">Твой профиль</h2>
+    </div>
+
+    <div class="nav-wrapper">
+        <div class="nav-island">
+            <div class="blob" id="blob"></div>
+            <div class="nav-item active" id="tab-0" onclick="switchTab(0)">
+                <img src="https://cdn-icons-png.flaticon.com/512/6997/6997164.png" alt="home">
+            </div>
+            <div class="nav-item" id="tab-1" onclick="switchTab(1)">
+                <img src="https://cdn-icons-png.flaticon.com/512/8025/8025278.png" alt="search">
+            </div>
+            <div class="nav-item" id="tab-2" onclick="switchTab(2)">
+                <div class="pfp-mini" id="nav-pfp" style="background-image: url('https://api.dicebear.com/7.x/avataaars/svg?seed=Lucky'); opacity: 1;"></div>
             </div>
         </div>
     </div>
@@ -157,113 +379,37 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         const tg = window.Telegram.WebApp;
+        tg.ready();
         tg.expand();
+        tg.enableClosingConfirmation();
 
-        const nav = document.getElementById('navMain');
-        const box = document.getElementById('iconsBox');
-        const blob = document.getElementById('activeBlob');
+        const blob = document.getElementById('blob');
         const items = document.querySelectorAll('.nav-item');
-        
+        const views = document.querySelectorAll('.content-view');
         let currentIndex = 0;
-        let isExpanded = false;
-        let pressTimer;
-        let startX = 0;
-        let currentScrollX = 0;
 
-        if (tg.initDataUnsafe?.user?.photo_url) {
-            document.getElementById('nav-pfp').style.backgroundImage = `url(${tg.initDataUnsafe.user.photo_url})`;
+        function switchTab(index) {
+            if (index === currentIndex) return;
+
+            const targetItem = document.getElementById(`tab-${index}`);
+            const targetX = targetItem.offsetLeft + (targetItem.offsetWidth / 2) - (blob.offsetWidth / 2);
+            blob.style.left = `${targetX}px`;
+            
+            items.forEach(item => item.classList.remove('active'));
+            targetItem.classList.add('active');
+
+            views.forEach(v => v.classList.remove('active'));
+            document.getElementById(`view-${index}`).classList.add('active');
+
+            currentIndex = index;
+            tg.HapticFeedback.impactOccurred('medium');
         }
 
-        // Управление положением блоба
-        function updateBlobPos() {
-            if (isExpanded) {
-                blob.style.left = '50%';
-            } else {
-                const activeItem = items[currentIndex];
-                const boxRect = box.getBoundingClientRect();
-                const itemRect = activeItem.getBoundingClientRect();
-                const relativeLeft = itemRect.left - boxRect.left + (itemRect.width / 2);
-                blob.style.left = `${relativeLeft}px`;
-            }
-        }
-
-        nav.addEventListener('touchstart', (e) => {
-            startX = e.touches[0].clientX;
-            pressTimer = setTimeout(() => {
-                isExpanded = true;
-                nav.classList.add('expanded');
-                tg.HapticFeedback.impactOccurred('medium');
-                updateBlobPos();
-                // Фиксируем смещение, чтобы активная иконка была в центре
-                syncScroll();
-            }, 300);
-        });
-
-        window.addEventListener('touchmove', (e) => {
-            const moveX = e.touches[0].clientX - startX;
-
-            if (isExpanded) {
-                // Движение МЕЖДУ иконками
-                const sensitivity = 0.8;
-                const gapWidth = 100; // Примерное расстояние между центрами в expanded
-                
-                let targetX = (moveX * sensitivity) - (currentIndex * gapWidth);
-                
-                // Эластичность на краях
-                const maxX = 0;
-                const minX = -(items.length - 1) * gapWidth;
-                if (targetX > maxX) targetX *= 0.3;
-                if (targetX < minX) targetX = minX + (targetX - minX) * 0.3;
-
-                currentScrollX = targetX;
-                box.style.transform = `translateX(${currentScrollX}px)`;
-
-                // Переключение иконок под пальцем
-                const nearest = Math.max(0, Math.min(items.length - 1, Math.round(-currentScrollX / gapWidth)));
-                if (nearest !== currentIndex) {
-                    currentIndex = nearest;
-                    updateActive(currentIndex);
-                    tg.HapticFeedback.selectionChanged();
-                }
-            } else {
-                if (Math.abs(moveX) > 10) clearTimeout(pressTimer);
-            }
-        });
-
-        window.addEventListener('touchend', () => {
-            clearTimeout(pressTimer);
-            if (isExpanded) {
-                isExpanded = false;
-                nav.classList.remove('expanded');
-                box.style.transform = 'translateX(0)';
-                updateBlobPos();
-                tg.HapticFeedback.impactOccurred('light');
-            }
-        });
-
-        function handleTap(index) {
-            if (!isExpanded) {
-                currentIndex = index;
-                updateActive(index);
-                updateBlobPos();
-                tg.HapticFeedback.impactOccurred('light');
-            }
-        }
-
-        function updateActive(index) {
-            items.forEach((item, i) => item.classList.toggle('active', i === index));
-            document.querySelectorAll('.content-view').forEach((v, i) => v.classList.toggle('active', i === index));
-        }
-
-        function syncScroll() {
-            const gapWidth = 100;
-            currentScrollX = -currentIndex * gapWidth;
-            box.style.transform = `translateX(${currentScrollX}px)`;
-        }
-
-        // Инициализация
+        // Центрируем блоб при загрузке
         window.onload = () => {
-            setTimeout(updateBlobPos, 100);
+            const initialTab = document.getElementById('tab-0');
+            const targetX = initialTab.offsetLeft + (initialTab.offsetWidth / 2) - (blob.offsetWidth / 2);
+            blob.style.left = `${targetX}px`;
         };
     </script>
 </body>
