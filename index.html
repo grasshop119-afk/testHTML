@@ -3,20 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>RATIO - Living UI</title>
+    <title>RATIO - Full Experience</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --tg-bg: #000000;
             --tg-accent: #007AFF; 
-            --tg-green: #34C759;
-            --tg-red: #FF3B30;
             --tg-star: #FFD700;
             --tg-text: #ffffff;
             --tg-hint: #8e8e93;
-            --nav-bg: rgba(255, 255, 255, 0.08);
             --card-bg: #111112;
-            --safe-top: env(safe-area-inset-top, 20px);
+            --safe-top: env(safe-area-inset-top, 0px);
             --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
 
@@ -35,19 +32,31 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            user-select: none;
         }
 
-        /* --- HEADER С ОТСТУПОМ ПОД ЧЕЛКУ --- */
+        /* --- СКРОЛЛБАР --- */
+        .content-view::-webkit-scrollbar {
+            width: 4px;
+        }
+        .content-view::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .content-view::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        /* --- HEADER (Смещен ниже для Fullscreen) --- */
         .app-header {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            padding: calc(var(--safe-top) + 10px) 20px 20px;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            /* Увеличил отступ, чтобы не мешать кнопкам ТГ */
+            padding: calc(var(--safe-top) + 35px) 20px 20px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             z-index: 1000;
             display: flex;
             justify-content: space-between;
@@ -58,59 +67,41 @@
         .logo {
             font-family: 'Montserrat', sans-serif;
             font-weight: 800;
-            font-size: 22px;
-            letter-spacing: -1px;
+            font-size: 20px;
+            color: #fff;
         }
 
-        /* --- CONTENT --- */
+        /* --- GOSSIP CARD --- */
         .content-view {
             flex: 1;
             overflow-y: auto;
-            padding: calc(var(--safe-top) + 90px) 16px 180px;
-            display: none;
-            /* Плавный скролл */
+            padding: calc(var(--safe-top) + 120px) 16px 160px;
             scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        /* Стилизация скроллбара (тонкий и плавный) */
-        .content-view::-webkit-scrollbar { width: 4px; }
-        .content-view::-webkit-scrollbar-track { background: transparent; }
-        .content-view::-webkit-scrollbar-thumb { 
-            background: rgba(255,255,255,0.1); 
-            border-radius: 10px; 
         }
 
-        .content-view.active { display: block; animation: fadeIn 0.4s ease; }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* --- GOSSIP CARD --- */
         .gossip-card {
             background: var(--card-bg);
-            border-radius: 28px;
-            padding: 14px;
-            margin-bottom: 20px;
-            border: 0.5px solid rgba(255,255,255,0.08);
+            border-radius: 24px;
+            padding: 12px;
+            margin-bottom: 16px;
+            border: 0.5px solid rgba(255,255,255,0.1);
         }
 
         .card-inner-header {
-            background: rgba(255,255,255,0.05);
-            border-radius: 20px;
-            padding: 12px 18px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 16px;
+            padding: 10px 14px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 18px;
+            margin-bottom: 16px;
         }
 
-        .gossip-tag { font-size: 12px; font-weight: 700; color: var(--tg-hint); }
-
-        /* УВЕЛИЧЕННЫЙ ТАЙМЕР */
+        /* ТАЙМЕР С АНИМАЦИЕЙ */
         .timer-wrap {
             position: relative;
-            width: 44px; /* Крупнее */
-            height: 44px;
+            width: 38px;
+            height: 38px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -119,97 +110,110 @@
         .timer-wrap svg {
             position: absolute;
             transform: rotate(-90deg);
-            width: 100%;
-            height: 100%;
+            width: 38px;
+            height: 38px;
         }
 
         .timer-wrap circle {
             fill: none;
-            stroke-width: 3.5; /* Толще контур */
-            stroke-linecap: round; /* Закругленные края прогресса */
+            stroke-width: 4; /* Толще круг */
+            stroke-linecap: round; /* Закругленные края */
         }
 
-        .timer-bg { stroke: rgba(255,255,255,0.12); }
+        .timer-bg { stroke: rgba(255,255,255,0.15); }
         .timer-progress {
             stroke: var(--tg-accent);
             stroke-dasharray: 100;
-            stroke-dashoffset: 100; /* Начинаем с пустого */
+            stroke-dashoffset: 100; /* Начало анимации */
             transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .timer-label { font-size: 11px; font-weight: 800; color: var(--tg-accent); z-index: 1; }
-
-        .gossip-content {
-            font-size: 16px;
-            line-height: 1.5;
-            text-align: justify;
-            padding: 0 10px;
-            margin-bottom: 20px;
+        .timer-label {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--tg-accent);
         }
 
-        /* --- ACTIONS --- */
+        .gossip-content {
+            font-size: 15px;
+            line-height: 1.45;
+            color: #ffffff;
+            text-align: justify;
+            margin: 0 12px 16px;
+        }
+
+        /* --- VOTING & STARS --- */
         .card-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-top: 15px;
+            padding: 12px 6px 4px;
             border-top: 0.5px solid rgba(255,255,255,0.06);
         }
 
-        .vote-section {
+        .vote-controls {
             display: flex;
             align-items: center;
-            gap: 15px;
-            background: rgba(255,255,255,0.04);
-            padding: 8px 16px;
+            gap: 16px;
+            background: rgba(255,255,255,0.03);
+            padding: 6px 14px;
             border-radius: 100px;
         }
 
-        .v-btn {
+        .vote-btn {
             background: none;
             border: none;
+            padding: 0;
             display: flex;
-            transition: all 0.3s ease;
+            transition: 0.2s;
         }
-        .v-btn img { width: 20px; height: 20px; filter: invert(1); opacity: 0.5; transition: 0.3s; }
 
-        /* Состояния кнопок */
-        .v-btn.up.active img { filter: invert(0) sepia(1) saturate(1000%) hue-rotate(80deg); opacity: 1; }
-        .v-btn.down.active img { filter: invert(0) sepia(1) saturate(1000%) hue-rotate(320deg); opacity: 1; }
-        .v-btn:active { transform: scale(1.4); }
+        .vote-btn img { width: 18px; filter: invert(1); opacity: 0.4; }
+        
+        /* Состояния нажатия */
+        .vote-btn.active-up img { filter: invert(0) sepia(1) saturate(5) hue-rotate(90deg); opacity: 1; }
+        .vote-btn.active-down img { filter: invert(0) sepia(1) saturate(5) hue-rotate(-50deg); opacity: 1; }
 
-        .vote-count { font-size: 15px; font-weight: 700; min-width: 30px; text-align: center; }
+        .vote-count { font-size: 14px; font-weight: 700; width: 30px; text-align: center; }
 
-        /* РЕСПЕКТ КНОПКА */
+        /* КНОПКА РЕСПЕКТ С БЛЕСТКАМИ */
         .respect-btn {
             position: relative;
-            background: rgba(255, 215, 0, 0.1);
+            background: rgba(255, 215, 0, 0.15);
             border: none;
-            padding: 10px 20px;
+            padding: 10px 18px;
             border-radius: 100px;
+            overflow: hidden;
+            transition: 0.2s;
+        }
+
+        .respect-label {
             color: var(--tg-star);
-            font-weight: 800;
             font-size: 13px;
-            overflow: visible;
+            font-weight: 800;
+            position: relative;
+            z-index: 2;
         }
 
-        /* Частицы */
-        .particle {
+        /* Анимация частиц */
+        .sparkle {
             position: absolute;
-            width: 4px;
-            height: 4px;
             background: var(--tg-star);
+            width: 2px;
+            height: 2px;
             border-radius: 50%;
-            pointer-events: none;
             opacity: 0;
+            pointer-events: none;
+            animation: fly 2s infinite linear;
         }
 
-        @keyframes explode {
-            0% { transform: translate(0,0); opacity: 1; }
-            100% { transform: translate(var(--x), var(--y)); opacity: 0; }
+        @keyframes fly {
+            0% { transform: translate(0, 0) scale(1); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; }
         }
 
-        /* --- ПОДВАЛ (ТВОЙ) --- */
+        /* --- ТВОЙ ПОДВАЛ --- */
         .nav-wrapper {
             position: fixed;
             bottom: calc(30px + var(--safe-bottom));
@@ -217,10 +221,11 @@
             transform: translateX(-50%);
             z-index: 2000;
         }
+
         .nav-island {
             position: relative;
             width: 220px; height: 60px;
-            background: var(--nav-bg);
+            background: rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
             border-radius: 30px;
@@ -230,100 +235,62 @@
             padding: 0 10px;
             border: 1px solid rgba(255,255,255,0.1);
         }
+
         .blob {
             position: absolute;
             width: 44px; height: 44px;
             background: var(--tg-accent);
             border-radius: 50%;
-            z-index: 0;
-            top: 50%; margin-top: -22px;
-            left: 10px;
+            z-index: 0; top: 50%; margin-top: -22px;
             transition: left 0.5s cubic-bezier(0.19, 1, 0.22, 1);
         }
+
         .nav-item { position: relative; width: 50px; height: 100%; display: flex; align-items: center; justify-content: center; z-index: 2; }
-        .nav-item img { width: 22px; height: 22px; filter: invert(1); opacity: 0.3; }
+        .nav-item img { width: 22px; filter: invert(1); opacity: 0.3; }
         .nav-item.active img { opacity: 1; }
-        .pfp-mini { width: 24px; height: 24px; border-radius: 50%; background-size: cover; opacity: 0.4; }
-        .active .pfp-mini { opacity: 1; border: 1px solid white; }
     </style>
 </head>
 <body>
 
     <header class="app-header">
         <div class="logo">RATIO.</div>
-        <div style="font-size: 13px; opacity: 0.6; font-weight: 600;">Сплетни</div>
+        <div style="font-size: 13px; font-weight: 600; color: var(--tg-accent);">Сплетни МСК</div>
     </header>
 
     <div id="view-0" class="content-view active">
         
-        <div class="gossip-card" id="card-1">
+        <div class="gossip-card" id="post-1">
             <div class="card-inner-header">
-                <span class="gossip-tag">Сплетня #7721</span>
+                <span style="font-size: 11px; font-weight: 700; opacity: 0.5;">СПЛЕТНЯ #7721</span>
                 <div class="timer-wrap">
-                    <svg viewBox="0 0 36 36">
-                        <circle class="timer-bg" cx="18" cy="18" r="16"></circle>
-                        <circle class="timer-progress" cx="18" cy="18" r="16" data-target="30"></circle>
+                    <svg viewBox="0 0 38 38">
+                        <circle class="timer-bg" cx="19" cy="19" r="17"></circle>
+                        <circle class="timer-progress" id="progress-1" cx="19" cy="19" r="17"></circle>
                     </svg>
-                    <span class="timer-label">14ч</span>
+                    <span class="timer-label">18ч</span>
                 </div>
             </div>
-            <div class="card-body">
-                <p class="gossip-content">
-                    Поговаривают, что один десятиклассник решил запустить стартап прямо на уроках истории. Если это взлетит, мы все будем сидеть в этом приложении вместо подготовки к ЕГЭ.
-                </p>
-            </div>
+            <p class="gossip-content">
+                Вчера в столовой видели, как Марина из 11-А пыталась расплатиться за сосиску лайками в ТТ. Походу проект Ratio реально нужен, чтобы такие истории не пропадали!
+            </p>
             <div class="card-footer">
-                <div class="vote-section">
-                    <button class="v-btn up" onclick="handleVote(this, 1)">
-                        <img src="https://cdn-icons-png.flaticon.com/512/8000/8000325.png">
+                <div class="vote-controls">
+                    <button class="vote-btn" onclick="vote(1, 'up')">
+                        <img src="https://cdn-icons-png.flaticon.com/512/8000/8000325.png" id="up-1">
                     </button>
-                    <span class="vote-count">0</span>
-                    <button class="v-btn down" onclick="handleVote(this, -1)">
-                        <img src="https://cdn-icons-png.flaticon.com/512/8000/8000314.png">
-                    </button>
-                </div>
-                <button class="respect-btn" onclick="createRespectEffect(this)">
-                    Респект
-                </button>
-            </div>
-        </div>
-
-        <div class="gossip-card" id="card-2">
-            <div class="card-inner-header">
-                <span class="gossip-tag">Сплетня #1004</span>
-                <div class="timer-wrap">
-                    <svg viewBox="0 0 36 36">
-                        <circle class="timer-bg" cx="18" cy="18" r="16"></circle>
-                        <circle class="timer-progress" cx="18" cy="18" r="16" data-target="80" style="stroke: var(--tg-red);"></circle>
-                    </svg>
-                    <span class="timer-label" style="color: var(--tg-red);">2ч</span>
-                </div>
-            </div>
-            <div class="card-body">
-                <p class="gossip-content">
-                    Вчера в раздевалке кто-то оставил кроссовки 48-го размера. Теперь полшколы ищет этого Гулливера, чтобы позвать в баскетбольную сборную.
-                </p>
-            </div>
-            <div class="card-footer">
-                <div class="vote-section">
-                    <button class="v-btn up" onclick="handleVote(this, 1)">
-                        <img src="https://cdn-icons-png.flaticon.com/512/8000/8000325.png">
-                    </button>
-                    <span class="vote-count">-5</span>
-                    <button class="v-btn down" onclick="handleVote(this, -1)">
-                        <img src="https://cdn-icons-png.flaticon.com/512/8000/8000314.png">
+                    <span class="vote-count" id="count-1">12</span>
+                    <button class="vote-btn" onclick="vote(1, 'down')">
+                        <img src="https://cdn-icons-png.flaticon.com/512/8000/8000314.png" id="down-1">
                     </button>
                 </div>
-                <button class="respect-btn" onclick="createRespectEffect(this)">
-                    Респект
+                <button class="respect-btn" onclick="openStars()">
+                    <span class="respect-label">Респект</span>
+                    <div class="particles"></div>
                 </button>
             </div>
         </div>
 
     </div>
-
-    <div id="view-1" class="content-view"></div>
-    <div id="view-2" class="content-view"></div>
 
     <div class="nav-wrapper">
         <div class="nav-island">
@@ -335,7 +302,7 @@
                 <img src="https://cdn-icons-png.flaticon.com/512/8025/8025278.png">
             </div>
             <div class="nav-item" id="tab-2" onclick="switchTab(2)">
-                <div class="pfp-mini" style="background-image: url('https://api.dicebear.com/7.x/avataaars/svg?seed=Milo'); opacity: 1;"></div>
+                <div style="width: 24px; height: 24px; border-radius: 50%; background: #333; border: 1px solid white;"></div>
             </div>
         </div>
     </div>
@@ -346,81 +313,67 @@
         tg.ready();
         tg.expand();
 
-        // 1. Плавный запуск кругов при входе
-        function initTimers() {
-            setTimeout(() => {
-                document.querySelectorAll('.timer-progress').forEach(circle => {
-                    const target = circle.getAttribute('data-target');
-                    circle.style.strokeDashoffset = target;
-                });
-            }, 300);
-        }
+        // 1. Анимация круга при входе
+        setTimeout(() => {
+            document.getElementById('progress-1').style.strokeDashoffset = "30"; // Значение времени
+        }, 300);
 
         // 2. Логика голосования
-        function handleVote(btn, val) {
-            const section = btn.closest('.vote-section');
-            const countEl = section.querySelector('.vote-count');
-            const allBtns = section.querySelectorAll('.v-btn');
+        let score = 12;
+        function vote(id, type) {
+            const up = document.getElementById(`up-${id}`);
+            const down = document.getElementById(`down-${id}`);
+            const counter = document.getElementById(`count-${id}`);
             
-            let current = parseInt(countEl.innerText);
-
-            if (btn.classList.contains('active')) {
-                btn.classList.remove('active');
-                countEl.innerText = current - val;
+            if(type === 'up') {
+                up.parentElement.classList.toggle('active-up');
+                down.parentElement.classList.remove('active-down');
+                score++;
+                tg.HapticFeedback.impactOccurred('medium');
             } else {
-                allBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                countEl.innerText = current + val;
+                down.parentElement.classList.toggle('active-down');
+                up.parentElement.classList.remove('active-up');
+                score--;
                 tg.HapticFeedback.impactOccurred('light');
             }
+            counter.innerText = score;
         }
 
-        // 3. Золотые частицы (Эффект Респекта)
-        function createRespectEffect(btn) {
+        // 3. Реальный донат (инвойс)
+        function openStars() {
             tg.HapticFeedback.notificationOccurred('success');
-            
-            for (let i = 0; i < 12; i++) {
-                const p = document.createElement('div');
-                p.className = 'particle';
-                const x = (Math.random() - 0.5) * 100;
-                const y = (Math.random() - 0.5) * 100;
-                p.style.setProperty('--x', `${x}px`);
-                p.style.setProperty('--y', `${y}px`);
-                p.style.left = '50%';
-                p.style.top = '50%';
-                p.style.animation = `explode 0.6s ease-out forwards`;
-                btn.appendChild(p);
-                setTimeout(() => p.remove(), 600);
-            }
-            
-            // Вызов реального окна ТГ (пример с суммой 5 звезд)
-            // tg.openInvoice('YOUR_INVOICE_URL'); 
+            // В продакшене: tg.openInvoice(url_from_bot);
+            tg.showAlert("Здесь открывается нативный платеж Telegram Stars ⭐");
         }
 
-        // 4. Твоя навигация
-        const blob = document.getElementById('blob');
-        let currentIndex = 0;
+        // 4. Генерация блесток
+        function createSparkles() {
+            const containers = document.querySelectorAll('.particles');
+            containers.forEach(container => {
+                for(let i=0; i<8; i++) {
+                    const s = document.createElement('div');
+                    s.className = 'sparkle';
+                    s.style.setProperty('--x', (Math.random()*40 - 20) + 'px');
+                    s.style.setProperty('--y', (Math.random()*40 - 20) + 'px');
+                    s.style.left = Math.random()*100 + '%';
+                    s.style.top = Math.random()*100 + '%';
+                    s.style.animationDelay = Math.random()*2 + 's';
+                    container.appendChild(s);
+                }
+            });
+        }
+        createSparkles();
 
+        // 5. Навигация (твой код)
         function switchTab(index) {
-            if (index === currentIndex) return;
+            const blob = document.getElementById('blob');
             const targetItem = document.getElementById(`tab-${index}`);
-            blob.style.left = `${targetItem.offsetLeft + (targetItem.offsetWidth / 2) - (blob.offsetWidth / 2)}px`;
-            
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            targetItem.classList.add('active');
-
-            document.querySelectorAll('.content-view').forEach(v => v.classList.remove('active'));
-            document.getElementById(`view-${index}`).classList.add('active');
-
-            currentIndex = index;
+            blob.style.left = (targetItem.offsetLeft + 3) + "px";
             tg.HapticFeedback.impactOccurred('medium');
+            // ... логика переключения вью
         }
 
-        window.onload = () => {
-            initTimers();
-            const initialTab = document.getElementById('tab-0');
-            blob.style.left = `${initialTab.offsetLeft + (initialTab.offsetWidth / 2) - (blob.offsetWidth / 2)}px`;
-        };
+        window.onload = () => switchTab(0);
     </script>
 </body>
 </html>
