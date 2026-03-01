@@ -2,131 +2,114 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Research Mini App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Research App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
-            --tg-blue: #0088cc;
-            --blue: #007AFF;
-            --blue-light: #E5F1FF;
-            --bg: #FFFFFF;
-            --gray: #F2F2F7;
-            --text: #1D1D1F;
-            --text-sec: #86868B;
+            /* Используем переменные TG с фолбеком на стандарт Apple */
+            --bg-color: var(--tg-theme-bg-color, #ffffff);
+            --sec-bg-color: var(--tg-theme-secondary-bg-color, #f2f2f7);
+            --text-color: var(--tg-theme-text-color, #1d1d1f);
+            --hint-color: var(--tg-theme-hint-color, #8e8e93);
+            --link-color: var(--tg-theme-link-color, #007aff);
+            --button-color: var(--tg-theme-button-color, #007aff);
+            --button-text: var(--tg-theme-button-text-color, #ffffff);
         }
 
-        /* Адаптация под темную тему Telegram */
-        body.tg-theme {
-            background-color: var(--tg-theme-bg-color, #fff);
-            color: var(--tg-theme-text-color, #000);
-        }
-
-        * { box-sizing: border-box; -webkit-font-smoothing: antialiased; touch-action: manipulation; }
+        * { box-sizing: border-box; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
+            background-color: var(--bg-color);
+            color: var(--text-color);
             margin: 0;
+            padding: calc(15px + env(safe-area-inset-top)) 20px 40px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            padding: 20px;
-            overflow-x: hidden;
         }
 
         /* Навигация */
-        .nav-grid { display: flex; gap: 6px; margin-bottom: 25px; }
+        .nav-grid { display: flex; gap: 8px; margin-bottom: 30px; }
         .dot {
-            width: 38px; height: 38px;
-            background: var(--gray);
-            border-radius: 11px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 13px; font-weight: 700;
-            color: var(--text-sec);
-            cursor: not-allowed;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            opacity: 0.4;
+            width: 38px; height: 38px; background: var(--sec-bg-color);
+            border-radius: 11px; display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 700; color: var(--hint-color);
+            cursor: pointer; transition: all 0.2s; opacity: 0.5;
         }
-        .dot.active { background: var(--blue); color: white; transform: scale(1.1); opacity: 1; cursor: pointer; }
-        .dot.done { background: var(--blue-light); color: var(--blue); opacity: 1; cursor: pointer; }
-        .dot.skipped { background: white; border: 1.5px solid var(--blue-light); color: var(--blue-light); opacity: 1; cursor: pointer; }
+        .dot.active { background: var(--link-color); color: #fff; opacity: 1; }
+        .dot.done { background: var(--link-color); opacity: 0.3; color: #fff; }
+        .dot.skipped { border: 2px solid var(--sec-bg-color); background: transparent; opacity: 1; }
 
-        .container { width: 100%; max-width: 380px; }
-        .screen { display: none; animation: fadeIn 0.4s ease; }
+        .container { width: 100%; max-width: 400px; }
+        .screen { display: none; }
         .screen.active { display: block; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        h1 { font-size: 24px; font-weight: 800; margin: 0 0 8px 0; letter-spacing: -0.5px; }
+        p.subtitle { color: var(--hint-color); font-size: 15px; margin-bottom: 25px; line-height: 1.4; }
+        .section-tag { font-size: 12px; text-transform: uppercase; color: var(--link-color); font-weight: 700; margin-bottom: 6px; letter-spacing: 0.5px; }
 
-        h1 { font-size: 22px; font-weight: 800; margin-bottom: 10px; letter-spacing: -0.5px; }
-        p.subtitle { color: var(--text-sec); font-size: 15px; margin-bottom: 25px; line-height: 1.5; }
-        .section-tag { font-size: 11px; text-transform: uppercase; color: var(--blue); font-weight: 700; margin-bottom: 8px; letter-spacing: 1px; }
-
-        /* Плашки ответов */
+        /* Кастомные чекбоксы и радио */
         .opt {
-            background: var(--gray); padding: 16px; border-radius: 15px; margin-bottom: 10px;
-            cursor: pointer; display: flex; align-items: center; font-weight: 600; font-size: 15px;
-            transition: transform 0.1s;
+            background: var(--sec-bg-color); padding: 16px; border-radius: 14px; margin-bottom: 10px;
+            cursor: pointer; display: flex; align-items: center; font-weight: 600; font-size: 16px;
+            position: relative;
         }
-        .opt:active { transform: scale(0.97); }
-        .opt input { margin-right: 12px; accent-color: var(--blue); transform: scale(1.2); }
+        .opt input { display: none; }
+        .check-ui {
+            width: 22px; height: 22px; border: 2px solid var(--hint-color);
+            border-radius: 6px; margin-right: 12px; position: relative;
+            transition: all 0.2s ease; display: flex; align-items: center; justify-content: center;
+        }
+        .opt input[type="radio"] + .check-ui { border-radius: 50%; }
         
+        .opt input:checked + .check-ui {
+            background: var(--link-color); border-color: var(--link-color);
+        }
+        .check-ui::after {
+            content: ''; width: 12px; height: 7px; border: 2px solid white;
+            border-top: none; border-right: none; transform: rotate(-45deg) scale(0);
+            transition: all 0.2s cubic-bezier(0.12, 0.4, 0.29, 1.46);
+            opacity: 0;
+        }
+        .opt input:checked + .check-ui::after { transform: rotate(-45deg) scale(1); opacity: 1; }
+
         .btn-main {
-            background: var(--blue); color: white; border: none; width: 100%; padding: 16px;
-            border-radius: 15px; font-size: 16px; font-weight: 700; margin-top: 15px; cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 122, 255, 0.2);
+            background: var(--button-color); color: var(--button-text); border: none;
+            width: 100%; padding: 18px; border-radius: 16px; font-size: 17px;
+            font-weight: 700; margin-top: 20px; cursor: pointer;
         }
 
         .btn-sec {
-            background: none; color: var(--blue); border: 2px solid var(--blue); width: 100%;
-            padding: 14px; border-radius: 15px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 10px;
+            background: transparent; color: var(--link-color); border: none;
+            width: 100%; padding: 12px; font-size: 15px; font-weight: 600; cursor: pointer;
         }
 
-        /* Мармеладный Лоадер */
+        /* Мармеладный лоадер */
         #loader {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.9); display: none; justify-content: center; align-items: center; 
-            z-index: 1000; backdrop-filter: blur(5px);
+            background: var(--bg-color); display: none; justify-content: center; align-items: center; z-index: 1000;
         }
-        .morph-svg { 
-            width: 80px; height: 80px; 
-            animation: jelly 2s infinite alternate;
-        }
-        @keyframes jelly {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.08); }
-        }
-        .circle { 
-            fill: none; stroke: var(--blue); stroke-width: 4; 
-            stroke-dasharray: 150; stroke-dashoffset: 150; 
-            transform-origin: center;
-        }
-        .check { 
-            fill: none; stroke: var(--blue); stroke-width: 4; 
-            stroke-dasharray: 40; stroke-dashoffset: 40; stroke-linecap: round; 
-        }
-
-        .loading .circle { 
-            animation: spin 1s linear infinite, drawCircle 1.2s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards; 
-        }
+        .morph-svg { width: 80px; height: 80px; }
+        .circle { fill: none; stroke: var(--link-color); stroke-width: 4; stroke-dasharray: 150; stroke-dashoffset: 150; transform-origin: center; }
+        .check { fill: none; stroke: var(--link-color); stroke-width: 4; stroke-dasharray: 40; stroke-dashoffset: 40; stroke-linecap: round; }
+        .loading .circle { animation: spin 1s linear infinite, drawCircle 1.2s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards; }
         .success .circle { stroke-dashoffset: 0; transition: 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .success .check { animation: drawCheck 0.6s 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.5) forwards; }
-
         @keyframes spin { 100% { transform: rotate(360deg); } }
         @keyframes drawCircle { to { stroke-dashoffset: 40; } }
         @keyframes drawCheck { to { stroke-dashoffset: 0; } }
 
-        input[type="text"] { 
-            width: 100%; padding: 16px; border: 2px solid var(--gray); border-radius: 15px; 
-            font-size: 16px; outline: none; transition: border-color 0.3s;
+        input[type="text"] {
+            width: 100%; padding: 16px; border-radius: 14px; background: var(--sec-bg-color);
+            border: 2px solid transparent; color: var(--text-color); font-size: 16px; outline: none;
         }
-        input[type="text"]:focus { border-color: var(--blue); }
     </style>
 </head>
-<body>
+<body class="tg-theme">
 
     <div id="loader">
         <svg class="morph-svg" id="svg" viewBox="0 0 50 50">
@@ -136,87 +119,90 @@
     </div>
 
     <div class="nav-grid" id="nav">
-        <div class="dot active" id="d0" onclick="safeJump(0)">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 4h2v5l-1-1-1 1V4z"/></svg>
-        </div>
-        <div class="dot" id="d1">1</div>
-        <div class="dot" id="d2">2</div>
-        <div class="dot" id="d3">3</div>
-        <div class="dot" id="d4">4</div>
+        <div class="dot active" onclick="jump(0)">🏠</div>
+        <div class="dot" id="d1">1</div><div class="dot" id="d2">2</div>
+        <div class="dot" id="d3">3</div><div class="dot" id="d4">4</div>
         <div class="dot" id="d5">5</div>
     </div>
 
-    <div class="container" id="main-content">
+    <div class="container">
         <div class="screen active" id="s0">
             <div class="section-tag">Введение</div>
-            <h1>Англицизмы в моей жизни</h1>
-            <p class="subtitle">Привет! Я провожу исследование для 10 класса. Этот опрос поможет понять, как современные заимствования влияют на нашу речь. Твой вклад очень важен!</p>
-            <button class="btn-main" id="start-btn" onclick="jump(1)">Начать опрос</button>
+            <h1>Англицизмы сегодня</h1>
+            <p class="subtitle">Привет! Я из 10 класса. Помоги мне исследовать, как английские слова проникают в наш язык. Опрос займет 1 минуту.</p>
+            <button class="btn-main" onclick="jump(1)">Начать</button>
         </div>
 
         <div class="screen" id="s1">
-            <div class="section-tag">Блок 1: Портрет</div>
+            <div class="section-tag">Портрет</div>
             <h1>Уровень владения</h1>
-            <p class="subtitle">Как ты оцениваешь свои знания английского языка?</p>
-            <div class="opt" onclick="sel(this, 1)"><input type="radio" name="q1"> Не знаю совсем / Учу через силу</div>
-            <div class="opt" onclick="sel(this, 1)"><input type="radio" name="q1"> Средний (понимаю мемы, читаю тексты)</div>
-            <div class="opt" onclick="sel(this, 1)"><input type="radio" name="q1"> Продвинутый (смотрю в оригинале)</div>
+            <p class="subtitle">Как ты оцениваешь свой английский?</p>
+            <label class="opt" onclick="sel(1)"><input type="radio" name="q1"><div class="check-ui"></div> Не знаю / Школьная база</label>
+            <label class="opt" onclick="sel(1)"><input type="radio" name="q1"><div class="check-ui"></div> Средний (понимаю мемы)</label>
+            <label class="opt" onclick="sel(1)"><input type="radio" name="q1"><div class="check-ui"></div> Продвинутый (свободно)</label>
             <button class="btn-main" id="b1" onclick="confirmStep(2)">Пропустить</button>
         </div>
 
         <div class="screen" id="s2">
-            <div class="section-tag">Блок 2: Отношение</div>
-            <h1>Частота речи</h1>
-            <p class="subtitle">Как часто ты используешь англицизмы в жизни?</p>
-            <div class="opt" onclick="sel(this, 2)"><input type="radio" name="q2"> Постоянно (через предложение)</div>
-            <div class="opt" onclick="sel(this, 2)"><input type="radio" name="q2"> Часто (в переписке или с друзьями)</div>
-            <div class="opt" onclick="sel(this, 2)"><input type="radio" name="q2"> Редко (только если нет аналога)</div>
+            <div class="section-tag">Частота</div>
+            <h1>Как часто?</h1>
+            <p class="subtitle">Используешь англицизмы в речи?</p>
+            <label class="opt" onclick="sel(2)"><input type="radio" name="q2"><div class="check-ui"></div> Постоянно (рил, вайб, юзать)</label>
+            <label class="opt" onclick="sel(2)"><input type="radio" name="q2"><div class="check-ui"></div> Часто (в соцсетях)</label>
+            <label class="opt" onclick="sel(2)"><input type="radio" name="q2"><div class="check-ui"></div> Редко</label>
             <button class="btn-main" id="b2" onclick="confirmStep(3)">Пропустить</button>
         </div>
 
         <div class="screen" id="s3">
-            <div class="section-tag">Блок 3: Сферы</div>
-            <h1>Где ты их юзаешь?</h1>
-            <p class="subtitle">В каких сферах ты чаще всего используешь такие слова?</p>
-            <div class="opt" onclick="toggleCheck(this, 3)"><input type="checkbox"> Игры и IT (стрим, скилл)</div>
-            <div class="opt" onclick="toggleCheck(this, 3)"><input type="checkbox"> Соцсети (кринж, рофл)</div>
-            <div class="opt" onclick="toggleCheck(this, 3)"><input type="checkbox"> Учеба и хобби (дедлайн, туториал)</div>
+            <div class="section-tag">Сферы</div>
+            <h1>Где чаще всего?</h1>
+            <p class="subtitle">Выбери несколько вариантов:</p>
+            <label class="opt" onclick="check(3)"><input type="checkbox"><div class="check-ui"></div> Игры и IT (скилл, лаг)</label>
+            <label class="opt" onclick="check(3)"><input type="checkbox"><div class="check-ui"></div> Соцсети (рофл, кринж)</label>
+            <label class="opt" onclick="check(3)"><input type="checkbox"><div class="check-ui"></div> Учеба (дедлайн, туториал)</label>
             <button class="btn-main" id="b3" onclick="confirmStep(4)">Пропустить</button>
         </div>
 
         <div class="screen" id="s4">
-            <div class="section-tag">Блок 4: Осознанность</div>
-            <h1>Взрослые и сленг</h1>
-            <p class="subtitle">Как ты относишься к использованию сленга учителями или родителями?</p>
-            <div class="opt" onclick="sel(this, 4)"><input type="radio" name="q4"> Положительно, это сближает</div>
-            <div class="opt" onclick="sel(this, 4)"><input type="radio" name="q4"> Нейтрально</div>
-            <div class="opt" onclick="sel(this, 4)"><input type="radio" name="q4"> Отрицательно, это неестественно</div>
+            <div class="section-tag">Осознанность</div>
+            <h1>Знаешь значение?</h1>
+            <p class="subtitle">Понимаешь ли ты точно слова: Газлайтинг, Триггер, Мэтч?</p>
+            <label class="opt" onclick="sel(4)"><input type="radio" name="q4"><div class="check-ui"></div> Да, знаю все</label>
+            <label class="opt" onclick="sel(4)"><input type="radio" name="q4"><div class="check-ui"></div> Знаю примерно</label>
+            <label class="opt" onclick="sel(4)"><input type="radio" name="q4"><div class="check-ui"></div> Просто повторяю</label>
             <button class="btn-main" id="b4" onclick="confirmStep(5)">Пропустить</button>
         </div>
 
         <div class="screen" id="s5">
-            <div class="section-tag">Финал</div>
+            <div class="section-tag">Топ слов</div>
             <h1>Твой топ-3</h1>
-            <p class="subtitle">Впиши 3 англицизма, которые ты используешь чаще всего:</p>
-            <input type="text" id="w-in" oninput="checkInput(5)" placeholder="вайб, рил, дедлайн...">
-            <button class="btn-main" id="b5" onclick="finish()">Завершить</button>
+            <p class="subtitle">Впиши самые частые слова через запятую:</p>
+            <input type="text" id="w-in" oninput="checkInput(5)" placeholder="Например: вайб, го, засейвить">
+            <button class="btn-main" id="b5" onclick="preFinish()">Завершить</button>
+        </div>
+
+        <div class="screen" id="rev">
+            <h1>Почти готово!</h1>
+            <p class="subtitle">Ты пропустил несколько вопросов. Хочешь заполнить их для точности статистики?</p>
+            <div id="miss-list"></div>
+            <button class="btn-main" onclick="finish()">Все равно завершить</button>
         </div>
 
         <div class="screen" id="final">
-            <h1>Готово!</h1>
-            <p class="subtitle">Спасибо! Твои ответы помогут мне сделать крутую статистику для проекта. Удачи!</p>
-            <button class="btn-sec" onclick="fireConfetti()">Еще блестки! ✨</button>
+            <h1>Спасибо!</h1>
+            <p class="subtitle">Твои ответы очень помогут моему проекту. Удачи!</p>
+            <button class="btn-main" onclick="fireConfetti()">Еще блестки! ✨</button>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Развернуть на весь экран
+        tg.expand();
+        tg.headerColor = 'secondary_bg_color';
 
         let ans = { 1:false, 2:false, 3:false, 4:false, 5:false };
         let confirmed = { 1:false, 2:false, 3:false, 4:false, 5:false };
         let maxStep = 0;
-        let isStarted = false;
 
         function confirmStep(nextS) {
             let cur = nextS - 1;
@@ -225,38 +211,28 @@
                 const s = document.getElementById('svg');
                 l.style.display = 'flex';
                 s.classList.remove('success'); s.classList.add('loading');
-                
-                // Вибрация Telegram при подтверждении
                 tg.HapticFeedback.notificationOccurred('success');
-
                 setTimeout(() => {
                     s.classList.remove('loading'); s.classList.add('success');
                     confirmed[cur] = true;
-                    setTimeout(() => {
-                        l.style.display = 'none'; jump(nextS);
-                    }, 800);
-                }, 1200); // Фиксированное мармеладное время
+                    setTimeout(() => { l.style.display = 'none'; jump(nextS); }, 800);
+                }, 1200);
             } else jump(nextS);
         }
 
         function jump(step) {
-            isStarted = true;
-            if (step > maxStep) maxStep = step;
-            
+            if (step > maxStep && step !== 'final' && step !== 'rev') maxStep = step;
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            const target = (step === 'final') ? 'final' : 's' + step;
-            document.getElementById(target).classList.add('active');
-            
-            if(step === 0 && isStarted) document.getElementById('start-btn').style.display = 'none';
+            const id = (step === 'final') ? 'final' : (step === 'rev' ? 'rev' : 's' + step);
+            document.getElementById(id).classList.add('active');
             updateDots(step);
         }
 
         function updateDots(step) {
             document.querySelectorAll('.dot').forEach((d, i) => {
                 d.classList.remove('active', 'done', 'skipped');
-                d.onclick = null; d.style.cursor = 'not-allowed';
                 if (i <= maxStep) {
-                    d.style.cursor = 'pointer';
+                    d.style.opacity = "1";
                     d.onclick = () => { tg.HapticFeedback.selectionChanged(); jump(i); };
                     if (i < step && i > 0) {
                         if(ans[i]) d.classList.add('done');
@@ -267,27 +243,40 @@
             });
         }
 
-        function safeJump(i) { if (i <= maxStep) jump(i); }
-
-        function sel(el, q) {
+        function sel(q) {
             tg.HapticFeedback.impactOccurred('light');
-            el.querySelector('input').checked = true;
             ans[q] = true;
             document.getElementById('b' + q).innerText = "Далее";
         }
 
-        function toggleCheck(el, q) {
+        function check(q) {
             tg.HapticFeedback.impactOccurred('light');
-            const inp = el.querySelector('input');
-            inp.checked = !inp.checked;
-            const has = document.getElementById('s' + q).querySelectorAll('input:checked').length > 0;
-            ans[q] = has;
-            document.getElementById('b' + q).innerText = has ? "Далее" : "Пропустить";
+            setTimeout(() => {
+                const has = document.getElementById('s' + q).querySelectorAll('input:checked').length > 0;
+                ans[q] = has;
+                document.getElementById('b' + q).innerText = has ? "Далее" : "Пропустить";
+            }, 50);
         }
 
         function checkInput(q) {
             ans[q] = document.getElementById('w-in').value.trim().length > 2;
             document.getElementById('b' + q).innerText = ans[q] ? "Завершить" : "Пропустить";
+        }
+
+        function preFinish() {
+            let missed = [];
+            for(let i=1; i<=5; i++) if(!ans[i]) missed.push(i);
+            if(missed.length > 0) {
+                const list = document.getElementById('miss-list');
+                list.innerHTML = "";
+                missed.forEach(n => {
+                    let d = document.createElement('div');
+                    d.className = "opt"; d.innerText = "Вернуться к вопросу " + n;
+                    d.onclick = () => jump(n);
+                    list.appendChild(d);
+                });
+                jump('rev');
+            } else finish();
         }
 
         function finish() {
@@ -297,10 +286,9 @@
         }
 
         function fireConfetti() {
-            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#0088cc', '#ffffff', '#007AFF'] });
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#0088cc', '#ffffff'] });
         }
 
-        // Сообщаем Telegram, что приложение готово
         tg.ready();
     </script>
 </body>
