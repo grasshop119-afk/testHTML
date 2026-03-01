@@ -19,7 +19,7 @@
         * { box-sizing: border-box; -webkit-font-smoothing: antialiased; touch-action: manipulation; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg);
             color: var(--text);
             margin: 0;
@@ -28,8 +28,10 @@
             align-items: center;
             min-height: 100vh;
             padding: 20px;
+            overflow-x: hidden;
         }
 
+        /* Навигация */
         .nav-grid { display: flex; gap: 6px; margin-bottom: 25px; }
         .dot {
             width: 38px; height: 38px;
@@ -45,44 +47,57 @@
         .dot.active { background: var(--blue); color: white; transform: scale(1.1); opacity: 1; cursor: pointer; }
         .dot.done { background: var(--blue-light); color: var(--blue); opacity: 1; cursor: pointer; }
         .dot.skipped { background: white; border: 1.5px solid var(--blue-light); color: var(--blue-light); opacity: 1; cursor: pointer; }
-        
-        /* Состояние после финала */
-        .nav-locked .dot { cursor: not-allowed !important; pointer-events: none !important; }
 
         .container { width: 100%; max-width: 380px; }
         .screen { display: none; }
         .screen.active { display: block; animation: fadeIn 0.3s ease; }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        h1 { font-size: 22px; font-weight: 800; margin-bottom: 10px; letter-spacing: -0.5px; }
+        h1 { font-size: 22px; font-weight: 800; margin-bottom: 10px; letter-spacing: -0.5px; line-height: 1.2; }
         p.subtitle { color: var(--text-sec); font-size: 15px; margin-bottom: 25px; line-height: 1.5; }
         .section-tag { font-size: 11px; text-transform: uppercase; color: var(--blue); font-weight: 700; margin-bottom: 8px; letter-spacing: 1px; }
 
+        /* Опции и Чекбоксы */
         .opt {
             background: var(--gray); padding: 16px; border-radius: 15px; margin-bottom: 10px;
             cursor: pointer; display: flex; align-items: center; font-weight: 600; font-size: 15px;
+            transition: background 0.2s ease;
         }
-        .opt input { margin-right: 12px; accent-color: var(--blue); transform: scale(1.2); }
+        .opt input { 
+            margin-right: 12px; accent-color: var(--blue); transform: scale(1.2); 
+            opacity: 0.7; transition: opacity 0.3s ease;
+        }
+        .opt input:checked { opacity: 1; }
         
         .btn-main {
             background: var(--blue); color: white; border: none; width: 100%; padding: 16px;
             border-radius: 15px; font-size: 16px; font-weight: 700; margin-top: 15px; cursor: pointer;
         }
+
         .btn-sec {
             background: none; color: var(--blue); border: 2px solid var(--blue); width: 100%;
             padding: 14px; border-radius: 15px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 10px;
         }
 
+        /* Мармеладный Лоадер */
         #loader {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.95); display: none; justify-content: center; align-items: center; z-index: 1000;
+            background: rgba(255,255,255,0.96); display: none; justify-content: center; align-items: center; 
+            z-index: 1000;
         }
         .morph-svg { width: 70px; height: 70px; }
-        .circle { fill: none; stroke: var(--blue); stroke-width: 4; stroke-dasharray: 150; stroke-dashoffset: 150; transform-origin: center; }
-        .check { fill: none; stroke: var(--blue); stroke-width: 4; stroke-dasharray: 40; stroke-dashoffset: 40; stroke-linecap: round; }
+        .circle { 
+            fill: none; stroke: var(--blue); stroke-width: 4; 
+            stroke-dasharray: 150; stroke-dashoffset: 150; 
+            transform-origin: center;
+        }
+        .check { 
+            fill: none; stroke: var(--blue); stroke-width: 4; 
+            stroke-dasharray: 40; stroke-dashoffset: 40; stroke-linecap: round; 
+        }
 
-        .loading .circle { animation: spin 1s linear infinite, drawCircle 1.2s cubic-bezier(0.6, -0.28, 0.73, 0.05) forwards; }
+        .loading .circle { animation: spin 1s linear infinite, drawCircle 1.2s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards; }
         .success .circle { stroke-dashoffset: 0; transition: 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .success .check { animation: drawCheck 0.5s 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.5) forwards; }
 
@@ -90,7 +105,11 @@
         @keyframes drawCircle { to { stroke-dashoffset: 40; } }
         @keyframes drawCheck { to { stroke-dashoffset: 0; } }
 
-        input[type="text"] { width: 100%; padding: 16px; border: 2px solid var(--gray); border-radius: 15px; font-size: 16px; outline: none; }
+        input[type="text"] { 
+            width: 100%; padding: 16px; border: 2px solid var(--gray); border-radius: 15px; 
+            font-size: 16px; outline: none; transition: border-color 0.3s;
+        }
+        input[type="text"]:focus { border-color: var(--blue); }
     </style>
 </head>
 <body>
@@ -106,33 +125,32 @@
         <div class="dot active" id="d0" onclick="safeJump(0)">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 4h2v5l-1-1-1 1V4z"/></svg>
         </div>
-        <div class="dot" id="d1">1</div><div class="dot" id="d2">2</div>
-        <div class="dot" id="d3">3</div><div class="dot" id="d4">4</div>
-        <div class="dot" id="d5">5</div><div class="dot" id="d6">6</div>
+        <div class="dot" id="d1">1</div><div class="dot" id="d2">2</div><div class="dot" id="d3">3</div>
+        <div class="dot" id="d4">4</div><div class="dot" id="d5">5</div><div class="dot" id="d6">6</div>
     </div>
 
     <div class="container" id="main-content">
         <div class="screen active" id="s0">
-            <div class="section-tag">Введение [cite: 3]</div>
+            <div class="section-tag">Исследование</div>
             <h1>Англицизмы в моей жизни</h1>
-            <p class="subtitle">Это исследование для 10 класса. Мы изучаем, как заимствования влияют на нашу культуру и речь. Помоги собрать статистику! [cite: 1, 2]</p>
+            <p class="subtitle">Этот опрос поможет выявить конкретные закономерности использования заимствований в нашей речи[cite: 1]. Твой вклад очень важен!</p>
             <button class="btn-main" id="start-btn" onclick="jump(1)">Начать</button>
         </div>
 
         <div class="screen" id="s1">
-            <div class="section-tag">Портрет респондента [cite: 4]</div>
-            <h1>Уровень владения [cite: 7]</h1>
-            <p class="subtitle">Как ты оцениваешь свой английский?</p>
-            <div class="opt" onclick="sel(this, 1)"><input type="radio" name="q1"> Не знаю совсем / Учу через силу [cite: 8]</div>
+            <div class="section-tag">Портрет респондента</div>
+            <h1>Уровень владения</h1>
+            <p class="subtitle">Как ты оцениваешь свой уровень английского? [cite: 7]</p>
+            <div class="opt" onclick="sel(this, 1)"><input type="radio" name="q1"> Не знаю / Учу через силу [cite: 8]</div>
             <div class="opt" onclick="sel(this, 1)"><input type="radio" name="q1"> Средний (понимаю мемы) [cite: 9]</div>
             <div class="opt" onclick="sel(this, 1)"><input type="radio" name="q1"> Продвинутый (свободно общаюсь) [cite: 10]</div>
             <button class="btn-main" id="b1" onclick="confirmStep(2)">Пропустить</button>
         </div>
 
         <div class="screen" id="s2">
-            <div class="section-tag">Отношение и частота [cite: 11]</div>
-            <h1>Как часто используешь? [cite: 13]</h1>
-            <p class="subtitle">Насколько глубоко англицизмы проникли в твою жизнь?</p>
+            <div class="section-tag">Отношение и частота</div>
+            <h1>Частота использования</h1>
+            <p class="subtitle">Как часто ты используешь англицизмы в своей речи? [cite: 13]</p>
             <div class="opt" onclick="sel(this, 2)"><input type="radio" name="q2"> Постоянно [cite: 14]</div>
             <div class="opt" onclick="sel(this, 2)"><input type="radio" name="q2"> Часто (с друзьями) [cite: 15]</div>
             <div class="opt" onclick="sel(this, 2)"><input type="radio" name="q2"> Редко [cite: 16]</div>
@@ -140,19 +158,19 @@
         </div>
 
         <div class="screen" id="s3">
-            <div class="section-tag">Причины использования [cite: 18]</div>
-            <h1>Почему ты их выбираешь?</h1>
-            <p class="subtitle">Можно выбрать несколько вариантов:</p>
-            <div class="opt" onclick="toggleCheck(this, 3)"><input type="checkbox"> Короче и удобнее [cite: 19]</div>
+            <div class="section-tag">Причины</div>
+            <h1>Почему английские слова?</h1>
+            <p class="subtitle">Можно выбрать несколько вариантов: [cite: 18]</p>
+            <div class="opt" onclick="toggleCheck(this, 3)"><input type="checkbox"> Звучат короче и удобнее [cite: 19]</div>
             <div class="opt" onclick="toggleCheck(this, 3)"><input type="checkbox"> Нет точного аналога [cite: 20]</div>
             <div class="opt" onclick="toggleCheck(this, 3)"><input type="checkbox"> Это модно [cite: 21]</div>
             <button class="btn-main" id="b3" onclick="confirmStep(4)">Пропустить</button>
         </div>
 
         <div class="screen" id="s4">
-            <div class="section-tag">Сферы использования [cite: 23]</div>
-            <h1>Где ты их юзаешь? [cite: 25]</h1>
-            <p class="subtitle">Выбери основные области применения:</p>
+            <div class="section-tag">Сферы использования</div>
+            <h1>Где ты их юзаешь чаще всего?</h1>
+            <p class="subtitle">Выбери основные области: [cite: 25]</p>
             <div class="opt" onclick="toggleCheck(this, 4)"><input type="checkbox"> Игры и IT [cite: 26]</div>
             <div class="opt" onclick="toggleCheck(this, 4)"><input type="checkbox"> Соцсети и мессенджеры [cite: 27]</div>
             <div class="opt" onclick="toggleCheck(this, 4)"><input type="checkbox"> Учеба и хобби [cite: 29]</div>
@@ -160,34 +178,34 @@
         </div>
 
         <div class="screen" id="s5">
-            <div class="section-tag">Лингвистический эксперимент [cite: 31]</div>
-            <h1>Проверка осознанности [cite: 32]</h1>
-            <p class="subtitle">Знаешь ли ты точный смысл слов: Газлайтинг, Мэтч, Вайб? [cite: 34, 36, 37]</p>
-            <div class="opt" onclick="sel(this, 5)"><input type="radio" name="q5"> Да, знаю все [cite: 33]</div>
-            <div class="opt" onclick="sel(this, 5)"><input type="radio" name="q5"> Знаю примерно [cite: 33]</div>
+            <div class="section-tag">Эксперимент</div>
+            <h1>Проверка осознанности</h1>
+            <p class="subtitle">Знаешь ли ты точный смысл слов: Газлайтинг, Мэтч, Вайб? [cite: 31, 33-37]</p>
+            <div class="opt" onclick="sel(this, 5)"><input type="radio" name="q5"> Да, знаю все</div>
+            <div class="opt" onclick="sel(this, 5)"><input type="radio" name="q5"> Знаю примерно</div>
             <div class="opt" onclick="sel(this, 5)"><input type="radio" name="q5"> Просто повторяю [cite: 32]</div>
             <button class="btn-main" id="b5" onclick="confirmStep(6)">Пропустить</button>
         </div>
 
         <div class="screen" id="s6">
-            <div class="section-tag">Личный топ [cite: 30]</div>
-            <h1>Твои 3 слова</h1>
-            <p class="subtitle">Впиши англицизмы, которые используешь чаще всего:</p>
+            <div class="section-tag">Твой выбор</div>
+            <h1>Твой топ-3</h1>
+            <p class="subtitle">Впиши 3 англицизма, которые используешь чаще всего: [cite: 30]</p>
             <input type="text" id="w-in" oninput="checkInput(6)" placeholder="рил, вайб, дедлайн...">
             <button class="btn-main" id="b6" onclick="preFinish()">Завершить</button>
         </div>
 
         <div id="rev" class="screen">
-            <h1>Почти готово</h1>
-            <p class="subtitle">Остались незаполненные пункты. Вернешься к ним для точности данных?</p>
+            <h1>Почти всё!</h1>
+            <p class="subtitle">Ты пропустил несколько вопросов. Хочешь вернуться и заполнить их для статистики?</p>
             <div id="miss-list"></div>
-            <button class="btn-main" onclick="finalLock()">Все равно завершить</button>
+            <button class="btn-main" onclick="finish()">Завершить как есть</button>
         </div>
 
         <div class="screen" id="final">
             <h1>Спасибо!</h1>
-            <p class="subtitle">Данные приняты. Они помогут выявить закономерности использования заимствований. [cite: 42, 46]</p>
-            <button class="btn-sec" onclick="fireConfetti()">Еще блестки! ✨</button>
+            <p class="subtitle">Твои ответы помогут мне в защите проекта. Данные сохранены! [cite: 42, 46]</p>
+            <button class="btn-sec" onclick="fireConfetti()">Больше блесток! ✨</button>
         </div>
     </div>
 
@@ -198,7 +216,6 @@
         let ans = { 1:false, 2:false, 3:false, 4:false, 5:false, 6:false };
         let confirmed = { 1:false, 2:false, 3:false, 4:false, 5:false, 6:false };
         let maxStep = 0;
-        let isStarted = false;
         let isFinal = false;
 
         function confirmStep(nextS) {
@@ -219,21 +236,27 @@
         }
 
         function jump(step) {
-            if(isFinal) return;
-            isStarted = true;
+            if (isFinal) return; // Полная блокировка навигации после финала
+            
             if (typeof step === 'number' && step > maxStep) maxStep = step;
+            if (step === 'final') isFinal = true;
+
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             const target = (step === 'final') ? 'final' : (step === 'rev' ? 'rev' : 's' + step);
             document.getElementById(target).classList.add('active');
-            if(step === 0 && isStarted) document.getElementById('start-btn').style.display = 'none';
+            
             updateDots(step);
         }
 
         function updateDots(step) {
-            document.querySelectorAll('.dot').forEach((d, i) => {
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((d, i) => {
                 d.classList.remove('active', 'done', 'skipped');
                 d.onclick = null;
+                d.style.cursor = 'not-allowed';
+
                 if (!isFinal && i <= maxStep) {
+                    d.style.cursor = 'pointer';
                     d.onclick = () => { tg.HapticFeedback.selectionChanged(); jump(i); };
                     if (i < step && i > 0) {
                         if(ans[i]) d.classList.add('done');
@@ -247,6 +270,7 @@
         function safeJump(i) { if (!isFinal && i <= maxStep) jump(i); }
 
         function sel(el, q) {
+            if (isFinal) return;
             tg.HapticFeedback.impactOccurred('light');
             el.querySelector('input').checked = true;
             ans[q] = true;
@@ -254,6 +278,7 @@
         }
 
         function toggleCheck(el, q) {
+            if (isFinal) return;
             tg.HapticFeedback.impactOccurred('light');
             const inp = el.querySelector('input');
             inp.checked = !inp.checked;
@@ -268,24 +293,23 @@
         }
 
         function preFinish() {
-            let m = [];
-            for(let i=1; i<=6; i++) if(!ans[i]) m.push(i);
-            if(m.length > 0) {
+            let missed = [];
+            for(let i=1; i<=6; i++) if(!ans[i]) missed.push(i);
+            
+            if(missed.length > 0) {
                 const list = document.getElementById('miss-list');
                 list.innerHTML = "";
-                m.forEach(n => {
+                missed.forEach(n => {
                     const b = document.createElement('div');
-                    b.className = "opt"; b.innerText = "Заполнить пункт " + n;
+                    b.className = "opt"; b.innerText = "Заполнить вопрос " + n;
                     b.onclick = () => jump(n);
                     list.appendChild(b);
                 });
                 jump('rev');
-            } else finalLock();
+            } else finish();
         }
 
-        function finalLock() {
-            isFinal = true;
-            document.getElementById('nav').classList.add('nav-locked');
+        function finish() {
             tg.HapticFeedback.notificationOccurred('success');
             jump('final');
             fireConfetti();
