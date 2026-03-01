@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Anglicisms Research</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>Anglicisms Research 10th Grade</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
@@ -19,7 +18,7 @@
         * { box-sizing: border-box; -webkit-font-smoothing: antialiased; touch-action: manipulation; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--bg);
             color: var(--text);
             margin: 0;
@@ -27,89 +26,74 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            padding: 20px;
-            overflow-x: hidden;
+            padding: 30px 20px;
         }
 
         /* Навигация */
         .nav-grid { display: flex; gap: 6px; margin-bottom: 25px; }
         .dot {
-            width: 38px; height: 38px;
+            width: 34px; height: 34px;
             background: var(--gray);
-            border-radius: 11px;
+            border-radius: 9px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 13px; font-weight: 700;
+            font-size: 11px; font-weight: 700;
             color: var(--text-sec);
             cursor: not-allowed;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.3s ease;
             opacity: 0.4;
         }
-        .dot.active { background: var(--blue); color: white; transform: scale(1.1); opacity: 1; cursor: pointer; }
+        .dot.active { background: var(--blue); color: white; transform: scale(1.05); opacity: 1; cursor: pointer; }
         .dot.done { background: var(--blue-light); color: var(--blue); opacity: 1; cursor: pointer; }
         .dot.skipped { background: white; border: 1.5px solid var(--blue-light); color: var(--blue-light); opacity: 1; cursor: pointer; }
 
-        .container { width: 100%; max-width: 380px; }
+        .container { width: 100%; max-width: 360px; }
         .screen { display: none; }
-        .screen.active { display: block; animation: fadeIn 0.3s ease; }
+        .screen.active { display: block; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        h1 { font-size: 20px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; line-height: 1.2; }
+        p.subtitle { color: var(--text-sec); font-size: 13.5px; margin-bottom: 20px; line-height: 1.5; }
+        .section-title { font-size: 10px; text-transform: uppercase; color: var(--blue); font-weight: 700; margin-bottom: 4px; letter-spacing: 1px; }
 
-        h1 { font-size: 22px; font-weight: 800; margin-bottom: 10px; letter-spacing: -0.5px; line-height: 1.2; }
-        p.subtitle { color: var(--text-sec); font-size: 15px; margin-bottom: 25px; line-height: 1.5; }
-        .section-tag { font-size: 11px; text-transform: uppercase; color: var(--blue); font-weight: 700; margin-bottom: 8px; letter-spacing: 1px; }
+        .lang-picker { display: flex; gap: 6px; margin-top: 20px; justify-content: center; }
+        .lang-btn {
+            padding: 6px 10px; border-radius: 8px; border: 1.5px solid var(--gray);
+            font-size: 11px; font-weight: 600; cursor: pointer; background: white;
+        }
+        .lang-btn.active { border-color: var(--blue); background: var(--blue-light); color: var(--blue); }
 
-        /* Опции и Чекбоксы */
         .opt {
-            background: var(--gray); padding: 16px; border-radius: 15px; margin-bottom: 10px;
-            cursor: pointer; display: flex; align-items: center; font-weight: 600; font-size: 15px;
-            transition: background 0.2s ease;
+            background: var(--gray); padding: 12px 14px; border-radius: 12px; margin-bottom: 8px;
+            cursor: pointer; display: flex; align-items: center; font-weight: 600; font-size: 13px;
         }
-        .opt input { 
-            margin-right: 12px; accent-color: var(--blue); transform: scale(1.2); 
-            opacity: 0.7; transition: opacity 0.3s ease;
-        }
-        .opt input:checked { opacity: 1; }
+        .opt input { margin-right: 10px; accent-color: var(--blue); transform: scale(1.1); }
         
         .btn-main {
-            background: var(--blue); color: white; border: none; width: 100%; padding: 16px;
-            border-radius: 15px; font-size: 16px; font-weight: 700; margin-top: 15px; cursor: pointer;
+            background: var(--blue); color: white; border: none; width: 100%; padding: 14px;
+            border-radius: 12px; font-size: 15px; font-weight: 700; margin-top: 15px; cursor: pointer;
         }
-
         .btn-sec {
-            background: none; color: var(--blue); border: 2px solid var(--blue); width: 100%;
-            padding: 14px; border-radius: 15px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 10px;
+            background: none; color: var(--blue); border: 1.5px solid var(--blue); width: 100%;
+            padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; margin-top: 10px;
         }
+        .btn-sec:hover { background: transparent; }
 
-        /* Мармеладный Лоадер */
+        /* Лоадер */
         #loader {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.96); display: none; justify-content: center; align-items: center; 
-            z-index: 1000;
+            background: rgba(255,255,255,0.98); display: none; justify-content: center; align-items: center; 
+            z-index: 1000; transition: opacity 0.6s ease;
         }
-        .morph-svg { width: 70px; height: 70px; }
-        .circle { 
-            fill: none; stroke: var(--blue); stroke-width: 4; 
-            stroke-dasharray: 150; stroke-dashoffset: 150; 
-            transform-origin: center;
-        }
-        .check { 
-            fill: none; stroke: var(--blue); stroke-width: 4; 
-            stroke-dasharray: 40; stroke-dashoffset: 40; stroke-linecap: round; 
-        }
-
-        .loading .circle { animation: spin 1s linear infinite, drawCircle 1.2s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards; }
-        .success .circle { stroke-dashoffset: 0; transition: 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .success .check { animation: drawCheck 0.5s 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.5) forwards; }
-
+        .morph-svg { width: 60px; height: 60px; }
+        .circle { fill: none; stroke: var(--blue); stroke-width: 4; stroke-dasharray: 150; stroke-dashoffset: 150; transform-origin: center; }
+        .check { fill: none; stroke: var(--blue); stroke-width: 4; stroke-dasharray: 40; stroke-dashoffset: 40; stroke-linecap: round; }
+        .loading .circle { animation: spin 1s linear infinite, drawCircle 1s ease-out forwards; }
+        .success .circle { stroke-dashoffset: 0; transition: 0.6s; }
+        .success .check { animation: drawCheck 0.5s 0.4s ease-out forwards; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
         @keyframes drawCircle { to { stroke-dashoffset: 40; } }
         @keyframes drawCheck { to { stroke-dashoffset: 0; } }
 
-        input[type="text"] { 
-            width: 100%; padding: 16px; border: 2px solid var(--gray); border-radius: 15px; 
-            font-size: 16px; outline: none; transition: border-color 0.3s;
-        }
-        input[type="text"]:focus { border-color: var(--blue); }
+        input[type="text"] { width: 100%; padding: 14px; border: 2px solid var(--gray); border-radius: 12px; font-size: 14px; outline: none; }
     </style>
 </head>
 <body>
@@ -123,203 +107,140 @@
 
     <div class="nav-grid" id="nav">
         <div class="dot active" id="d0" onclick="safeJump(0)">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 4h2v5l-1-1-1 1V4z"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 4h2v5l-1-1-1 1V4z"/></svg>
         </div>
         <div class="dot" id="d1">1</div><div class="dot" id="d2">2</div><div class="dot" id="d3">3</div>
         <div class="dot" id="d4">4</div><div class="dot" id="d5">5</div><div class="dot" id="d6">6</div>
     </div>
 
-    <div class="container" id="main-content">
-        <div class="screen active" id="s0">
-            <div class="section-tag">Исследование</div>
-            <h1>Англицизмы в моей жизни</h1>
-            <p class="subtitle">Этот опрос поможет выявить конкретные закономерности использования заимствований в нашей речи[cite: 1]. Твой вклад очень важен!</p>
-            <button class="btn-main" id="start-btn" onclick="jump(1)">Начать</button>
-        </div>
-
-        <div class="screen" id="s1">
-            <div class="section-tag">Портрет респондента</div>
-            <h1>Уровень владения</h1>
-            <p class="subtitle">Как ты оцениваешь свой уровень английского? [cite: 7]</p>
-            <div class="opt" onclick="sel(this, 1)"><input type="radio" name="q1"> Не знаю / Учу через силу [cite: 8]</div>
-            <div class="opt" onclick="sel(this, 1)"><input type="radio" name="q1"> Средний (понимаю мемы) [cite: 9]</div>
-            <div class="opt" onclick="sel(this, 1)"><input type="radio" name="q1"> Продвинутый (свободно общаюсь) [cite: 10]</div>
-            <button class="btn-main" id="b1" onclick="confirmStep(2)">Пропустить</button>
-        </div>
-
-        <div class="screen" id="s2">
-            <div class="section-tag">Отношение и частота</div>
-            <h1>Частота использования</h1>
-            <p class="subtitle">Как часто ты используешь англицизмы в своей речи? [cite: 13]</p>
-            <div class="opt" onclick="sel(this, 2)"><input type="radio" name="q2"> Постоянно [cite: 14]</div>
-            <div class="opt" onclick="sel(this, 2)"><input type="radio" name="q2"> Часто (с друзьями) [cite: 15]</div>
-            <div class="opt" onclick="sel(this, 2)"><input type="radio" name="q2"> Редко [cite: 16]</div>
-            <button class="btn-main" id="b2" onclick="confirmStep(3)">Пропустить</button>
-        </div>
-
-        <div class="screen" id="s3">
-            <div class="section-tag">Причины</div>
-            <h1>Почему английские слова?</h1>
-            <p class="subtitle">Можно выбрать несколько вариантов: [cite: 18]</p>
-            <div class="opt" onclick="toggleCheck(this, 3)"><input type="checkbox"> Звучат короче и удобнее [cite: 19]</div>
-            <div class="opt" onclick="toggleCheck(this, 3)"><input type="checkbox"> Нет точного аналога [cite: 20]</div>
-            <div class="opt" onclick="toggleCheck(this, 3)"><input type="checkbox"> Это модно [cite: 21]</div>
-            <button class="btn-main" id="b3" onclick="confirmStep(4)">Пропустить</button>
-        </div>
-
-        <div class="screen" id="s4">
-            <div class="section-tag">Сферы использования</div>
-            <h1>Где ты их юзаешь чаще всего?</h1>
-            <p class="subtitle">Выбери основные области: [cite: 25]</p>
-            <div class="opt" onclick="toggleCheck(this, 4)"><input type="checkbox"> Игры и IT [cite: 26]</div>
-            <div class="opt" onclick="toggleCheck(this, 4)"><input type="checkbox"> Соцсети и мессенджеры [cite: 27]</div>
-            <div class="opt" onclick="toggleCheck(this, 4)"><input type="checkbox"> Учеба и хобби [cite: 29]</div>
-            <button class="btn-main" id="b4" onclick="confirmStep(5)">Пропустить</button>
-        </div>
-
-        <div class="screen" id="s5">
-            <div class="section-tag">Эксперимент</div>
-            <h1>Проверка осознанности</h1>
-            <p class="subtitle">Знаешь ли ты точный смысл слов: Газлайтинг, Мэтч, Вайб? [cite: 31, 33-37]</p>
-            <div class="opt" onclick="sel(this, 5)"><input type="radio" name="q5"> Да, знаю все</div>
-            <div class="opt" onclick="sel(this, 5)"><input type="radio" name="q5"> Знаю примерно</div>
-            <div class="opt" onclick="sel(this, 5)"><input type="radio" name="q5"> Просто повторяю [cite: 32]</div>
-            <button class="btn-main" id="b5" onclick="confirmStep(6)">Пропустить</button>
-        </div>
-
-        <div class="screen" id="s6">
-            <div class="section-tag">Твой выбор</div>
-            <h1>Твой топ-3</h1>
-            <p class="subtitle">Впиши 3 англицизма, которые используешь чаще всего: [cite: 30]</p>
-            <input type="text" id="w-in" oninput="checkInput(6)" placeholder="рил, вайб, дедлайн...">
-            <button class="btn-main" id="b6" onclick="preFinish()">Завершить</button>
-        </div>
-
-        <div id="rev" class="screen">
-            <h1>Почти всё!</h1>
-            <p class="subtitle">Ты пропустил несколько вопросов. Хочешь вернуться и заполнить их для статистики?</p>
-            <div id="miss-list"></div>
-            <button class="btn-main" onclick="finish()">Завершить как есть</button>
-        </div>
-
-        <div class="screen" id="final">
-            <h1>Спасибо!</h1>
-            <p class="subtitle">Твои ответы помогут мне в защите проекта. Данные сохранены! [cite: 42, 46]</p>
-            <button class="btn-sec" onclick="fireConfetti()">Больше блесток! ✨</button>
-        </div>
-    </div>
+    <div class="container" id="main-content"></div>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-
+        let currentLang = 'en';
         let ans = { 1:false, 2:false, 3:false, 4:false, 5:false, 6:false };
         let confirmed = { 1:false, 2:false, 3:false, 4:false, 5:false, 6:false };
+        let currentStep = 0;
         let maxStep = 0;
-        let isFinal = false;
+        let activeSurvey = false;
+
+        const i18n = {
+            ru: {
+                intro: "Введение", start: "Начать опрос", skip: "Пропустить", next: "Далее", finish: "Завершить",
+                title: "Англицизмы в моей жизни", desc: "Это исследование для 10 класса. Мы изучаем, как заимствования влияют на нашу культуру.",
+                q1_h: "Уровень английского", q1_s: "Как ты оцениваешь свои знания?",
+                q1_o: ["Не знаю совсем", "Средний (понимаю мемы)", "Продвинутый (свободно)"],
+                q2_h: "Частота речи", q2_s: "Как часто используешь англицизмы?",
+                q2_o: ["Постоянно", "Часто", "Редко", "Вообще нет"],
+                q3_h: "Причины", q3_s: "Почему ты их выбираешь?",
+                q3_o: ["Короче и удобнее", "Нет точного аналога", "Это модно", "Вылетают сами собой"],
+                q4_h: "Сферы использования", q4_s: "Где ты их юзаешь чаще всего?",
+                q4_o: ["Игры и IT", "Соцсети и мессенджеры", "Мода и шопинг", "Учеба и хобби"],
+                q5_h: "Эксперимент", q5_s: "Знаешь ли ты точный смысл слов: Газлайтинг, Мэтч, Вайб?",
+                q5_o: ["Да, знаю все", "Знаю примерно", "Просто повторяю"],
+                q6_h: "Твой топ-3", q6_s: "Впиши слова, которые используешь чаще всего:",
+                final_h: "Успех!", final_s: "Спасибо за помощь в проекте!", more: "Еще блестки! ✨", share: "Поделиться"
+            },
+            en: {
+                intro: "Intro", start: "Launch Survey", skip: "Skip", next: "Continue", finish: "Finish",
+                title: "Anglicisms in Daily Life", desc: "10th-grade research. We are analyzing how loanwords shape our modern communication.",
+                q1_h: "English Proficiency", q1_s: "How would you rate your English?",
+                q1_o: ["Beginner", "Intermediate (I get memes)", "Advanced (Fluent)"],
+                q2_h: "Speech Frequency", q2_s: "How often do you use anglicisms?",
+                q2_o: ["Constantly", "Often", "Rarely", "Never"],
+                q3_h: "The 'Why'", q3_s: "Why do you choose English words?",
+                q3_o: ["Shorter & convenient", "No Russian equivalent", "It's trendy", "Habitual / Automatic"],
+                q4_h: "Usage Areas", q4_s: "Where do you use them most?",
+                q4_o: ["Gaming & IT", "Social Media", "Fashion & Shopping", "Education & Hobbies"],
+                q5_h: "The Experiment", q5_s: "Do you know the exact meaning of: Gaslighting, Match, Vibe?",
+                q5_o: ["Yes, I know all", "Vaguely", "No, just repeating"],
+                q6_h: "Your Top 3", q6_s: "Write down the words you use most frequently:",
+                final_h: "Success!", final_s: "Your contribution is invaluable for my research!", more: "More Sparkles! ✨", share: "Share"
+            },
+            ar: {
+                intro: "مقدمة", start: "ابدأ", skip: "تخطي", next: "التالي", finish: "إنهاء",
+                title: "الكلمات الإنجليزية", desc: "بحث الصف العاشر حول تأثير الكلمات المستعارة على لغتنا.",
+                q1_h: "مستوى اللغة", q1_s: "كيف تقيم لغتك الإنجليزية؟",
+                q1_o: ["مبتدئ", "متوسط", "متقدم"],
+                q2_h: "التكرار", q2_s: "كم مرة تستخدمها؟",
+                q2_o: ["دائماً", "غالباً", "نادراً", "أبداً"],
+                q3_h: "الأسباب", q3_s: "لماذا تختار الكلمات الإنجليزية؟",
+                q3_o: ["أقصر وأسهل", "لا يوجد بديل", "موضة", "تلقائياً"],
+                q4_h: "المجالات", q4_s: "أين تستخدمها أكثر؟",
+                q4_o: ["الألعاب", "التواصل الاجتماعي", "الموضة", "الدراسة"],
+                q5_h: "تجربة", q5_s: "هل تعرف المعنى الدقيق لهذه الكلمات؟",
+                q5_o: ["نعم", "تقريباً", "لا"],
+                q6_h: "أفضل ٣", q6_s: "اكتب الكلمات الأكثر استخداماً:",
+                final_h: "تم بنجاح!", final_s: "شكراً لك!", more: "المزيد من البريق! ✨", share: "مشاركة"
+            }
+        };
+
+        function renderScreen(step) {
+            const c = i18n[currentLang];
+            const container = document.getElementById('main-content');
+            if (step === 0) {
+                container.innerHTML = `<div class="screen active">
+                    <div class="section-title">${c.intro}</div><h1>${c.title}</h1><p class="subtitle">${c.desc}</p>
+                    ${!activeSurvey ? `<button class="btn-main" onclick="jump(1)">${c.start}</button>` : ''}
+                    <div class="lang-picker">
+                        <button class="lang-btn ${currentLang==='ru'?'active':''}" onclick="setLang('ru')">🇷🇺 RU</button>
+                        <button class="lang-btn ${currentLang==='en'?'active':''}" onclick="setLang('en')">🇺🇸 EN</button>
+                        <button class="lang-btn ${currentLang==='ar'?'active':''}" onclick="setLang('ar')">🇦🇪 AR</button>
+                    </div></div>`;
+            } else if (step <= 5) {
+                const q = c['q'+step+'_h']; const s = c['q'+step+'_s']; const o = c['q'+step+'_o'];
+                container.innerHTML = `<div class="screen active">
+                    <div class="section-title">Block ${step}</div><h1>${q}</h1><p class="subtitle">${s}</p>
+                    ${o.map(opt => `<div class="opt" onclick="sel(this, ${step})"><input type="radio" name="q${step}"> ${opt}</div>`).join('')}
+                    <button class="btn-main" id="b${step}" onclick="confirmStep(${step+1})">${ans[step] ? c.next : c.skip}</button></div>`;
+            } else if (step === 6) {
+                container.innerHTML = `<div class="screen active">
+                    <div class="section-title">Final Block</div><h1>${c.q6_h}</h1><p class="subtitle">${c.q6_s}</p>
+                    <input type="text" id="w-in" oninput="checkInput(6)" placeholder="...">
+                    <button class="btn-main" id="b6" onclick="preFinish()">${ans[6] ? c.finish : c.skip}</button></div>`;
+            } else if (step === 'final') {
+                container.innerHTML = `<div class="screen active"><h1>${c.final_h}</h1><p class="subtitle">${c.final_s}</p>
+                    <button class="btn-sec" onclick="fireConfetti()">${c.more}</button><button class="btn-sec">${c.share}</button></div>`;
+            }
+        }
 
         function confirmStep(nextS) {
             let cur = nextS - 1;
             if (!confirmed[cur]) {
-                const l = document.getElementById('loader');
-                const s = document.getElementById('svg');
-                l.style.display = 'flex';
-                s.classList.remove('success'); s.classList.add('loading');
-                tg.HapticFeedback.notificationOccurred('success');
-
+                const l = document.getElementById('loader'); const s = document.getElementById('svg');
+                l.style.display = 'flex'; l.style.opacity = '1'; s.classList.remove('success'); s.classList.add('loading');
                 setTimeout(() => {
-                    s.classList.remove('loading'); s.classList.add('success');
-                    confirmed[cur] = true;
-                    setTimeout(() => { l.style.display = 'none'; jump(nextS); }, 800);
-                }, 1100);
+                    s.classList.remove('loading'); s.classList.add('success'); confirmed[cur] = true;
+                    setTimeout(() => { l.style.opacity = '0'; setTimeout(() => { l.style.display = 'none'; jump(nextS); }, 500); }, 600);
+                }, 1000);
             } else jump(nextS);
         }
 
         function jump(step) {
-            if (isFinal) return; // Полная блокировка навигации после финала
-            
-            if (typeof step === 'number' && step > maxStep) maxStep = step;
-            if (step === 'final') isFinal = true;
-
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            const target = (step === 'final') ? 'final' : (step === 'rev' ? 'rev' : 's' + step);
-            document.getElementById(target).classList.add('active');
-            
-            updateDots(step);
+            if(step > 0) activeSurvey = true;
+            if(typeof step === 'number' && step > maxStep) maxStep = step;
+            currentStep = step; renderScreen(step); updateDots(step);
         }
 
         function updateDots(step) {
-            const dots = document.querySelectorAll('.dot');
-            dots.forEach((d, i) => {
-                d.classList.remove('active', 'done', 'skipped');
-                d.onclick = null;
-                d.style.cursor = 'not-allowed';
-
-                if (!isFinal && i <= maxStep) {
-                    d.style.cursor = 'pointer';
-                    d.onclick = () => { tg.HapticFeedback.selectionChanged(); jump(i); };
-                    if (i < step && i > 0) {
-                        if(ans[i]) d.classList.add('done');
-                        else d.classList.add('skipped');
-                    }
+            document.querySelectorAll('.dot').forEach((d, i) => {
+                d.classList.remove('active', 'done', 'skipped'); d.onclick = null; d.style.cursor = 'not-allowed';
+                if (i <= maxStep) {
+                    d.style.cursor = 'pointer'; d.onclick = () => jump(i);
+                    if (i < step && i > 0) { if(ans[i]) d.classList.add('done'); else d.classList.add('skipped'); }
                 }
                 if (i == step) d.classList.add('active');
             });
         }
 
-        function safeJump(i) { if (!isFinal && i <= maxStep) jump(i); }
+        function safeJump(i) { if (i <= maxStep) jump(i); }
+        function setLang(lang) { currentLang = lang; renderScreen(currentStep); }
+        function sel(el, q) { el.querySelector('input').checked = true; ans[q] = true; document.getElementById('b' + q).innerText = i18n[currentLang].next; }
+        function checkInput(q) { ans[q] = document.getElementById('w-in').value.trim().length > 2; document.getElementById('b' + q).innerText = ans[q] ? i18n[currentLang].finish : i18n[currentLang].skip; }
+        function preFinish() { finish(); }
+        function finish() { const l = document.getElementById('loader'); l.style.display = 'flex'; l.style.opacity = '1'; setTimeout(() => { l.style.display = 'none'; jump('final'); fireConfetti(); }, 800); }
+        function fireConfetti() { confetti({ particleCount: 160, spread: 70, origin: { y: 0.6 }, colors: ['#007AFF', '#FFFFFF', '#5AC8FA'] }); }
 
-        function sel(el, q) {
-            if (isFinal) return;
-            tg.HapticFeedback.impactOccurred('light');
-            el.querySelector('input').checked = true;
-            ans[q] = true;
-            document.getElementById('b' + q).innerText = "Далее";
-        }
-
-        function toggleCheck(el, q) {
-            if (isFinal) return;
-            tg.HapticFeedback.impactOccurred('light');
-            const inp = el.querySelector('input');
-            inp.checked = !inp.checked;
-            const has = document.getElementById('s' + q).querySelectorAll('input:checked').length > 0;
-            ans[q] = has;
-            document.getElementById('b' + q).innerText = has ? "Далее" : "Пропустить";
-        }
-
-        function checkInput(q) {
-            ans[q] = document.getElementById('w-in').value.trim().length > 2;
-            document.getElementById('b' + q).innerText = ans[q] ? "Завершить" : "Пропустить";
-        }
-
-        function preFinish() {
-            let missed = [];
-            for(let i=1; i<=6; i++) if(!ans[i]) missed.push(i);
-            
-            if(missed.length > 0) {
-                const list = document.getElementById('miss-list');
-                list.innerHTML = "";
-                missed.forEach(n => {
-                    const b = document.createElement('div');
-                    b.className = "opt"; b.innerText = "Заполнить вопрос " + n;
-                    b.onclick = () => jump(n);
-                    list.appendChild(b);
-                });
-                jump('rev');
-            } else finish();
-        }
-
-        function finish() {
-            tg.HapticFeedback.notificationOccurred('success');
-            jump('final');
-            fireConfetti();
-        }
-
-        function fireConfetti() {
-            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#0088cc', '#ffffff', '#007AFF'] });
-        }
-
-        tg.ready();
+        renderScreen(0);
     </script>
 </body>
 </html>
