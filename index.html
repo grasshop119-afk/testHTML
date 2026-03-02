@@ -2,202 +2,358 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Anglicisms Research</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jar of Days | Коллекция твоих достижений</title>
     <style>
         :root {
-            --blue: #007AFF;
-            --blue-light: #E5F1FF;
-            --bg: #FFFFFF;
-            --gray: #F2F2F7;
-            --text: #1D1D1F;
-            --text-sec: #86868B;
+            --bg-color: #0a0a0a;
+            --jar-glass: rgba(255, 255, 255, 0.08);
+            --jar-border: rgba(255, 255, 255, 0.15);
+            
+            /* Цвета фантиков (Металлик) */
+            --foil-gold: linear-gradient(135deg, #ffd700 0%, #ffface 20%, #d4af37 40%, #f9e18b 60%, #b8860b 80%, #ffd700 100%);
+            --foil-green: linear-gradient(135deg, #2ecc71 0%, #a2f9b1 20%, #27ae60 40%, #d5f5e3 60%, #1e8449 80%, #2ecc71 100%);
+            --foil-red: linear-gradient(135deg, #e74c3c 0%, #ffadad 20%, #c0392b 40%, #fadbd8 60%, #943126 80%, #e74c3c 100%);
         }
 
-        * { box-sizing: border-box; -webkit-font-smoothing: antialiased; touch-action: manipulation; }
+        * { box-sizing: border-box; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
             margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: #fff;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             min-height: 100vh;
-            padding: 20px;
-            overflow-x: hidden;
+            overflow: hidden;
         }
 
-        /* Навигация */
-        .nav-grid { display: flex; gap: 6px; margin-bottom: 25px; }
-        .dot {
-            width: 38px; height: 38px;
-            background: var(--gray);
-            border-radius: 11px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 13px; font-weight: 700;
-            color: var(--text-sec);
-            cursor: not-allowed;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            opacity: 0.4;
-        }
-        .dot.active { background: var(--blue); color: white; transform: scale(1.1); opacity: 1; cursor: pointer; }
-        .dot.done { background: var(--blue-light); color: var(--blue); opacity: 1; cursor: pointer; }
-        .dot.skipped { background: white; border: 1.5px solid var(--blue-light); color: var(--blue-light); opacity: 1; cursor: pointer; }
-
-        .container { width: 100%; max-width: 380px; }
-        .screen { display: none; }
-        .screen.active { display: block; animation: fadeIn 0.3s ease; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
-        h1 { font-size: 22px; font-weight: 800; margin-bottom: 10px; letter-spacing: -0.5px; line-height: 1.2; }
-        p.subtitle { color: var(--text-sec); font-size: 15px; margin-bottom: 25px; line-height: 1.5; }
-        .section-tag { font-size: 11px; text-transform: uppercase; color: var(--blue); font-weight: 700; margin-bottom: 8px; letter-spacing: 1px; }
-
-        /* Опции (кнопки ответов) */
-        .opt {
-            background: var(--gray); padding: 16px; border-radius: 15px; margin-bottom: 10px;
-            cursor: pointer; display: flex; align-items: center; font-weight: 600; font-size: 15px;
-            transition: background 0.2s ease;
-        }
-        .opt input { 
-            margin-right: 12px; accent-color: var(--blue); transform: scale(1.2); 
-            transition: all 0.2s ease;
-        }
-        
-        .btn-main {
-            background: var(--blue); color: white; border: none; width: 100%; padding: 16px;
-            border-radius: 15px; font-size: 16px; font-weight: 700; margin-top: 15px; cursor: pointer;
+        .title-section {
+            text-align: center;
+            margin-bottom: 20px;
+            z-index: 5;
         }
 
-        .btn-sec {
-            background: none; color: var(--blue); border: 2px solid var(--blue); width: 100%;
-            padding: 14px; border-radius: 15px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 10px;
+        .title-section h1 {
+            font-weight: 200;
+            letter-spacing: 5px;
+            margin: 0;
+            text-transform: uppercase;
+            font-size: 1.5rem;
+            opacity: 0.7;
         }
 
-        /* Мармеладный Лоадер */
-        #loader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.96); display: none; justify-content: center; align-items: center; 
-            z-index: 1000;
-        }
-        .morph-svg { width: 70px; height: 70px; }
-        .circle { 
-            fill: none; stroke: var(--blue); stroke-width: 4; 
-            stroke-dasharray: 150; stroke-dashoffset: 150; 
-            transform-origin: center;
-        }
-        .check { 
-            fill: none; stroke: var(--blue); stroke-width: 4; 
-            stroke-dasharray: 40; stroke-dashoffset: 40; stroke-linecap: round; 
+        .month-name {
+            color: var(--ribbon-color);
+            font-weight: bold;
         }
 
-        /* Анимация успеха в лоадере */
-        .loading .circle { animation: spin 1s linear infinite, drawCircle 1.2s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards; }
-        .success .circle { stroke-dashoffset: 0; transition: 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .success .check { animation: drawCheck 0.5s 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.5) forwards; }
-
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        @keyframes drawCircle { to { stroke-dashoffset: 40; } }
-        @keyframes drawCheck { to { stroke-dashoffset: 0; } }
-
-        input[type="text"] { 
-            width: 100%; padding: 16px; border: 2px solid var(--gray); border-radius: 15px; 
-            font-size: 16px; outline: none; transition: border-color 0.3s;
+        /* КОНСТРУКЦИЯ БАНКИ */
+        .jar-wrapper {
+            position: relative;
+            width: 280px;
+            height: 380px;
+            margin-bottom: 30px;
         }
-        input[type="text"]:focus { border-color: var(--blue); }
+
+        .jar {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 90%;
+            background: var(--jar-glass);
+            border: 2px solid var(--jar-border);
+            border-radius: 60px 60px 40px 40px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 30px rgba(255,255,255,0.05);
+            backdrop-filter: blur(5px);
+            display: flex;
+            flex-wrap: wrap-reverse;
+            padding: 25px;
+            align-content: flex-start;
+            overflow: hidden;
+            z-index: 2;
+        }
+
+        .jar::after {
+            content: '';
+            position: absolute;
+            top: 10%;
+            left: 10%;
+            width: 15%;
+            height: 70%;
+            background: linear-gradient(to right, rgba(255,255,255,0.1), transparent);
+            border-radius: 50px;
+        }
+
+        .lid {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
+            height: 40px;
+            background: #1a1a1a;
+            border-radius: 10px;
+            z-index: 4;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .ribbon {
+            position: absolute;
+            top: 35px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 190px;
+            height: 20px;
+            background: var(--ribbon-color);
+            z-index: 3;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+            border-radius: 2px;
+            transition: background 1s ease;
+        }
+
+        /* ФАНТИКИ */
+        .wrapper {
+            width: 45px;
+            height: 45px;
+            margin: 5px;
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.5));
+            cursor: pointer;
+            transition: transform 0.3s;
+            animation: fall 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+        }
+
+        .wrapper:hover {
+            transform: scale(1.2) rotate(10deg) !important;
+            z-index: 10;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-300px) rotate(0deg); opacity: 0; }
+            100% { transform: translateY(0) rotate(var(--r)); opacity: 1; }
+        }
+
+        /* ИНТЕРФЕЙС */
+        .ui-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+            z-index: 5;
+        }
+
+        .input-day {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid #333;
+            color: #fff;
+            padding: 10px;
+            width: 300px;
+            text-align: center;
+            outline: none;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .input-day:focus { border-color: var(--ribbon-color); }
+
+        .btn-group {
+            display: flex;
+            gap: 25px;
+        }
+
+        .choice-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+            position: relative;
+        }
+
+        .choice-btn:hover { transform: scale(1.15); }
+        .choice-btn.active { border-color: #fff; }
+
+        .gold-btn { background: var(--foil-gold); }
+        .green-btn { background: var(--foil-green); }
+        .red-btn { background: var(--foil-red); }
+
+        .add-btn {
+            margin-top: 10px;
+            background: none;
+            border: 1px solid #444;
+            color: #aaa;
+            padding: 8px 25px;
+            border-radius: 20px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 0.8rem;
+        }
+
+        .add-btn:hover { background: #fff; color: #000; }
+
+        /* Всплывающая подсказка */
+        .tooltip {
+            position: fixed;
+            background: rgba(255,255,255,0.9);
+            color: #000;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            pointer-events: none;
+            display: none;
+            z-index: 100;
+            max-width: 200px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
     </style>
 </head>
 <body>
 
-    <div id="loader">
-        <svg class="morph-svg" id="svg" viewBox="0 0 50 50">
-            <circle class="circle" cx="25" cy="25" r="20"></circle>
-            <path class="check" d="M15 25l7 7 13-13"></path>
-        </svg>
+    <div class="title-section">
+        <h1 id="jarTitle">Банка: <span class="month-name" id="monthDisplay">...</span></h1>
     </div>
 
-    <div class="nav-grid" id="nav">
-        <div class="dot active" id="d0" onclick="safeJump(0)">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 4h2v5l-1-1-1 1V4z"/></svg>
-        </div>
-        <div class="dot" id="d1">1</div><div class="dot" id="d2">2</div><div class="dot" id="d3">3</div>
-        <div class="dot" id="d4">4</div><div class="dot" id="d5">5</div><div class="dot" id="d6">6</div>
+    <div class="jar-wrapper">
+        <div class="lid"></div>
+        <div class="ribbon" id="jarRibbon"></div>
+        <div class="jar" id="mainJar"></div>
     </div>
 
-    <div class="container" id="main-content">
-        
-        <div class="screen active" id="s0">
-            <div class="section-tag">Введение</div>
-            <h1>Англицизмы в моей жизни</h1>
-            <p class="subtitle">Этот опрос поможет выявить конкретные закономерности использования заимствований в нашей речи. Помоги собрать статистику для исследования!</p>
-            <button class="btn-main" onclick="jump(1)">Начать опрос</button>
+    <div class="ui-panel">
+        <input type="text" id="dayText" class="input-day" placeholder="Как прошел день?" maxlength="60">
+        <div class="btn-group">
+            <div class="choice-btn gold-btn" onclick="selectColor('gold', this)"></div>
+            <div class="choice-btn green-btn" onclick="selectColor('green', this)"></div>
+            <div class="choice-btn red-btn" onclick="selectColor('red', this)"></div>
         </div>
+        <button class="add-btn" onclick="throwWrapper()">Бросить фантик</button>
+    </div>
 
-        <div class="screen" id="s1">
-            <div class="section-tag">Портрет респондента</div>
-            <h1>Уровень владения</h1>
-            <p class="subtitle">Как ты оцениваешь свой уровень владения английским языком?</p>
-            <div class="opt" onclick="sel(this, 1)"><input type="radio" name="q1"> Не знаю совсем / Учу через силу</div>
-            <div class="opt" onclick="sel(this, 1)"><input type="radio" name="q1"> Средний (понимаю мемы, читаю тексты)</div>
-            <div class="opt" onclick="sel(this, 1)"><input type="radio" name="q1"> Продвинутый (свободно общаюсь)</div>
-            <button class="btn-main" id="b1" onclick="confirmStep(2)">Пропустить</button>
-        </div>
+    <div id="tooltip" class="tooltip"></div>
 
-        <div class="screen" id="s2">
-            <div class="section-tag">Отношение и частота</div>
-            <h1>Частота использования</h1>
-            <p class="subtitle">Как часто ты используешь англицизмы в своей повседневной речи?</p>
-            <div class="opt" onclick="sel(this, 2)"><input type="radio" name="q2"> Постоянно (через предложение)</div>
-            <div class="opt" onclick="sel(this, 2)"><input type="radio" name="q2"> Часто (с друзьями или в переписке)</div>
-            <div class="opt" onclick="sel(this, 2)"><input type="radio" name="q2"> Редко (только если нет русского аналога)</div>
-            <button class="btn-main" id="b2" onclick="confirmStep(3)">Пропустить</button>
-        </div>
+    <script>
+        let selectedColor = null;
+        const jarElement = document.getElementById('mainJar');
+        const tooltip = document.getElementById('tooltip');
 
-        <div class="screen" id="s3">
-            <div class="section-tag">Причины</div>
-            <h1>Почему английские слова?</h1>
-            <p class="subtitle">Что заставляет тебя выбирать заимствования? (несколько вариантов)</p>
-            <div class="opt" onclick="toggleCheck(this, 3)"><input type="checkbox"> Они звучат короче и удобнее</div>
-            <div class="opt" onclick="toggleCheck(this, 3)"><input type="checkbox"> В русском языке нет точного аналога</div>
-            <div class="opt" onclick="toggleCheck(this, 3)"><input type="checkbox"> Это звучит модно и современно</div>
-            <button class="btn-main" id="b3" onclick="confirmStep(4)">Пропустить</button>
-        </div>
+        // 1. ЛОГИКА СЕЗОНОВ И ЦВЕТОВ ЛЕНТЫ
+        const seasons = {
+            winter: ['#2c3e50', '#3498db', '#85c1e9'], // Дек, Янв, Фев
+            spring: ['#27ae60', '#58d68d', '#abebc6'], // Мар, Апр, Май
+            summer: ['#f1c40f', '#f7dc6f', '#fef9e7'], // Июн, Июл, Авг
+            autumn: ['#e67e22', '#d35400', '#ba4a00']  // Сен, Окт, Ноя
+        };
 
-        <div class="screen" id="s4">
-            <div class="section-tag">Сферы использования</div>
-            <h1>Где ты их юзаешь?</h1>
-            <p class="subtitle">В каких областях жизни англицизмы встречаются чаще всего?</p>
-            <div class="opt" onclick="toggleCheck(this, 4)"><input type="checkbox"> Компьютерные игры и IT</div>
-            <div class="opt" onclick="toggleCheck(this, 4)"><input type="checkbox"> Соцсети и мессенджеры</div>
-            <div class="opt" onclick="toggleCheck(this, 4)"><input type="checkbox"> Учеба, хобби и мода</div>
-            <button class="btn-main" id="b4" onclick="confirmStep(5)">Пропустить</button>
-        </div>
+        const monthNames = ["ЯНВАРЬ", "ФЕВРАЛЬ", "МАРТ", "АПРЕЛЬ", "МАЙ", "ИЮНЬ", 
+                            "ИЮЛЬ", "АВГУСТ", "СЕНТЯБРЬ", "ОКТЯБРЬ", "НОЯБРЬ", "ДЕКАБРЬ"];
 
-        <div class="screen" id="s5">
-            <div class="section-tag">Лингвистический эксперимент</div>
-            <h1>Проверка осознанности</h1>
-            <p class="subtitle">Знаешь ли ты точный смысл слов: Газлайтинг, Триггер, Мэтч, Вайб?</p>
-            <div class="opt" onclick="sel(this, 5)"><input type="radio" name="q5"> Да, знаю все определения</div>
-            <div class="opt" onclick="sel(this, 5)"><input type="radio" name="q5"> Знаю примерно / интуитивно</div>
-            <div class="opt" onclick="sel(this, 5)"><input type="radio" name="q5"> Просто повторяю за другими</div>
-            <button class="btn-main" id="b5" onclick="confirmStep(6)">Пропустить</button>
-        </div>
+        function updateSeasonUI() {
+            const now = new Date();
+            const monthIndex = now.getMonth(); 
+            const monthName = monthNames[monthIndex];
+            
+            document.getElementById('monthDisplay').innerText = monthName;
 
-        <div class="screen" id="s6">
-            <div class="section-tag">Твой топ слов</div>
-            <h1>Твой топ-3</h1>
-            <p class="subtitle">Впиши 3 англицизма, которые ты используешь чаще всего:</p>
-            <input type="text" id="w-in" oninput="checkInput(6)" placeholder="Например: рил, дедлайн, вайб">
-            <button class="btn-main" id="b6" onclick="preFinish()">Завершить</button>
-        </div>
+            let seasonKey;
+            if (monthIndex === 11 || monthIndex <= 1) seasonKey = 'winter';
+            else if (monthIndex <= 4) seasonKey = 'spring';
+            else if (monthIndex <= 7) seasonKey = 'summer';
+            else seasonKey = 'autumn';
 
-        <div id="rev" class="screen">
-            <h1>Почти всё!</h1>
-            <p class="subtitle">Ты пропустил несколько вопросов. Хочешь вернуться и заполнить их для точности статистики?</p>
-            <div id="miss-list"></div>
-            <button class="btn-main" onclick="finish()">Завершить как есть</button>
+            // Берем оттенок в зависимости от того, какой это месяц в сезоне (0, 1 или 2)
+            const shadeIndex = (monthIndex % 3);
+            const color = seasons[seasonKey][shadeIndex];
+            document.documentElement.style.setProperty('--ribbon-color', color);
+        }
+
+        // 2. ВЫБОР ЦВЕТА
+        function selectColor(color, btn) {
+            selectedColor = color;
+            document.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        // 3. МЕХАНИКА БРОСКА
+        function throwWrapper() {
+            const text = document.getElementById('dayText').value.trim();
+            
+            if (!selectedColor) {
+                alert("Сначала выбери цвет фантика!");
+                return;
+            }
+            if (!text) {
+                alert("Напиши пару слов о сегодняшнем дне.");
+                return;
+            }
+
+            const wrapperData = {
+                id: Date.now(),
+                color: selectedColor,
+                text: text,
+                rotation: Math.floor(Math.random() * 360),
+                date: new Date().toLocaleDateString()
+            };
+
+            saveWrapper(wrapperData);
+            renderWrapper(wrapperData);
+
+            // Очистка
+            document.getElementById('dayText').value = '';
+        }
+
+        function renderWrapper(data) {
+            const div = document.createElement('div');
+            div.className = 'wrapper';
+            div.style.background = `var(--foil-${data.color})`;
+            div.style.setProperty('--r', `${data.rotation}deg`);
+            div.style.transform = `rotate(${data.rotation}deg)`;
+            
+            // Просмотр текста при наведении
+            div.onmouseover = (e) => {
+                tooltip.style.display = 'block';
+                tooltip.innerText = `${data.date}: ${data.text}`;
+            };
+            div.onmousemove = (e) => {
+                tooltip.style.left = e.clientX + 15 + 'px';
+                tooltip.style.top = e.clientY + 15 + 'px';
+            };
+            div.onmouseout = () => {
+                tooltip.style.display = 'none';
+            };
+
+            jarElement.appendChild(div);
+        }
+
+        // 4. СОХРАНЕНИЕ (LocalStorage)
+        function saveWrapper(data) {
+            const monthKey = new Date().getMonth() + '-' + new Date().getFullYear();
+            let history = JSON.parse(localStorage.getItem('jarHistory') || '{}');
+            
+            if (!history[monthKey]) history[monthKey] = [];
+            history[monthKey].push(data);
+            
+            localStorage.setItem('jarHistory', JSON.stringify(history));
+        }
+
+        function loadHistory() {
+            const monthKey = new Date().getMonth() + '-' + new Date().getFullYear();
+            let history = JSON.parse(localStorage.getItem('jarHistory') || '{}');
+            const currentMonthData = history[monthKey] || [];
+            
+            currentMonthData.forEach(item => renderWrapper(item));
+        }
+
+        // Инициализация
+        updateSeasonUI();
+        loadHistory();
+    </script>
+</body>
+</html>
