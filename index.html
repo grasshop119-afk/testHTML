@@ -3,21 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iOS 26 Liquid Drag Menu</title>
+    <title>iOS 26 Perfect Liquid Menu</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
             --accent-color: var(--tg-theme-accent-color, #f7a251);
             --bg-color: #000;
-            --menu-bg: rgba(28, 28, 28, 0.8);
-            --bubble-bg: rgba(255, 255, 255, 0.15);
+            --menu-bg: rgba(25, 25, 25, 0.9);
+            --bubble-bg: rgba(255, 255, 255, 0.12);
+            --transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
 
         * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
             user-select: none;
-            touch-action: none; /* Критично для Drag */
+            touch-action: none;
         }
 
         body {
@@ -27,41 +28,41 @@
             display: flex;
             justify-content: center;
             align-items: flex-end;
-            padding-bottom: 50px;
+            padding-bottom: 60px;
             overflow: hidden;
         }
 
-        /* Контейнер с эффектом вязкости */
-        .gooey-wrapper {
-            filter: url('#liquid-filter');
+        /* Общий контейнер для слоев */
+        .menu-wrapper {
             position: relative;
-            will-change: filter;
+            width: 360px;
+            height: 80px;
+            filter: url('#liquid-filter'); /* Тот самый эффект мармелада */
         }
 
         .nav-bar {
-            width: 360px;
-            height: 80px;
+            width: 100%;
+            height: 100%;
             background: var(--menu-bg);
             border-radius: 40px;
             display: flex;
             position: relative;
-            backdrop-filter: blur(30px);
+            backdrop-filter: blur(20px);
             border: 0.5px solid rgba(255, 255, 255, 0.1);
-            padding: 0 10px;
+            z-index: 1;
         }
 
         .bubble {
             position: absolute;
             top: 10px;
             left: 0;
-            width: 100px;
+            width: 106px; /* Чуть шире для мягкости */
             height: 60px;
             background: var(--bubble-bg);
             border-radius: 30px;
-            z-index: 1;
+            z-index: 2;
             pointer-events: none;
-            will-change: transform, width;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            will-change: transform;
         }
 
         .nav-item {
@@ -71,50 +72,60 @@
             align-items: center;
             justify-content: center;
             position: relative;
-            z-index: 2;
+            z-index: 10;
+            cursor: pointer;
         }
 
-        .icon-svg {
-            width: 26px;
-            height: 26px;
-            fill: #ffffff;
-            transition: fill 0.2s, transform 0.2s;
-            pointer-events: none;
+        /* Слой 1: Белые иконки */
+        .icon-base {
+            width: 24px;
+            height: 24px;
+            fill: #fff;
+            transition: transform 0.3s var(--transition);
         }
 
         .label {
             font-size: 10px;
-            color: #ffffff;
-            margin-top: 5px;
+            color: #fff;
+            margin-top: 4px;
             font-family: -apple-system, system-ui;
-            pointer-events: none;
         }
 
-        /* Слой акцентных иконок с маской */
-        .accent-layer {
+        /* Слой 2: Оранжевые иконки (проявляются маской) */
+        .accent-mask-layer {
             position: absolute;
             inset: 0;
-            display: flex;
+            width: 360px;
+            height: 80px;
             pointer-events: none;
-            z-index: 3;
-            -webkit-mask-image: radial-gradient(circle, black 100%, transparent 100%);
+            z-index: 20;
+            display: flex;
+            /* Маска движется строго за пузырем */
+            -webkit-mask-image: radial-gradient(circle, black 50px, transparent 65px);
             -webkit-mask-repeat: no-repeat;
-            -webkit-mask-size: 100px 60px;
+            -webkit-mask-size: 110px 110px;
             will-change: -webkit-mask-position;
         }
 
         .accent-item {
             flex: 1;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            padding-bottom: 15px; /* Смещение под иконки */
+            justify-content: center;
         }
 
-        .accent-item svg {
-            width: 26px;
-            height: 26px;
+        .icon-accent {
+            width: 24px;
+            height: 24px;
             fill: var(--accent-color);
+        }
+
+        .label-accent {
+            font-size: 10px;
+            color: var(--accent-color);
+            margin-top: 4px;
+            font-family: -apple-system, system-ui;
         }
 
         #liquid-filter { display: none; }
@@ -122,137 +133,113 @@
 </head>
 <body>
 
-    <div class="gooey-wrapper" id="gooeyWrapper">
+    <div class="menu-wrapper">
         <nav class="nav-bar" id="navbar">
             <div class="bubble" id="bubble"></div>
             
-            <div class="nav-item">
-                <svg class="icon-svg" viewBox="0 0 512 512"><path d="M256 32L32 224h64v256h128V352h64v128h128V224h64L256 32z"/></svg>
+            <div class="nav-item" onpointerdown="handleClick(0)">
+                <svg class="icon-base" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
                 <span class="label">Дом</span>
             </div>
 
-            <div class="nav-item">
-                <svg class="icon-svg" viewBox="0 0 512 512"><path d="M256 32l64 168h184l-148 116 56 188-152-112-152 112 56-188L8 200h184z"/></svg>
+            <div class="nav-item" onpointerdown="handleClick(1)">
+                <svg class="icon-base" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
                 <span class="label">Избранное</span>
             </div>
 
-            <div class="nav-item">
-                <svg class="icon-svg" viewBox="0 0 512 512"><path d="M64 128h384v64H64zm0 128h384v64H64zm0 128h384v64H64z"/></svg>
+            <div class="nav-item" onpointerdown="handleClick(2)">
+                <svg class="icon-base" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
                 <span class="label">Меню</span>
             </div>
         </nav>
 
-        <div class="accent-layer" id="accentLayer">
-            <div class="accent-item"><svg viewBox="0 0 512 512"><path d="M256 32L32 224h64v256h128V352h64v128h128V224h64L256 32z"/></svg></div>
-            <div class="accent-item"><svg viewBox="0 0 512 512"><path d="M256 32l64 168h184l-148 116 56 188-152-112-152 112 56-188L8 200h184z"/></svg></div>
-            <div class="accent-item"><svg viewBox="0 0 512 512"><path d="M64 128h384v64H64zm0 128h384v64H64zm0 128h384v64H64z"/></svg></div>
+        <div class="accent-mask-layer" id="maskLayer">
+            <div class="accent-item">
+                <svg class="icon-accent" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                <span class="label-accent">Дом</span>
+            </div>
+            <div class="accent-item">
+                <svg class="icon-accent" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                <span class="label-accent">Избранное</span>
+            </div>
+            <div class="accent-item">
+                <svg class="icon-accent" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+                <span class="label-accent">Меню</span>
+            </div>
         </div>
     </div>
 
     <svg>
         <filter id="liquid-filter">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
-            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 25 -12" result="goo" />
+            <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
+            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -10" />
         </filter>
     </svg>
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.ready();
-
-        const navbar = document.getElementById('navbar');
         const bubble = document.getElementById('bubble');
-        const accentLayer = document.getElementById('accentLayer');
-        const items = document.querySelectorAll('.nav-item');
+        const maskLayer = document.getElementById('maskLayer');
+        const navItems = document.querySelectorAll('.nav-item');
 
         let isDragging = false;
-        let startX = 0;
-        let currentX = 10; // Начальная позиция
-        let targetX = 10;
-        let velocity = 0;
-        let lastX = 0;
+        let currentPos = 7; // Стартовая позиция для "Дом"
 
-        const ITEM_WIDTH = 340 / 3;
-        const BUBBLE_WIDTH = 100;
+        function updateUI(x, isSpring = true) {
+            const transitionStyle = isSpring ? 'all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)' : 'none';
+            bubble.style.transition = transitionStyle;
+            maskLayer.style.transition = transitionStyle;
 
-        // Инициализация
-        function init() {
-            updatePosition(10);
+            bubble.style.transform = `translateX(${x}px)`;
+            // Маска центрируется по пузырю (-2 отступа для идеального наложения)
+            maskLayer.style.webkitMaskPosition = `${x - 2}px -15px`;
         }
 
-        // Обработка касания
-        navbar.addEventListener('pointerdown', (e) => {
-            isDragging = true;
-            startX = e.clientX - currentX;
-            bubble.style.transition = 'none';
-            accentLayer.style.transition = 'none';
+        function handleClick(index) {
+            const positions = [7, 127, 247]; // Точно выверенные центры для 360px
+            currentPos = positions[index];
+            updateUI(currentPos);
+            
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+
+            // Анимация иконки (прыжок)
+            navItems.forEach((item, i) => {
+                item.querySelector('.icon-base').style.transform = (i === index) ? 'translateY(-5px) scale(1.1)' : 'translateY(0) scale(1)';
+            });
+        }
+
+        // Логика Drag
+        document.addEventListener('pointerdown', (e) => {
+            if (e.target.closest('.nav-bar')) {
+                isDragging = true;
+                bubble.style.transition = 'none';
+                maskLayer.style.transition = 'none';
+            }
         });
 
-        window.addEventListener('pointermove', (e) => {
+        document.addEventListener('pointermove', (e) => {
             if (!isDragging) return;
-
-            const rect = navbar.getBoundingClientRect();
-            let x = e.clientX - rect.left - (BUBBLE_WIDTH / 2);
-            
-            // Ограничители
-            x = Math.max(5, Math.min(x, rect.width - BUBBLE_WIDTH - 5));
-            
-            velocity = x - lastX;
-            lastX = x;
-            currentX = x;
-
-            // Эффект деформации (растяжение)
-            const stretch = Math.min(Math.abs(velocity) * 1.5, 40);
-            const scaleX = 1 + (stretch / 100);
-            const skew = velocity * 0.5;
-
-            updatePosition(currentX, scaleX, skew);
+            const rect = document.querySelector('.nav-bar').getBoundingClientRect();
+            let x = e.clientX - rect.left - 53; // 53 - половина пузыря
+            x = Math.max(7, Math.min(x, 247));
+            currentPos = x;
+            updateUI(x, false);
         });
 
-        window.addEventListener('pointerup', () => {
+        document.addEventListener('pointerup', () => {
             if (!isDragging) return;
             isDragging = false;
-
-            // Магнетизм к ближайшей иконке
-            const center = currentX + BUBBLE_WIDTH / 2;
-            let closestIndex = 0;
-            let minDistance = Infinity;
-
-            items.forEach((item, index) => {
-                const itemCenter = item.offsetLeft + item.offsetWidth / 2;
-                const dist = Math.abs(center - itemCenter);
-                if (dist < minDistance) {
-                    minDistance = dist;
-                    closestIndex = index;
-                }
-            });
-
-            snapToItem(closestIndex);
+            // Примагничивание к ближайшему
+            const positions = [7, 127, 247];
+            const closest = positions.reduce((prev, curr) => 
+                Math.abs(curr - currentPos) < Math.abs(prev - currentPos) ? curr : prev
+            );
+            const index = positions.indexOf(closest);
+            handleClick(index);
         });
 
-        function snapToItem(index) {
-            const item = items[index];
-            const x = item.offsetLeft + (item.offsetWidth - BUBBLE_WIDTH) / 2;
-            
-            currentX = x;
-            
-            // Возвращаем плавность для "долета"
-            bubble.style.transition = 'all 0.6s cubic-bezier(0.23, 1, 0.32, 1)';
-            accentLayer.style.transition = 'all 0.6s cubic-bezier(0.23, 1, 0.32, 1)';
-            
-            updatePosition(x, 1, 0);
-
-            if (tg.HapticFeedback) {
-                tg.HapticFeedback.selectionChanged();
-            }
-        }
-
-        function updatePosition(x, scaleX = 1, skew = 0) {
-            bubble.style.transform = `translateX(${x}px) scaleX(${scaleX}) skewX(${skew}deg)`;
-            accentLayer.style.webkitMaskPosition = `${x}px 10px`;
-        }
-
-        init();
+        // Инициализация
+        window.onload = () => handleClick(0);
     </script>
 </body>
 </html>
