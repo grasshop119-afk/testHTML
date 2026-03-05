@@ -3,223 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iOS 26 Liquid Menu Final</title>
+    <title>Mini App Menu</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        /* Блокировка системных штук */
         :root {
             --accent-color: var(--tg-theme-accent-color, #f7a251);
-            --bg-color: #000;
-            --menu-bg: rgba(28, 28, 28, 0.85);
-            --bubble-bg: rgba(255, 255, 255, 0.12);
+            --bg-color: #000000;
+            --menu-bg: #1c1c1e;
         }
 
         * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
-            user-select: none;
-            touch-action: none;
+            user-select: none; /* Запрет выделения */
+            -webkit-user-select: none;
+            touch-action: none; /* Запрет масштабирования и жестов браузера */
         }
 
         body {
             margin: 0;
-            background: var(--bg-color);
+            padding: 0;
+            background-color: var(--bg-color);
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: flex-end;
-            padding-bottom: 50px;
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            padding-bottom: 30px; /* Отступ от низа экрана */
+            overflow: hidden;
         }
 
-        /* Контейнер для эффекта слипания */
-        .gooey-wrapper {
-            filter: url('#liquid-filter');
-            position: relative;
-            width: 90%;
-            max-width: 380px;
-        }
-
-        .nav-bar {
-            width: 100%;
-            height: 80px;
-            background: var(--menu-bg);
-            border-radius: 40px;
+        /* Контейнер меню почти во всю ширину */
+        .nav-container {
+            width: 94%; 
+            max-width: 500px;
+            height: 70px;
+            background-color: var(--menu-bg);
+            border-radius: 35px;
             display: flex;
             position: relative;
-            backdrop-filter: blur(25px);
-            border: 0.5px solid rgba(255, 255, 255, 0.1);
+            padding: 0 5px; /* Небольшой внутренний отступ */
+            align-items: center;
         }
 
-        .nav-item {
+        .nav-sector {
             flex: 1;
+            height: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 5;
-            pointer-events: all;
+            position: relative;
+            z-index: 2;
         }
 
-        /* Слой иконок */
-        .icon-svg {
+        /* Выбранный пузырь: на 5px ниже (по высоте) и уже сектора */
+        .active-bubble {
+            position: absolute;
+            /* Рассчитываем размеры: 100% / 3 секторов - зазор */
+            width: calc(33.33% - 10px); 
+            height: 60px; /* На 10px меньше высоты меню (70-10=60), т.е. по 5px сверху и снизу */
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            left: 5px; /* Начальный отступ */
+            top: 5px; /* Отступ сверху 5px */
+            z-index: 1;
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .icon {
             width: 24px;
             height: 24px;
-            fill: #fff;
-            transition: transform 0.2s;
+            fill: #ffffff;
+            margin-bottom: 4px;
         }
 
         .label {
-            font-size: 10px;
-            color: #fff;
-            margin-top: 4px;
-            opacity: 0.8;
+            color: #ffffff;
+            font-size: 11px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
-        /* ЖИДКИЙ ПУЗЫРЬ */
-        .bubble {
-            position: absolute;
-            top: 10px;
-            left: 0;
-            width: 30%; /* Относительно размера бара */
-            height: 60px;
-            background: var(--bubble-bg);
-            border-radius: 30px;
-            z-index: 2;
-            pointer-events: none;
-            will-change: transform, width;
+        /* Окрашивание для активного состояния (пока без переключения, просто стили) */
+        .nav-sector.active .icon {
+            fill: var(--accent-color);
+        }
+        .nav-sector.active .label {
+            color: var(--accent-color);
         }
 
-        /* СЛОЙ ОКРАШИВАНИЯ (MASK) */
-        .accent-layer {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            z-index: 6;
-            pointer-events: none;
-            /* Маска, которая движется СТРОГО за пузырем */
-            -webkit-mask-image: radial-gradient(circle, black 40px, transparent 60px);
-            -webkit-mask-repeat: no-repeat;
-            -webkit-mask-size: 150px 150px; /* Размер зоны окрашивания */
-        }
-
-        .accent-item {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .accent-item svg { fill: var(--accent-color); width: 24px; height: 24px; }
-        .accent-item span { color: var(--accent-color); font-size: 10px; margin-top: 4px; }
-
-        #liquid-filter { display: none; }
     </style>
 </head>
 <body>
 
-    <div class="gooey-wrapper" id="wrapper">
-        <nav class="nav-bar" id="navbar">
-            <div class="bubble" id="bubble"></div>
-            
-            <div class="nav-item" onpointerdown="selectItem(0)">
-                <svg class="icon-svg" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-                <span class="label">Дом</span>
-            </div>
+    <div class="nav-container">
+        <div class="active-bubble" id="bubble"></div>
 
-            <div class="nav-item" onpointerdown="selectItem(1)">
-                <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                <span class="label">Избранное</span>
-            </div>
+        <div class="nav-sector active">
+            <svg class="icon" viewBox="0 0 24 24">
+                <path d="M21.6,11.4l-9-7.6c-0.4-0.3-0.9-0.3-1.2,0l-9,7.6c-0.3,0.3-0.4,0.7-0.1,1.1c0.1,0.2,0.3,0.3,0.6,0.3H5v7c0,0.6,0.4,1,1,1h4v-5h4v5h4c0.6,0,1-0.4,1-1v-7h1.1c0.4,0,0.7-0.2,0.9-0.5C22,12.1,21.9,11.7,21.6,11.4z"/>
+            </svg>
+            <span class="label">Дом</span>
+        </div>
 
-            <div class="nav-item" onpointerdown="selectItem(2)">
-                <svg class="icon-svg" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
-                <span class="label">Меню</span>
-            </div>
-        </nav>
+        <div class="nav-sector">
+            <svg class="icon" viewBox="0 0 24 24">
+                <path d="M22,9.2l-7.2-0.6L12,2L9.2,8.6L2,9.2l5.5,4.7l-1.6,7L12,17.3l6.1,3.7l-1.6-7L22,9.2z"/>
+            </svg>
+            <span class="label">Избранное</span>
+        </div>
 
-        <div class="accent-layer" id="accentLayer">
-            <div class="accent-item">
-                <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-                <span>Дом</span>
-            </div>
-            <div class="accent-item">
-                <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                <span>Избранное</span>
-            </div>
-            <div class="accent-item">
-                <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
-                <span>Меню</span>
-            </div>
+        <div class="nav-sector">
+            <svg class="icon" viewBox="0 0 24 24">
+                <path d="M3,6h18v2H3V6z M3,11h18v2H3V11z M3,16h18v2H3V16z"/>
+            </svg>
+            <span class="label">Меню</span>
         </div>
     </div>
 
-    <svg>
-        <filter id="liquid-filter">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" />
-            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -9" />
-        </filter>
-    </svg>
-
     <script>
+        // Инициализация Telegram Mini App
         const tg = window.Telegram.WebApp;
-        const bubble = document.getElementById('bubble');
-        const accentLayer = document.getElementById('accentLayer');
-        const navbar = document.getElementById('navbar');
-        
-        let isDragging = false;
-        let lastX = 0;
+        tg.expand(); // Развернуть на всё окно
+        tg.ready();
 
-        function updatePosition(x, spring = true, velocity = 0) {
-            const stretch = Math.min(Math.abs(velocity) * 1.2, 1.5); // Растяжение от скорости
-            const transition = spring ? 'all 0.6s cubic-bezier(0.68, -0.6, 0.32, 1.6)' : 'none';
-            
-            bubble.style.transition = transition;
-            accentLayer.style.transition = transition;
+        // Запрет контекстного меню (правой кнопки мыши)
+        window.oncontextmenu = function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            return false;
+        };
 
-            bubble.style.transform = `translateX(${x}px) scaleX(${1 + stretch})`;
-            accentLayer.style.webkitMaskPosition = `${x - (bubble.offsetWidth/2)}px -35px`;
-        }
-
-        function selectItem(index) {
-            const step = navbar.offsetWidth / 3;
-            const targetX = (step * index) + (step - bubble.offsetWidth) / 2;
-            
-            updatePosition(targetX, true);
-            
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-        }
-
-        navbar.addEventListener('pointerdown', (e) => {
-            isDragging = true;
-            bubble.style.transition = 'none';
-        });
-
-        window.addEventListener('pointermove', (e) => {
-            if (!isDragging) return;
-            const rect = navbar.getBoundingClientRect();
-            let x = e.clientX - rect.left - (bubble.offsetWidth / 2);
-            
-            x = Math.max(5, Math.min(x, rect.width - bubble.offsetWidth - 5));
-            
-            const velocity = x - lastX;
-            lastX = x;
-
-            updatePosition(x, false, velocity / 10);
-        });
-
-        window.addEventListener('pointerup', () => {
-            if (!isDragging) return;
-            isDragging = false;
-            
-            // Магнитизм
-            const step = navbar.offsetWidth / 3;
-            const center = lastX + bubble.offsetWidth / 2;
-            const index = Math.round((center - step/2) / step);
-            selectItem(Math.max(0, Math.min(2, index)));
-        });
-
-        window.onload = () => selectItem(0);
+        // В будущем здесь будет логика перемещения translateX для #bubble
     </script>
 </body>
 </html>
