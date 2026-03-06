@@ -3,22 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iOS 26 Liquid Physics</title>
+    <title>iOS 26 Logic Fix</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
             --accent-color: var(--tg-theme-accent-color, #f7a251);
             --bg-color: #000000;
             --menu-bg: #1c1c1e;
-            /* Кривая для быстрого старта и плавного замедления */
-            --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+            /* Быстрый старт, очень плавный финиш */
+            --bezier: cubic-bezier(0.19, 1, 0.22, 1);
         }
 
         * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
             user-select: none;
-            -webkit-user-select: none;
             touch-action: none;
         }
 
@@ -29,7 +28,7 @@
             display: flex;
             justify-content: center;
             align-items: flex-end;
-            padding-bottom: 40px;
+            padding-bottom: 50px;
         }
 
         .nav-container {
@@ -42,7 +41,7 @@
             position: relative;
             align-items: center;
             padding: 0 5px;
-            border: 0.5px solid rgba(255, 255, 255, 0.05);
+            border: 0.5px solid rgba(255, 255, 255, 0.08);
         }
 
         .nav-sector {
@@ -53,43 +52,44 @@
             align-items: center;
             justify-content: center;
             position: relative;
-            z-index: 2;
+            z-index: 10;
+            cursor: pointer;
         }
 
-        /* ПУЗЫРЬ С ФИЗИКОЙ */
+        /* ПУЗЫРЬ: Строгие размеры */
         .active-bubble {
             position: absolute;
-            width: calc(33.33% - 10px); 
+            width: 0; /* Будет задано в JS */
             height: 56px;
             background-color: rgba(255, 255, 255, 0.08);
             border-radius: 35px;
-            left: 5px; 
             top: 5px;
+            left: 0;
             z-index: 1;
-            /* Основная анимация перемещения */
-            transition: transform 0.5s var(--ease-out), 
-                        width 0.3s ease, 
-                        height 0.3s ease, 
-                        top 0.3s ease;
-            will-change: transform, width, height;
+            will-change: transform, width, height, top;
+            /* Плавность всех параметров */
+            transition: transform 0.6s var(--bezier), 
+                        width 0.4s var(--bezier), 
+                        height 0.4s var(--bezier), 
+                        top 0.4s var(--bezier);
         }
 
-        /* Класс деформации при движении (ниже и шире) */
-        .bubble-moving {
-            height: 46px; 
-            top: 10px;
-            width: calc(33.33% + 10px);
+        /* Состояние в полете: ниже и шире */
+        .is-moving {
+            height: 40px;
+            top: 13px;
+            width: 40% !important; /* Немного раздувается */
         }
 
-        /* Класс пружинки при стопе (выше и уже) */
-        .bubble-snap {
-            animation: spring 0.4s ease-out;
-        }
-
-        @keyframes spring {
+        /* Пружинка при остановке */
+        @keyframes spring-bounce {
             0% { transform: scaleX(1.1) scaleY(0.8); }
-            40% { transform: scaleX(0.9) scaleY(1.1); }
+            50% { transform: scaleX(0.9) scaleY(1.15); }
             100% { transform: scaleX(1) scaleY(1); }
+        }
+
+        .do-spring {
+            animation: spring-bounce 0.45s ease-out;
         }
 
         .icon {
@@ -97,7 +97,7 @@
             height: 22px;
             fill: #ffffff;
             margin-bottom: 3px;
-            transition: fill 0.3s, transform 0.3s var(--ease-out);
+            transition: fill 0.4s ease;
         }
 
         .label {
@@ -105,31 +105,31 @@
             font-size: 10px;
             font-weight: 500;
             font-family: -apple-system, system-ui;
-            transition: color 0.3s;
+            transition: color 0.4s ease;
         }
 
-        .nav-sector.active .icon { fill: var(--accent-color); transform: translateY(-2px); }
+        .nav-sector.active .icon { fill: var(--accent-color); }
         .nav-sector.active .label { color: var(--accent-color); }
 
     </style>
 </head>
 <body>
 
-    <div class="nav-container">
+    <div class="nav-container" id="navBar">
         <div class="active-bubble" id="bubble"></div>
 
-        <div class="nav-sector active" onclick="navigate(0)">
-            <svg class="icon" viewBox="0 0 24 24"><path d="M21.6,11.4l-9-7.6c-0.4-0.3-0.9-0.3-1.2,0l-9,7.6c-0.3,0.3-0.4,0.7-0.1,1.1c0.1,0.2,0.3,0.3,0.6,0.3H5v7c0,0.6,0.4,1,1,1h4v-5h4v5h4c0.6,0,1-0.4,1-1v-7h1.1c0.4,0,0.7-0.2,0.9-0.5C22,12.1,21.9,11.7,21.6,11.4z"/></svg>
+        <div class="nav-sector active" onclick="move(0)">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
             <span class="label">Дом</span>
         </div>
 
-        <div class="nav-sector" onclick="navigate(1)">
-            <svg class="icon" viewBox="0 0 24 24"><path d="M22,9.2l-7.2-0.6L12,2L9.2,8.6L2,9.2l5.5,4.7l-1.6,7L12,17.3l6.1,3.7l-1.6-7L22,9.2z"/></svg>
+        <div class="nav-sector" onclick="move(1)">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
             <span class="label">Избранное</span>
         </div>
 
-        <div class="nav-sector" onclick="navigate(2)">
-            <svg class="icon" viewBox="0 0 24 24"><path d="M3,6h18v2H3V6z M3,11h18v2H3V11z M3,16h18v2H3V16z"/></svg>
+        <div class="nav-sector" onclick="move(2)">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
             <span class="label">Меню</span>
         </div>
     </div>
@@ -139,38 +139,55 @@
         tg.expand();
 
         const bubble = document.getElementById('bubble');
+        const navBar = document.getElementById('navBar');
         const sectors = document.querySelectorAll('.nav-sector');
-        let isMoving = false;
+        
+        let currentIndex = 0;
 
-        function navigate(index) {
-            if (isMoving) return;
-            isMoving = true;
+        function updateBubbleSize() {
+            // Устанавливаем ширину пузыря = (ширина меню / 3) - 10px отступа
+            const sectorWidth = navBar.offsetWidth / 3;
+            bubble.style.width = `${sectorWidth - 10}px`;
+        }
 
-            // 1. СТАРТ: Деформируем пузырь (шире и ниже)
-            bubble.classList.add('bubble-moving');
+        function move(index) {
+            if (index === currentIndex) return;
             
-            // 2. ПЕРЕМЕЩЕНИЕ
-            bubble.style.transform = `translateX(${index * 100}%)`;
+            const sectorWidth = navBar.offsetWidth / 3;
+            const targetX = (index * sectorWidth) + 5; // +5 для центровки зазора
 
-            // Вибрация
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+            // 1. Старт: включаем деформацию (шире/ниже)
+            bubble.classList.add('is-moving');
+            bubble.classList.remove('do-spring');
 
-            // Управление классами текста
+            // 2. Движение
+            bubble.style.transform = `translateX(${targetX}px)`;
+
+            // Вибрация в начале движения
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+
+            // Переключение цветов
             sectors.forEach((s, i) => {
                 s.classList.toggle('active', i === index);
             });
 
-            // 3. ФИНИШ: Через небольшую паузу убираем деформацию и даем пружинку
+            // 3. Завершение
             setTimeout(() => {
-                bubble.classList.remove('bubble-moving');
-                bubble.classList.add('bubble-snap');
+                bubble.classList.remove('is-moving');
+                bubble.classList.add('do-spring');
                 
-                setTimeout(() => {
-                    bubble.classList.remove('bubble-snap');
-                    isMoving = false;
-                }, 400); // Время анимации пружинки
-            }, 200); // Момент, когда пузырь почти долетел
+                // Финальная вибрация при "ударе"
+                if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+                
+                currentIndex = index;
+            }, 300); // Тайминг должен совпадать с моментом когда визуально пузырь на месте
         }
+
+        window.addEventListener('resize', updateBubbleSize);
+        window.onload = () => {
+            updateBubbleSize();
+            move(0); // Ставим на старт
+        };
 
         window.oncontextmenu = (e) => e.preventDefault();
     </script>
