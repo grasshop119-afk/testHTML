@@ -3,82 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Fluid iOS 26 Tab Bar</title>
+    <title>iOS 26 Liquid Tabs</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
             --bg-color: #000000;
-            --tab-bar-bg: rgba(28, 28, 30, 0.85); /* Чуть темнее для контраста */
+            --tab-bar-bg: rgba(28, 28, 30, 0.8);
             --active-accent: #3da9ff;
             --text-inactive: #8e8e93;
-            --text-active: #ffffff;
-            --pill-bg: rgba(255, 255, 255, 0.08); /* Менее яркий, более глубокий */
-            /* Пружинные параметры для JS */
-            --spring-tension: 200;
-            --spring-friction: 18;
-            --spring-mass: 1.1;
-        }
-
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
+            --pill-bg: rgba(255, 255, 255, 0.12);
         }
 
         body {
             margin: 0;
-            padding: 0;
-            background-color: var(--bg-color);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-color);
+            font-family: -apple-system, system-ui, sans-serif;
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: flex-end;
             overflow: hidden;
-            /* Учет Safe Area в TMA */
             padding-bottom: env(safe-area-inset-bottom);
         }
 
         .tab-bar-container {
-            margin-bottom: 24px;
+            margin-bottom: 30px;
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 0 16px;
-            pointer-events: auto;
+            gap: 15px;
+            /* Разрешаем вылет пузырька за пределы контейнера сверху */
+            padding: 20px 16px; 
         }
 
         .ios-tab-bar {
             position: relative;
             background: var(--tab-bar-bg);
-            backdrop-filter: blur(25px) saturate(210%);
-            -webkit-backdrop-filter: blur(25px) saturate(210%);
+            backdrop-filter: blur(30px) saturate(200%);
+            -webkit-backdrop-filter: blur(30px) saturate(200%);
             border-radius: 40px;
             display: flex;
-            padding: 4px;
-            border: 0.5px solid rgba(255, 255, 255, 0.12);
-            width: fit-content;
-            /* Важно для точности JS расчетов */
-            transform-style: preserve-3d;
+            padding: 5px;
+            border: 0.5px solid rgba(255, 255, 255, 0.1);
+            /* Важно: overflow visible, чтобы пузырек мог "вырасти" выше панели */
+            overflow: visible; 
         }
 
         .tab-item {
             position: relative;
             z-index: 2;
-            padding: 10px 24px;
+            padding: 10px 25px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            border: none;
             background: none;
-            min-width: 90px;
-            transition: transform 0.1s ease-out; /* Быстрое нажатие */
-        }
-
-        /* Эффект нажатия на саму кнопку (Haptic press visualization) */
-        .tab-item:active {
-            transform: scale(0.96);
+            border: none;
+            min-width: 95px;
+            cursor: pointer;
+            outline: none;
         }
 
         .tab-icon {
@@ -86,70 +67,44 @@
             height: 24px;
             margin-bottom: 4px;
             fill: var(--text-inactive);
-            transition: fill 0.3s ease, color 0.3s ease;
-            pointer-events: none;
+            transition: fill 0.2s ease;
         }
 
         .tab-text {
             font-size: 11px;
             font-weight: 500;
             color: var(--text-inactive);
-            transition: color 0.3s ease;
-            pointer-events: none;
+            transition: color 0.2s ease;
         }
 
-        /* Состояние для активного текста/иконки */
-        .tab-item.active .tab-text {
-            color: var(--active-accent);
-        }
-        
-        .tab-item.active .tab-icon {
-            fill: var(--active-accent);
-        }
+        .tab-item.active .tab-icon { fill: var(--active-accent); }
+        .tab-item.active .tab-text { color: var(--active-accent); }
 
-        /* Плавающий фон (Fluid Slider) */
-        .tab-slider {
+        /* Пузырек (Жижа) */
+        .liquid-slider {
             position: absolute;
-            top: 4px;
-            left: 4px;
-            height: calc(100% - 8px);
+            top: 5px;
+            left: 5px;
+            height: calc(100% - 10px);
             background: var(--pill-bg);
             border-radius: 35px;
             z-index: 1;
+            pointer-events: none;
+            /* Центр трансформации — середина, чтобы сплющивание шло к центру */
             transform-origin: center center;
-            /* Убираем CSS transition, теперь управляет JS */
-            transition: none;
-            /* Добавляем эффект жидкого свечения при движении */
-            filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
+            will-change: transform, left, width;
         }
 
-        /* Отдельная кнопка поиска */
-        .search-button {
+        .search-btn {
             background: var(--tab-bar-bg);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
+            backdrop-filter: blur(30px);
             width: 56px;
             height: 56px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 0.5px solid rgba(255, 255, 255, 0.12);
-            cursor: pointer;
-            transition: transform 0.1s ease-out;
-        }
-        
-        .search-button:active {
-            transform: scale(0.96);
-        }
-
-        .search-button svg {
-            width: 24px;
-            height: 24px;
-            stroke: white;
-            stroke-width: 2.5;
-            fill: none;
-            pointer-events: none;
+            border: 0.5px solid rgba(255, 255, 255, 0.1);
         }
     </style>
 </head>
@@ -157,7 +112,7 @@
 
 <div class="tab-bar-container">
     <nav class="ios-tab-bar" id="tabBar">
-        <div class="tab-slider" id="slider"></div>
+        <div class="liquid-slider" id="slider"></div>
 
         <button class="tab-item active" data-index="0">
             <svg class="tab-icon" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/><path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
@@ -166,148 +121,112 @@
 
         <button class="tab-item" data-index="1">
             <svg class="tab-icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-            <span class="tab-text" style="color: white;">Контакты</span>
+            <span class="tab-text">Контакты</span>
         </button>
 
         <button class="tab-item" data-index="2">
             <svg class="tab-icon" viewBox="0 0 24 24"><circle cx="7" cy="7" r="2"/><circle cx="12" cy="7" r="2"/><circle cx="17" cy="7" r="2"/><circle cx="7" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="17" cy="12" r="2"/><circle cx="7" cy="17" r="2"/><circle cx="12" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
-            <span class="tab-text" style="color: white;">Клавиши</span>
+            <span class="tab-text">Клавиши</span>
         </button>
     </nav>
 
-    <button class="search-button" id="searchBtn">
-        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-    </button>
+    <div class="search-btn">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+    </div>
 </div>
 
 <script>
-    if (window.Telegram && window.Telegram.WebApp) {
-        Telegram.WebApp.ready();
-        Telegram.WebApp.expand(); // Развернуть на весь экран
-        console.log("Telegram Mini App initialized");
-    } else {
-        console.warn("Telegram WebApp object not found. Running in browser mode.");
-    }
-</script>
-
-<script>
-    // Простая симуляция физики пружины
-    function solveSpring(x, v, target, k, damping, m) {
-        const ax = -(k * (x - target) + damping * v) / m;
-        v += ax * 0.016; // Шаг времени (прим. 60fps)
-        x += v * 0.016;
-        return [x, v];
-    }
+    // Настройки физики
+    const PHYSICS = {
+        pos: { k: 180, d: 22, m: 1 },    // Пружина для позиции
+        scale: { k: 280, d: 15, m: 1 }   // Пружина для деформации (мягче и прыгучее)
+    };
 
     const slider = document.getElementById('slider');
-    const tabBar = document.getElementById('tabBar');
     const tabs = document.querySelectorAll('.tab-item');
-    const searchBtn = document.getElementById('searchBtn');
 
-    // Текущее состояние слайдера
-    let currentX = 0;
-    let currentW = 0;
-    let targetX = 0;
-    let targetW = 0;
-    let velocityX = 0;
-    let velocityW = 0;
-    let prevVelocityX = 0; // Для расчета свечения
-    let animationFrame;
+    let state = {
+        x: 0, tx: 0, vx: 0,
+        w: 0, tw: 0, vw: 0,
+        sx: 1, tsx: 1, vsx: 0,
+        sy: 1, tsy: 1, vsy: 0,
+        isMoving: false
+    };
 
-    // Параметры пружины (из CSS переменных)
-    const style = getComputedStyle(document.documentElement);
-    const K = parseFloat(style.getPropertyValue('--spring-tension'));
-    const DAMPING = parseFloat(style.getPropertyValue('--spring-friction'));
-    const MASS = parseFloat(style.getPropertyValue('--spring-mass'));
-
-    // Функция отрисовки физики
-    function animateSpring() {
-        // Решаем пружину для X
-        [currentX, velocityX] = solveSpring(currentX, velocityX, targetX, K, DAMPING, MASS);
-        // Решаем пружину для Ширины
-        [currentW, velocityW] = solveSpring(currentW, velocityW, targetW, K, DAMPING, MASS);
-
-        // Расчет "жидкого свечения" на основе ускорения/скорости
-        const currentVelocity = Math.abs(velocityX);
-        const acceleration = Math.abs(velocityX - prevVelocityX);
-        const glowOpacity = Math.min(0.2, (currentVelocity / 1500) + (acceleration / 800)); // Максимум 20%
-        slider.style.filter = `drop-shadow(0 0 6px rgba(255, 255, 255, ${glowOpacity}))`;
-        prevVelocityX = velocityX;
-
-        // Применяем значения к слайдеру
-        slider.style.left = `${currentX}px`;
-        slider.style.width = `${currentW}px`;
-
-        // Условие остановки (погрешность)
-        if (Math.abs(currentX - targetX) < 0.01 && Math.abs(velocityX) < 0.01 && 
-            Math.abs(currentW - targetW) < 0.01 && Math.abs(velocityW) < 0.01) {
-            cancelAnimationFrame(animationFrame);
-            animationFrame = null;
-            slider.style.filter = 'none'; // Убираем свечение при остановке
-            return;
-        }
-
-        animationFrame = requestAnimationFrame(animateSpring);
+    function spring(current, target, velocity, config) {
+        const force = -config.k * (current - target);
+        const damping = -config.d * velocity;
+        const acceleration = (force + damping) / config.m;
+        velocity += acceleration * 0.016;
+        current += velocity * 0.016;
+        return [current, velocity];
     }
 
-    function moveSliderFluid(element, instant = false) {
-        // Haptic Feedback при переключении таба (TMA)
-        if (window.Telegram && window.Telegram.WebApp && !instant) {
-            Telegram.WebApp.HapticFeedback.selectionChanged();
+    function update() {
+        // 1 & 2: Логика роста и сужения в движении
+        const dist = Math.abs(state.x - state.tx);
+        const vel = Math.abs(state.vx);
+
+        if (state.isMoving) {
+            if (dist > 10) { 
+                // В полете: растет в высоту (sy), сужается (sx)
+                state.tsy = 1.35; // Выше панели
+                state.tsx = 0.85; // Узкий
+            } else {
+                // 3: Приземление: резко сплющивается и расширяется
+                state.tsy = 0.75; // Сплюснутый
+                state.tsx = 1.25; // Длинный
+            }
         }
 
-        // Вычисляем размеры и позицию новой цели
-        targetX = element.offsetLeft;
-        targetW = element.offsetWidth;
+        // 4: Возврат в норму
+        if (dist < 1 && vel < 1) {
+            state.tsx = 1;
+            state.tsy = 1;
+            state.isMoving = false;
+        }
 
+        // Применяем физику
+        [state.x, state.vx] = spring(state.x, state.tx, state.vx, PHYSICS.pos);
+        [state.w, state.vw] = spring(state.w, state.tw, state.vw, PHYSICS.pos);
+        [state.sx, state.vsx] = spring(state.sx, state.tsx, state.vsx, PHYSICS.scale);
+        [state.sy, state.vsy] = spring(state.sy, state.tsy, state.vsy, PHYSICS.scale);
+
+        // Рендер
+        slider.style.left = `${state.x}px`;
+        slider.style.width = `${state.w}px`;
+        slider.style.transform = `scale(${state.sx}, ${state.sy})`;
+
+        requestAnimationFrame(update);
+    }
+
+    function setActive(el, instant = false) {
+        tabs.forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+
+        state.tx = el.offsetLeft;
+        state.tw = el.offsetWidth;
+        
         if (instant) {
-            currentX = targetX;
-            currentW = targetW;
-            slider.style.left = `${currentX}px`;
-            slider.style.width = `${currentW}px`;
-            return;
-        }
-
-        // Запускаем физику
-        if (!animationFrame) {
-            animateSpring();
+            state.x = state.tx;
+            state.w = state.tw;
+        } else {
+            state.isMoving = true;
+            // Вибрация Telegram
+            if (window.Telegram?.WebApp?.HapticFeedback) {
+                Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+            }
         }
     }
 
-    // Обработчик кликов
     tabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            // Если вкладка уже активна, ничего не делаем
-            if (this.classList.contains('active')) return;
-
-            // Убираем активный класс у всех
-            tabs.forEach(t => t.classList.remove('active'));
-            // Добавляем текущему
-            this.classList.add('active');
-
-            moveSliderFluid(this);
-        });
+        tab.addEventListener('click', () => setActive(tab));
     });
 
-    // Обработчик для кнопки поиска (отдельная тактильная вибрация)
-    searchBtn.addEventListener('click', () => {
-        if (window.Telegram && window.Telegram.WebApp) {
-            Telegram.WebApp.HapticFeedback.impactOccurred('medium');
-        }
-        console.log("Search clicked");
-    });
-
-    // Инициализация при загрузке (мгновенно)
-    window.addEventListener('load', () => {
-        const activeTab = document.querySelector('.tab-item.active');
-        moveSliderFluid(activeTab, true);
-    });
-
-    // Перерасчет при изменении размера окна
-    window.addEventListener('resize', () => {
-        const activeTab = document.querySelector('.tab-item.active');
-        moveSliderFluid(activeTab, true);
-    });
+    // Старт
+    const initial = document.querySelector('.tab-item.active');
+    setActive(initial, true);
+    requestAnimationFrame(update);
 </script>
 
 </body>
