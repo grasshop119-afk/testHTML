@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iOS 26 Pro Liquid Tabs</title>
+    <title>iOS 26 Nitro Tabs</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
             --bg-color: #000000;
-            --tab-bar-bg: rgba(28, 28, 30, 0.8);
+            --tab-bar-bg: rgba(28, 28, 30, 0.85);
             --active-accent: #3da9ff;
             --text-inactive: #8e8e93;
-            --pill-bg: rgba(255, 255, 255, 0.12);
+            --pill-bg: rgba(255, 255, 255, 0.15);
         }
 
         body {
@@ -30,8 +30,8 @@
             margin-bottom: 30px;
             display: flex;
             align-items: center;
-            gap: 15px;
-            padding: 30px 16px; /* Запас для роста пузырька */
+            gap: 12px;
+            padding: 40px 16px; 
         }
 
         .ios-tab-bar {
@@ -41,15 +41,15 @@
             -webkit-backdrop-filter: blur(30px) saturate(210%);
             border-radius: 40px;
             display: flex;
-            padding: 5px;
-            border: 0.5px solid rgba(255, 255, 255, 0.1);
+            padding: 4px;
+            border: 0.5px solid rgba(255, 255, 255, 0.12);
             overflow: visible; 
         }
 
         .tab-item {
             position: relative;
             z-index: 2;
-            padding: 10px 25px;
+            padding: 10px 22px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -58,8 +58,7 @@
             min-width: 95px;
             cursor: pointer;
             outline: none;
-            /* Иконки не должны двигаться никогда */
-            transform: none !important; 
+            transform: none !important; /* Иконки не шелохнутся */
         }
 
         .tab-icon {
@@ -67,7 +66,7 @@
             height: 24px;
             margin-bottom: 4px;
             fill: var(--text-inactive);
-            transition: fill 0.2s ease;
+            transition: fill 0.15s ease;
             pointer-events: none;
         }
 
@@ -75,7 +74,7 @@
             font-size: 11px;
             font-weight: 500;
             color: var(--text-inactive);
-            transition: color 0.2s ease;
+            transition: color 0.15s ease;
             pointer-events: none;
         }
 
@@ -84,9 +83,9 @@
 
         .liquid-slider {
             position: absolute;
-            top: 5px;
-            left: 5px;
-            height: calc(100% - 10px);
+            top: 4px;
+            left: 4px;
+            height: calc(100% - 8px);
             background: var(--pill-bg);
             border-radius: 35px;
             z-index: 1;
@@ -104,7 +103,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 0.5px solid rgba(255, 255, 255, 0.1);
+            border: 0.5px solid rgba(255, 255, 255, 0.12);
             cursor: pointer;
         }
     </style>
@@ -137,15 +136,14 @@
 </div>
 
 <script>
-    // Базовые настройки пружин
+    // Разогнанная физика
     const PHYSICS = {
-        pos: { k: 180, d: 24, m: 1 },    
-        scale: { k: 260, d: 18, m: 1 }   
+        pos: { k: 450, d: 35, m: 1 },    // Высокое натяжение = высокая скорость
+        scale: { k: 700, d: 25, m: 1 }   // Очень резкая деформация
     };
 
     const slider = document.getElementById('slider');
     const tabs = document.querySelectorAll('.tab-item');
-    const searchBtn = document.getElementById('searchBtn');
 
     let state = {
         x: 0, tx: 0, vx: 0,
@@ -153,8 +151,7 @@
         sx: 1, tsx: 1, vsx: 0,
         sy: 1, tsy: 1, vsy: 0,
         isMoving: false,
-        currentIndex: 0,
-        intensity: 1 // Множитель "пластики"
+        intensity: 1
     };
 
     function spring(current, target, velocity, config) {
@@ -167,29 +164,29 @@
     }
 
     function update() {
-        const distToTarget = Math.abs(state.x - state.tx);
+        const dist = Math.abs(state.x - state.tx);
         const vel = Math.abs(state.vx);
 
         if (state.isMoving) {
-            if (distToTarget > 15) { 
-                // Состояние "В ПОЛЕТЕ"
-                state.tsy = 1 + (0.35 * state.intensity); // Рост высоты (до 1.35 при дальнем)
-                state.tsx = 1 - (0.15 * state.intensity); // Сужение (до 0.85 при дальнем)
+            // Мгновенное переключение состояний
+            if (dist > 8) { 
+                // В полете: вытягивается
+                state.tsy = 1 + (0.3 * state.intensity); 
+                state.tsx = 1 - (0.2 * state.intensity); 
             } else {
-                // Состояние "ПРИЗЕМЛЕНИЕ" (сплющивание)
-                state.tsy = 1 - (0.25 * state.intensity); // Сплющивание (до 0.75)
-                state.tsx = 1 + (0.25 * state.intensity); // Растяжение в длину (до 1.25)
+                // Удар: расплющивается
+                state.tsy = 1 - (0.2 * state.intensity); 
+                state.tsx = 1 + (0.3 * state.intensity); 
             }
         }
 
-        // Возврат к норме
-        if (distToTarget < 0.5 && vel < 1) {
+        // Фиксация в конце
+        if (dist < 0.1 && vel < 1) {
             state.tsx = 1;
             state.tsy = 1;
             state.isMoving = false;
         }
 
-        // Применяем физику (для позиции K может меняться динамически)
         [state.x, state.vx] = spring(state.x, state.tx, state.vx, PHYSICS.pos);
         [state.w, state.vw] = spring(state.w, state.tw, state.vw, PHYSICS.pos);
         [state.sx, state.vsx] = spring(state.sx, state.tsx, state.vsx, PHYSICS.scale);
@@ -203,43 +200,33 @@
     }
 
     function setActive(el, instant = false) {
-        const newIndex = parseInt(el.dataset.index);
-        const diff = Math.abs(state.currentIndex - newIndex);
+        const newIdx = parseInt(el.dataset.index);
+        const oldIdx = state.currentIndex || 0;
+        const diff = Math.abs(newIdx - oldIdx);
 
         tabs.forEach(t => t.classList.remove('active'));
         el.classList.add('active');
 
         state.tx = el.offsetLeft;
         state.tw = el.offsetWidth;
+        state.currentIndex = newIdx;
         
         if (instant) {
             state.x = state.tx;
             state.w = state.tw;
-            state.currentIndex = newIndex;
         } else {
-            // Если соседняя — слабее. Если дальняя — быстрее и сильнее.
-            state.intensity = diff > 1 ? 1 : 0.45; // Снижаем силу для соседей
-            PHYSICS.pos.k = diff > 1 ? 260 : 180;  // Дальние летят быстрее
-            
+            state.intensity = diff > 1 ? 1 : 0.5;
             state.isMoving = true;
-            state.currentIndex = newIndex;
 
             if (window.Telegram?.WebApp?.HapticFeedback) {
-                Telegram.WebApp.HapticFeedback.selectionChanged();
+                Telegram.WebApp.HapticFeedback.impactOccurred('light');
             }
         }
     }
 
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => setActive(tab));
-    });
+    tabs.forEach(tab => tab.addEventListener('click', () => setActive(tab)));
 
-    searchBtn.addEventListener('click', () => {
-        if (window.Telegram?.WebApp?.HapticFeedback) {
-            Telegram.WebApp.HapticFeedback.impactOccurred('light');
-        }
-    });
-
+    // Погнали
     const initial = document.querySelector('.tab-item.active');
     setActive(initial, true);
     requestAnimationFrame(update);
