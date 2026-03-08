@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iOS 26 Nitro Tabs</title>
+    <title>iOS 26 Liquid Pro</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -58,7 +58,7 @@
             min-width: 95px;
             cursor: pointer;
             outline: none;
-            transform: none !important; /* Иконки не шелохнутся */
+            transform: none !important;
         }
 
         .tab-icon {
@@ -136,10 +136,10 @@
 </div>
 
 <script>
-    // Разогнанная физика
+    // Разогнанная физика для мгновенного отклика
     const PHYSICS = {
-        pos: { k: 450, d: 35, m: 1 },    // Высокое натяжение = высокая скорость
-        scale: { k: 700, d: 25, m: 1 }   // Очень резкая деформация
+        pos: { k: 550, d: 42, m: 1 },    // Еще быстрее позиция
+        scale: { k: 850, d: 30, m: 1 }   // Экстремально резкая шкала
     };
 
     const slider = document.getElementById('slider');
@@ -151,7 +151,8 @@
         sx: 1, tsx: 1, vsx: 0,
         sy: 1, tsy: 1, vsy: 0,
         isMoving: false,
-        intensity: 1
+        intensity: 1,
+        currentIndex: 0
     };
 
     function spring(current, target, velocity, config) {
@@ -168,30 +169,34 @@
         const vel = Math.abs(state.vx);
 
         if (state.isMoving) {
-            // Мгновенное переключение состояний
-            if (dist > 8) { 
-                // В полете: вытягивается
-                state.tsy = 1 + (0.3 * state.intensity); 
-                state.tsx = 1 - (0.2 * state.intensity); 
+            // Динамическая смена таргетов формы в зависимости от расстояния
+            if (dist > 12) { 
+                // 1) ВЗЛЕТ И ПОЛЕТ (одновременно быстро)
+                state.tsy = 1 + (0.35 * state.intensity); 
+                state.tsx = 1 - (0.25 * state.intensity); 
+            } else if (dist <= 12 && dist > 0.5) {
+                // 2) УДАР / ПРИЗЕМЛЕНИЕ (резко расплющивается)
+                state.tsy = 1 - (0.3 * state.intensity); 
+                state.tsx = 1 + (0.4 * state.intensity); 
             } else {
-                // Удар: расплющивается
-                state.tsy = 1 - (0.2 * state.intensity); 
-                state.tsx = 1 + (0.3 * state.intensity); 
+                // 3) ВОЗВРАТ В НОРМУ + МИКРО-СЖАТИЕ (пружина сама сделает отскок)
+                state.tsx = 1;
+                state.tsy = 1;
+                
+                // Если скорость почти нулевая — гасим
+                if (vel < 0.5 && Math.abs(state.vsx) < 0.5) {
+                    state.isMoving = false;
+                }
             }
         }
 
-        // Фиксация в конце
-        if (dist < 0.1 && vel < 1) {
-            state.tsx = 1;
-            state.tsy = 1;
-            state.isMoving = false;
-        }
-
+        // Применяем физику
         [state.x, state.vx] = spring(state.x, state.tx, state.vx, PHYSICS.pos);
         [state.w, state.vw] = spring(state.w, state.tw, state.vw, PHYSICS.pos);
         [state.sx, state.vsx] = spring(state.sx, state.tsx, state.vsx, PHYSICS.scale);
         [state.sy, state.vsy] = spring(state.sy, state.tsy, state.vsy, PHYSICS.scale);
 
+        // Рендер
         slider.style.left = `${state.x}px`;
         slider.style.width = `${state.w}px`;
         slider.style.transform = `scale(${state.sx}, ${state.sy})`;
@@ -201,8 +206,7 @@
 
     function setActive(el, instant = false) {
         const newIdx = parseInt(el.dataset.index);
-        const oldIdx = state.currentIndex || 0;
-        const diff = Math.abs(newIdx - oldIdx);
+        const diff = Math.abs(newIdx - (state.currentIndex || 0));
 
         tabs.forEach(t => t.classList.remove('active'));
         el.classList.add('active');
@@ -214,8 +218,9 @@
         if (instant) {
             state.x = state.tx;
             state.w = state.tw;
+            state.sx = 1; state.sy = 1;
         } else {
-            state.intensity = diff > 1 ? 1 : 0.5;
+            state.intensity = diff > 1 ? 1 : 0.55;
             state.isMoving = true;
 
             if (window.Telegram?.WebApp?.HapticFeedback) {
@@ -226,7 +231,7 @@
 
     tabs.forEach(tab => tab.addEventListener('click', () => setActive(tab)));
 
-    // Погнали
+    // Инициализация
     const initial = document.querySelector('.tab-item.active');
     setActive(initial, true);
     requestAnimationFrame(update);
