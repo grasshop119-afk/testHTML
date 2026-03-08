@@ -3,17 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iOS 26 Stealth Liquid</title>
+    <title>iOS 26 Stealth Liquid Glass</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
             --bg-color: #000000;
-            --tab-bar-bg: rgba(28, 28, 30, 0.92);
+            --tab-bar-bg: rgba(28, 28, 30, 0.9);
             --active-accent: #007AFF;
             --inactive-color: #8e8e93;
             --pill-bg: rgba(255, 255, 255, 0.12);
-            /* Сделали контур темнее */
-            --pill-border-moving: rgba(255, 255, 255, 0.25); 
+            --pill-border-moving: rgba(255, 255, 255, 0.25);
+            /* Переменная для динамического отступа */
+            --dynamic-gap: 12px;
         }
 
         body {
@@ -27,6 +28,13 @@
             overflow: hidden;
         }
 
+        /* SVG фильтр для эффекта жидкости */
+        .liquid-filter {
+            position: absolute;
+            width: 0; height: 0;
+            pointer-events: none;
+        }
+
         .tab-bar-container {
             margin-bottom: calc(15px + env(safe-area-inset-bottom));
             width: 92%;
@@ -38,14 +46,18 @@
         .ios-tab-bar {
             position: relative;
             background: var(--tab-bar-bg);
-            backdrop-filter: blur(25px) saturate(180%);
-            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            /* Размытие для стекла */
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
             border-radius: 38px;
             display: flex;
             padding: 4px;
             border: 0.5px solid rgba(255, 255, 255, 0.08);
             width: 100%;
             justify-content: space-around;
+            /* Применение SVG фильтра для стягивания */
+            filter: url('#liquid');
+            gap: var(--dynamic-gap); /* Используем динамический отступ */
         }
 
         .tab-item {
@@ -99,18 +111,26 @@
             box-sizing: border-box;
             border: 1px solid transparent;
             will-change: transform, left, width, background-color, border-color;
-            /* Быстрая и плавная смена состояний */
             transition: background-color 0.16s ease-out, border-color 0.16s ease-out;
         }
 
-        /* Состояние полета: без заливки и с темным контуром */
         .liquid-slider.flying {
-            background-color: transparent !important; 
+            background-color: transparent !important;
             border-color: var(--pill-border-moving);
         }
     </style>
 </head>
 <body>
+
+    <svg class="liquid-filter">
+        <defs>
+            <filter id="liquid">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="liquid" />
+                <feComposite in="SourceGraphic" in2="liquid" operator="atop"/>
+            </filter>
+        </defs>
+    </svg>
 
 <div class="tab-bar-container">
     <nav class="ios-tab-bar" id="tabBar">
@@ -135,11 +155,12 @@
 
 <script>
     const PHYSICS = {
-        pos: { k: 380, d: 38, m: 1 },    
-        scale: { k: 420, d: 24, m: 1 }   
+        pos: { k: 380, d: 38, m: 1 },
+        scale: { k: 420, d: 24, m: 1 }
     };
 
     const slider = document.getElementById('slider');
+    const tabBar = document.getElementById('tabBar');
     const tabs = document.querySelectorAll('.tab-item');
 
     let state = {
@@ -166,16 +187,20 @@
         const vel = Math.abs(state.vx);
 
         if (state.isMoving) {
-            if (dist > 15) { 
+            // Динамическое изменение gap для эффекта "стягивания жидкости"
+            let dynamicGap;
+            if (dist > 15) {
+                dynamicGap = 0; // Стягиваем жидкость в полете
                 slider.classList.add('flying');
-                // Рост на дальних дистанциях +5% к предыдущему значению
-                state.tsy = 1 + ((0.27) * state.intensity); 
-                state.tsx = 1 - (0.10 * state.intensity); 
+                state.tsy = 1 + ((0.27) * state.intensity);
+                state.tsx = 1 - (0.10 * state.intensity);
             } else if (dist <= 15 && dist > 0.5) {
+                dynamicGap = 8; // Частично восстанавливаем gap при приземлении
                 slider.classList.remove('flying');
-                state.tsy = 1 - (0.05 * state.intensity); 
-                state.tsx = 1 + (0.08 * state.intensity); 
+                state.tsy = 1 - (0.05 * state.intensity);
+                state.tsx = 1 + (0.08 * state.intensity);
             } else {
+                dynamicGap = 12; // Нормальный gap в покое
                 state.tsx = 1;
                 state.tsy = 1;
                 if (vel < 0.2 && Math.abs(state.vsx) < 0.2) {
@@ -183,6 +208,8 @@
                     slider.classList.remove('flying');
                 }
             }
+            // Плавно применяем динамический gap
+            tabBar.style.setProperty('--dynamic-gap', `${dynamicGap}px`);
         }
 
         [state.x, state.vx] = spring(state.x, state.tx, state.vx, PHYSICS.pos);
@@ -207,7 +234,7 @@
         state.tx = el.offsetLeft;
         state.tw = el.offsetWidth;
         state.currentIndex = newIdx;
-        
+
         if (instant) {
             state.x = state.tx;
             state.w = state.tw;
