@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iOS 26 Liquid Glass</title>
+    <title>iOS 26 Liquid Drag</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -11,8 +11,15 @@
             --tab-bar-bg: rgba(28, 28, 30, 0.92);
             --active-accent: #007AFF;
             --inactive-color: #8e8e93;
-            /* Базовая заливка пузырька */
-            --pill-bg: rgba(255, 255, 255, 0.1); 
+            --pill-bg: rgba(255, 255, 255, 0.12);
+            --pill-border-moving: rgba(255, 255, 255, 0.25);
+        }
+
+        * {
+            /* запретим выделение объектов */
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
         }
 
         body {
@@ -32,6 +39,7 @@
             max-width: 400px;
             display: flex;
             justify-content: center;
+            touch-action: none; /* Предотвращаем системный скролл при драге */
         }
 
         .ios-tab-bar {
@@ -59,7 +67,6 @@
             flex: 1;
             cursor: pointer;
             outline: none;
-            transform: none !important; /* Иконки не двигаются */
         }
 
         .icon-wrapper {
@@ -70,6 +77,9 @@
             -webkit-mask-size: contain;
             -webkit-mask-repeat: no-repeat;
             -webkit-mask-position: center;
+            mask-size: contain;
+            mask-repeat: no-repeat;
+            mask-position: center;
             transition: background-color 0.25s ease;
         }
 
@@ -83,8 +93,7 @@
         .tab-item.active .icon-wrapper { background-color: var(--active-accent); }
         .tab-item.active .tab-text { color: var(--active-accent); }
 
-        /* Эффект "жидкого стекла" (Liquid Glass) */
-        .liquid-glass-slider {
+        .liquid-slider {
             position: absolute;
             top: 4px;
             left: 4px;
@@ -95,53 +104,29 @@
             pointer-events: none;
             transform-origin: center center;
             box-sizing: border-box;
-            will-change: transform, left, width, background, filter;
-            
-            /* Создаем многослойное стекло с преломлением */
-            overflow: hidden; /* Важно для обрезки эффектов внутри */
-            border: 0.5px solid rgba(255, 255, 255, 0.05);
-
-            /* Быстрый переход для включения/выключения эффекта */
-            transition: background 0.15s ease, filter 0.15s ease;
+            border: 1px solid transparent;
+            will-change: transform, left, width, background-color, border-color;
+            transition: background-color 0.16s ease-out, border-color 0.16s ease-out;
         }
 
-        /* Слой "хроматического преломления" (Радужное свечение по краям) */
-        .liquid-glass-slider::before {
-            content: '';
-            position: absolute;
-            inset: -20px; /* Выходим за пределы, чтобы поймать край */
-            background: conic-gradient(
-                from 180deg at 50% 50%,
-                rgba(255, 0, 0, 0.2) 0deg,
-                rgba(255, 255, 0, 0.2) 60deg,
-                rgba(0, 255, 0, 0.2) 120deg,
-                rgba(0, 255, 255, 0.2) 180deg,
-                rgba(0, 0, 255, 0.2) 240deg,
-                rgba(255, 0, 255, 0.2) 300deg,
-                rgba(255, 0, 0, 0.2) 360deg
-            );
-            /* Усиливаем контраст на гранях для получения "жидкого" эффекта */
-            filter: blur(10px) contrast(15);
-            opacity: 0; /* Невидимый в покое */
-            transition: opacity 0.2s ease;
+        .liquid-slider.flying {
+            background-color: transparent !important;
+            border-color: var(--pill-border-moving);
         }
 
-        /* Состояние ПОЛЕТА: Активируем "жидкое стекло" */
-        .liquid-glass-slider.flying {
-            background: rgba(255, 255, 255, 0.05); /* Уменьшаем заливку */
-            filter: saturate(200%); /* Усиливаем цвета */
-        }
-
-        .liquid-glass-slider.flying::before {
-            opacity: 1; /* Проявление радужных граней */
+        /* Состояние при прямом переносе пальцем */
+        .liquid-slider.dragging {
+            transition: background-color 0.2s ease, border-color 0.2s ease; /* Убираем transition для left/width для мгновенного следования */
+            background-color: transparent !important;
+            border-color: var(--pill-border-moving);
         }
     </style>
 </head>
 <body>
 
-<div class="tab-bar-container">
+<div class="tab-bar-container" id="dragZone">
     <nav class="ios-tab-bar" id="tabBar">
-        <div class="liquid-glass-slider" id="slider"></div>
+        <div class="liquid-slider" id="slider"></div>
 
         <button class="tab-item active" data-index="0">
             <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/6997/6997164.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/6997/6997164.png');"></div>
@@ -168,6 +153,7 @@
 
     const slider = document.getElementById('slider');
     const tabs = document.querySelectorAll('.tab-item');
+    const dragZone = document.getElementById('dragZone');
 
     let state = {
         x: 0, tx: 0, vx: 0,
@@ -175,6 +161,7 @@
         sx: 1, tsx: 1, vsx: 0,
         sy: 1, tsy: 1, vsy: 0,
         isMoving: false,
+        isDragging: false,
         intensity: 1,
         currentIndex: 0
     };
@@ -189,33 +176,31 @@
     }
 
     function update() {
-        const dist = Math.abs(state.x - state.tx);
-        const vel = Math.abs(state.vx);
+        if (!state.isDragging) {
+            const dist = Math.abs(state.x - state.tx);
+            const vel = Math.abs(state.vx);
 
-        if (state.isMoving) {
-            if (dist > 15) { 
-                // ПОЛЕТ (Включаем жидкое стекло)
-                slider.classList.add('flying');
-                // Рост на дальних дистанциях +5%
-                state.tsy = 1 + ((0.22 + (state.intensity === 1 ? 0.05 : 0)) * state.intensity); 
-                state.tsx = 1 - (0.10 * state.intensity); 
-            } else if (dist <= 15 && dist > 0.5) {
-                // ПРИЗЕМЛЕНИЕ (Деликатное сплющивание 8-10%)
-                slider.classList.remove('flying');
-                state.tsy = 1 - (0.05 * state.intensity); 
-                state.tsx = 1 + (0.08 * state.intensity); 
-            } else {
-                state.tsx = 1;
-                state.tsy = 1;
-                if (vel < 0.2 && Math.abs(state.vsx) < 0.2) {
-                    state.isMoving = false;
+            if (state.isMoving) {
+                if (dist > 15) { 
+                    slider.classList.add('flying');
+                    state.tsy = 1 + (0.27 * state.intensity); 
+                    state.tsx = 1 - (0.10 * state.intensity); 
+                } else if (dist <= 15 && dist > 0.5) {
                     slider.classList.remove('flying');
+                    state.tsy = 1 - (0.05 * state.intensity); 
+                    state.tsx = 1 + (0.08 * state.intensity); 
+                } else {
+                    state.tsx = 1; state.tsy = 1;
+                    if (vel < 0.2) {
+                        state.isMoving = false;
+                        slider.classList.remove('flying');
+                    }
                 }
             }
+            [state.x, state.vx] = spring(state.x, state.tx, state.vx, PHYSICS.pos);
+            [state.w, state.vw] = spring(state.w, state.tw, state.vw, PHYSICS.pos);
         }
 
-        [state.x, state.vx] = spring(state.x, state.tx, state.vx, PHYSICS.pos);
-        [state.w, state.vw] = spring(state.w, state.tw, state.vw, PHYSICS.pos);
         [state.sx, state.vsx] = spring(state.sx, state.tsx, state.vsx, PHYSICS.scale);
         [state.sy, state.vsy] = spring(state.sy, state.tsy, state.vsy, PHYSICS.scale);
 
@@ -228,7 +213,7 @@
 
     function setActive(el, instant = false) {
         const newIdx = parseInt(el.dataset.index);
-        const diff = Math.abs(newIdx - (state.currentIndex || 0));
+        const diff = Math.abs(newIdx - state.currentIndex);
 
         tabs.forEach(t => t.classList.remove('active'));
         el.classList.add('active');
@@ -244,16 +229,79 @@
         } else {
             state.intensity = diff > 1 ? 1 : 0.6;
             state.isMoving = true;
-
-            if (window.Telegram?.WebApp?.HapticFeedback) {
-                Telegram.WebApp.HapticFeedback.selectionChanged();
-            }
+            if (window.Telegram?.WebApp?.HapticFeedback) Telegram.WebApp.HapticFeedback.selectionChanged();
         }
     }
 
-    tabs.forEach(tab => tab.addEventListener('click', () => setActive(tab)));
+    // ЛОГИКА ПЕРЕНОСА (Drag & Drop)
+    let dragStartPos = 0;
+    let longPressTimer;
 
+    function startDrag(e) {
+        const touch = e.touches ? e.touches[0] : e;
+        const startX = touch.clientX;
+        
+        longPressTimer = setTimeout(() => {
+            state.isDragging = true;
+            slider.classList.add('dragging');
+            if (window.Telegram?.WebApp?.HapticFeedback) Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+        }, 200); // Apple-style hold duration
+    }
+
+    function handleMove(e) {
+        if (!state.isDragging) {
+            // Если начали двигать до срабатывания таймера — отменяем долгий пресс
+            clearTimeout(longPressTimer);
+            return;
+        }
+        
+        const touch = e.touches ? e.touches[0] : e;
+        const rect = document.getElementById('tabBar').getBoundingClientRect();
+        let newX = touch.clientX - rect.left - (state.w / 2);
+
+        // Ограничители, чтобы не вылетал за пределы бара
+        newX = Math.max(4, Math.min(newX, rect.width - state.w - 4));
+        
+        state.x = newX;
+        state.vx = 0; // Сбрасываем инерцию при ручном вождении
+    }
+
+    function endDrag(e) {
+        clearTimeout(longPressTimer);
+        if (!state.isDragging) return;
+
+        state.isDragging = false;
+        slider.classList.remove('dragging');
+
+        // Находим ближайшую вкладку к текущему положению x
+        let closestTab = tabs[0];
+        let minDist = Infinity;
+
+        tabs.forEach(tab => {
+            const d = Math.abs(state.x - tab.offsetLeft);
+            if (d < minDist) {
+                minDist = d;
+                closestTab = tab;
+            }
+        });
+
+        setActive(closestTab);
+    }
+
+    // Слушатели событий
+    tabs.forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            if (!state.isDragging) setActive(tab);
+        });
+        tab.addEventListener('touchstart', startDrag, {passive: true});
+    });
+
+    window.addEventListener('touchmove', handleMove, {passive: false});
+    window.addEventListener('touchend', endDrag);
+
+    // Инициализация
     const initial = document.querySelector('.tab-item.active');
+    state.tw = initial.offsetWidth;
     setActive(initial, true);
     requestAnimationFrame(update);
 </script>
