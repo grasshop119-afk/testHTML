@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iOS 26 Liquid Master</title>
+    <title>iOS 26 Inertia Master</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -117,7 +117,6 @@
         .liquid-slider.dragging {
             background-color: transparent !important;
             border-color: var(--pill-border-moving);
-            /* Растет чуть выше высоты панели */
             height: calc(100% + 4px);
             top: -2px;
             transition: background-color 0.2s, border-color 0.2s, height 0.3s, top 0.3s;
@@ -151,7 +150,7 @@
     const PHYSICS = {
         pos: { k: 380, d: 38, m: 1 },    
         scale: { k: 420, d: 24, m: 1 },
-        dragSpring: { k: 280, d: 22, m: 1 } // Пружинка для эффекта при остановке пальца
+        dragSpring: { k: 260, d: 20, m: 1 } 
     };
 
     const slider = document.getElementById('slider');
@@ -167,7 +166,8 @@
         isDragging: false,
         intensity: 1,
         currentIndex: 0,
-        lastMouseX: 0
+        lastMouseX: 0,
+        peakSpeed: 0 // Для замера силы сплющивания
     };
 
     function spring(current, target, velocity, config) {
@@ -202,7 +202,6 @@
             [state.x, state.vx] = spring(state.x, state.tx, state.vx, PHYSICS.pos);
             [state.w, state.vw] = spring(state.w, state.tw, state.vw, PHYSICS.pos);
         } else {
-            // Эффект пружины при удержании и движении
             [state.sx, state.vsx] = spring(state.sx, state.tsx, state.vsx, PHYSICS.dragSpring);
             [state.sy, state.vsy] = spring(state.sy, state.tsy, state.vsy, PHYSICS.dragSpring);
         }
@@ -244,12 +243,12 @@
         const touch = e.touches ? e.touches[0] : e;
         const rect = slider.getBoundingClientRect();
         dragOffset = touch.clientX - rect.left;
+        state.peakSpeed = 0;
 
         longPressTimer = setTimeout(() => {
             state.isDragging = true;
             state.isMoving = false;
             slider.classList.add('dragging');
-            // При захвате чуть растет
             state.tsx = 1.05; 
             state.tsy = 1.05;
             if (window.Telegram?.WebApp?.HapticFeedback) Telegram.WebApp.HapticFeedback.impactOccurred('medium');
@@ -267,15 +266,28 @@
         let newX = touch.clientX - rect.left - dragOffset;
         newX = Math.max(4, Math.min(newX, rect.width - state.w - 4));
 
-        // Физика деформации при движении пальцем
-        const speed = touch.clientX - state.lastMouseX;
-        if (Math.abs(speed) > 1) {
-            state.tsx = 1 + (Math.abs(speed) * 0.005);
-            state.tsy = 1 - (Math.abs(speed) * 0.003);
+        const speed = Math.abs(touch.clientX - state.lastMouseX);
+        state.peakSpeed = Math.max(state.peakSpeed, speed); // Запоминаем макс. скорость рывка
+
+        if (speed > 1) {
+            // Растяжение при движении
+            state.tsx = 1 + (speed * 0.006);
+            state.tsy = 1 - (speed * 0.004);
         } else {
-            // Остановка пальца — возвращаем к увеличенному состоянию через пружину
-            state.tsx = 1.05;
-            state.tsy = 1.05;
+            // Остановка пальца: эффект сплющивания зависит от peakSpeed
+            const squishIntensity = Math.min(state.peakSpeed * 0.015, 0.12);
+            state.tsx = 1 + squishIntensity;
+            state.tsy = 1 - squishIntensity;
+            
+            // Сбрасываем пиковую скорость постепенно
+            state.peakSpeed *= 0.8;
+            
+            // Пружина сама вернет к 1.05/1.05 в update()
+            setTimeout(() => {
+                if (state.isDragging && Math.abs(touch.clientX - state.lastMouseX) < 1) {
+                    state.tsx = 1.05; state.tsy = 1.05;
+                }
+            }, 80);
         }
 
         state.x = newX;
@@ -289,11 +301,14 @@
         state.isDragging = false;
         slider.classList.remove('dragging');
         
-        // Находим ближайшую вкладку для "приземления"
+        // Логика захвата ближайшей иконки
         let closestTab = tabs[0];
         let minDist = Infinity;
+        const sliderMid = state.x + (state.w / 2);
+
         tabs.forEach(tab => {
-            const d = Math.abs(state.x - tab.offsetLeft);
+            const tabMid = tab.offsetLeft + (tab.offsetWidth / 2);
+            const d = Math.abs(sliderMid - tabMid);
             if (d < minDist) { minDist = d; closestTab = tab; }
         });
 
