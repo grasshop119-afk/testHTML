@@ -3,21 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iOS 26 Ultimate</title>
+    <title>iOS 26 Liquid Outline</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
             --bg-color: #000000;
             --tab-bar-bg: rgba(28, 28, 30, 0.92);
-            --active-accent: #007AFF; /* Системный голубой iOS */
-            --inactive-color: #8e8e93; /* Тот самый серый Apple */
-            --pill-bg: rgba(255, 255, 255, 0.1);
+            --active-accent: #007AFF;
+            --inactive-color: #8e8e93;
+            --pill-bg: rgba(255, 255, 255, 0.12);
+            --pill-border: rgba(255, 255, 255, 0.2);
         }
 
         body {
             margin: 0;
             background: var(--bg-color);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             height: 100vh;
             display: flex;
             justify-content: center;
@@ -28,7 +29,7 @@
         .tab-bar-container {
             /* 15 пикселей выше нижней границы */
             margin-bottom: calc(15px + env(safe-area-inset-bottom));
-            width: 92%; /* По длине как на скриншотах Fitness */
+            width: 92%;
             max-width: 400px;
             display: flex;
             justify-content: center;
@@ -59,16 +60,15 @@
             flex: 1;
             cursor: pointer;
             outline: none;
-            transition: opacity 0.2s ease;
+            /* Иконки не двигаются */
+            transform: none !important;
         }
 
-        /* Иконки из flaticon, цвет невыбранных серый */
         .icon-wrapper {
             width: 24px;
             height: 24px;
             margin-bottom: 4px;
             background-color: var(--inactive-color);
-            /* Используем маску для идеального перекрашивания PNG */
             -webkit-mask-size: contain;
             -webkit-mask-repeat: no-repeat;
             -webkit-mask-position: center;
@@ -85,13 +85,8 @@
             transition: color 0.25s ease;
         }
 
-        .tab-item.active .icon-wrapper {
-            background-color: var(--active-accent);
-        }
-
-        .tab-item.active .tab-text {
-            color: var(--active-accent);
-        }
+        .tab-item.active .icon-wrapper { background-color: var(--active-accent); }
+        .tab-item.active .tab-text { color: var(--active-accent); }
 
         .liquid-slider {
             position: absolute;
@@ -99,11 +94,20 @@
             left: 4px;
             height: calc(100% - 8px);
             background: var(--pill-bg);
+            border: 1px solid var(--pill-border);
+            box-sizing: border-box;
             border-radius: 34px;
             z-index: 1;
             pointer-events: none;
             transform-origin: center center;
-            will-change: transform, left, width;
+            will-change: transform, left, width, background-color, border-color;
+            transition: background-color 0.15s ease, border-color 0.15s ease;
+        }
+
+        /* Эффект контура при перемещении */
+        .liquid-slider.flying {
+            background-color: rgba(255, 255, 255, 0.02);
+            border-color: rgba(255, 255, 255, 0.4);
         }
     </style>
 </head>
@@ -131,7 +135,6 @@
 </div>
 
 <script>
-    // Анимации и физику не ломай, скорость не уменьшай
     const PHYSICS = {
         pos: { k: 380, d: 38, m: 1 },    
         scale: { k: 420, d: 24, m: 1 }   
@@ -165,10 +168,14 @@
 
         if (state.isMoving) {
             if (dist > 15) { 
-                state.tsy = 1 + (0.18 * state.intensity); 
+                // ПОЛЕТ: Пузырь становится контуром
+                slider.classList.add('flying');
+                // Рост на дальних дистанциях на 5% больше (было 0.22 -> стало 0.27 при интенсивности 1)
+                state.tsy = 1 + ((0.22 + (state.intensity === 1 ? 0.05 : 0)) * state.intensity); 
                 state.tsx = 1 - (0.10 * state.intensity); 
             } else if (dist <= 15 && dist > 0.5) {
-                // сплющивание еще на 5% меньше (теперь 0.05-0.08)
+                // ПРИЗЕМЛЕНИЕ: Возвращаем заливку
+                slider.classList.remove('flying');
                 state.tsy = 1 - (0.05 * state.intensity); 
                 state.tsx = 1 + (0.08 * state.intensity); 
             } else {
@@ -176,6 +183,7 @@
                 state.tsy = 1;
                 if (vel < 0.2 && Math.abs(state.vsx) < 0.2) {
                     state.isMoving = false;
+                    slider.classList.remove('flying');
                 }
             }
         }
@@ -208,7 +216,8 @@
             state.w = state.tw;
             state.sx = 1; state.sy = 1;
         } else {
-            state.intensity = diff > 1 ? 1 : 0.6;
+            // Интенсивность 1 для дальних, 0.5 для соседних
+            state.intensity = diff > 1 ? 1 : 0.55;
             state.isMoving = true;
 
             if (window.Telegram?.WebApp?.HapticFeedback) {
