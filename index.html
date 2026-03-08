@@ -3,34 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iOS 26 Mini App</title>
+    <title>iOS 26 Ultimate</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
             --bg-color: #000000;
-            --tab-bar-bg: rgba(28, 28, 30, 0.85);
-            --active-accent: #3da9ff;
-            --text-inactive: #8e8e93;
-            --pill-bg: rgba(255, 255, 255, 0.15);
+            --tab-bar-bg: rgba(28, 28, 30, 0.92);
+            --active-accent: #007AFF; /* Системный голубой iOS */
+            --inactive-color: #8e8e93; /* Тот самый серый Apple */
+            --pill-bg: rgba(255, 255, 255, 0.1);
         }
 
         body {
             margin: 0;
             background: var(--bg-color);
-            font-family: -apple-system, system-ui, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: flex-end;
             overflow: hidden;
-            padding-bottom: env(safe-area-inset-bottom);
         }
 
         .tab-bar-container {
-            margin-bottom: 25px;
-            width: 100%; /* Панель почти во всю длину */
-            max-width: 500px;
-            padding: 40px 16px; 
+            /* 15 пикселей выше нижней границы */
+            margin-bottom: calc(15px + env(safe-area-inset-bottom));
+            width: 92%; /* По длине как на скриншотах Fitness */
+            max-width: 400px;
             display: flex;
             justify-content: center;
         }
@@ -38,62 +37,61 @@
         .ios-tab-bar {
             position: relative;
             background: var(--tab-bar-bg);
-            backdrop-filter: blur(30px) saturate(210%);
-            -webkit-backdrop-filter: blur(30px) saturate(210%);
-            border-radius: 40px;
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border-radius: 38px;
             display: flex;
             padding: 4px;
-            border: 0.5px solid rgba(255, 255, 255, 0.12);
-            overflow: visible; 
-            width: 100%; /* Растягиваем */
+            border: 0.5px solid rgba(255, 255, 255, 0.08);
+            width: 100%;
             justify-content: space-around;
         }
 
         .tab-item {
             position: relative;
             z-index: 2;
-            padding: 10px 0;
+            padding: 8px 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             background: none;
             border: none;
-            flex: 1; /* Одинаковая ширина для всех вкладок */
+            flex: 1;
             cursor: pointer;
             outline: none;
-            transform: none !important;
+            transition: opacity 0.2s ease;
         }
 
-        /* Стили для иконок-картинок */
-        .tab-icon-img {
+        /* Иконки из flaticon, цвет невыбранных серый */
+        .icon-wrapper {
             width: 24px;
             height: 24px;
             margin-bottom: 4px;
-            filter: grayscale(1) brightness(0.7); /* Цвет неактивной иконки */
-            transition: filter 0.2s ease;
-            pointer-events: none;
+            background-color: var(--inactive-color);
+            /* Используем маску для идеального перекрашивания PNG */
+            -webkit-mask-size: contain;
+            -webkit-mask-repeat: no-repeat;
+            -webkit-mask-position: center;
+            mask-size: contain;
+            mask-repeat: no-repeat;
+            mask-position: center;
+            transition: background-color 0.25s ease;
         }
 
         .tab-text {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 500;
-            color: var(--text-inactive);
-            transition: color 0.2s ease;
-            pointer-events: none;
+            color: var(--inactive-color);
+            transition: color 0.25s ease;
         }
 
-        /* Активное состояние */
-        .tab-item.active .tab-icon-img {
-            filter: none; /* Возвращаем оригинальный цвет или можно наложить tint через mask */
-            /* Если хочешь покрасить иконку в --active-accent, используй drop-shadow или mask-image */
-        }
-        
-        /* Вариант покраски иконки в синий (акцентный) */
-        .tab-item.active .tab-icon-img {
-            filter: invert(56%) sepia(88%) saturate(1914%) hue-rotate(182deg) brightness(101%) contrast(101%);
+        .tab-item.active .icon-wrapper {
+            background-color: var(--active-accent);
         }
 
-        .tab-item.active .tab-text { color: var(--active-accent); }
+        .tab-item.active .tab-text {
+            color: var(--active-accent);
+        }
 
         .liquid-slider {
             position: absolute;
@@ -101,7 +99,7 @@
             left: 4px;
             height: calc(100% - 8px);
             background: var(--pill-bg);
-            border-radius: 35px;
+            border-radius: 34px;
             z-index: 1;
             pointer-events: none;
             transform-origin: center center;
@@ -116,23 +114,24 @@
         <div class="liquid-slider" id="slider"></div>
 
         <button class="tab-item active" data-index="0">
-            <img src="https://cdn-icons-png.flaticon.com/512/6997/6997164.png" alt="Home" class="tab-icon-img">
+            <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/6997/6997164.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/6997/6997164.png');"></div>
             <span class="tab-text">Главная</span>
         </button>
 
         <button class="tab-item" data-index="1">
-            <img src="https://cdn-icons-png.flaticon.com/512/2769/2769160.png" alt="Menu" class="tab-icon-img">
+            <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/2769/2769160.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/2769/2769160.png');"></div>
             <span class="tab-text">Меню</span>
         </button>
 
         <button class="tab-item" data-index="2">
-            <img src="https://cdn-icons-png.flaticon.com/512/9959/9959489.png" alt="Settings" class="tab-icon-img">
+            <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/9959/9959489.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/9959/9959489.png');"></div>
             <span class="tab-text">Настройки</span>
         </button>
     </nav>
 </div>
 
 <script>
+    // Анимации и физику не ломай, скорость не уменьшай
     const PHYSICS = {
         pos: { k: 380, d: 38, m: 1 },    
         scale: { k: 420, d: 24, m: 1 }   
@@ -166,13 +165,12 @@
 
         if (state.isMoving) {
             if (dist > 15) { 
-                // ПОЛЕТ (чуть-чуть меньше вытяжение)
-                state.tsy = 1 + (0.22 * state.intensity); 
-                state.tsx = 1 - (0.12 * state.intensity); 
+                state.tsy = 1 + (0.18 * state.intensity); 
+                state.tsx = 1 - (0.10 * state.intensity); 
             } else if (dist <= 15 && dist > 0.5) {
-                // УДАР (сплющивание на 5% меньше чем в прошлый раз)
-                state.tsy = 1 - (0.10 * state.intensity); 
-                state.tsx = 1 + (0.13 * state.intensity); 
+                // сплющивание еще на 5% меньше (теперь 0.05-0.08)
+                state.tsy = 1 - (0.05 * state.intensity); 
+                state.tsx = 1 + (0.08 * state.intensity); 
             } else {
                 state.tsx = 1;
                 state.tsy = 1;
@@ -210,7 +208,7 @@
             state.w = state.tw;
             state.sx = 1; state.sy = 1;
         } else {
-            state.intensity = diff > 1 ? 1 : 0.5;
+            state.intensity = diff > 1 ? 1 : 0.6;
             state.isMoving = true;
 
             if (window.Telegram?.WebApp?.HapticFeedback) {
