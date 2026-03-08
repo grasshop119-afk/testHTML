@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iOS 26 Liquid Outline</title>
+    <title>iOS 26 Liquid Pro Outline</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -12,7 +12,7 @@
             --active-accent: #007AFF;
             --inactive-color: #8e8e93;
             --pill-bg: rgba(255, 255, 255, 0.12);
-            --pill-border: rgba(255, 255, 255, 0.2);
+            --pill-border-active: rgba(255, 255, 255, 0.45); /* Яркий контур в движении */
         }
 
         body {
@@ -27,7 +27,6 @@
         }
 
         .tab-bar-container {
-            /* 15 пикселей выше нижней границы */
             margin-bottom: calc(15px + env(safe-area-inset-bottom));
             width: 92%;
             max-width: 400px;
@@ -60,8 +59,6 @@
             flex: 1;
             cursor: pointer;
             outline: none;
-            /* Иконки не двигаются */
-            transform: none !important;
         }
 
         .icon-wrapper {
@@ -94,20 +91,25 @@
             left: 4px;
             height: calc(100% - 8px);
             background: var(--pill-bg);
-            border: 1px solid var(--pill-border);
-            box-sizing: border-box;
             border-radius: 34px;
             z-index: 1;
             pointer-events: none;
             transform-origin: center center;
+            box-sizing: border-box;
+            
+            /* Начальное состояние: без контура */
+            border: 1.5px solid transparent;
+            
             will-change: transform, left, width, background-color, border-color;
-            transition: background-color 0.15s ease, border-color 0.15s ease;
+            /* Плавное, но очень быстрое появление контура и исчезновение заливки */
+            transition: background-color 0.18s cubic-bezier(0.2, 0, 0, 1), 
+                        border-color 0.18s cubic-bezier(0.2, 0, 0, 1);
         }
 
-        /* Эффект контура при перемещении */
+        /* Состояние при перемещении */
         .liquid-slider.flying {
-            background-color: rgba(255, 255, 255, 0.02);
-            border-color: rgba(255, 255, 255, 0.4);
+            background-color: rgba(255, 255, 255, 0.03); /* Почти прозрачная заливка */
+            border-color: var(--pill-border-active); /* Проявление яркого контура */
         }
     </style>
 </head>
@@ -168,13 +170,13 @@
 
         if (state.isMoving) {
             if (dist > 15) { 
-                // ПОЛЕТ: Пузырь становится контуром
+                // ПОЛЕТ: Активируем контур и прозрачность
                 slider.classList.add('flying');
-                // Рост на дальних дистанциях на 5% больше (было 0.22 -> стало 0.27 при интенсивности 1)
+                // Рост на дальних дистанциях +5%
                 state.tsy = 1 + ((0.22 + (state.intensity === 1 ? 0.05 : 0)) * state.intensity); 
                 state.tsx = 1 - (0.10 * state.intensity); 
             } else if (dist <= 15 && dist > 0.5) {
-                // ПРИЗЕМЛЕНИЕ: Возвращаем заливку
+                // ПРИЗЕМЛЕНИЕ: Возвращаем заливку, убираем контур
                 slider.classList.remove('flying');
                 state.tsy = 1 - (0.05 * state.intensity); 
                 state.tsx = 1 + (0.08 * state.intensity); 
@@ -216,7 +218,6 @@
             state.w = state.tw;
             state.sx = 1; state.sy = 1;
         } else {
-            // Интенсивность 1 для дальних, 0.5 для соседних
             state.intensity = diff > 1 ? 1 : 0.55;
             state.isMoving = true;
 
