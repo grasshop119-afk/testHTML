@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iOS 26 Liquid Realtime</title>
+    <title>iOS 26 Liquid Pro Drag</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -105,20 +105,21 @@
             transform-origin: center center;
             box-sizing: border-box;
             border: 1px solid transparent;
-            will-change: transform, left, width, background-color, border-color;
-            transition: background-color 0.16s ease, border-color 0.16s ease, height 0.25s, top 0.25s;
+            will-change: transform, left, width;
         }
 
         .liquid-slider.flying {
             background-color: transparent !important;
             border-color: var(--pill-border-moving);
+            transition: background-color 0.16s, border-color 0.16s;
         }
 
         .liquid-slider.dragging {
             background-color: transparent !important;
             border-color: var(--pill-border-moving);
-            height: calc(100% + 6px); /* */
-            top: -3px;
+            height: calc(100% + 4px);
+            top: -2px;
+            transition: background-color 0.2s, border-color 0.2s, height 0.3s, top 0.3s;
         }
     </style>
 </head>
@@ -149,7 +150,7 @@
     const PHYSICS = {
         pos: { k: 380, d: 38, m: 1 },    
         scale: { k: 420, d: 24, m: 1 },
-        dragSpring: { k: 260, d: 20, m: 1 } 
+        dragSpring: { k: 280, d: 22, m: 1 } 
     };
 
     const slider = document.getElementById('slider');
@@ -185,22 +186,25 @@
                     slider.classList.add('flying');
                     state.tsy = 1 + (0.27 * state.intensity); 
                     state.tsx = 1 - (0.10 * state.intensity); 
-                } else {
+                } else if (dist <= 15 && dist > 0.5) {
                     slider.classList.remove('flying');
                     state.tsy = 1 - (0.05 * state.intensity); 
                     state.tsx = 1 + (0.08 * state.intensity); 
+                } else {
+                    state.tsx = 1; state.tsy = 1;
+                    if (Math.abs(state.vx) < 0.2) {
+                        state.isMoving = false;
+                        slider.classList.remove('flying');
+                    }
                 }
             }
             [state.x, state.vx] = spring(state.x, state.tx, state.vx, PHYSICS.pos);
             [state.w, state.vw] = spring(state.w, state.tw, state.vw, PHYSICS.pos);
+            [state.sx, state.vsx] = spring(state.sx, state.tsx, state.vsx, PHYSICS.scale);
+            [state.sy, state.vsy] = spring(state.sy, state.tsy, state.vsy, PHYSICS.scale);
         } else {
             [state.sx, state.vsx] = spring(state.sx, state.tsx, state.vsx, PHYSICS.dragSpring);
             [state.sy, state.vsy] = spring(state.sy, state.tsy, state.vsy, PHYSICS.dragSpring);
-        }
-
-        if (!state.isDragging) {
-            [state.sx, state.vsx] = spring(state.sx, state.tsx, state.vsx, PHYSICS.scale);
-            [state.sy, state.vsy] = spring(state.sy, state.tsy, state.vsy, PHYSICS.scale);
         }
 
         slider.style.left = `${state.x}px`;
@@ -210,15 +214,22 @@
         requestAnimationFrame(update);
     }
 
-    function selectTabDirect(index) {
-        if (state.currentIndex === index) return;
-        tabs.forEach((t, i) => {
-            t.classList.toggle('active', i === index);
-        });
-        state.currentIndex = index;
-        state.tw = tabs[index].offsetWidth;
-        state.tx = tabs[index].offsetLeft;
-        if (window.Telegram?.WebApp?.HapticFeedback) Telegram.WebApp.HapticFeedback.selectionChanged();
+    function setActive(el, instant = false) {
+        const newIdx = parseInt(el.dataset.index);
+        const diff = Math.abs(newIdx - state.currentIndex);
+        tabs.forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        state.tx = el.offsetLeft;
+        state.tw = el.offsetWidth;
+        state.currentIndex = newIdx;
+        if (instant) {
+            state.x = state.tx; state.w = state.tw;
+            state.sx = 1; state.sy = 1;
+        } else {
+            state.intensity = diff > 1 ? 1 : 0.6;
+            state.isMoving = true;
+            if (window.Telegram?.WebApp?.HapticFeedback) Telegram.WebApp.HapticFeedback.selectionChanged();
+        }
     }
 
     let longPressTimer;
@@ -233,8 +244,9 @@
             state.isDragging = true;
             state.isMoving = false;
             slider.classList.add('dragging');
-            state.tsx = 1.05; state.tsy = 1.05;
-            if (window.Telegram?.WebApp?.HapticFeedback) Telegram.WebApp.HapticFeedback.impactOccurred('light');
+            state.tsx = 1.05; 
+            state.tsy = 1.05;
+            if (window.Telegram?.WebApp?.HapticFeedback) Telegram.WebApp.HapticFeedback.impactOccurred('medium');
         }, 200);
     }
 
@@ -249,27 +261,33 @@
         let newX = touch.clientX - rect.left - dragOffset;
         newX = Math.max(4, Math.min(newX, rect.width - state.w - 4));
 
-        // Физика деформации (+5% к сплющиванию)
-        const speed = Math.abs(touch.clientX - state.lastMouseX);
-        if (speed > 1) {
-            state.tsx = 1 + (speed * 0.008); // Увеличенное растяжение
-            state.tsy = 1 - (speed * 0.005); // Увеличенное сплющивание
+        const speed = touch.clientX - state.lastMouseX;
+        if (Math.abs(speed) > 0.5) {
+            // Увеличено сплющивание на 5% (было 0.005/0.003 -> стало 0.008/0.005)
+            state.tsx = 1.05 + (Math.abs(speed) * 0.008);
+            state.tsy = 1.05 - (Math.abs(speed) * 0.005);
         } else {
-            state.tsx = 1.05; state.tsy = 1.05;
+            state.tsx = 1.05;
+            state.tsy = 1.05;
         }
 
         state.x = newX;
         state.lastMouseX = touch.clientX;
 
-        // РЕАЛЬНОЕ ВРЕМЯ: Проверяем, над какой иконкой центр пузырька
-        const bubbleCenter = state.x + (state.w / 2);
-        tabs.forEach((tab, i) => {
-            const tabStart = tab.offsetLeft;
-            const tabEnd = tabStart + tab.offsetWidth;
-            if (bubbleCenter >= tabStart && bubbleCenter <= tabEnd) {
-                selectTabDirect(i);
-            }
+        // ВЫБОР ИКОНКИ В ПРОЦЕССЕ (Live selection)
+        let closestTab = tabs[0];
+        let minDist = Infinity;
+        tabs.forEach(tab => {
+            const d = Math.abs(state.x - tab.offsetLeft);
+            if (d < minDist) { minDist = d; closestTab = tab; }
         });
+
+        if (parseInt(closestTab.dataset.index) !== state.currentIndex) {
+            tabs.forEach(t => t.classList.remove('active'));
+            closestTab.classList.add('active');
+            state.currentIndex = parseInt(closestTab.dataset.index);
+            if (window.Telegram?.WebApp?.HapticFeedback) Telegram.WebApp.HapticFeedback.selectionChanged();
+        }
     }
 
     function endDrag() {
@@ -279,22 +297,15 @@
         state.isDragging = false;
         slider.classList.remove('dragging');
         
-        // Приземляемся точно в текущую активную вкладку
+        // Финальная фиксация на уже выбранной в процессе вкладке
         const currentActive = document.querySelector('.tab-item.active');
-        state.tx = currentActive.offsetLeft;
-        state.tw = currentActive.offsetWidth;
-        state.isMoving = true;
+        setActive(currentActive);
     }
 
-    tabs.forEach((tab, i) => {
+    tabs.forEach(tab => {
         tab.addEventListener('mousedown', startDrag);
         tab.addEventListener('touchstart', startDrag, {passive: true});
-        tab.addEventListener('click', () => { 
-            if(!state.isDragging) {
-                selectTabDirect(i);
-                state.isMoving = true;
-            }
-        });
+        tab.addEventListener('click', () => { if(!state.isDragging) setActive(tab); });
     });
 
     window.addEventListener('mousemove', handleMove);
@@ -302,11 +313,9 @@
     window.addEventListener('mouseup', endDrag);
     window.addEventListener('touchend', endDrag);
 
-    // Initial load
-    const initial = tabs[0];
+    const initial = document.querySelector('.tab-item.active');
     state.tw = initial.offsetWidth;
-    state.x = initial.offsetLeft;
-    state.tx = initial.offsetLeft;
+    setActive(initial, true);
     requestAnimationFrame(update);
 </script>
 
