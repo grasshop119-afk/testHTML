@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iOS 26 Inertia Master</title>
+    <title>iOS 26 Liquid Realtime</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -80,14 +80,14 @@
             mask-size: contain;
             mask-repeat: no-repeat;
             mask-position: center;
-            transition: background-color 0.25s ease;
+            transition: background-color 0.2s ease;
         }
 
         .tab-text {
             font-size: 10px;
             font-weight: 500;
             color: var(--inactive-color);
-            transition: color 0.25s ease;
+            transition: color 0.2s ease;
         }
 
         .tab-item.active .icon-wrapper { background-color: var(--active-accent); }
@@ -106,7 +106,7 @@
             box-sizing: border-box;
             border: 1px solid transparent;
             will-change: transform, left, width, background-color, border-color;
-            transition: background-color 0.16s ease, border-color 0.16s ease;
+            transition: background-color 0.16s ease, border-color 0.16s ease, height 0.25s, top 0.25s;
         }
 
         .liquid-slider.flying {
@@ -117,9 +117,8 @@
         .liquid-slider.dragging {
             background-color: transparent !important;
             border-color: var(--pill-border-moving);
-            height: calc(100% + 4px);
-            top: -2px;
-            transition: background-color 0.2s, border-color 0.2s, height 0.3s, top 0.3s;
+            height: calc(100% + 6px); /* */
+            top: -3px;
         }
     </style>
 </head>
@@ -166,8 +165,7 @@
         isDragging: false,
         intensity: 1,
         currentIndex: 0,
-        lastMouseX: 0,
-        peakSpeed: 0 // Для замера силы сплющивания
+        lastMouseX: 0
     };
 
     function spring(current, target, velocity, config) {
@@ -187,16 +185,10 @@
                     slider.classList.add('flying');
                     state.tsy = 1 + (0.27 * state.intensity); 
                     state.tsx = 1 - (0.10 * state.intensity); 
-                } else if (dist <= 15 && dist > 0.5) {
+                } else {
                     slider.classList.remove('flying');
                     state.tsy = 1 - (0.05 * state.intensity); 
                     state.tsx = 1 + (0.08 * state.intensity); 
-                } else {
-                    state.tsx = 1; state.tsy = 1;
-                    if (Math.abs(state.vx) < 0.2) {
-                        state.isMoving = false;
-                        slider.classList.remove('flying');
-                    }
                 }
             }
             [state.x, state.vx] = spring(state.x, state.tx, state.vx, PHYSICS.pos);
@@ -218,22 +210,15 @@
         requestAnimationFrame(update);
     }
 
-    function setActive(el, instant = false) {
-        const newIdx = parseInt(el.dataset.index);
-        const diff = Math.abs(newIdx - state.currentIndex);
-        tabs.forEach(t => t.classList.remove('active'));
-        el.classList.add('active');
-        state.tx = el.offsetLeft;
-        state.tw = el.offsetWidth;
-        state.currentIndex = newIdx;
-        if (instant) {
-            state.x = state.tx; state.w = state.tw;
-            state.sx = 1; state.sy = 1;
-        } else {
-            state.intensity = diff > 1 ? 1 : 0.6;
-            state.isMoving = true;
-            if (window.Telegram?.WebApp?.HapticFeedback) Telegram.WebApp.HapticFeedback.selectionChanged();
-        }
+    function selectTabDirect(index) {
+        if (state.currentIndex === index) return;
+        tabs.forEach((t, i) => {
+            t.classList.toggle('active', i === index);
+        });
+        state.currentIndex = index;
+        state.tw = tabs[index].offsetWidth;
+        state.tx = tabs[index].offsetLeft;
+        if (window.Telegram?.WebApp?.HapticFeedback) Telegram.WebApp.HapticFeedback.selectionChanged();
     }
 
     let longPressTimer;
@@ -243,15 +228,13 @@
         const touch = e.touches ? e.touches[0] : e;
         const rect = slider.getBoundingClientRect();
         dragOffset = touch.clientX - rect.left;
-        state.peakSpeed = 0;
 
         longPressTimer = setTimeout(() => {
             state.isDragging = true;
             state.isMoving = false;
             slider.classList.add('dragging');
-            state.tsx = 1.05; 
-            state.tsy = 1.05;
-            if (window.Telegram?.WebApp?.HapticFeedback) Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+            state.tsx = 1.05; state.tsy = 1.05;
+            if (window.Telegram?.WebApp?.HapticFeedback) Telegram.WebApp.HapticFeedback.impactOccurred('light');
         }, 200);
     }
 
@@ -266,32 +249,27 @@
         let newX = touch.clientX - rect.left - dragOffset;
         newX = Math.max(4, Math.min(newX, rect.width - state.w - 4));
 
+        // Физика деформации (+5% к сплющиванию)
         const speed = Math.abs(touch.clientX - state.lastMouseX);
-        state.peakSpeed = Math.max(state.peakSpeed, speed); // Запоминаем макс. скорость рывка
-
         if (speed > 1) {
-            // Растяжение при движении
-            state.tsx = 1 + (speed * 0.006);
-            state.tsy = 1 - (speed * 0.004);
+            state.tsx = 1 + (speed * 0.008); // Увеличенное растяжение
+            state.tsy = 1 - (speed * 0.005); // Увеличенное сплющивание
         } else {
-            // Остановка пальца: эффект сплющивания зависит от peakSpeed
-            const squishIntensity = Math.min(state.peakSpeed * 0.015, 0.12);
-            state.tsx = 1 + squishIntensity;
-            state.tsy = 1 - squishIntensity;
-            
-            // Сбрасываем пиковую скорость постепенно
-            state.peakSpeed *= 0.8;
-            
-            // Пружина сама вернет к 1.05/1.05 в update()
-            setTimeout(() => {
-                if (state.isDragging && Math.abs(touch.clientX - state.lastMouseX) < 1) {
-                    state.tsx = 1.05; state.tsy = 1.05;
-                }
-            }, 80);
+            state.tsx = 1.05; state.tsy = 1.05;
         }
 
         state.x = newX;
         state.lastMouseX = touch.clientX;
+
+        // РЕАЛЬНОЕ ВРЕМЯ: Проверяем, над какой иконкой центр пузырька
+        const bubbleCenter = state.x + (state.w / 2);
+        tabs.forEach((tab, i) => {
+            const tabStart = tab.offsetLeft;
+            const tabEnd = tabStart + tab.offsetWidth;
+            if (bubbleCenter >= tabStart && bubbleCenter <= tabEnd) {
+                selectTabDirect(i);
+            }
+        });
     }
 
     function endDrag() {
@@ -301,24 +279,22 @@
         state.isDragging = false;
         slider.classList.remove('dragging');
         
-        // Логика захвата ближайшей иконки
-        let closestTab = tabs[0];
-        let minDist = Infinity;
-        const sliderMid = state.x + (state.w / 2);
-
-        tabs.forEach(tab => {
-            const tabMid = tab.offsetLeft + (tab.offsetWidth / 2);
-            const d = Math.abs(sliderMid - tabMid);
-            if (d < minDist) { minDist = d; closestTab = tab; }
-        });
-
-        setActive(closestTab);
+        // Приземляемся точно в текущую активную вкладку
+        const currentActive = document.querySelector('.tab-item.active');
+        state.tx = currentActive.offsetLeft;
+        state.tw = currentActive.offsetWidth;
+        state.isMoving = true;
     }
 
-    tabs.forEach(tab => {
+    tabs.forEach((tab, i) => {
         tab.addEventListener('mousedown', startDrag);
         tab.addEventListener('touchstart', startDrag, {passive: true});
-        tab.addEventListener('click', () => { if(!state.isDragging) setActive(tab); });
+        tab.addEventListener('click', () => { 
+            if(!state.isDragging) {
+                selectTabDirect(i);
+                state.isMoving = true;
+            }
+        });
     });
 
     window.addEventListener('mousemove', handleMove);
@@ -326,9 +302,11 @@
     window.addEventListener('mouseup', endDrag);
     window.addEventListener('touchend', endDrag);
 
-    const initial = document.querySelector('.tab-item.active');
+    // Initial load
+    const initial = tabs[0];
     state.tw = initial.offsetWidth;
-    setActive(initial, true);
+    state.x = initial.offsetLeft;
+    state.tx = initial.offsetLeft;
     requestAnimationFrame(update);
 </script>
 
