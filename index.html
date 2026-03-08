@@ -3,18 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iOS 26 Stealth Liquid Glass</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>Apple Liquid Lens TabBar</title>
     <style>
         :root {
             --bg-color: #000000;
-            --tab-bar-bg: rgba(28, 28, 30, 0.9);
+            --tab-bar-bg: rgba(28, 28, 30, 0.92);
             --active-accent: #007AFF;
             --inactive-color: #8e8e93;
-            --pill-bg: rgba(255, 255, 255, 0.12);
-            --pill-border-moving: rgba(255, 255, 255, 0.25);
-            /* Переменная для динамического отступа */
-            --dynamic-gap: 12px;
+            --pill-border-moving: rgba(255, 255, 255, 0.2);
         }
 
         body {
@@ -28,149 +24,169 @@
             overflow: hidden;
         }
 
-        /* SVG фильтр для эффекта жидкости */
-        .liquid-filter {
-            position: absolute;
-            width: 0; height: 0;
-            pointer-events: none;
-        }
-
+        /* Контейнер панели */
         .tab-bar-container {
             margin-bottom: calc(15px + env(safe-area-inset-bottom));
             width: 92%;
             max-width: 400px;
-            display: flex;
-            justify-content: center;
+            position: relative;
         }
 
         .ios-tab-bar {
             position: relative;
             background: var(--tab-bar-bg);
-            /* Размытие для стекла */
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
             border-radius: 38px;
-            display: flex;
             padding: 4px;
             border: 0.5px solid rgba(255, 255, 255, 0.08);
-            width: 100%;
+            display: flex;
             justify-content: space-around;
-            /* Применение SVG фильтра для стягивания */
-            filter: url('#liquid');
-            gap: var(--dynamic-gap); /* Используем динамический отступ */
+            overflow: hidden; /* Важно для работы маски */
         }
 
-        .tab-item {
-            position: relative;
-            z-index: 2;
-            padding: 8px 0;
+        /* Слой 1: Неактивные (серые) иконки */
+        .static-icons {
+            position: absolute;
+            top: 4px; left: 4px; right: 4px; bottom: 4px;
+            display: flex;
+            justify-content: space-around;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Слой 2: Активные (цветные) иконки, которые проявит линза */
+        .active-icons-layer {
+            position: absolute;
+            top: 4px; left: 4px; right: 4px; bottom: 4px;
+            display: flex;
+            justify-content: space-around;
+            z-index: 3;
+            pointer-events: none;
+            /* Эта часть будет видна только через пузырек */
+            clip-path: inset(0 0 0 0); 
+        }
+
+        .tab-item-visual {
+            flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            background: none;
-            border: none;
-            flex: 1;
-            cursor: pointer;
-            outline: none;
+            padding: 8px 0;
         }
 
-        .icon-wrapper {
+        /* Невидимые кнопки для кликов */
+        .click-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            z-index: 10;
+        }
+        .click-target { flex: 1; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+
+        .icon-img {
             width: 24px;
             height: 24px;
             margin-bottom: 4px;
-            background-color: var(--inactive-color);
             -webkit-mask-size: contain;
             -webkit-mask-repeat: no-repeat;
             -webkit-mask-position: center;
-            mask-size: contain;
-            mask-repeat: no-repeat;
-            mask-position: center;
-            transition: background-color 0.25s ease;
         }
 
-        .tab-text {
-            font-size: 10px;
-            font-weight: 500;
-            color: var(--inactive-color);
-            transition: color 0.25s ease;
-        }
+        /* Цвета слоев */
+        .static-icons .icon-img { background-color: var(--inactive-color); }
+        .static-icons .tab-text { color: var(--inactive-color); font-size: 10px; font-weight: 500; }
 
-        .tab-item.active .icon-wrapper { background-color: var(--active-accent); }
-        .tab-item.active .tab-text { color: var(--active-accent); }
+        .active-icons-layer .icon-img { background-color: var(--active-accent); }
+        .active-icons-layer .tab-text { color: var(--active-accent); font-size: 10px; font-weight: 500; }
 
-        .liquid-slider {
+        /* Пузырек-линза */
+        .liquid-lens {
             position: absolute;
             top: 4px;
             left: 4px;
             height: calc(100% - 8px);
-            background: var(--pill-bg);
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 34px;
-            z-index: 1;
+            z-index: 2;
             pointer-events: none;
-            transform-origin: center center;
             box-sizing: border-box;
             border: 1px solid transparent;
-            will-change: transform, left, width, background-color, border-color;
-            transition: background-color 0.16s ease-out, border-color 0.16s ease-out;
+            
+            /* Эффект преломления и деформации */
+            backdrop-filter: blur(10px) brightness(1.1) scale(1.05);
+            -webkit-backdrop-filter: blur(10px) brightness(1.1);
+            
+            will-change: transform, left, width, border-color;
+            transition: border-color 0.2s, background-color 0.2s;
         }
 
-        .liquid-slider.flying {
-            background-color: transparent !important;
+        .liquid-lens.flying {
             border-color: var(--pill-border-moving);
+            background-color: transparent;
         }
     </style>
 </head>
 <body>
 
-    <svg class="liquid-filter">
-        <defs>
-            <filter id="liquid">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
-                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="liquid" />
-                <feComposite in="SourceGraphic" in2="liquid" operator="atop"/>
-            </filter>
-        </defs>
-    </svg>
-
 <div class="tab-bar-container">
-    <nav class="ios-tab-bar" id="tabBar">
-        <div class="liquid-slider" id="slider"></div>
+    <div class="ios-tab-bar">
+        <div class="static-icons">
+            <div class="tab-item-visual">
+                <div class="icon-img" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/6997/6997164.png');"></div>
+                <span class="tab-text">Главная</span>
+            </div>
+            <div class="tab-item-visual">
+                <div class="icon-img" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/2769/2769160.png');"></div>
+                <span class="tab-text">Меню</span>
+            </div>
+            <div class="tab-item-visual">
+                <div class="icon-img" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/9959/9959489.png');"></div>
+                <span class="tab-text">Настройки</span>
+            </div>
+        </div>
 
-        <button class="tab-item active" data-index="0">
-            <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/6997/6997164.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/6997/6997164.png');"></div>
-            <span class="tab-text">Главная</span>
-        </button>
+        <div class="liquid-lens" id="lens"></div>
 
-        <button class="tab-item" data-index="1">
-            <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/2769/2769160.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/2769/2769160.png');"></div>
-            <span class="tab-text">Меню</span>
-        </button>
+        <div class="active-icons-layer" id="activeLayer">
+            <div class="tab-item-visual">
+                <div class="icon-img" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/6997/6997164.png');"></div>
+                <span class="tab-text">Главная</span>
+            </div>
+            <div class="tab-item-visual">
+                <div class="icon-img" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/2769/2769160.png');"></div>
+                <span class="tab-text">Меню</span>
+            </div>
+            <div class="tab-item-visual">
+                <div class="icon-img" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/9959/9959489.png');"></div>
+                <span class="tab-text">Настройки</span>
+            </div>
+        </div>
 
-        <button class="tab-item" data-index="2">
-            <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/9959/9959489.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/9959/9959489.png');"></div>
-            <span class="tab-text">Настройки</span>
-        </button>
-    </nav>
+        <div class="click-layer">
+            <div class="click-target" data-index="0"></div>
+            <div class="click-target" data-index="1"></div>
+            <div class="click-target" data-index="2"></div>
+        </div>
+    </div>
 </div>
 
 <script>
+    const lens = document.getElementById('lens');
+    const activeLayer = document.getElementById('activeLayer');
+    const targets = document.querySelectorAll('.click-target');
+
     const PHYSICS = {
         pos: { k: 380, d: 38, m: 1 },
         scale: { k: 420, d: 24, m: 1 }
     };
-
-    const slider = document.getElementById('slider');
-    const tabBar = document.getElementById('tabBar');
-    const tabs = document.querySelectorAll('.tab-item');
 
     let state = {
         x: 0, tx: 0, vx: 0,
         w: 0, tw: 0, vw: 0,
         sx: 1, tsx: 1, vsx: 0,
         sy: 1, tsy: 1, vsy: 0,
-        isMoving: false,
-        intensity: 1,
-        currentIndex: 0
+        isMoving: false, intensity: 1
     };
 
     function spring(current, target, velocity, config) {
@@ -184,32 +200,17 @@
 
     function update() {
         const dist = Math.abs(state.x - state.tx);
-        const vel = Math.abs(state.vx);
-
+        
         if (state.isMoving) {
-            // Динамическое изменение gap для эффекта "стягивания жидкости"
-            let dynamicGap;
-            if (dist > 15) {
-                dynamicGap = 0; // Стягиваем жидкость в полете
-                slider.classList.add('flying');
-                state.tsy = 1 + ((0.27) * state.intensity);
+            if (dist > 10) {
+                lens.classList.add('flying');
+                state.tsy = 1 + (0.27 * state.intensity); 
                 state.tsx = 1 - (0.10 * state.intensity);
-            } else if (dist <= 15 && dist > 0.5) {
-                dynamicGap = 8; // Частично восстанавливаем gap при приземлении
-                slider.classList.remove('flying');
+            } else {
+                lens.classList.remove('flying');
                 state.tsy = 1 - (0.05 * state.intensity);
                 state.tsx = 1 + (0.08 * state.intensity);
-            } else {
-                dynamicGap = 12; // Нормальный gap в покое
-                state.tsx = 1;
-                state.tsy = 1;
-                if (vel < 0.2 && Math.abs(state.vsx) < 0.2) {
-                    state.isMoving = false;
-                    slider.classList.remove('flying');
-                }
             }
-            // Плавно применяем динамический gap
-            tabBar.style.setProperty('--dynamic-gap', `${dynamicGap}px`);
         }
 
         [state.x, state.vx] = spring(state.x, state.tx, state.vx, PHYSICS.pos);
@@ -217,44 +218,39 @@
         [state.sx, state.vsx] = spring(state.sx, state.tsx, state.vsx, PHYSICS.scale);
         [state.sy, state.vsy] = spring(state.sy, state.tsy, state.vsy, PHYSICS.scale);
 
-        slider.style.left = `${state.x}px`;
-        slider.style.width = `${state.w}px`;
-        slider.style.transform = `scale(${state.sx}, ${state.sy})`;
+        // Двигаем линзу
+        lens.style.left = `${state.x}px`;
+        lens.style.width = `${state.w}px`;
+        lens.style.transform = `scale(${state.sx}, ${state.sy})`;
+
+        // ГЛАВНЫЙ СЕКРЕТ: Обрезаем цветной слой точно по границам линзы
+        // Используем clip-path, чтобы показать цветные иконки только под пузырьком
+        const left = state.x;
+        const right = state.x + state.w;
+        activeLayer.style.clipPath = `inset(0 calc(100% - ${right}px) 0 ${left}px)`;
 
         requestAnimationFrame(update);
     }
 
-    function setActive(el, instant = false) {
-        const newIdx = parseInt(el.dataset.index);
-        const diff = Math.abs(newIdx - (state.currentIndex || 0));
-
-        tabs.forEach(t => t.classList.remove('active'));
-        el.classList.add('active');
-
-        state.tx = el.offsetLeft;
-        state.tw = el.offsetWidth;
-        state.currentIndex = newIdx;
-
-        if (instant) {
-            state.x = state.tx;
-            state.w = state.tw;
-            state.sx = 1; state.sy = 1;
-        } else {
-            state.intensity = diff > 1 ? 1 : 0.6;
+    targets.forEach(t => {
+        t.addEventListener('click', () => {
+            const idx = parseInt(t.dataset.index);
+            state.tx = t.offsetLeft;
+            state.tw = t.offsetWidth;
             state.isMoving = true;
-
+            state.intensity = Math.abs(state.x - state.tx) > 150 ? 1 : 0.6;
+            
             if (window.Telegram?.WebApp?.HapticFeedback) {
                 Telegram.WebApp.HapticFeedback.selectionChanged();
             }
-        }
-    }
+        });
+    });
 
-    tabs.forEach(tab => tab.addEventListener('click', () => setActive(tab)));
-
-    const initial = document.querySelector('.tab-item.active');
-    setActive(initial, true);
-    requestAnimationFrame(update);
+    // Инициализация
+    const first = targets[0];
+    state.x = state.tx = first.offsetLeft;
+    state.w = state.tw = first.offsetWidth;
+    update();
 </script>
-
 </body>
 </html>
