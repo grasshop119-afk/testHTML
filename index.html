@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iOS 26 Liquid Pro</title>
+    <title>iOS 26 Liquid Smooth</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -58,7 +58,7 @@
             min-width: 95px;
             cursor: pointer;
             outline: none;
-            transform: none !important;
+            transform: none !important; /* Иконки статичны */
         }
 
         .tab-icon {
@@ -66,7 +66,7 @@
             height: 24px;
             margin-bottom: 4px;
             fill: var(--text-inactive);
-            transition: fill 0.15s ease;
+            transition: fill 0.2s ease;
             pointer-events: none;
         }
 
@@ -74,7 +74,7 @@
             font-size: 11px;
             font-weight: 500;
             color: var(--text-inactive);
-            transition: color 0.15s ease;
+            transition: color 0.2s ease;
             pointer-events: none;
         }
 
@@ -136,10 +136,10 @@
 </div>
 
 <script>
-    // Разогнанная физика для мгновенного отклика
+    // Настройки для более плавного и "вязкого" движения
     const PHYSICS = {
-        pos: { k: 550, d: 42, m: 1 },    // Еще быстрее позиция
-        scale: { k: 850, d: 30, m: 1 }   // Экстремально резкая шкала
+        pos: { k: 380, d: 38, m: 1 },    // Плавное замедление (было k:550, d:42)
+        scale: { k: 420, d: 24, m: 1 }   // Деформация капельку медленнее (было k:850)
     };
 
     const slider = document.getElementById('slider');
@@ -169,34 +169,30 @@
         const vel = Math.abs(state.vx);
 
         if (state.isMoving) {
-            // Динамическая смена таргетов формы в зависимости от расстояния
-            if (dist > 12) { 
-                // 1) ВЗЛЕТ И ПОЛЕТ (одновременно быстро)
-                state.tsy = 1 + (0.35 * state.intensity); 
-                state.tsx = 1 - (0.25 * state.intensity); 
-            } else if (dist <= 12 && dist > 0.5) {
-                // 2) УДАР / ПРИЗЕМЛЕНИЕ (резко расплющивается)
-                state.tsy = 1 - (0.3 * state.intensity); 
-                state.tsx = 1 + (0.4 * state.intensity); 
+            if (dist > 15) { 
+                // ПОЛЕТ: чуть меньше вытяжение
+                state.tsy = 1 + (0.25 * state.intensity); 
+                state.tsx = 1 - (0.15 * state.intensity); 
+            } else if (dist <= 15 && dist > 0.5) {
+                // УДАР: сплющивание не такое сильное (было 0.3 и 0.4)
+                state.tsy = 1 - (0.15 * state.intensity); 
+                state.tsx = 1 + (0.18 * state.intensity); 
             } else {
-                // 3) ВОЗВРАТ В НОРМУ + МИКРО-СЖАТИЕ (пружина сама сделает отскок)
+                // ПРИЗЕМЛЕНИЕ: возврат к норме с мягким овершутом
                 state.tsx = 1;
                 state.tsy = 1;
                 
-                // Если скорость почти нулевая — гасим
-                if (vel < 0.5 && Math.abs(state.vsx) < 0.5) {
+                if (vel < 0.2 && Math.abs(state.vsx) < 0.2) {
                     state.isMoving = false;
                 }
             }
         }
 
-        // Применяем физику
         [state.x, state.vx] = spring(state.x, state.tx, state.vx, PHYSICS.pos);
         [state.w, state.vw] = spring(state.w, state.tw, state.vw, PHYSICS.pos);
         [state.sx, state.vsx] = spring(state.sx, state.tsx, state.vsx, PHYSICS.scale);
         [state.sy, state.vsy] = spring(state.sy, state.tsy, state.vsy, PHYSICS.scale);
 
-        // Рендер
         slider.style.left = `${state.x}px`;
         slider.style.width = `${state.w}px`;
         slider.style.transform = `scale(${state.sx}, ${state.sy})`;
@@ -220,18 +216,17 @@
             state.w = state.tw;
             state.sx = 1; state.sy = 1;
         } else {
-            state.intensity = diff > 1 ? 1 : 0.55;
+            state.intensity = diff > 1 ? 1 : 0.5;
             state.isMoving = true;
 
             if (window.Telegram?.WebApp?.HapticFeedback) {
-                Telegram.WebApp.HapticFeedback.impactOccurred('light');
+                Telegram.WebApp.HapticFeedback.selectionChanged();
             }
         }
     }
 
     tabs.forEach(tab => tab.addEventListener('click', () => setActive(tab)));
 
-    // Инициализация
     const initial = document.querySelector('.tab-item.active');
     setActive(initial, true);
     requestAnimationFrame(update);
