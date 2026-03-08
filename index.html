@@ -3,18 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iOS 26 Liquid Lens Pro</title>
+    <title>iOS 26 Liquid Glass</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
             --bg-color: #000000;
-            --tab-bar-bg: rgba(28, 28, 30, 0.95);
+            --tab-bar-bg: rgba(28, 28, 30, 0.92);
             --active-accent: #007AFF;
             --inactive-color: #8e8e93;
-            --pill-bg-hover: rgba(255, 255, 255, 0.03);
-            --pill-border-moving: rgba(255, 255, 255, 0.35); 
-            /* Параметры линзы */
-            --lens-distort: 15px; /* Сила искажения по краям */
+            /* Базовая заливка пузырька */
+            --pill-bg: rgba(255, 255, 255, 0.1); 
         }
 
         body {
@@ -39,16 +37,14 @@
         .ios-tab-bar {
             position: relative;
             background: var(--tab-bar-bg);
-            backdrop-filter: blur(25px) saturate(200%);
-            -webkit-backdrop-filter: blur(25px) saturate(200%);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
             border-radius: 38px;
             display: flex;
             padding: 4px;
-            border: 0.5px solid rgba(255, 255, 255, 0.1);
+            border: 0.5px solid rgba(255, 255, 255, 0.08);
             width: 100%;
             justify-content: space-around;
-            /* Важно для работы SVG фильтра */
-            filter: url(#liquid-lens-filter);
         }
 
         .tab-item {
@@ -63,153 +59,103 @@
             flex: 1;
             cursor: pointer;
             outline: none;
-        }
-
-        /* Эффект окрашивания на части иконки */
-        .icon-and-text-container {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            /* Смешивание цветов */
-            mix-blend-mode: plus-lighter; 
-        }
-
-        /* Слой с неактивным серым цветом */
-        .inactive-layer {
-            position: relative;
-            z-index: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* Слой с активным синим цветом, который проявляется линзой */
-        .active-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 2;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            /* Прячем, пока не наедет линза */
-            -webkit-mask-image: var(--lens-mask);
-            mask-image: var(--lens-mask);
-            -webkit-mask-size: 0 0;
-            mask-size: 0 0;
-            -webkit-mask-repeat: no-repeat;
-            mask-repeat: no-repeat;
+            transform: none !important; /* Иконки не двигаются */
         }
 
         .icon-wrapper {
             width: 24px;
             height: 24px;
             margin-bottom: 4px;
+            background-color: var(--inactive-color);
             -webkit-mask-size: contain;
             -webkit-mask-repeat: no-repeat;
             -webkit-mask-position: center;
-            mask-size: contain;
-            mask-repeat: no-repeat;
-            mask-position: center;
+            transition: background-color 0.25s ease;
         }
 
         .tab-text {
             font-size: 10px;
             font-weight: 500;
+            color: var(--inactive-color);
+            transition: color 0.25s ease;
         }
 
-        /* Цвета для неактивного слоя */
-        .inactive-layer .icon-wrapper { background-color: var(--inactive-color); }
-        .inactive-layer .tab-text { color: var(--inactive-color); }
+        .tab-item.active .icon-wrapper { background-color: var(--active-accent); }
+        .tab-item.active .tab-text { color: var(--active-accent); }
 
-        /* Цвета для активного слоя */
-        .active-layer .icon-wrapper { background-color: var(--active-accent); }
-        .active-layer .tab-text { color: var(--active-accent); }
-
-
-        .liquid-slider {
+        /* Эффект "жидкого стекла" (Liquid Glass) */
+        .liquid-glass-slider {
             position: absolute;
             top: 4px;
             left: 4px;
             height: calc(100% - 8px);
-            background: var(--pill-bg-hover);
+            background: var(--pill-bg);
             border-radius: 34px;
             z-index: 1;
             pointer-events: none;
             transform-origin: center center;
             box-sizing: border-box;
-            border: 1px solid transparent;
-            will-change: transform, left, width, background-color, border-color, filter;
-            transition: background-color 0.16s ease, border-color 0.16s ease;
+            will-change: transform, left, width, background, filter;
             
-            /* Хроматическая аберрация по краям линзы */
-            filter: drop-shadow(2px 0 0px rgba(255, 0, 0, 0)) drop-shadow(-2px 0 0px rgba(0, 0, 255, 0));
+            /* Создаем многослойное стекло с преломлением */
+            overflow: hidden; /* Важно для обрезки эффектов внутри */
+            border: 0.5px solid rgba(255, 255, 255, 0.05);
+
+            /* Быстрый переход для включения/выключения эффекта */
+            transition: background 0.15s ease, filter 0.15s ease;
         }
 
-        /* Состояние полета: контур + аберрация */
-        .liquid-slider.flying {
-            background-color: transparent !important; 
-            border-color: var(--pill-border-moving);
-            filter: drop-shadow(2px 0 1px rgba(255, 0, 0, 0.3)) drop-shadow(-2px 0 1px rgba(0, 0, 255, 0.3));
+        /* Слой "хроматического преломления" (Радужное свечение по краям) */
+        .liquid-glass-slider::before {
+            content: '';
+            position: absolute;
+            inset: -20px; /* Выходим за пределы, чтобы поймать край */
+            background: conic-gradient(
+                from 180deg at 50% 50%,
+                rgba(255, 0, 0, 0.2) 0deg,
+                rgba(255, 255, 0, 0.2) 60deg,
+                rgba(0, 255, 0, 0.2) 120deg,
+                rgba(0, 255, 255, 0.2) 180deg,
+                rgba(0, 0, 255, 0.2) 240deg,
+                rgba(255, 0, 255, 0.2) 300deg,
+                rgba(255, 0, 0, 0.2) 360deg
+            );
+            /* Усиливаем контраст на гранях для получения "жидкого" эффекта */
+            filter: blur(10px) contrast(15);
+            opacity: 0; /* Невидимый в покое */
+            transition: opacity 0.2s ease;
+        }
+
+        /* Состояние ПОЛЕТА: Активируем "жидкое стекло" */
+        .liquid-glass-slider.flying {
+            background: rgba(255, 255, 255, 0.05); /* Уменьшаем заливку */
+            filter: saturate(200%); /* Усиливаем цвета */
+        }
+
+        .liquid-glass-slider.flying::before {
+            opacity: 1; /* Проявление радужных граней */
         }
     </style>
 </head>
 <body>
 
-<svg width="0" height="0" style="position:absolute;">
-  <defs>
-    <filter id="liquid-lens-filter" x="-20%" y="-20%" width="140%" height="140%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" result="noise" />
-      <feDisplacementMap in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G" result="distort" id="lensDisplacementMap" />
-      <feComposite in="distort" in2="SourceGraphic" operator="arithmetic" k1="0" k2="1" k3="0" k4="0" />
-    </filter>
-  </defs>
-</svg>
-
 <div class="tab-bar-container">
     <nav class="ios-tab-bar" id="tabBar">
-        <div class="liquid-slider" id="slider"></div>
+        <div class="liquid-glass-slider" id="slider"></div>
 
         <button class="tab-item active" data-index="0">
-            <div class="icon-and-text-container">
-                <div class="inactive-layer">
-                    <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/6997/6997164.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/6997/6997164.png');"></div>
-                    <span class="tab-text">Главная</span>
-                </div>
-                <div class="active-layer">
-                    <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/6997/6997164.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/6997/6997164.png');"></div>
-                    <span class="tab-text">Главная</span>
-                </div>
-            </div>
+            <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/6997/6997164.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/6997/6997164.png');"></div>
+            <span class="tab-text">Главная</span>
         </button>
 
         <button class="tab-item" data-index="1">
-            <div class="icon-and-text-container">
-                <div class="inactive-layer">
-                    <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/2769/2769160.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/2769/2769160.png');"></div>
-                    <span class="tab-text">Меню</span>
-                </div>
-                <div class="active-layer">
-                    <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/2769/2769160.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/2769/2769160.png');"></div>
-                    <span class="tab-text">Меню</span>
-                </div>
-            </div>
+            <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/2769/2769160.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/2769/2769160.png');"></div>
+            <span class="tab-text">Меню</span>
         </button>
 
         <button class="tab-item" data-index="2">
-            <div class="icon-and-text-container">
-                <div class="inactive-layer">
-                    <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/9959/9959489.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/9959/9959489.png');"></div>
-                    <span class="tab-text">Настройки</span>
-                </div>
-                <div class="active-layer">
-                    <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/9959/9959489.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/9959/9959489.png');"></div>
-                    <span class="tab-text">Настройки</span>
-                </div>
-            </div>
+            <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/9959/9959489.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/9959/9959489.png');"></div>
+            <span class="tab-text">Настройки</span>
         </button>
     </nav>
 </div>
@@ -222,9 +168,6 @@
 
     const slider = document.getElementById('slider');
     const tabs = document.querySelectorAll('.tab-item');
-    const tabBar = document.getElementById('tabBar');
-    const displacementMap = document.getElementById('lensDisplacementMap');
-    const activeLayers = document.querySelectorAll('.active-layer');
 
     let state = {
         x: 0, tx: 0, vx: 0,
@@ -245,41 +188,19 @@
         return [current, velocity];
     }
 
-    function updateEffects() {
-        const vel = Math.abs(state.vx);
-        const style = getComputedStyle(document.documentElement);
-        
-        // 1 & 2: Искажение линзы по краям (Френель)
-        const distortIntensity = Math.min(parseInt(style.getPropertyValue('--lens-distort')), vel / 80);
-        displacementMap.setAttribute('scale', distortIntensity);
-
-        // 3: Динамическое окрашивание части иконки
-        // Мы используем позицию и размер слайдера для создания CSS маски
-        const maskURL = `radial-gradient(ellipse ${state.w/2}px ${state.sy * state.w/2.5}px at ${state.x + state.w/2}px center, black 0%, black 80%, transparent 100%)`;
-        
-        activeLayers.forEach(layer => {
-            layer.style.maskImage = maskURL;
-            layer.style.webkitMaskImage = maskURL;
-            // Размер маски делаем больше родителя, чтобы покрыть иконку
-            layer.style.maskSize = `${tabBar.offsetWidth * 1.5}px ${tabBar.offsetHeight * 2}px`;
-            layer.style.webkitMaskSize = `${tabBar.offsetWidth * 1.5}px ${tabBar.offsetHeight * 2}px`;
-            // Центрируем маску относительно таббара
-            layer.style.maskPosition = `calc(50% - ${state.x}px) center`;
-            layer.style.webkitMaskPosition = `calc(50% - ${state.x}px) center`;
-        });
-    }
-
     function update() {
         const dist = Math.abs(state.x - state.tx);
         const vel = Math.abs(state.vx);
 
         if (state.isMoving) {
             if (dist > 15) { 
+                // ПОЛЕТ (Включаем жидкое стекло)
                 slider.classList.add('flying');
                 // Рост на дальних дистанциях +5%
-                state.tsy = 1 + ((0.27) * state.intensity); 
+                state.tsy = 1 + ((0.22 + (state.intensity === 1 ? 0.05 : 0)) * state.intensity); 
                 state.tsx = 1 - (0.10 * state.intensity); 
             } else if (dist <= 15 && dist > 0.5) {
+                // ПРИЗЕМЛЕНИЕ (Деликатное сплющивание 8-10%)
                 slider.classList.remove('flying');
                 state.tsy = 1 - (0.05 * state.intensity); 
                 state.tsx = 1 + (0.08 * state.intensity); 
@@ -298,13 +219,9 @@
         [state.sx, state.vsx] = spring(state.sx, state.tsx, state.vsx, PHYSICS.scale);
         [state.sy, state.vsy] = spring(state.sy, state.tsy, state.vsy, PHYSICS.scale);
 
-        // Обновляем позицию слайдера
         slider.style.left = `${state.x}px`;
         slider.style.width = `${state.w}px`;
         slider.style.transform = `scale(${state.sx}, ${state.sy})`;
-
-        // Обновляем эффекты линзы и окрашивания
-        updateEffects();
 
         requestAnimationFrame(update);
     }
@@ -336,7 +253,6 @@
 
     tabs.forEach(tab => tab.addEventListener('click', () => setActive(tab)));
 
-    // Инициализация
     const initial = document.querySelector('.tab-item.active');
     setActive(initial, true);
     requestAnimationFrame(update);
