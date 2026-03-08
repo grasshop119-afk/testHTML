@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iOS 26 Liquid Drag</title>
+    <title>iOS 26 Liquid Pro Drag</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -16,10 +16,10 @@
         }
 
         * {
-            /* запретим выделение объектов */
             -webkit-user-select: none;
             user-select: none;
             -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -39,7 +39,7 @@
             max-width: 400px;
             display: flex;
             justify-content: center;
-            touch-action: none; /* Предотвращаем системный скролл при драге */
+            touch-action: none;
         }
 
         .ios-tab-bar {
@@ -106,17 +106,10 @@
             box-sizing: border-box;
             border: 1px solid transparent;
             will-change: transform, left, width, background-color, border-color;
-            transition: background-color 0.16s ease-out, border-color 0.16s ease-out;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
         }
 
-        .liquid-slider.flying {
-            background-color: transparent !important;
-            border-color: var(--pill-border-moving);
-        }
-
-        /* Состояние при прямом переносе пальцем */
-        .liquid-slider.dragging {
-            transition: background-color 0.2s ease, border-color 0.2s ease; /* Убираем transition для left/width для мгновенного следования */
+        .liquid-slider.flying, .liquid-slider.dragging {
             background-color: transparent !important;
             border-color: var(--pill-border-moving);
         }
@@ -147,13 +140,13 @@
 
 <script>
     const PHYSICS = {
-        pos: { k: 380, d: 38, m: 1 },    
-        scale: { k: 420, d: 24, m: 1 }   
+        pos: { k: 400, d: 35, m: 1 },    
+        scale: { k: 350, d: 20, m: 1 }   
     };
 
     const slider = document.getElementById('slider');
     const tabs = document.querySelectorAll('.tab-item');
-    const dragZone = document.getElementById('dragZone');
+    const tabBar = document.getElementById('tabBar');
 
     let state = {
         x: 0, tx: 0, vx: 0,
@@ -163,7 +156,8 @@
         isMoving: false,
         isDragging: false,
         intensity: 1,
-        currentIndex: 0
+        currentIndex: 0,
+        lastMouseX: 0
     };
 
     function spring(current, target, velocity, config) {
@@ -176,29 +170,34 @@
     }
 
     function update() {
+        // Логика автоматического полета (не драга)
         if (!state.isDragging) {
             const dist = Math.abs(state.x - state.tx);
-            const vel = Math.abs(state.vx);
-
             if (state.isMoving) {
-                if (dist > 15) { 
+                if (dist > 15) {
                     slider.classList.add('flying');
                     state.tsy = 1 + (0.27 * state.intensity); 
                     state.tsx = 1 - (0.10 * state.intensity); 
-                } else if (dist <= 15 && dist > 0.5) {
-                    slider.classList.remove('flying');
-                    state.tsy = 1 - (0.05 * state.intensity); 
-                    state.tsx = 1 + (0.08 * state.intensity); 
                 } else {
+                    slider.classList.remove('flying');
                     state.tsx = 1; state.tsy = 1;
-                    if (vel < 0.2) {
-                        state.isMoving = false;
-                        slider.classList.remove('flying');
-                    }
+                    if (dist < 0.5 && Math.abs(state.vx) < 0.5) state.isMoving = false;
                 }
             }
             [state.x, state.vx] = spring(state.x, state.tx, state.vx, PHYSICS.pos);
             [state.w, state.vw] = spring(state.w, state.tw, state.vw, PHYSICS.pos);
+        } else {
+            // ЛОГИКА ПРИ УДЕРЖАНИИ
+            // Базовый рост при удержании
+            state.tsx = 1.08; 
+            state.tsy = 1.08;
+
+            // Эффект сплющивания/растяжения от скорости пальца
+            const speedX = Math.abs(state.x - state.lastMouseX) * 0.15;
+            state.tsx += speedX * 0.2; // растягивается вширь
+            state.tsy -= speedX * 0.1; // чуть приседает
+            
+            state.lastMouseX = state.x;
         }
 
         [state.sx, state.vsx] = spring(state.sx, state.tsx, state.vsx, PHYSICS.scale);
@@ -210,6 +209,9 @@
 
         requestAnimationFrame(update);
     }
+
+    let longPressTimer;
+    let dragActive = false;
 
     function setActive(el, instant = false) {
         const newIdx = parseInt(el.dataset.index);
@@ -223,8 +225,7 @@
         state.currentIndex = newIdx;
         
         if (instant) {
-            state.x = state.tx;
-            state.w = state.tw;
+            state.x = state.tx; state.w = state.tw;
             state.sx = 1; state.sy = 1;
         } else {
             state.intensity = diff > 1 ? 1 : 0.6;
@@ -233,71 +234,64 @@
         }
     }
 
-    // ЛОГИКА ПЕРЕНОСА (Drag & Drop)
-    let dragStartPos = 0;
-    let longPressTimer;
-
-    function startDrag(e) {
+    function onStart(e) {
         const touch = e.touches ? e.touches[0] : e;
-        const startX = touch.clientX;
+        dragActive = true;
         
         longPressTimer = setTimeout(() => {
+            if (!dragActive) return;
             state.isDragging = true;
             slider.classList.add('dragging');
             if (window.Telegram?.WebApp?.HapticFeedback) Telegram.WebApp.HapticFeedback.impactOccurred('medium');
-        }, 200); // Apple-style hold duration
+        }, 220);
     }
 
-    function handleMove(e) {
+    function onMove(e) {
         if (!state.isDragging) {
-            // Если начали двигать до срабатывания таймера — отменяем долгий пресс
-            clearTimeout(longPressTimer);
+            // Если начали заметно двигать — отменяем лонгпресс для обычного клика
+            if (dragActive) clearTimeout(longPressTimer);
             return;
         }
         
+        e.preventDefault();
         const touch = e.touches ? e.touches[0] : e;
-        const rect = document.getElementById('tabBar').getBoundingClientRect();
-        let newX = touch.clientX - rect.left - (state.w / 2);
-
-        // Ограничители, чтобы не вылетал за пределы бара
-        newX = Math.max(4, Math.min(newX, rect.width - state.w - 4));
+        const rect = tabBar.getBoundingClientRect();
         
-        state.x = newX;
-        state.vx = 0; // Сбрасываем инерцию при ручном вождении
+        // Центрируем пузырек под пальцем
+        let targetX = touch.clientX - rect.left - (state.w / 2);
+        targetX = Math.max(4, Math.min(targetX, rect.width - state.w - 4));
+        
+        state.x = targetX;
     }
 
-    function endDrag(e) {
+    function onEnd() {
+        dragActive = false;
         clearTimeout(longPressTimer);
-        if (!state.isDragging) return;
+        
+        if (state.isDragging) {
+            state.isDragging = false;
+            slider.classList.remove('dragging');
 
-        state.isDragging = false;
-        slider.classList.remove('dragging');
-
-        // Находим ближайшую вкладку к текущему положению x
-        let closestTab = tabs[0];
-        let minDist = Infinity;
-
-        tabs.forEach(tab => {
-            const d = Math.abs(state.x - tab.offsetLeft);
-            if (d < minDist) {
-                minDist = d;
-                closestTab = tab;
-            }
-        });
-
-        setActive(closestTab);
+            // Ищем ближайшую вкладку
+            let closest = tabs[0];
+            let minD = Infinity;
+            tabs.forEach(t => {
+                const d = Math.abs(state.x - t.offsetLeft);
+                if (d < minD) { minD = d; closest = t; }
+            });
+            setActive(closest);
+        }
     }
 
-    // Слушатели событий
     tabs.forEach(tab => {
-        tab.addEventListener('click', (e) => {
-            if (!state.isDragging) setActive(tab);
-        });
-        tab.addEventListener('touchstart', startDrag, {passive: true});
+        tab.addEventListener('mousedown', onStart);
+        tab.addEventListener('touchstart', onStart, {passive: true});
     });
 
-    window.addEventListener('touchmove', handleMove, {passive: false});
-    window.addEventListener('touchend', endDrag);
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('touchmove', onMove, {passive: false});
+    window.addEventListener('mouseup', onEnd);
+    window.addEventListener('touchend', onEnd);
 
     // Инициализация
     const initial = document.querySelector('.tab-item.active');
