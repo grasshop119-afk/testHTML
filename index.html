@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iOS 26 Wide Tabs</title>
+    <title>iOS 26 Mini App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -26,71 +26,82 @@
             padding-bottom: env(safe-area-inset-bottom);
         }
 
-        /* Контейнер теперь на всю ширину */
         .tab-bar-container {
-            width: 100%;
-            max-width: 500px; /* Ограничение для десктопа, на мобилках будет во всю ширину */
             margin-bottom: 25px;
-            padding: 40px 12px; 
+            width: 100%; /* Панель почти во всю длину */
+            max-width: 500px;
+            padding: 40px 16px; 
             display: flex;
             justify-content: center;
         }
 
         .ios-tab-bar {
             position: relative;
-            width: 100%;
             background: var(--tab-bar-bg);
             backdrop-filter: blur(30px) saturate(210%);
             -webkit-backdrop-filter: blur(30px) saturate(210%);
-            border-radius: 35px;
+            border-radius: 40px;
             display: flex;
-            padding: 5px;
-            border: 0.5px solid rgba(255, 255, 255, 0.1);
+            padding: 4px;
+            border: 0.5px solid rgba(255, 255, 255, 0.12);
             overflow: visible; 
+            width: 100%; /* Растягиваем */
+            justify-content: space-around;
         }
 
         .tab-item {
             position: relative;
             z-index: 2;
-            flex: 1; /* Растягиваем кнопки равномерно */
-            padding: 12px 0;
+            padding: 10px 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             background: none;
             border: none;
+            flex: 1; /* Одинаковая ширина для всех вкладок */
             cursor: pointer;
             outline: none;
             transform: none !important;
         }
 
-        .tab-icon {
-            width: 22px;
-            height: 22px;
+        /* Стили для иконок-картинок */
+        .tab-icon-img {
+            width: 24px;
+            height: 24px;
             margin-bottom: 4px;
-            fill: var(--text-inactive);
-            transition: fill 0.25s ease;
+            filter: grayscale(1) brightness(0.7); /* Цвет неактивной иконки */
+            transition: filter 0.2s ease;
             pointer-events: none;
         }
 
         .tab-text {
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 500;
             color: var(--text-inactive);
-            transition: color 0.25s ease;
+            transition: color 0.2s ease;
             pointer-events: none;
         }
 
-        .tab-item.active .tab-icon { fill: var(--active-accent); }
+        /* Активное состояние */
+        .tab-item.active .tab-icon-img {
+            filter: none; /* Возвращаем оригинальный цвет или можно наложить tint через mask */
+            /* Если хочешь покрасить иконку в --active-accent, используй drop-shadow или mask-image */
+        }
+        
+        /* Вариант покраски иконки в синий (акцентный) */
+        .tab-item.active .tab-icon-img {
+            filter: invert(56%) sepia(88%) saturate(1914%) hue-rotate(182deg) brightness(101%) contrast(101%);
+        }
+
         .tab-item.active .tab-text { color: var(--active-accent); }
 
         .liquid-slider {
             position: absolute;
-            top: 5px;
-            left: 5px;
-            height: calc(100% - 10px);
+            top: 4px;
+            left: 4px;
+            height: calc(100% - 8px);
             background: var(--pill-bg);
-            border-radius: 30px;
+            border-radius: 35px;
             z-index: 1;
             pointer-events: none;
             transform-origin: center center;
@@ -105,27 +116,26 @@
         <div class="liquid-slider" id="slider"></div>
 
         <button class="tab-item active" data-index="0">
-            <svg class="tab-icon" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            <img src="https://cdn-icons-png.flaticon.com/512/6997/6997164.png" alt="Home" class="tab-icon-img">
             <span class="tab-text">Главная</span>
         </button>
 
         <button class="tab-item" data-index="1">
-            <svg class="tab-icon" viewBox="0 0 24 24"><path d="M4 11h5V5H4v6zm0 7h5v-6H4v6zm6 0h5v-6h-5v6zm6 0h5v-6h-5v6zm-6-7h5V5h-5v6zm6-6v6h5V5h-5z"/></svg>
+            <img src="https://cdn-icons-png.flaticon.com/512/2769/2769160.png" alt="Menu" class="tab-icon-img">
             <span class="tab-text">Меню</span>
         </button>
 
         <button class="tab-item" data-index="2">
-            <svg class="tab-icon" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+            <img src="https://cdn-icons-png.flaticon.com/512/9959/9959489.png" alt="Settings" class="tab-icon-img">
             <span class="tab-text">Настройки</span>
         </button>
     </nav>
 </div>
 
 <script>
-    // Финальные настройки вязкой физики
     const PHYSICS = {
-        pos: { k: 320, d: 42, m: 1 },    // Более ленивое и плавное перемещение
-        scale: { k: 350, d: 28, m: 1 }   // Деформация стала еще мягче
+        pos: { k: 380, d: 38, m: 1 },    
+        scale: { k: 420, d: 24, m: 1 }   
     };
 
     const slider = document.getElementById('slider');
@@ -155,20 +165,18 @@
         const vel = Math.abs(state.vx);
 
         if (state.isMoving) {
-            if (dist > 20) { 
-                // В ПОЛЕТЕ: Вытяжение
-                state.tsy = 1 + (0.18 * state.intensity); 
-                state.tsx = 1 - (0.10 * state.intensity); 
-            } else if (dist <= 20 && dist > 0.5) {
-                // УДАР: Сплющивание снижено на 5% от предыдущего (стало ~10%)
+            if (dist > 15) { 
+                // ПОЛЕТ (чуть-чуть меньше вытяжение)
+                state.tsy = 1 + (0.22 * state.intensity); 
+                state.tsx = 1 - (0.12 * state.intensity); 
+            } else if (dist <= 15 && dist > 0.5) {
+                // УДАР (сплющивание на 5% меньше чем в прошлый раз)
                 state.tsy = 1 - (0.10 * state.intensity); 
-                state.tsx = 1 + (0.12 * state.intensity); 
+                state.tsx = 1 + (0.13 * state.intensity); 
             } else {
-                // ПРИЗЕМЛЕНИЕ
                 state.tsx = 1;
                 state.tsy = 1;
-                
-                if (vel < 0.1 && Math.abs(state.vsx) < 0.1) {
+                if (vel < 0.2 && Math.abs(state.vsx) < 0.2) {
                     state.isMoving = false;
                 }
             }
@@ -202,7 +210,7 @@
             state.w = state.tw;
             state.sx = 1; state.sy = 1;
         } else {
-            state.intensity = diff > 1 ? 1 : 0.4;
+            state.intensity = diff > 1 ? 1 : 0.5;
             state.isMoving = true;
 
             if (window.Telegram?.WebApp?.HapticFeedback) {
