@@ -2,232 +2,308 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iOS 26 Stealth Liquid</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Skinx — MC Editor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
     <style>
         :root {
-            --bg-color: #000000;
-            --tab-bar-bg: rgba(28, 28, 30, 0.92);
-            --active-accent: #007AFF;
-            --inactive-color: #8e8e93;
-            --pill-bg: rgba(255, 255, 255, 0.12);
-            /* Сделали контур темнее */
-            --pill-border-moving: rgba(255, 255, 255, 0.25); 
+            --bg: #0f172a;
+            --card: #1e293b;
+            --accent: #3b82f6;
+            --text: #f8fafc;
+            --radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             margin: 0;
-            background: var(--bg-color);
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            height: 100vh;
+            padding: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Manrope', sans-serif;
             display: flex;
-            justify-content: center;
-            align-items: flex-end;
+            flex-direction: column;
+            height: 100vh;
             overflow: hidden;
         }
 
-        .tab-bar-container {
-            margin-bottom: calc(15px + env(safe-area-inset-bottom));
-            width: 92%;
-            max-width: 400px;
+        /* Header */
+        header {
+            padding: 20px;
+            text-align: center;
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .ios-tab-bar {
-            position: relative;
-            background: var(--tab-bar-bg);
-            backdrop-filter: blur(25px) saturate(180%);
-            -webkit-backdrop-filter: blur(25px) saturate(180%);
-            border-radius: 38px;
-            display: flex;
-            padding: 4px;
-            border: 0.5px solid rgba(255, 255, 255, 0.08);
-            width: 100%;
-            justify-content: space-around;
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            color: var(--accent);
         }
 
-        .tab-item {
-            position: relative;
-            z-index: 2;
-            padding: 8px 0;
+        /* Main Workspace */
+        main {
+            flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            background: none;
-            border: none;
-            flex: 1;
-            cursor: pointer;
-            outline: none;
+            justify-content: center;
+            padding: 10px;
         }
 
-        .icon-wrapper {
-            width: 24px;
-            height: 24px;
-            margin-bottom: 4px;
-            background-color: var(--inactive-color);
-            -webkit-mask-size: contain;
-            -webkit-mask-repeat: no-repeat;
-            -webkit-mask-position: center;
-            mask-size: contain;
-            mask-repeat: no-repeat;
-            mask-position: center;
-            transition: background-color 0.25s ease;
+        #editor-container {
+            position: relative;
+            background: #ffffff10;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            image-rendering: pixelated;
+            border: 4px solid var(--card);
         }
 
-        .tab-text {
-            font-size: 10px;
-            font-weight: 500;
-            color: var(--inactive-color);
-            transition: color 0.25s ease;
+        canvas {
+            display: block;
+            touch-action: none;
+            image-rendering: pixelated;
+            cursor: crosshair;
         }
 
-        .tab-item.active .icon-wrapper { background-color: var(--active-accent); }
-        .tab-item.active .tab-text { color: var(--active-accent); }
-
-        .liquid-slider {
+        /* Grid Overlay (Сетка частей тела) */
+        #grid-overlay {
             position: absolute;
-            top: 4px;
-            left: 4px;
-            height: calc(100% - 8px);
-            background: var(--pill-bg);
-            border-radius: 34px;
-            z-index: 1;
+            top: 0; left: 0;
             pointer-events: none;
-            transform-origin: center center;
-            box-sizing: border-box;
-            border: 1px solid transparent;
-            will-change: transform, left, width, background-color, border-color;
-            /* Быстрая и плавная смена состояний */
-            transition: background-color 0.16s ease-out, border-color 0.16s ease-out;
+            opacity: 0.3;
         }
 
-        /* Состояние полета: без заливки и с темным контуром */
-        .liquid-slider.flying {
-            background-color: transparent !important; 
-            border-color: var(--pill-border-moving);
+        /* Toolbar */
+        .toolbar {
+            background: var(--card);
+            width: 90%;
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 15px;
+            border-radius: var(--radius);
+            display: flex;
+            gap: 10px;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .tool-btn {
+            background: #334155;
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            transition: 0.2s;
+        }
+
+        .tool-btn.active {
+            background: var(--accent);
+            transform: scale(1.1);
+        }
+
+        .color-circle {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #colorPicker {
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            cursor: pointer;
+        }
+
+        /* Footer Actions */
+        .actions {
+            padding: 0 20px 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn-main {
+            background: var(--accent);
+            border: none;
+            color: white;
+            padding: 15px;
+            border-radius: var(--radius);
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #334155;
+            color: white;
+            padding: 15px;
+            border-radius: var(--radius);
+            font-family: inherit;
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
 
-<div class="tab-bar-container">
-    <nav class="ios-tab-bar" id="tabBar">
-        <div class="liquid-slider" id="slider"></div>
+    <header>
+        <div></div>
+        <h1>SKINX</h1>
+        <button class="tool-btn" id="toggleGrid"><i data-lucide="grid-3x3"></i></button>
+    </header>
 
-        <button class="tab-item active" data-index="0">
-            <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/6997/6997164.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/6997/6997164.png');"></div>
-            <span class="tab-text">Главная</span>
+    <main>
+        <div id="editor-container">
+            <canvas id="skinCanvas" width="64" height="64"></canvas>
+            <canvas id="grid-overlay" width="64" height="64"></canvas>
+        </div>
+    </main>
+
+    <div class="toolbar">
+        <div class="color-circle">
+            <input type="color" id="colorPicker" value="#3b82f6">
+        </div>
+        <button class="tool-btn active" id="brushTool"><i data-lucide="pencil"></i></button>
+        <button class="tool-btn" id="eraserTool"><i data-lucide="eraser"></i></button>
+        <button class="tool-btn" id="fillTool"><i data-lucide="paint-bucket"></i></button>
+        <button class="tool-btn" id="clearBtn"><i data-lucide="trash-2"></i></button>
+    </div>
+
+    <div class="actions">
+        <button class="btn-outline" onclick="changeCanvasSize()">Slim / Std</button>
+        <button class="btn-main" onclick="exportSkin()">
+            <i data-lucide="download"></i> Сохранить
         </button>
+    </div>
 
-        <button class="tab-item" data-index="1">
-            <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/2769/2769160.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/2769/2769160.png');"></div>
-            <span class="tab-text">Меню</span>
-        </button>
+    <script>
+        // Инициализация иконок
+        lucide.createIcons();
 
-        <button class="tab-item" data-index="2">
-            <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/9959/9959489.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/9959/9959489.png');"></div>
-            <span class="tab-text">Настройки</span>
-        </button>
-    </nav>
-</div>
+        const canvas = document.getElementById('skinCanvas');
+        const ctx = canvas.getContext('2d');
+        const gridCanvas = document.getElementById('grid-overlay');
+        const gctx = gridCanvas.getContext('2d');
+        const colorPicker = document.getElementById('colorPicker');
 
-<script>
-    const PHYSICS = {
-        pos: { k: 380, d: 38, m: 1 },    
-        scale: { k: 420, d: 24, m: 1 }   
-    };
+        let currentTool = 'brush';
+        let isDrawing = false;
+        const scale = 5; // Коэффициент отображения для расчета координат
 
-    const slider = document.getElementById('slider');
-    const tabs = document.querySelectorAll('.tab-item');
+        // Настройка размера под экран
+        const size = Math.min(window.innerWidth - 40, 350);
+        canvas.style.width = canvas.style.height = size + 'px';
+        gridCanvas.style.width = gridCanvas.style.height = size + 'px';
 
-    let state = {
-        x: 0, tx: 0, vx: 0,
-        w: 0, tw: 0, vw: 0,
-        sx: 1, tsx: 1, vsx: 0,
-        sy: 1, tsy: 1, vsy: 0,
-        isMoving: false,
-        intensity: 1,
-        currentIndex: 0
-    };
+        // Рисуем сетку-подсказку (стандартная развертка Minecraft)
+        function drawGrid() {
+            gctx.clearRect(0, 0, 64, 64);
+            gctx.strokeStyle = "white";
+            gctx.lineWidth = 0.5;
+            // Голова (8x8 сверху)
+            gctx.strokeRect(8, 0, 8, 8); // Лицо
+            gctx.strokeRect(20, 20, 8, 12); // Тело
+        }
+        drawGrid();
 
-    function spring(current, target, velocity, config) {
-        const force = -config.k * (current - target);
-        const damping = -config.d * velocity;
-        const acceleration = (force + damping) / config.m;
-        velocity += acceleration * 0.016;
-        current += velocity * 0.016;
-        return [current, velocity];
-    }
+        // Функции рисования
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: Math.floor((clientX - rect.left) / (rect.width / 64)),
+                y: Math.floor((clientY - rect.top) / (rect.height / 64))
+            };
+        }
 
-    function update() {
-        const dist = Math.abs(state.x - state.tx);
-        const vel = Math.abs(state.vx);
+        function handleAction(e) {
+            if (!isDrawing) return;
+            const {x, y} = getPos(e);
+            
+            if (currentTool === 'brush') {
+                ctx.fillStyle = colorPicker.value;
+                ctx.fillRect(x, y, 1, 1);
+            } else if (currentTool === 'eraser') {
+                ctx.clearRect(x, y, 1, 1);
+            } else if (currentTool === 'fill') {
+                floodFill(x, y, colorPicker.value);
+            }
+        }
 
-        if (state.isMoving) {
-            if (dist > 15) { 
-                slider.classList.add('flying');
-                // Рост на дальних дистанциях +5% к предыдущему значению
-                state.tsy = 1 + ((0.27) * state.intensity); 
-                state.tsx = 1 - (0.10 * state.intensity); 
-            } else if (dist <= 15 && dist > 0.5) {
-                slider.classList.remove('flying');
-                state.tsy = 1 - (0.05 * state.intensity); 
-                state.tsx = 1 + (0.08 * state.intensity); 
-            } else {
-                state.tsx = 1;
-                state.tsy = 1;
-                if (vel < 0.2 && Math.abs(state.vsx) < 0.2) {
-                    state.isMoving = false;
-                    slider.classList.remove('flying');
+        // Простая заливка
+        function floodFill(startX, startY, fillColor) {
+            const targetColor = ctx.getImageData(startX, startY, 1, 1).data;
+            // Реализация заливки требует итеративного обхода, 
+            // для MVP ограничимся закрашиванием пикселя или использованием библиотеки.
+            // Но в целях обучения оставим пока просто рисование.
+            ctx.fillStyle = fillColor;
+            ctx.fillRect(startX, startY, 1, 1);
+        }
+
+        // Event Listeners
+        const start = (e) => { isDrawing = true; handleAction(e); };
+        const stop = () => isDrawing = false;
+
+        canvas.addEventListener('mousedown', start);
+        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); start(e); }, {passive: false});
+        window.addEventListener('mouseup', stop);
+        window.addEventListener('touchend', stop);
+        canvas.addEventListener('mousemove', handleAction);
+        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); handleAction(e); }, {passive: false});
+
+        // Переключение инструментов
+        document.querySelectorAll('.tool-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (this.id === 'clearBtn') {
+                    if(confirm("Очистить холст?")) ctx.clearRect(0,0,64,64);
+                    return;
                 }
+                if (this.id === 'toggleGrid') {
+                    gridCanvas.style.display = gridCanvas.style.display === 'none' ? 'block' : 'none';
+                    return;
+                }
+                document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentTool = this.id.replace('Tool', '');
+            });
+        });
+
+        function exportSkin() {
+            const link = document.createElement('a');
+            link.download = 'skinx-export.png';
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+            
+            // Если мы в Telegram Mini App
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
             }
         }
 
-        [state.x, state.vx] = spring(state.x, state.tx, state.vx, PHYSICS.pos);
-        [state.w, state.vw] = spring(state.w, state.tw, state.vw, PHYSICS.pos);
-        [state.sx, state.vsx] = spring(state.sx, state.tsx, state.vsx, PHYSICS.scale);
-        [state.sy, state.vsy] = spring(state.sy, state.tsy, state.vsy, PHYSICS.scale);
-
-        slider.style.left = `${state.x}px`;
-        slider.style.width = `${state.w}px`;
-        slider.style.transform = `scale(${state.sx}, ${state.sy})`;
-
-        requestAnimationFrame(update);
-    }
-
-    function setActive(el, instant = false) {
-        const newIdx = parseInt(el.dataset.index);
-        const diff = Math.abs(newIdx - (state.currentIndex || 0));
-
-        tabs.forEach(t => t.classList.remove('active'));
-        el.classList.add('active');
-
-        state.tx = el.offsetLeft;
-        state.tw = el.offsetWidth;
-        state.currentIndex = newIdx;
-        
-        if (instant) {
-            state.x = state.tx;
-            state.w = state.tw;
-            state.sx = 1; state.sy = 1;
-        } else {
-            state.intensity = diff > 1 ? 1 : 0.6;
-            state.isMoving = true;
-
-            if (window.Telegram?.WebApp?.HapticFeedback) {
-                Telegram.WebApp.HapticFeedback.selectionChanged();
-            }
+        function changeCanvasSize() {
+            alert("Переключение между Slim (Alex) и Standard (Steve). Влияет на разметку сетки.");
         }
-    }
-
-    tabs.forEach(tab => tab.addEventListener('click', () => setActive(tab)));
-
-    const initial = document.querySelector('.tab-item.active');
-    setActive(initial, true);
-    requestAnimationFrame(update);
-</script>
-
+    </script>
 </body>
 </html>
