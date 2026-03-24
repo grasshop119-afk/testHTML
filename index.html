@@ -2,319 +2,381 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Skinx — Модульный Редактор</title>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Skinx Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;500;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
-            --bg: #0f172a;
-            --card: #1e293b;
-            --accent: #3b82f6;
-            --text: #f8fafc;
-            --radius: 20px;
+            --ios-bg: #000000;
+            --ios-panel: rgba(28, 28, 30, 0.8);
+            --ios-accent: #0A84FF;
+            --ios-text: #FFFFFF;
+            --ios-secondary: #8E8E93;
+            --blur: blur(20px);
         }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
             margin: 0;
-            background: var(--bg);
-            color: var(--text);
+            background: var(--ios-bg);
+            color: var(--ios-text);
             font-family: 'Manrope', sans-serif;
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            height: 100vh;
             overflow: hidden;
         }
 
+        /* iOS Header */
         header {
-            padding: 20px;
+            padding: 50px 20px 10px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-end;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
         }
 
-        .logo { font-weight: 800; font-size: 22px; color: var(--accent); }
+        header h1 { margin: 0; font-size: 32px; font-weight: 800; letter-spacing: -1px; }
 
-        /* Выбор части тела */
-        .part-selector {
+        /* Segmented Control (iOS Style) */
+        .segmented-control {
+            margin: 10px 20px;
+            background: rgba(118, 118, 128, 0.24);
+            border-radius: 10px;
+            padding: 2px;
             display: flex;
-            gap: 8px;
-            padding: 0 20px 15px;
-            overflow-x: auto;
-            scrollbar-width: none;
         }
-        .part-selector::-webkit-scrollbar { display: none; }
 
-        .part-chip {
-            background: var(--card);
-            padding: 8px 16px;
-            border-radius: 12px;
-            white-space: nowrap;
-            font-size: 14px;
+        .segment {
+            flex: 1;
+            padding: 6px 0;
+            text-align: center;
+            font-size: 13px;
             font-weight: 600;
-            border: 2px solid transparent;
-        }
-        .part-chip.active {
-            border-color: var(--accent);
-            background: #3b82f620;
+            border-radius: 8px;
+            transition: 0.2s;
+            color: var(--ios-secondary);
         }
 
-        /* Холст */
-        main {
+        .segment.active {
+            background: #636366;
+            color: #fff;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+        }
+
+        /* Face Selector (Grid 2x3) */
+        .face-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            padding: 0 20px 20px;
+        }
+
+        .face-btn {
+            background: var(--ios-panel);
+            backdrop-filter: var(--blur);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            text-align: center;
+            color: var(--ios-secondary);
+        }
+
+        .face-btn.active {
+            border-color: var(--ios-accent);
+            color: var(--ios-accent);
+            background: rgba(10, 132, 255, 0.1);
+        }
+
+        /* Canvas Area */
+        .workspace {
             flex: 1;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
+            position: relative;
         }
 
-        .canvas-container {
-            background-color: #2a2a2a;
-            background-image: repeating-conic-gradient(#333 0% 25%, #444 0% 50%) ;
-            background-position: 0 0, 10px 10px;
-            background-size: 20px 20px;
-            border: 4px solid var(--card);
-            border-radius: 12px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            image-rendering: pixelated;
+        .canvas-card {
+            background: #1c1c1e;
+            padding: 10px;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
         canvas {
-            display: block;
             image-rendering: pixelated;
             touch-action: none;
+            display: block;
+            background-image: 
+                linear-gradient(45deg, #2c2c2e 25%, transparent 25%), 
+                linear-gradient(-45deg, #2c2c2e 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #2c2c2e 75%),
+                linear-gradient(-45deg, transparent 75%, #2c2c2e 75%);
+            background-size: 20px 20px;
         }
 
-        /* Инструменты */
+        /* Floating Toolbar */
         .toolbar {
-            background: var(--card);
-            margin: 20px;
-            padding: 15px;
-            border-radius: var(--radius);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-        }
-
-        .tool-btn {
-            background: #334155;
-            border: none;
-            color: white;
-            padding: 12px;
-            border-radius: 14px;
-        }
-        .tool-btn.active { background: var(--accent); }
-
-        .color-input {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: 3px solid white;
-            overflow: hidden;
-            position: relative;
-        }
-        #colorPicker {
             position: absolute;
-            top: -50%; left: -50%;
-            width: 200%; height: 200%;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--ios-panel);
+            backdrop-filter: var(--blur);
+            padding: 10px 20px;
+            border-radius: 40px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
-        .footer-btns {
-            padding: 0 20px 30px;
-            display: grid;
-            grid-template-columns: 1fr auto;
-            gap: 10px;
+        .color-dot {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            position: relative; overflow: hidden;
         }
 
-        .btn-download {
-            background: var(--accent);
-            border: none;
+        #colorPicker { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; border: none; }
+
+        .tool-icon { color: var(--ios-secondary); transition: 0.2s; }
+        .tool-icon.active { color: var(--ios-accent); transform: scale(1.2); }
+
+        /* Actions */
+        .actions {
+            padding: 20px 20px 40px;
+            background: var(--ios-panel);
+            backdrop-filter: var(--blur);
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .btn-main {
+            background: var(--ios-accent);
             color: white;
+            border: none;
+            width: 100%;
             padding: 18px;
-            border-radius: 18px;
-            font-weight: 800;
-            font-size: 16px;
+            border-radius: 16px;
+            font-size: 17px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
     </style>
 </head>
 <body>
 
     <header>
-        <span class="logo">SKINX</span>
-        <button class="tool-btn" onclick="resetAll()"><i data-lucide="rotate-ccw"></i></button>
+        <h1>Skinx</h1>
+        <button style="background:none; border:none; color:var(--ios-accent)" onclick="reset()">Сброс</button>
     </header>
 
-    <div class="part-selector" id="partSelector">
-        <div class="part-chip active" data-part="head">Голова (8x8)</div>
-        <div class="part-chip" data-part="body">Тело (8x12)</div>
-        <div class="part-chip" data-part="arm">Рука (4x12)</div>
-        <div class="part-chip" data-part="leg">Нога (4x12)</div>
+    <div class="segmented-control" id="partTabs">
+        <div class="segment active" data-part="head">Head</div>
+        <div class="segment" data-part="body">Body</div>
+        <div class="segment" data-part="arm">Arm</div>
+        <div class="segment" data-part="leg">Leg</div>
     </div>
 
-    <main>
-        <div class="canvas-container">
-            <canvas id="editorCanvas"></canvas>
-        </div>
-        <p id="partLabel" style="font-size: 12px; color: #64748b; margin-top: 10px;">Рисуем переднюю часть</p>
-    </main>
-
-    <div class="toolbar">
-        <div class="color-input">
-            <input type="color" id="colorPicker" value="#3b82f6">
-        </div>
-        <button class="tool-btn active" id="pen"><i data-lucide="pencil"></i></button>
-        <button class="tool-btn" id="eraser"><i data-lucide="eraser"></i></button>
-        <button class="tool-btn" id="picker"><i data-lucide="pipette"></i></button>
+    <div class="face-grid" id="faceTabs">
+        <div class="face-btn active" data-face="front">Front</div>
+        <div class="face-btn" data-face="back">Back</div>
+        <div class="face-btn" data-face="top">Top</div>
+        <div class="face-btn" data-face="bottom">Bottom</div>
+        <div class="face-btn" data-face="right">Right</div>
+        <div class="face-btn" data-face="left">Left</div>
     </div>
 
-    <div class="footer-btns">
-        <button class="btn-download" onclick="exportFullSkin()">СКАЧАТЬ .PNG SKIN</button>
-        <button class="tool-btn" style="background: #334155;" onclick="alert('Прогресс сохранен!')"><i data-lucide="save"></i></button>
+    <div class="workspace">
+        <div class="canvas-card">
+            <canvas id="editor"></canvas>
+        </div>
+
+        <div class="toolbar">
+            <div class="color-dot">
+                <input type="color" id="colorPicker" value="#007AFF">
+            </div>
+            <i data-lucide="pencil" class="tool-icon active" id="pen"></i>
+            <i data-lucide="eraser" class="tool-icon" id="eraser"></i>
+            <i data-lucide="pipette" class="tool-icon" id="pipette"></i>
+        </div>
+    </div>
+
+    <div class="actions">
+        <button class="btn-main" onclick="exportSkin()">
+            <i data-lucide="download"></i> Export Skin
+        </button>
     </div>
 
     <script>
         lucide.createIcons();
 
-        // Конфигурация частей (размеры и координаты в финальном скине 64x64)
-        const PARTS = {
-            head: { w: 8, h: 8, x: 8, y: 8 },
-            body: { w: 8, h: 12, x: 20, y: 20 },
-            arm: { w: 4, h: 12, x: 44, y: 20 },
-            leg: { w: 4, h: 12, x: 4, y: 20 }
+        // Константы координат Minecraft 64x64 (Steve Model)
+        const MAP = {
+            head: {
+                size: [8, 8],
+                faces: {
+                    top: [8, 0], bottom: [16, 0], right: [0, 8],
+                    front: [8, 8], left: [16, 8], back: [24, 8]
+                }
+            },
+            body: {
+                size: [8, 12, 4], // w, h, depth
+                faces: {
+                    top: [20, 16, 8, 4], bottom: [28, 16, 8, 4], right: [16, 20, 4, 12],
+                    front: [20, 20, 8, 12], left: [28, 20, 4, 12], back: [32, 20, 8, 12]
+                }
+            },
+            arm: {
+                size: [4, 12],
+                faces: {
+                    top: [44, 16], bottom: [52, 16], right: [40, 20],
+                    front: [44, 20], left: [48, 20], back: [52, 20]
+                }
+            },
+            leg: {
+                size: [4, 12],
+                faces: {
+                    top: [4, 16], bottom: [12, 16], right: [0, 20],
+                    front: [4, 20], left: [8, 20], back: [12, 20]
+                }
+            }
         };
 
-        let currentPartKey = 'head';
+        let currentPart = 'head';
+        let currentFace = 'front';
+        let currentTool = 'pen';
         let isDrawing = false;
-        let tool = 'pen';
 
-        const canvas = document.getElementById('editorCanvas');
+        const canvas = document.getElementById('editor');
         const ctx = canvas.getContext('2d');
-        const colorPicker = document.getElementById('colorPicker');
+        
+        // Хранилище всех данных в памяти (64x64 виртуальный холст)
+        const vCanvas = document.createElement('canvas');
+        vCanvas.width = 64; vCanvas.height = 64;
+        const vCtx = vCanvas.getContext('2d');
 
-        // Хранилище данных (ImageData) для каждой части
-        let storage = JSON.parse(localStorage.getItem('skinx_data')) || {};
-
-        function initCanvas() {
-            const config = PARTS[currentPartKey];
-            canvas.width = config.w;
-            canvas.height = config.h;
-            
-            // Масштабирование для экрана телефона
-            const displaySize = 280;
-            if (config.w > config.h) {
-                canvas.style.width = displaySize + 'px';
-                canvas.style.height = (displaySize * (config.h / config.w)) + 'px';
-            } else {
-                canvas.style.height = displaySize + 'px';
-                canvas.style.width = (displaySize * (config.w / config.h)) + 'px';
-            }
-
-            // Загрузка из памяти
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            if (storage[currentPartKey]) {
-                const img = new Image();
-                img.onload = () => ctx.drawImage(img, 0, 0);
-                img.src = storage[currentPartKey];
-            }
+        // Загрузка из localStorage
+        const saved = localStorage.getItem('skinx_v2');
+        if (saved) {
+            const img = new Image();
+            img.onload = () => { vCtx.drawImage(img, 0, 0); updateEditor(); };
+            img.src = saved;
         }
 
-        // Логика рисования
+        function updateEditor() {
+            const partData = MAP[currentPart];
+            let w, h, x, y;
+            
+            // Определяем размеры грани
+            const f = partData.faces[currentFace];
+            x = f[0]; y = f[1];
+            w = f[2] || partData.size[0];
+            h = f[3] || partData.size[1];
+
+            canvas.width = w;
+            canvas.height = h;
+            
+            // Масштаб для отображения
+            const scale = 300 / Math.max(w, h);
+            canvas.style.width = (w * scale) + 'px';
+            canvas.style.height = (h * scale) + 'px';
+
+            // Отрисовка текущего состояния из виртуального холста
+            ctx.clearRect(0,0,w,h);
+            ctx.drawImage(vCanvas, x, y, w, h, 0, 0, w, h);
+        }
+
         function draw(e) {
             if (!isDrawing) return;
             const rect = canvas.getBoundingClientRect();
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            const cx = e.touches ? e.touches[0].clientX : e.clientX;
+            const cy = e.touches ? e.touches[0].clientY : e.clientY;
             
-            const x = Math.floor((clientX - rect.left) / (rect.width / canvas.width));
-            const y = Math.floor((clientY - rect.top) / (rect.height / canvas.height));
+            const px = Math.floor((cx - rect.left) / (rect.width / canvas.width));
+            const py = Math.floor((cy - rect.top) / (rect.height / canvas.height));
 
-            if (tool === 'pen') {
-                ctx.fillStyle = colorPicker.value;
-                ctx.fillRect(x, y, 1, 1);
-            } else if (tool === 'eraser') {
-                ctx.clearRect(x, y, 1, 1);
-            } else if (tool === 'picker') {
-                const data = ctx.getImageData(x, y, 1, 1).data;
-                if (data[3] > 0) {
-                    const hex = "#" + ((1 << 24) + (data[0] << 16) + (data[1] << 8) + data[2]).toString(16).slice(1);
-                    colorPicker.value = hex;
+            const faceCoords = MAP[currentPart].faces[currentFace];
+            const realX = faceCoords[0] + px;
+            const realY = faceCoords[1] + py;
+
+            if (currentTool === 'pen') {
+                vCtx.fillStyle = document.getElementById('colorPicker').value;
+                vCtx.fillRect(realX, realY, 1, 1);
+            } else if (currentTool === 'eraser') {
+                vCtx.clearRect(realX, realY, 1, 1);
+            } else if (currentTool === 'pipette') {
+                const d = vCtx.getImageData(realX, realY, 1, 1).data;
+                if(d[3] > 0) {
+                    const hex = "#" + ((1 << 24) + (d[0] << 16) + (d[1] << 8) + d[2]).toString(16).slice(1);
+                    document.getElementById('colorPicker').value = hex;
                 }
             }
-            saveCurrentPart();
+            
+            updateEditor();
+            localStorage.setItem('skinx_v2', vCanvas.toDataURL());
         }
 
-        function saveCurrentPart() {
-            storage[currentPartKey] = canvas.toDataURL();
-            localStorage.setItem('skinx_data', JSON.stringify(storage));
-        }
-
-        // Переключение частей
-        document.getElementById('partSelector').addEventListener('click', (e) => {
-            if (e.target.classList.contains('part-chip')) {
-                document.querySelectorAll('.part-chip').forEach(c => c.classList.remove('active'));
+        // Навигация
+        document.getElementById('partTabs').onclick = (e) => {
+            if (e.target.dataset.part) {
+                document.querySelectorAll('.segment').forEach(s => s.classList.remove('active'));
                 e.target.classList.add('active');
-                currentPartKey = e.target.dataset.part;
-                initCanvas();
+                currentPart = e.target.dataset.part;
+                updateEditor();
             }
-        });
+        };
+
+        document.getElementById('faceTabs').onclick = (e) => {
+            if (e.target.dataset.face) {
+                document.querySelectorAll('.face-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                currentFace = e.target.dataset.face;
+                updateEditor();
+            }
+        };
 
         // Инструменты
-        document.getElementById('pen').onclick = () => selectTool('pen');
-        document.getElementById('eraser').onclick = () => selectTool('eraser');
-        document.getElementById('picker').onclick = () => selectTool('picker');
+        const setTool = (id) => {
+            currentTool = id;
+            document.querySelectorAll('.tool-icon').forEach(i => i.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        };
+        document.getElementById('pen').onclick = () => setTool('pen');
+        document.getElementById('eraser').onclick = () => setTool('eraser');
+        document.getElementById('pipette').onclick = () => setTool('pipette');
 
-        function selectTool(t) {
-            tool = t;
-            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(t).classList.add('active');
+        // События холста
+        canvas.onmousedown = (e) => { isDrawing = true; draw(e); };
+        canvas.ontouchstart = (e) => { isDrawing = true; draw(e); };
+        window.onmouseup = window.ontouchend = () => isDrawing = false;
+        canvas.onmousemove = canvas.ontouchmove = (e) => draw(e);
+
+        function exportSkin() {
+            const link = document.createElement('a');
+            link.download = 'skinx_skin.png';
+            link.href = vCanvas.toDataURL();
+            link.click();
+            if(window.Telegram?.WebApp) window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
         }
 
-        // Сборка финального скина
-        function exportFullSkin() {
-            const finalCanvas = document.createElement('canvas');
-            finalCanvas.width = 64;
-            finalCanvas.height = 64;
-            const fctx = finalCanvas.getContext('2d');
-
-            // Проходим по всем частям и рисуем их на невидимом холсте 64x64
-            const promises = Object.keys(PARTS).map(key => {
-                return new Promise(resolve => {
-                    if (!storage[key]) return resolve();
-                    const img = new Image();
-                    img.onload = () => {
-                        fctx.drawImage(img, PARTS[key].x, PARTS[key].y);
-                        resolve();
-                    };
-                    img.src = storage[key];
-                });
-            });
-
-            Promise.all(promises).then(() => {
-                const link = document.createElement('a');
-                link.download = 'mc_skin_skinx.png';
-                link.href = finalCanvas.toDataURL("image/png");
-                link.click();
-            });
-        }
-
-        function resetAll() {
-            if(confirm("Удалить всё и начать заново?")) {
-                storage = {};
-                localStorage.removeItem('skinx_data');
-                initCanvas();
+        function reset() {
+            if(confirm("Очистить скин?")) {
+                vCtx.clearRect(0,0,64,64);
+                updateEditor();
+                localStorage.removeItem('skinx_v2');
             }
         }
 
-        // Слушатели событий
-        canvas.addEventListener('mousedown', (e) => { isDrawing = true; draw(e); });
-        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); isDrawing = true; draw(e); });
-        window.addEventListener('mouseup', () => isDrawing = false);
-        window.addEventListener('touchend', () => isDrawing = false);
-        canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); });
-
-        // Старт
-        initCanvas();
+        updateEditor();
     </script>
 </body>
 </html>
