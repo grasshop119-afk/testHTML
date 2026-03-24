@@ -3,406 +3,361 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Skinx Premium</title>
+    <title>Skinx iOS Edition</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    
     <style>
         :root {
-            --ios-bg: #000000;
-            --ios-card: #1C1C1E;
-            --ios-btn: #2C2C2E;
-            --ios-accent: #0A84FF;
-            --ios-text: #FFFFFF;
-            --ios-sub: #8E8E93;
+            --bg: #000000;
+            --panel: #1C1C1E;
+            --secondary: #2C2C2E;
+            --accent: #ffffff;
+            --text: #ffffff;
+            --sub-text: #8E8E93;
+            --ios-blue: #0A84FF;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        * { 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
+            user-select: none;
+        }
 
         body {
             margin: 0;
-            padding: 0;
-            background: var(--ios-bg);
-            color: var(--ios-text);
+            background: var(--bg);
+            color: var(--text);
             font-family: 'Manrope', sans-serif;
-            height: 100vh;
             display: flex;
             flex-direction: column;
+            height: 100vh;
             overflow: hidden;
+            padding-top: env(safe-area-inset-top);
         }
 
         /* HEADER */
         header {
-            padding: 50px 20px 10px;
+            padding: 10px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(20px);
-            z-index: 100;
         }
 
-        .logo { font-weight: 800; font-size: 18px; letter-spacing: -0.5px; opacity: 0.9; }
+        .logo { font-weight: 800; font-size: 18px; letter-spacing: -0.5px; }
 
-        .circle-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--ios-btn);
+        .top-actions { display: flex; gap: 8px; }
+
+        .round-btn {
+            background: var(--secondary);
             border: none;
             color: white;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: opacity 0.2s;
         }
 
-        .circle-btn:active { transform: scale(0.9); background: #3A3A3C; }
-        .circle-btn.apply { background: var(--ios-accent); }
+        .round-btn:active { opacity: 0.6; }
 
-        /* 3D PREVIEW AREA */
-        #preview-3d {
-            width: 100px;
-            height: 100px;
-            position: absolute;
-            top: 100px;
-            right: 20px;
-            z-index: 50;
-            pointer-events: none;
-        }
-
-        /* EDITOR VIEWPORT */
+        /* VIEWPORT */
         #viewport {
             flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            position: relative;
-        }
-
-        .canvas-container {
-            position: relative;
             padding: 10px;
-            background: #111;
-            border-radius: 20px;
-            box-shadow: 0 0 0 1px rgba(255,255,255,0.05);
         }
 
-        canvas#mainEditor {
-            display: block;
-            image-rendering: pixelated;
-            touch-action: none;
-            border-radius: 4px;
+        .canvas-wrapper {
+            background-color: #111;
             background-image: 
                 linear-gradient(45deg, #1a1a1a 25%, transparent 25%), 
                 linear-gradient(-45deg, #1a1a1a 25%, transparent 25%),
                 linear-gradient(45deg, transparent 75%, #1a1a1a 75%),
                 linear-gradient(-45deg, transparent 75%, #1a1a1a 75%);
             background-size: 16px 16px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            image-rendering: pixelated;
         }
 
-        /* PALETTE & TOOLS */
-        .tools-shelf {
-            padding: 15px 20px;
+        canvas {
+            display: block;
+            image-rendering: pixelated;
+            touch-action: none;
+        }
+
+        /* TOOLBAR */
+        .toolbar {
+            background: rgba(28, 28, 30, 0.8);
+            backdrop-filter: blur(20px);
+            margin: 10px 15px;
+            padding: 8px 12px;
+            border-radius: 40px;
             display: flex;
-            justify-content: center;
-            gap: 12px;
+            justify-content: space-between;
             align-items: center;
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
-        .palette-dock {
+        .tool-group { display: flex; gap: 6px; }
+
+        .tool-item {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            color: var(--sub-text);
             display: flex;
-            background: var(--ios-card);
-            padding: 6px;
-            border-radius: 30px;
-            gap: 8px;
-            border: 1px solid rgba(255,255,255,0.05);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tool-item.active {
+            background: var(--secondary);
+            color: var(--accent);
         }
 
         .color-dot {
             width: 34px;
             height: 34px;
             border-radius: 50%;
-            border: 2px solid transparent;
-            transition: 0.2s;
+            border: 2px solid #333;
+            position: relative;
+            overflow: hidden;
         }
-        .color-dot.active { transform: scale(1.15); border-color: white; box-shadow: 0 0 15px rgba(255,255,255,0.2); }
+
+        #colorPicker {
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            border: none; padding: 0; background: none;
+        }
 
         /* MODAL BOTTOM */
-        .ios-modal {
-            background: var(--ios-card);
-            border-radius: 30px 30px 0 0;
-            padding: 20px 20px 40px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .modal-label {
-            font-size: 11px;
-            font-weight: 800;
-            color: var(--ios-sub);
-            margin-bottom: 15px;
-            letter-spacing: 0.5px;
-            padding-left: 5px;
+        .bottom-shelf {
+            background: var(--panel);
+            padding: 15px 15px calc(20px + env(safe-area-inset-bottom));
+            border-radius: 24px 24px 0 0;
         }
 
         .scroll-row {
             display: flex;
             gap: 10px;
             overflow-x: auto;
-            margin-bottom: 20px;
-            padding-bottom: 5px;
-            -ms-overflow-style: none; scrollbar-width: none;
+            padding-bottom: 12px;
+            scrollbar-width: none;
         }
         .scroll-row::-webkit-scrollbar { display: none; }
 
         .ios-chip {
-            background: var(--ios-btn);
-            padding: 12px 20px;
+            background: var(--secondary);
+            padding: 8px 16px;
             border-radius: 20px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
+            color: var(--sub-text);
+            border: 1.5px solid transparent;
             white-space: nowrap;
-            color: var(--ios-sub);
-            transition: 0.3s;
         }
-        .ios-chip.active { background: white; color: black; }
 
-        /* TOOL BAR FLOATING */
-        .floating-tools {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
+        .ios-chip.active {
+            background: #3a3a3c;
+            color: #fff;
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        .section-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #48484a;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            margin-left: 5px;
+            letter-spacing: 0.5px;
         }
     </style>
 </head>
 <body>
 
     <header>
-        <button class="circle-btn" id="undoBtn"><i data-lucide="undo-2"></i></button>
-        <span class="logo">SKINX</span>
-        <button class="circle-btn apply" id="applyBtn"><i data-lucide="check"></i></button>
+        <div class="logo">SKINX</div>
+        <div class="top-actions">
+            <button class="round-btn" id="undo"><i data-lucide="undo-2" size="18"></i></button>
+            <button class="round-btn" id="apply" style="background: var(--ios-blue);"><i data-lucide="chevron-right" size="20"></i></button>
+        </div>
     </header>
 
-    <div id="preview-3d"></div>
-
     <div id="viewport">
-        <div class="canvas-container">
-            <canvas id="mainEditor"></canvas>
+        <div class="canvas-wrapper">
+            <canvas id="mainCanvas"></canvas>
         </div>
-        
-        <div class="tools-shelf">
-            <button class="circle-btn active" data-t="pen"><i data-lucide="pencil"></i></button>
-            <button class="circle-btn" data-t="fill"><i data-lucide="paint-bucket"></i></button>
-            <button class="circle-btn" data-t="eraser"><i data-lucide="eraser"></i></button>
-            
-            <div class="palette-dock">
-                <div class="color-dot active" style="background: #FF3B30;" onclick="pickColor('#FF3B30', this)"></div>
-                <div class="color-dot" style="background: #4CD964;" onclick="pickColor('#4CD964', this)"></div>
-                <div class="color-dot" style="background: #007AFF;" onclick="pickColor('#007AFF', this)"></div>
-                <div class="color-dot" style="background: #FFCC00;" onclick="pickColor('#FFCC00', this)"></div>
-                <input type="color" id="hexPicker" style="display:none">
-                <div class="color-dot" style="background: linear-gradient(45deg, red, blue);" onclick="document.getElementById('hexPicker').click()"></div>
-            </div>
+        <div id="status" style="margin-top:10px; font-size:12px; color:#444;">Ready</div>
+    </div>
+
+    <div class="toolbar">
+        <div class="color-dot" id="colorWrapper">
+            <input type="color" id="colorPicker" value="#007AFF">
+        </div>
+        <div class="tool-group">
+            <button class="tool-item active" data-tool="pen"><i data-lucide="pencil" size="20"></i></button>
+            <button class="tool-item" data-tool="fill"><i data-lucide="paint-bucket" size="20"></i></button>
+            <button class="tool-item" data-tool="eraser"><i data-lucide="eraser" size="20"></i></button>
+            <button class="tool-item" data-tool="picker"><i data-lucide="pipette" size="20"></i></button>
         </div>
     </div>
 
-    <div class="ios-modal">
-        <div class="modal-label">ЧАСТЬ ТЕЛА</div>
-        <div class="scroll-row" id="partsRow">
-            <div class="ios-chip active" data-p="head">Голова</div>
-            <div class="ios-chip" data-p="body">Тело</div>
-            <div class="ios-chip" data-p="arm_r">П. Рука</div>
-            <div class="ios-chip" data-p="arm_l">Л. Рука</div>
-            <div class="ios-chip" data-p="leg_r">П. Нога</div>
-            <div class="ios-chip" data-p="leg_l">Л. Нога</div>
+    <div class="bottom-shelf">
+        <div class="section-label">Часть тела</div>
+        <div class="scroll-row" id="parts">
+            <div class="ios-chip active" data-part="head">Голова</div>
+            <div class="ios-chip" data-part="body">Тело</div>
+            <div class="ios-chip" data-part="arm_l">Л. Рука</div>
+            <div class="ios-chip" data-part="arm_r">П. Рука</div>
+            <div class="ios-chip" data-part="leg_l">Л. Нога</div>
+            <div class="ios-chip" data-part="leg_r">П. Нога</div>
         </div>
 
-        <div class="modal-label">РАКУРС</div>
-        <div class="scroll-row" id="sidesRow">
-            <div class="ios-chip active" data-s="front">Спереди</div>
-            <div class="ios-chip" data-s="back">Сзади</div>
-            <div class="ios-chip" data-s="left">Слева</div>
-            <div class="ios-chip" data-s="right">Справа</div>
-            <div class="ios-chip" data-s="top">Сверху</div>
-            <div class="ios-chip" data-s="bottom">Снизу</div>
+        <div class="section-label" style="margin-top:10px">Сторона</div>
+        <div class="scroll-row" id="sides">
+            <div class="ios-chip active" data-side="front">Перед</div>
+            <div class="ios-chip" data-side="back">Зад</div>
+            <div class="ios-chip" data-side="top">Верх</div>
+            <div class="ios-chip" data-side="bottom">Низ</div>
+            <div class="ios-chip" data-side="left">Слева</div>
+            <div class="ios-chip" data-side="right">Справа</div>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.MainButton.setParams({ text: 'СОХРАНИТЬ В ГАЛЕРЕЮ', is_visible: true, color: '#0A84FF' });
-        tg.MainButton.onClick(() => exportSkin());
-
+        tg.backgroundColor = "#000000";
+        tg.headerColor = "#000000";
+        tg.MainButton.setParams({ text: 'СКАЧАТЬ PNG', color: '#ffffff', text_color: '#000000', is_active: true, is_visible: true });
+        
         lucide.createIcons();
 
-        // --- 1. CONFIG & STATE ---
-        const UV = {
-            head: { size: [8,8], front:[8,8], back:[24,8], left:[16,8], right:[0,8], top:[8,0], bottom:[16,0] },
-            body: { size: [8,12], front:[20,20], back:[32,20], left:[28,20], right:[16,20], top:[20,16], bottom:[28,16] },
-            arm_r: { size: [4,12], front:[44,20], back:[52,20], left:[48,20], right:[40,20], top:[44,16], bottom:[48,16] },
-            arm_l: { size: [4,12], front:[36,52], back:[44,52], left:[40,52], right:[32,52], top:[36,48], bottom:[40,48] },
-            leg_r: { size: [4,12], front:[4,20], back:[12,20], left:[8,20], right:[0,20], top:[4,16], bottom:[8,16] },
-            leg_l: { size: [4,12], front:[20,52], back:[28,52], left:[24,52], right:[16,52], top:[20,48], bottom:[24,48] }
+        const CONFIG = {
+            head: { size: [8, 8], front: [8, 8], back: [24, 8], top: [8, 0], bottom: [16, 0], left: [0, 8], right: [16, 8] },
+            body: { size: [8, 12], front: [20, 20], back: [32, 20], top: [20, 16], bottom: [28, 16], left: [16, 20], right: [28, 20] },
+            arm_r: { size: [4, 12], front: [44, 20], back: [52, 20], top: [44, 16], bottom: [48, 16], left: [40, 20], right: [48, 20] },
+            arm_l: { size: [4, 12], front: [36, 52], back: [44, 52], top: [36, 48], bottom: [40, 48], left: [32, 52], right: [40, 52] },
+            leg_r: { size: [4, 12], front: [4, 20], back: [12, 20], top: [4, 16], bottom: [8, 16], left: [0, 20], right: [8, 20] },
+            leg_l: { size: [4, 12], front: [20, 52], back: [28, 52], top: [20, 48], bottom: [24, 48], left: [16, 52], right: [24, 52] }
         };
 
         let state = {
-            part: 'head', side: 'front', color: '#FF3B30', tool: 'pen',
-            isDrawing: false,
+            part: 'head', side: 'front', tool: 'pen', color: '#007AFF', isDrawing: false,
             master: document.createElement('canvas')
         };
         state.master.width = 64; state.master.height = 64;
         const mctx = state.master.getContext('2d');
 
-        const editor = document.getElementById('mainEditor');
-        const ectx = editor.getContext('2d');
+        const canvas = document.getElementById('mainCanvas');
+        const ctx = canvas.getContext('2d');
 
-        // --- 2. 3D PREVIEW (Three.js) ---
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-        renderer.setSize(100, 100);
-        document.getElementById('preview-3d').appendChild(renderer.domElement);
-
-        const geometry = new THREE.BoxGeometry(1, 1, 1);
-        const material = new THREE.MeshBasicMaterial({ color: 0x333333, wireframe: false });
-        const cube = new THREE.Mesh(geometry, material);
-        scene.add(cube);
-        camera.position.z = 2.5;
-
-        function update3DRotation() {
-            const rotations = {
-                front: [0, 0], back: [0, Math.PI],
-                left: [0, Math.PI/2], right: [0, -Math.PI/2],
-                top: [Math.PI/2, 0], bottom: [-Math.PI/2, 0]
-            };
-            const target = rotations[state.side];
-            // Плавная анимация поворота куба
-            cube.rotation.set(target[0], target[1], 0);
-        }
-
-        function animate() {
-            requestAnimationFrame(animate);
-            renderer.render(scene, camera);
-        }
-        animate();
-
-        // --- 3. EDITOR LOGIC ---
-        function syncEditor() {
-            const cfg = UV[state.part];
-            const pos = cfg[state.side];
-            editor.width = cfg.size[0];
-            editor.height = cfg.size[1];
+        function updateCanvas() {
+            const conf = CONFIG[state.part];
+            const pos = conf[state.side];
+            canvas.width = conf.size[0]; canvas.height = conf.size[1];
             
-            // UI Scaling
-            const zoom = window.innerWidth * 0.7 / editor.width;
-            editor.style.width = (editor.width * zoom) + "px";
-            editor.style.height = (editor.height * zoom) + "px";
+            // Динамический размер для мобилок
+            const drawSize = Math.min(window.innerWidth * 0.7, 260);
+            const ratio = canvas.width / canvas.height;
+            canvas.style.width = (ratio >= 1 ? drawSize : drawSize * ratio) + "px";
+            canvas.style.height = (ratio >= 1 ? drawSize / ratio : drawSize) + "px";
 
-            ectx.imageSmoothingEnabled = false;
-            ectx.drawImage(state.master, pos[0], pos[1], editor.width, editor.height, 0, 0, editor.width, editor.height);
-            update3DRotation();
+            ctx.imageSmoothingEnabled = false;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(state.master, pos[0], pos[1], canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+            document.getElementById('status').innerText = `${state.part} / ${state.side}`;
         }
 
-        function commit() {
-            const pos = UV[state.part][state.side];
-            mctx.clearRect(pos[0], pos[1], editor.width, editor.height);
-            mctx.drawImage(editor, pos[0], pos[1]);
-            tg.HapticFeedback.notificationOccurred('success');
+        function save() {
+            const pos = CONFIG[state.part][state.side];
+            mctx.clearRect(pos[0], pos[1], canvas.width, canvas.height);
+            mctx.drawImage(canvas, pos[0], pos[1]);
             localStorage.setItem('skinx_v2', state.master.toDataURL());
         }
 
-        // DRAWING
-        function paint(e) {
-            if(!state.isDrawing) return;
-            const rect = editor.getBoundingClientRect();
+        // Рисование
+        function handle(e) {
+            if (!state.isDrawing) return;
+            const rect = canvas.getBoundingClientRect();
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            const x = Math.floor((clientX - rect.left) / (rect.width / editor.width));
-            const y = Math.floor((clientY - rect.top) / (rect.height / editor.height));
+            const x = Math.floor((clientX - rect.left) / (rect.width / canvas.width));
+            const y = Math.floor((clientY - rect.top) / (rect.height / canvas.height));
 
-            if(state.tool === 'pen') {
-                ectx.fillStyle = state.color;
-                ectx.fillRect(x, y, 1, 1);
-            } else if(state.tool === 'eraser') {
-                ectx.clearRect(x, y, 1, 1);
+            if (x >= 0 && x < canvas.width && y >= 0 && y < canvas.height) {
+                if (state.tool === 'pen') { ctx.fillStyle = state.color; ctx.fillRect(x, y, 1, 1); }
+                else if (state.tool === 'eraser') { ctx.clearRect(x, y, 1, 1); }
+                else if (state.tool === 'picker') {
+                    const d = ctx.getImageData(x, y, 1, 1).data;
+                    if(d[3] > 0) {
+                        const hex = "#" + ((1 << 24) + (d[0] << 16) + (d[1] << 8) + d[2]).toString(16).slice(1);
+                        state.color = hex; document.getElementById('colorPicker').value = hex;
+                    }
+                }
+                save();
             }
         }
 
-        editor.onpointerdown = (e) => { state.isDrawing = true; paint(e); tg.HapticFeedback.impactOccurred('light'); };
-        window.onpointerup = () => state.isDrawing = false;
-        editor.onpointermove = paint;
+        canvas.addEventListener('pointerdown', (e) => { state.isDrawing = true; handle(e); tg.HapticFeedback.impactOccurred('light'); });
+        window.addEventListener('pointerup', () => state.isDrawing = false);
+        canvas.addEventListener('pointermove', handle);
 
-        // --- 4. UI HANDLERS ---
-        function pickColor(hex, el) {
-            state.color = hex;
-            document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
-            el.classList.add('active');
-            tg.HapticFeedback.selectionChanged();
-        }
+        // Кнопки переключения
+        document.querySelectorAll('.ios-chip').forEach(chip => {
+            chip.onclick = () => {
+                const parent = chip.parentElement.id;
+                document.querySelectorAll(`#${parent} .ios-chip`).forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                state[parent === 'parts' ? 'part' : 'side'] = chip.dataset[parent === 'parts' ? 'part' : 'side'];
+                updateCanvas();
+                tg.HapticFeedback.selectionChanged();
+            };
+        });
 
-        document.querySelectorAll('[data-t]').forEach(btn => {
+        document.querySelectorAll('[data-tool]').forEach(btn => {
             btn.onclick = () => {
-                document.querySelectorAll('[data-t]').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('[data-tool]').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                state.tool = btn.dataset.t;
+                state.tool = btn.dataset.tool;
                 tg.HapticFeedback.impactOccurred('medium');
             };
         });
 
-        document.getElementById('partsRow').onclick = (e) => {
-            const chip = e.target.closest('.ios-chip');
-            if(chip) {
-                document.querySelectorAll('#partsRow .ios-chip').forEach(c => c.classList.remove('active'));
-                chip.classList.add('active');
-                state.part = chip.dataset.p;
-                syncEditor();
-            }
+        document.getElementById('apply').onclick = () => {
+            tg.HapticFeedback.notificationOccurred('success');
+            tg.showConfirm("Применить изменения и сохранить слой?", (ok) => { if(ok) save(); });
         };
 
-        document.getElementById('sidesRow').onclick = (e) => {
-            const chip = e.target.closest('.ios-chip');
-            if(chip) {
-                document.querySelectorAll('#sidesRow .ios-chip').forEach(c => c.classList.remove('active'));
-                chip.classList.add('active');
-                state.side = chip.dataset.s;
-                syncEditor();
-            }
-        };
+        document.getElementById('colorPicker').oninput = (e) => state.color = e.target.value;
 
-        document.getElementById('applyBtn').onclick = () => {
-            commit();
-            const btn = document.getElementById('applyBtn');
-            btn.style.transform = 'scale(1.2)';
-            setTimeout(() => btn.style.transform = 'scale(1)', 200);
-        };
-
-        document.getElementById('hexPicker').oninput = (e) => {
-            state.color = e.target.value;
-            tg.HapticFeedback.selectionChanged();
-        };
-
-        function exportSkin() {
-            const data = state.master.toDataURL("image/png");
+        tg.MainButton.onClick(() => {
             const link = document.createElement('a');
-            link.href = data;
-            link.download = 'skin_premium.png';
+            link.download = 'skin.png';
+            link.href = state.master.toDataURL();
             link.click();
-            tg.showPopup({ title: 'Готово!', message: 'Скин сохранен в загрузки.', buttons: [{type: 'ok'}] });
-        }
+            tg.HapticFeedback.notificationOccurred('success');
+        });
 
-        // LOAD SAVED
-        const last = localStorage.getItem('skinx_v2');
-        if(last) {
-            const img = new Image();
-            img.onload = () => { mctx.drawImage(img, 0, 0); syncEditor(); };
-            img.src = last;
+        // Загрузка
+        const old = localStorage.getItem('skinx_v2');
+        if(old) { 
+            const img = new Image(); 
+            img.onload = () => { mctx.drawImage(img, 0, 0); updateCanvas(); }; 
+            img.src = old; 
+        } else {
+            updateCanvas();
         }
-
-        syncEditor();
     </script>
 </body>
 </html>
