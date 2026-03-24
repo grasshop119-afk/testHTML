@@ -3,343 +3,309 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Skinx iOS Edition</title>
+    <title>Skinx — Apple Edition</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
             --bg: #000000;
             --panel: #1C1C1E;
             --secondary: #2C2C2E;
-            --accent: #ffffff;
+            --accent: #0A84FF;
             --text: #ffffff;
             --sub-text: #8E8E93;
-            --ios-blue: #0A84FF;
         }
 
-        * { 
-            box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent; 
-            user-select: none;
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
 
         body {
-            margin: 0;
-            background: var(--bg);
-            color: var(--text);
+            margin: 0; background: var(--bg); color: var(--text);
             font-family: 'Manrope', sans-serif;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-            padding-top: env(safe-area-inset-top);
+            display: flex; flex-direction: column; height: 100vh; overflow: hidden;
         }
 
-        /* HEADER */
         header {
-            padding: 10px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;
         }
 
-        .logo { font-weight: 800; font-size: 18px; letter-spacing: -0.5px; }
-
-        .top-actions { display: flex; gap: 8px; }
+        .logo { font-weight: 800; font-size: 20px; letter-spacing: -0.5px; }
 
         .round-btn {
-            background: var(--secondary);
-            border: none;
-            color: white;
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 0.2s;
+            background: var(--secondary); border: none; color: white;
+            width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.1s, opacity 0.2s;
         }
-
-        .round-btn:active { opacity: 0.6; }
+        .round-btn:active { transform: scale(0.9); opacity: 0.8; }
 
         /* VIEWPORT */
         #viewport {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 10px;
+            flex: 1; display: flex; align-items: center; justify-content: center; position: relative;
         }
 
-        .canvas-wrapper {
-            background-color: #111;
+        .canvas-container {
+            position: relative; border-radius: 12px; overflow: hidden;
             background-image: 
-                linear-gradient(45deg, #1a1a1a 25%, transparent 25%), 
-                linear-gradient(-45deg, #1a1a1a 25%, transparent 25%),
-                linear-gradient(45deg, transparent 75%, #1a1a1a 75%),
-                linear-gradient(-45deg, transparent 75%, #1a1a1a 75%);
+                linear-gradient(45deg, #111 25%, transparent 25%), 
+                linear-gradient(-45deg, #111 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #111 75%),
+                linear-gradient(-45deg, transparent 75%, #111 75%);
             background-size: 16px 16px;
-            border-radius: 12px;
             border: 1px solid #333;
-            image-rendering: pixelated;
         }
 
-        canvas {
-            display: block;
-            image-rendering: pixelated;
-            touch-action: none;
+        canvas { display: block; image-rendering: pixelated; touch-action: none; }
+
+        /* PALETTE (5 Colors) */
+        .palette {
+            display: flex; justify-content: center; gap: 12px; margin-bottom: 15px;
+        }
+
+        .color-opt {
+            width: 32px; height: 32px; border-radius: 50%; border: 2px solid transparent;
+            transition: 0.2s; position: relative;
+        }
+        .color-opt.active { border-color: white; transform: scale(1.1); }
+        
+        #customPicker {
+            position: absolute; opacity: 0; width: 100%; height: 100%; top: 0; left: 0; cursor: pointer;
         }
 
         /* TOOLBAR */
         .toolbar {
-            background: rgba(28, 28, 30, 0.8);
-            backdrop-filter: blur(20px);
-            margin: 10px 15px;
-            padding: 8px 12px;
-            border-radius: 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid rgba(255,255,255,0.05);
+            background: var(--panel); margin: 0 20px 15px; padding: 6px;
+            border-radius: 30px; display: flex; justify-content: space-around;
         }
 
-        .tool-group { display: flex; gap: 6px; }
+        .tool-icon {
+            width: 44px; height: 44px; border-radius: 50%; border: none;
+            background: transparent; color: var(--sub-text);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .tool-icon.active { background: var(--secondary); color: white; }
 
-        .tool-item {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            border: none;
-            background: transparent;
-            color: var(--sub-text);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        /* SLIDING SELECTORS */
+        .shelf {
+            background: var(--panel); padding: 15px 15px calc(30px + env(safe-area-inset-bottom));
+            border-radius: 30px 30px 0 0;
         }
 
-        .tool-item.active {
-            background: var(--secondary);
-            color: var(--accent);
+        .sliding-nav {
+            position: relative; display: flex; background: var(--secondary);
+            border-radius: 12px; padding: 2px; margin-bottom: 15px; overflow: hidden;
         }
 
-        .color-dot {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            border: 2px solid #333;
-            position: relative;
-            overflow: hidden;
+        .nav-item {
+            flex: 1; text-align: center; padding: 8px 0; font-size: 13px; font-weight: 700;
+            z-index: 2; color: var(--sub-text); transition: color 0.3s;
+        }
+        .nav-item.active { color: #000; }
+
+        .indicator {
+            position: absolute; top: 2px; left: 2px; bottom: 2px;
+            background: white; border-radius: 10px; z-index: 1;
+            transition: transform 0.3s cubic-bezier(0.2, 1, 0.3, 1), width 0.3s;
         }
 
-        #colorPicker {
-            position: absolute;
-            top: -50%; left: -50%; width: 200%; height: 200%;
-            border: none; padding: 0; background: none;
-        }
-
-        /* MODAL BOTTOM */
-        .bottom-shelf {
-            background: var(--panel);
-            padding: 15px 15px calc(20px + env(safe-area-inset-bottom));
-            border-radius: 24px 24px 0 0;
-        }
-
-        .scroll-row {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            padding-bottom: 12px;
-            scrollbar-width: none;
-        }
-        .scroll-row::-webkit-scrollbar { display: none; }
-
-        .ios-chip {
-            background: var(--secondary);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--sub-text);
-            border: 1.5px solid transparent;
-            white-space: nowrap;
-        }
-
-        .ios-chip.active {
-            background: #3a3a3c;
-            color: #fff;
-            border-color: rgba(255,255,255,0.1);
-        }
-
-        .section-label {
-            font-size: 11px;
-            font-weight: 700;
-            color: #48484a;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-            margin-left: 5px;
-            letter-spacing: 0.5px;
-        }
+        .label { font-size: 11px; color: #555; font-weight: 800; margin-bottom: 6px; margin-left: 4px; }
     </style>
 </head>
 <body>
 
     <header>
         <div class="logo">SKINX</div>
-        <div class="top-actions">
-            <button class="round-btn" id="undo"><i data-lucide="undo-2" size="18"></i></button>
-            <button class="round-btn" id="apply" style="background: var(--ios-blue);"><i data-lucide="chevron-right" size="20"></i></button>
+        <div style="display: flex; gap: 10px;">
+            <button class="round-btn" id="undoBtn"><i data-lucide="undo-2" size="18"></i></button>
+            <button class="round-btn" style="background: var(--accent);"><i data-lucide="chevron-right" size="20"></i></button>
         </div>
     </header>
 
     <div id="viewport">
-        <div class="canvas-wrapper">
-            <canvas id="mainCanvas"></canvas>
+        <div class="canvas-container">
+            <canvas id="editor"></canvas>
         </div>
-        <div id="status" style="margin-top:10px; font-size:12px; color:#444;">Ready</div>
+    </div>
+
+    <div class="palette" id="palette">
+        <div class="color-opt active" style="background: #FF3B30;" data-hex="#FF3B30"></div>
+        <div class="color-opt" style="background: #4CD964;" data-hex="#4CD964"></div>
+        <div class="color-opt" style="background: #007AFF;" data-hex="#007AFF"></div>
+        <div class="color-opt" style="background: #FFCC00;" data-hex="#FFCC00"></div>
+        <div class="color-opt" style="background: #8E8E93;" id="lastColor">
+            <input type="color" id="customPicker">
+            <i data-lucide="plus" size="14" style="color:white; position:absolute; top:7px; left:7px; pointer-events:none;"></i>
+        </div>
     </div>
 
     <div class="toolbar">
-        <div class="color-dot" id="colorWrapper">
-            <input type="color" id="colorPicker" value="#007AFF">
-        </div>
-        <div class="tool-group">
-            <button class="tool-item active" data-tool="pen"><i data-lucide="pencil" size="20"></i></button>
-            <button class="tool-item" data-tool="fill"><i data-lucide="paint-bucket" size="20"></i></button>
-            <button class="tool-item" data-tool="eraser"><i data-lucide="eraser" size="20"></i></button>
-            <button class="tool-item" data-tool="picker"><i data-lucide="pipette" size="20"></i></button>
-        </div>
+        <button class="tool-icon active" data-t="pen"><i data-lucide="pencil"></i></button>
+        <button class="tool-icon" data-t="fill"><i data-lucide="paint-bucket"></i></button>
+        <button class="tool-icon" data-t="eraser"><i data-lucide="eraser"></i></button>
+        <button class="tool-icon" data-t="pipette"><i data-lucide="pipette"></i></button>
     </div>
 
-    <div class="bottom-shelf">
-        <div class="section-label">Часть тела</div>
-        <div class="scroll-row" id="parts">
-            <div class="ios-chip active" data-part="head">Голова</div>
-            <div class="ios-chip" data-part="body">Тело</div>
-            <div class="ios-chip" data-part="arm_l">Л. Рука</div>
-            <div class="ios-chip" data-part="arm_r">П. Рука</div>
-            <div class="ios-chip" data-part="leg_l">Л. Нога</div>
-            <div class="ios-chip" data-part="leg_r">П. Нога</div>
+    <div class="shelf">
+        <div class="label">ОБЛАСТЬ</div>
+        <div class="sliding-nav" id="partNav">
+            <div class="indicator" id="partInd"></div>
+            <div class="nav-item active" data-v="head">Голова</div>
+            <div class="nav-item" data-v="body">Тело</div>
+            <div class="nav-item" data-v="arm_r">Рука</div>
+            <div class="nav-item" data-v="leg_r">Нога</div>
         </div>
 
-        <div class="section-label" style="margin-top:10px">Сторона</div>
-        <div class="scroll-row" id="sides">
-            <div class="ios-chip active" data-side="front">Перед</div>
-            <div class="ios-chip" data-side="back">Зад</div>
-            <div class="ios-chip" data-side="top">Верх</div>
-            <div class="ios-chip" data-side="bottom">Низ</div>
-            <div class="ios-chip" data-side="left">Слева</div>
-            <div class="ios-chip" data-side="right">Справа</div>
+        <div class="label">СТОРОНА</div>
+        <div class="sliding-nav" id="sideNav">
+            <div class="indicator" id="sideInd"></div>
+            <div class="nav-item active" data-v="front">Перед</div>
+            <div class="nav-item" data-v="back">Зад</div>
+            <div class="nav-item" data-v="top">Верх</div>
+            <div class="nav-item" data-v="bottom">Низ</div>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.backgroundColor = "#000000";
-        tg.headerColor = "#000000";
-        tg.MainButton.setParams({ text: 'СКАЧАТЬ PNG', color: '#ffffff', text_color: '#000000', is_active: true, is_visible: true });
-        
+        tg.MainButton.setParams({ text: 'СОХРАНИТЬ СКИН', color: '#ffffff', text_color: '#000000', is_visible: true });
+
         lucide.createIcons();
 
-        const CONFIG = {
-            head: { size: [8, 8], front: [8, 8], back: [24, 8], top: [8, 0], bottom: [16, 0], left: [0, 8], right: [16, 8] },
-            body: { size: [8, 12], front: [20, 20], back: [32, 20], top: [20, 16], bottom: [28, 16], left: [16, 20], right: [28, 20] },
-            arm_r: { size: [4, 12], front: [44, 20], back: [52, 20], top: [44, 16], bottom: [48, 16], left: [40, 20], right: [48, 20] },
-            arm_l: { size: [4, 12], front: [36, 52], back: [44, 52], top: [36, 48], bottom: [40, 48], left: [32, 52], right: [40, 52] },
-            leg_r: { size: [4, 12], front: [4, 20], back: [12, 20], top: [4, 16], bottom: [8, 16], left: [0, 20], right: [8, 20] },
-            leg_l: { size: [4, 12], front: [20, 52], back: [28, 52], top: [20, 48], bottom: [24, 48], left: [16, 52], right: [24, 52] }
+        const UV = {
+            head: { s: [8,8], front:[8,8], back:[24,8], top:[8,0], bottom:[16,0] },
+            body: { s: [8,12], front:[20,20], back:[32,20], top:[20,16], bottom:[28,16] },
+            arm_r: { s: [4,12], front:[44,20], back:[52,20], top:[44,16], bottom:[48,16] },
+            leg_r: { s: [4,12], front:[4,20], back:[12,20], top:[4,16], bottom:[8,16] }
         };
 
         let state = {
-            part: 'head', side: 'front', tool: 'pen', color: '#007AFF', isDrawing: false,
-            master: document.createElement('canvas')
+            part: 'head', side: 'front', tool: 'pen', color: '#FF3B30',
+            master: document.createElement('canvas'),
+            undoStack: []
         };
         state.master.width = 64; state.master.height = 64;
         const mctx = state.master.getContext('2d');
 
-        const canvas = document.getElementById('mainCanvas');
+        const canvas = document.getElementById('editor');
         const ctx = canvas.getContext('2d');
 
-        function updateCanvas() {
-            const conf = CONFIG[state.part];
-            const pos = conf[state.side];
-            canvas.width = conf.size[0]; canvas.height = conf.size[1];
+        function update() {
+            const conf = UV[state.part];
+            canvas.width = conf.s[0]; canvas.height = conf.s[1];
+            const size = 260;
+            canvas.style.width = (canvas.width >= canvas.height ? size : size * (canvas.width/canvas.height)) + "px";
+            canvas.style.height = (canvas.height > canvas.width ? size : size * (canvas.height/canvas.width)) + "px";
             
-            // Динамический размер для мобилок
-            const drawSize = Math.min(window.innerWidth * 0.7, 260);
-            const ratio = canvas.width / canvas.height;
-            canvas.style.width = (ratio >= 1 ? drawSize : drawSize * ratio) + "px";
-            canvas.style.height = (ratio >= 1 ? drawSize / ratio : drawSize) + "px";
-
-            ctx.imageSmoothingEnabled = false;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(state.master, pos[0], pos[1], canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
-            document.getElementById('status').innerText = `${state.part} / ${state.side}`;
+            const p = conf[state.side];
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            ctx.drawImage(state.master, p[0], p[1], canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
         }
 
-        function save() {
-            const pos = CONFIG[state.part][state.side];
-            mctx.clearRect(pos[0], pos[1], canvas.width, canvas.height);
-            mctx.drawImage(canvas, pos[0], pos[1]);
-            localStorage.setItem('skinx_v2', state.master.toDataURL());
+        function saveStep() {
+            state.undoStack.push(state.master.toDataURL());
+            if(state.undoStack.length > 20) state.undoStack.shift();
+            
+            const p = UV[state.part][state.side];
+            mctx.clearRect(p[0], p[1], canvas.width, canvas.height);
+            mctx.drawImage(canvas, p[0], p[1]);
         }
 
-        // Рисование
-        function handle(e) {
-            if (!state.isDrawing) return;
-            const rect = canvas.getBoundingClientRect();
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            const x = Math.floor((clientX - rect.left) / (rect.width / canvas.width));
-            const y = Math.floor((clientY - rect.top) / (rect.height / canvas.height));
+        function undo() {
+            if(state.undoStack.length === 0) return;
+            const last = state.undoStack.pop();
+            const img = new Image();
+            img.onload = () => {
+                mctx.clearRect(0,0,64,64);
+                mctx.drawImage(img,0,0);
+                update();
+            };
+            img.src = last;
+            tg.HapticFeedback.impactOccurred('medium');
+        }
 
-            if (x >= 0 && x < canvas.width && y >= 0 && y < canvas.height) {
-                if (state.tool === 'pen') { ctx.fillStyle = state.color; ctx.fillRect(x, y, 1, 1); }
-                else if (state.tool === 'eraser') { ctx.clearRect(x, y, 1, 1); }
-                else if (state.tool === 'picker') {
-                    const d = ctx.getImageData(x, y, 1, 1).data;
-                    if(d[3] > 0) {
-                        const hex = "#" + ((1 << 24) + (d[0] << 16) + (d[1] << 8) + d[2]).toString(16).slice(1);
-                        state.color = hex; document.getElementById('colorPicker').value = hex;
-                    }
-                }
-                save();
+        // --- ИНДИКАТОРЫ ---
+        function moveInd(navId, indId) {
+            const nav = document.getElementById(navId);
+            const ind = document.getElementById(indId);
+            const active = nav.querySelector('.active');
+            ind.style.width = active.offsetWidth + "px";
+            ind.style.transform = `translateX(${active.offsetLeft - 2}px)`;
+        }
+
+        // --- СОБЫТИЯ ---
+        canvas.addEventListener('pointerdown', (e) => {
+            state.drawing = true;
+            saveStep();
+            draw(e);
+            tg.HapticFeedback.impactOccurred('light');
+        });
+        window.addEventListener('pointerup', () => state.drawing = false);
+        canvas.addEventListener('pointermove', draw);
+
+        function draw(e) {
+            if(!state.drawing) return;
+            const r = canvas.getBoundingClientRect();
+            const x = Math.floor(((e.clientX || e.touches[0].clientX) - r.left) / (r.width / canvas.width));
+            const y = Math.floor(((e.clientY || e.touches[0].clientY) - r.top) / (r.height / canvas.height));
+            
+            if(x>=0 && x<canvas.width && y>=0 && y<canvas.height) {
+                if(state.tool==='pen') { ctx.fillStyle=state.color; ctx.fillRect(x,y,1,1); }
+                else if(state.tool==='eraser') { ctx.clearRect(x,y,1,1); }
+                const p = UV[state.part][state.side];
+                mctx.clearRect(p[0], p[1], canvas.width, canvas.height);
+                mctx.drawImage(canvas, p[0], p[1]);
             }
         }
 
-        canvas.addEventListener('pointerdown', (e) => { state.isDrawing = true; handle(e); tg.HapticFeedback.impactOccurred('light'); });
-        window.addEventListener('pointerup', () => state.isDrawing = false);
-        canvas.addEventListener('pointermove', handle);
-
-        // Кнопки переключения
-        document.querySelectorAll('.ios-chip').forEach(chip => {
-            chip.onclick = () => {
-                const parent = chip.parentElement.id;
-                document.querySelectorAll(`#${parent} .ios-chip`).forEach(c => c.classList.remove('active'));
-                chip.classList.add('active');
-                state[parent === 'parts' ? 'part' : 'side'] = chip.dataset[parent === 'parts' ? 'part' : 'side'];
-                updateCanvas();
+        document.getElementById('partNav').onclick = (e) => {
+            if(e.target.dataset.v) {
+                document.querySelectorAll('#partNav .nav-item').forEach(n=>n.classList.remove('active'));
+                e.target.classList.add('active');
+                state.part = e.target.dataset.v;
+                moveInd('partNav', 'partInd');
+                update();
                 tg.HapticFeedback.selectionChanged();
-            };
-        });
-
-        document.querySelectorAll('[data-tool]').forEach(btn => {
-            btn.onclick = () => {
-                document.querySelectorAll('[data-tool]').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                state.tool = btn.dataset.tool;
-                tg.HapticFeedback.impactOccurred('medium');
-            };
-        });
-
-        document.getElementById('apply').onclick = () => {
-            tg.HapticFeedback.notificationOccurred('success');
-            tg.showConfirm("Применить изменения и сохранить слой?", (ok) => { if(ok) save(); });
+            }
         };
 
-        document.getElementById('colorPicker').oninput = (e) => state.color = e.target.value;
+        document.getElementById('sideNav').onclick = (e) => {
+            if(e.target.dataset.v) {
+                document.querySelectorAll('#sideNav .nav-item').forEach(n=>n.classList.remove('active'));
+                e.target.classList.add('active');
+                state.side = e.target.dataset.v;
+                moveInd('sideNav', 'sideInd');
+                update();
+                tg.HapticFeedback.selectionChanged();
+            }
+        };
+
+        document.querySelectorAll('.tool-icon').forEach(btn => {
+            btn.onclick = () => {
+                document.querySelectorAll('.tool-icon').forEach(i=>i.classList.remove('active'));
+                btn.classList.add('active');
+                state.tool = btn.dataset.t;
+                tg.HapticFeedback.impactOccurred('light');
+            };
+        });
+
+        document.getElementById('palette').onclick = (e) => {
+            if(e.target.dataset.hex) {
+                document.querySelectorAll('.color-opt').forEach(c=>c.classList.remove('active'));
+                e.target.classList.add('active');
+                state.color = e.target.dataset.hex;
+                tg.HapticFeedback.impactOccurred('light');
+            }
+        };
+
+        document.getElementById('customPicker').oninput = (e) => {
+            state.color = e.target.value;
+            document.getElementById('lastColor').style.background = e.target.value;
+            document.querySelectorAll('.color-opt').forEach(c=>c.classList.remove('active'));
+            document.getElementById('lastColor').classList.add('active');
+        };
+
+        document.getElementById('undoBtn').onclick = undo;
 
         tg.MainButton.onClick(() => {
             const link = document.createElement('a');
@@ -349,15 +315,11 @@
             tg.HapticFeedback.notificationOccurred('success');
         });
 
-        // Загрузка
-        const old = localStorage.getItem('skinx_v2');
-        if(old) { 
-            const img = new Image(); 
-            img.onload = () => { mctx.drawImage(img, 0, 0); updateCanvas(); }; 
-            img.src = old; 
-        } else {
-            updateCanvas();
-        }
+        window.onload = () => {
+            update();
+            moveInd('partNav', 'partInd');
+            moveInd('sideNav', 'sideInd');
+        };
     </script>
 </body>
 </html>
