@@ -3,380 +3,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Skinx Premium</title>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;500;700;800&display=swap" rel="stylesheet">
+    <title>Skinx Pro</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
-            --ios-bg: #000000;
-            --ios-panel: rgba(28, 28, 30, 0.8);
-            --ios-accent: #0A84FF;
-            --ios-text: #FFFFFF;
-            --ios-secondary: #8E8E93;
-            --blur: blur(20px);
+            --ios-bg: #000;
+            --ios-card: #1c1c1e;
+            --accent: #007aff;
+            --text: #fff;
+            --secondary: #8e8e93;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Manrope', sans-serif; }
 
         body {
-            margin: 0;
-            background: var(--ios-bg);
-            color: var(--ios-text);
-            font-family: 'Manrope', sans-serif;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            margin: 0; background: var(--ios-bg); color: var(--text);
+            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
         }
 
-        /* iOS Header */
-        header {
-            padding: 50px 20px 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
-        }
-
-        header h1 { margin: 0; font-size: 32px; font-weight: 800; letter-spacing: -1px; }
-
-        /* Segmented Control (iOS Style) */
-        .segmented-control {
-            margin: 10px 20px;
-            background: rgba(118, 118, 128, 0.24);
-            border-radius: 10px;
-            padding: 2px;
-            display: flex;
-        }
-
-        .segment {
-            flex: 1;
-            padding: 6px 0;
-            text-align: center;
-            font-size: 13px;
-            font-weight: 600;
-            border-radius: 8px;
-            transition: 0.2s;
-            color: var(--ios-secondary);
-        }
-
-        .segment.active {
-            background: #636366;
-            color: #fff;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-        }
-
-        /* Face Selector (Grid 2x3) */
-        .face-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            padding: 0 20px 20px;
-        }
-
-        .face-btn {
-            background: var(--ios-panel);
-            backdrop-filter: var(--blur);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            text-align: center;
-            color: var(--ios-secondary);
-        }
-
-        .face-btn.active {
-            border-color: var(--ios-accent);
-            color: var(--ios-accent);
-            background: rgba(10, 132, 255, 0.1);
-        }
+        /* Header */
+        header { padding: 40px 20px 10px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-weight: 800; font-size: 24px; letter-spacing: -1px; }
 
         /* Canvas Area */
-        .workspace {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
+        .viewport {
+            flex: 1; display: flex; align-items: center; justify-content: center;
+            padding-bottom: 250px; /* Место под модалку */
         }
-
-        .canvas-card {
-            background: #1c1c1e;
-            padding: 10px;
-            border-radius: 24px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-            border: 1px solid rgba(255,255,255,0.05);
+        .canvas-box {
+            background: #2c2c2e; border-radius: 12px; padding: 5px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5); position: relative;
         }
-
-        canvas {
-            image-rendering: pixelated;
-            touch-action: none;
-            display: block;
-            background-image: 
-                linear-gradient(45deg, #2c2c2e 25%, transparent 25%), 
-                linear-gradient(-45deg, #2c2c2e 25%, transparent 25%),
-                linear-gradient(45deg, transparent 75%, #2c2c2e 75%),
-                linear-gradient(-45deg, transparent 75%, #2c2c2e 75%);
+        canvas { 
+            image-rendering: pixelated; display: block; touch-action: none;
+            background-image: repeating-conic-gradient(#3a3a3c 0% 25%, #2c2c2e 0% 50%);
             background-size: 20px 20px;
         }
 
-        /* Floating Toolbar */
-        .toolbar {
-            position: absolute;
-            bottom: 120px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--ios-panel);
-            backdrop-filter: var(--blur);
-            padding: 10px 20px;
-            border-radius: 40px;
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .color-dot {
-            width: 32px; height: 32px;
-            border-radius: 50%;
-            border: 2px solid #fff;
-            position: relative; overflow: hidden;
-        }
-
-        #colorPicker { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; border: none; }
-
-        .tool-icon { color: var(--ios-secondary); transition: 0.2s; }
-        .tool-icon.active { color: var(--ios-accent); transform: scale(1.2); }
-
-        /* Actions */
-        .actions {
-            padding: 20px 20px 40px;
-            background: var(--ios-panel);
-            backdrop-filter: var(--blur);
+        /* Bottom Sheet (Modal) */
+        .bottom-sheet {
+            position: fixed; bottom: 0; width: 100%;
+            background: rgba(28, 28, 30, 0.85); backdrop-filter: blur(25px);
             border-top: 1px solid rgba(255,255,255,0.1);
+            border-radius: 30px 30px 0 0;
+            padding: 20px 20px 40px;
+            display: flex; flex-direction: column; gap: 15px;
+            z-index: 100;
         }
 
-        .btn-main {
-            background: var(--ios-accent);
-            color: white;
-            border: none;
-            width: 100%;
-            padding: 18px;
-            border-radius: 16px;
-            font-size: 17px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+        /* Палитра-трансформер */
+        .palette-container {
+            display: flex; align-items: center; gap: 10px;
+            background: rgba(255,255,255,0.05); padding: 8px; border-radius: 40px;
+            width: fit-content; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden; max-width: 50px; /* Свернута */
         }
+        .palette-container.expanded { max-width: 400px; }
+
+        .color-slot {
+            min-width: 34px; height: 34px; border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.2); transition: 0.2s;
+        }
+        .color-slot.active { border-color: #fff; transform: scale(1.1); }
+
+        /* Навигация и инструменты */
+        .scroller { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+        .scroller::-webkit-scrollbar { display: none; }
+
+        .chip {
+            background: rgba(255,255,255,0.1); padding: 8px 16px; 
+            border-radius: 12px; font-size: 13px; font-weight: 600; white-space: nowrap;
+        }
+        .chip.active { background: var(--accent); color: #fff; }
+
+        .tools-row { display: flex; justify-content: space-between; align-items: center; }
+        .tool-btn {
+            background: none; border: none; color: var(--secondary);
+            padding: 10px; transition: 0.2s;
+        }
+        .tool-btn.active { color: var(--accent); transform: scale(1.1); }
+        
+        input[type="color"] { display: none; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Skinx</h1>
-        <button style="background:none; border:none; color:var(--ios-accent)" onclick="reset()">Сброс</button>
+        <div class="logo">Skinx</div>
+        <div id="status" style="font-size: 12px; color: var(--secondary);">Saved</div>
     </header>
 
-    <div class="segmented-control" id="partTabs">
-        <div class="segment active" data-part="head">Head</div>
-        <div class="segment" data-part="body">Body</div>
-        <div class="segment" data-part="arm">Arm</div>
-        <div class="segment" data-part="leg">Leg</div>
-    </div>
-
-    <div class="face-grid" id="faceTabs">
-        <div class="face-btn active" data-face="front">Front</div>
-        <div class="face-btn" data-face="back">Back</div>
-        <div class="face-btn" data-face="top">Top</div>
-        <div class="face-btn" data-face="bottom">Bottom</div>
-        <div class="face-btn" data-face="right">Right</div>
-        <div class="face-btn" data-face="left">Left</div>
-    </div>
-
-    <div class="workspace">
-        <div class="canvas-card">
+    <div class="viewport">
+        <div class="canvas-box">
             <canvas id="editor"></canvas>
         </div>
+    </div>
 
-        <div class="toolbar">
-            <div class="color-dot">
-                <input type="color" id="colorPicker" value="#007AFF">
+    <div class="bottom-sheet">
+        <div class="tools-row">
+            <div class="palette-container" id="palette">
+                <div class="color-slot active" style="background: #007aff;" onclick="pickColor(this, '#007aff')"></div>
+                <div class="color-slot" style="background: #ff3b30;" onclick="pickColor(this, '#ff3b30')"></div>
+                <div class="color-slot" style="background: #4cd964;" onclick="pickColor(this, '#4cd964')"></div>
+                <div class="color-slot" style="background: #ffcc00;" onclick="pickColor(this, '#ffcc00')"></div>
+                <div class="color-slot" style="background: #ffffff;" onclick="pickColor(this, '#ffffff')"></div>
+                <div class="color-slot" style="background: #5856d6;" onclick="pickColor(this, '#5856d6')"></div>
+                <div class="color-slot" id="customColorSlot" style="background: #000;" onclick="openPicker()">+</div>
             </div>
-            <i data-lucide="pencil" class="tool-icon active" id="pen"></i>
-            <i data-lucide="eraser" class="tool-icon" id="eraser"></i>
-            <i data-lucide="pipette" class="tool-icon" id="pipette"></i>
+            
+            <div style="display: flex; gap: 5px;">
+                <button class="tool-btn active" id="pen" onclick="setTool('pen')"><i data-lucide="pencil"></i></button>
+                <button class="tool-btn" id="fill" onclick="setTool('fill')"><i data-lucide="paint-bucket"></i></button>
+                <button class="tool-btn" id="eraser" onclick="setTool('eraser')"><i data-lucide="eraser"></i></button>
+                <button class="tool-btn" id="pipette" onclick="setTool('pipette')"><i data-lucide="pipette"></i></button>
+            </div>
+        </div>
+
+        <div class="scroller" id="faceTabs">
+            <div class="chip active" data-face="front">Front</div>
+            <div class="chip" data-face="back">Back</div>
+            <div class="chip" data-face="top">Top</div>
+            <div class="chip" data-face="bottom">Bottom</div>
+            <div class="chip" data-face="left">Left</div>
+            <div class="chip" data-face="right">Right</div>
+        </div>
+
+        <div class="scroller" id="partTabs">
+            <div class="chip active" data-part="head">Head (Голова)</div>
+            <div class="chip" data-part="body">Body (Тело)</div>
+            <div class="chip" data-part="arm">Arm (Рука)</div>
+            <div class="chip" data-part="leg">Leg (Нога)</div>
         </div>
     </div>
 
-    <div class="actions">
-        <button class="btn-main" onclick="exportSkin()">
-            <i data-lucide="download"></i> Export Skin
-        </button>
-    </div>
+    <input type="color" id="hiddenPicker" onchange="updateCustomColor(this.value)">
 
     <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.MainButton.text = "ЭКСПОРТ В PNG";
+        tg.MainButton.show();
+        tg.MainButton.onClick(() => exportSkin());
+
         lucide.createIcons();
 
-        // Константы координат Minecraft 64x64 (Steve Model)
+        // Сетка координат Minecraft
         const MAP = {
-            head: {
-                size: [8, 8],
-                faces: {
-                    top: [8, 0], bottom: [16, 0], right: [0, 8],
-                    front: [8, 8], left: [16, 8], back: [24, 8]
-                }
-            },
-            body: {
-                size: [8, 12, 4], // w, h, depth
-                faces: {
-                    top: [20, 16, 8, 4], bottom: [28, 16, 8, 4], right: [16, 20, 4, 12],
-                    front: [20, 20, 8, 12], left: [28, 20, 4, 12], back: [32, 20, 8, 12]
-                }
-            },
-            arm: {
-                size: [4, 12],
-                faces: {
-                    top: [44, 16], bottom: [52, 16], right: [40, 20],
-                    front: [44, 20], left: [48, 20], back: [52, 20]
-                }
-            },
-            leg: {
-                size: [4, 12],
-                faces: {
-                    top: [4, 16], bottom: [12, 16], right: [0, 20],
-                    front: [4, 20], left: [8, 20], back: [12, 20]
-                }
-            }
+            head: { size: [8,8], faces: { front:[8,8], back:[24,8], top:[8,0], bottom:[16,0], left:[16,8], right:[0,8] } },
+            body: { size: [8,12], faces: { front:[20,20], back:[32,20], top:[20,16,8,4], bottom:[28,16,8,4], left:[28,20,4,12], right:[16,20,4,12] } },
+            arm: { size: [4,12], faces: { front:[44,20], back:[52,20], top:[44,16,4,4], bottom:[48,16,4,4], left:[48,20], right:[40,20] } },
+            leg: { size: [4,12], faces: { front:[4,20], back:[12,20], top:[4,16,4,4], bottom:[8,16,4,4], left:[8,20], right:[0,20] } }
         };
 
         let currentPart = 'head';
         let currentFace = 'front';
         let currentTool = 'pen';
+        let activeColor = '#007aff';
         let isDrawing = false;
 
         const canvas = document.getElementById('editor');
         const ctx = canvas.getContext('2d');
-        
-        // Хранилище всех данных в памяти (64x64 виртуальный холст)
-        const vCanvas = document.createElement('canvas');
+        const vCanvas = document.createElement('canvas'); // Мастер-холст 64x64
         vCanvas.width = 64; vCanvas.height = 64;
-        const vCtx = vCanvas.getContext('2d');
+        const vCtx = vCanvas.getContext('2d', { willReadFrequently: true });
 
-        // Загрузка из localStorage
-        const saved = localStorage.getItem('skinx_v2');
-        if (saved) {
+        // Автозагрузка
+        const saved = localStorage.getItem('skinx_v3');
+        if(saved) {
             const img = new Image();
-            img.onload = () => { vCtx.drawImage(img, 0, 0); updateEditor(); };
+            img.onload = () => { vCtx.drawImage(img,0,0); updateCanvas(); };
             img.src = saved;
         }
 
-        function updateEditor() {
-            const partData = MAP[currentPart];
-            let w, h, x, y;
+        function updateCanvas() {
+            const f = MAP[currentPart].faces[currentFace];
+            const w = f[2] || MAP[currentPart].size[0];
+            const h = f[3] || MAP[currentPart].size[1];
+            canvas.width = w; canvas.height = h;
             
-            // Определяем размеры грани
-            const f = partData.faces[currentFace];
-            x = f[0]; y = f[1];
-            w = f[2] || partData.size[0];
-            h = f[3] || partData.size[1];
-
-            canvas.width = w;
-            canvas.height = h;
-            
-            // Масштаб для отображения
-            const scale = 300 / Math.max(w, h);
+            const scale = Math.min((window.innerWidth - 80)/w, 40);
             canvas.style.width = (w * scale) + 'px';
             canvas.style.height = (h * scale) + 'px';
-
-            // Отрисовка текущего состояния из виртуального холста
+            
             ctx.clearRect(0,0,w,h);
-            ctx.drawImage(vCanvas, x, y, w, h, 0, 0, w, h);
+            ctx.drawImage(vCanvas, f[0], f[1], w, h, 0, 0, w, h);
         }
 
-        function draw(e) {
-            if (!isDrawing) return;
+        function getXY(e) {
             const rect = canvas.getBoundingClientRect();
-            const cx = e.touches ? e.touches[0].clientX : e.clientX;
-            const cy = e.touches ? e.touches[0].clientY : e.clientY;
-            
-            const px = Math.floor((cx - rect.left) / (rect.width / canvas.width));
-            const py = Math.floor((cy - rect.top) / (rect.height / canvas.height));
-
-            const faceCoords = MAP[currentPart].faces[currentFace];
-            const realX = faceCoords[0] + px;
-            const realY = faceCoords[1] + py;
-
-            if (currentTool === 'pen') {
-                vCtx.fillStyle = document.getElementById('colorPicker').value;
-                vCtx.fillRect(realX, realY, 1, 1);
-            } else if (currentTool === 'eraser') {
-                vCtx.clearRect(realX, realY, 1, 1);
-            } else if (currentTool === 'pipette') {
-                const d = vCtx.getImageData(realX, realY, 1, 1).data;
-                if(d[3] > 0) {
-                    const hex = "#" + ((1 << 24) + (d[0] << 16) + (d[1] << 8) + d[2]).toString(16).slice(1);
-                    document.getElementById('colorPicker').value = hex;
-                }
-            }
-            
-            updateEditor();
-            localStorage.setItem('skinx_v2', vCanvas.toDataURL());
+            const t = e.touches ? e.touches[0] : e;
+            const x = Math.floor((t.clientX - rect.left) / (rect.width / canvas.width));
+            const y = Math.floor((t.clientY - rect.top) / (rect.height / canvas.height));
+            return { x, y };
         }
 
-        // Навигация
-        document.getElementById('partTabs').onclick = (e) => {
-            if (e.target.dataset.part) {
-                document.querySelectorAll('.segment').forEach(s => s.classList.remove('active'));
-                e.target.classList.add('active');
-                currentPart = e.target.dataset.part;
-                updateEditor();
-            }
-        };
+        function handleDraw(e) {
+            if(!isDrawing) return;
+            const {x, y} = getXY(e);
+            if (x < 0 || y < 0 || x >= canvas.width || y >= canvas.height) return;
 
-        document.getElementById('faceTabs').onclick = (e) => {
-            if (e.target.dataset.face) {
-                document.querySelectorAll('.face-btn').forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
-                currentFace = e.target.dataset.face;
-                updateEditor();
-            }
-        };
+            const f = MAP[currentPart].faces[currentFace];
+            const rx = f[0] + x; const ry = f[1] + y;
 
-        // Инструменты
-        const setTool = (id) => {
-            currentTool = id;
-            document.querySelectorAll('.tool-icon').forEach(i => i.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        };
-        document.getElementById('pen').onclick = () => setTool('pen');
-        document.getElementById('eraser').onclick = () => setTool('eraser');
-        document.getElementById('pipette').onclick = () => setTool('pipette');
-
-        // События холста
-        canvas.onmousedown = (e) => { isDrawing = true; draw(e); };
-        canvas.ontouchstart = (e) => { isDrawing = true; draw(e); };
-        window.onmouseup = window.ontouchend = () => isDrawing = false;
-        canvas.onmousemove = canvas.ontouchmove = (e) => draw(e);
-
-        function exportSkin() {
-            const link = document.createElement('a');
-            link.download = 'skinx_skin.png';
-            link.href = vCanvas.toDataURL();
-            link.click();
-            if(window.Telegram?.WebApp) window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-        }
-
-        function reset() {
-            if(confirm("Очистить скин?")) {
-                vCtx.clearRect(0,0,64,64);
-                updateEditor();
-                localStorage.removeItem('skinx_v2');
-            }
-        }
-
-        updateEditor();
-    </script>
-</body>
-</html>
+            if(currentTool === 'pen') {
+                vCtx.fillStyle = activeColor;
+                vCtx.fillRect(rx, ry, 1, 1);
+                tg.HapticFeedback.impactOccurred('light');
+            } else if(currentTool === 'eraser') {
+                vCtx.clearRect(rx, ry, 1, 1);
+            } else if(currentTool === 'pipette')
