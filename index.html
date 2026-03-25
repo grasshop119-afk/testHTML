@@ -3,116 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Skinx Pro — Professional Editor</title>
+    <title>Skinx — Native iOS</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
-            --bg: #000000;
-            --ios-card: rgba(28, 28, 30, 0.7);
-            --ios-active: #3a3a3c;
-            --accent: #ffffff;
+            --bg: #000;
+            --card: #1C1C1E;
+            --sec: #2C2C2E;
+            --accent: #fff;
             --blue: #0A84FF;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        
+        * { 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
+            -webkit-user-select: none; 
+            user-select: none;
+            outline: none;
+        }
+
         body {
             margin: 0; background: var(--bg); color: #fff;
             font-family: 'Manrope', sans-serif;
-            display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+            height: 100vh; width: 100vw; overflow: hidden;
+            display: flex; flex-direction: column;
+            position: fixed; /* Полная фиксация */
         }
 
+        /* HEADER */
         header {
-            padding: 20px 24px; display: flex; justify-content: space-between; align-items: center;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+            padding: 12px 20px; display: flex; justify-content: space-between; align-items: center;
+            z-index: 100;
+        }
+        .logo { font-size: 19px; font-weight: 800; letter-spacing: -0.5px; }
+        
+        .btn-top {
+            width: 36px; height: 36px; border-radius: 50%; border: none;
+            background: var(--card); color: #fff; display: flex;
+            align-items: center; justify-content: center; backdrop-filter: blur(10px);
         }
 
-        .logo { font-size: 22px; font-weight: 800; letter-spacing: -1px; }
-
-        .btn-circle {
-            width: 42px; height: 42px; border-radius: 50%; border: none;
-            background: var(--ios-card); color: #fff;
-            display: flex; align-items: center; justify-content: center;
-            backdrop-filter: blur(15px); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .btn-circle:active { transform: scale(0.9); background: var(--ios-active); }
-
-        /* VIEWPORT */
+        /* VIEWPORT (Центральная часть) */
         #viewport {
             flex: 1; display: flex; align-items: center; justify-content: center;
-            padding: 20px; position: relative;
+            padding: 10px; position: relative;
         }
-
-        .canvas-frame {
-            position: relative; border-radius: 4px;
-            box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 20px 40px rgba(0,0,0,0.8);
-            background-image: 
-                linear-gradient(45deg, #111 25%, transparent 25%), 
-                linear-gradient(-45deg, #111 25%, transparent 25%),
-                linear-gradient(45deg, transparent 75%, #111 75%),
-                linear-gradient(-45deg, transparent 75%, #111 75%);
+        .canvas-box {
+            background-color: #111;
+            background-image: linear-gradient(45deg, #181818 25%, transparent 25%), 
+                              linear-gradient(-45deg, #181818 25%, transparent 25%),
+                              linear-gradient(45deg, transparent 75%, #181818 75%),
+                              linear-gradient(-45deg, transparent 75%, #181818 75%);
             background-size: 16px 16px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.7);
+            border-radius: 4px; border: 1px solid #333;
+        }
+        canvas { display: block; image-rendering: pixelated; touch-action: none; }
+
+        /* ИНСТРУМЕНТЫ (С бегающим фоном) */
+        .controls { padding: 10px 20px; display: flex; flex-direction: column; gap: 12px; }
+        
+        .palette { display: flex; justify-content: center; gap: 10px; }
+        .swatch { width: 30px; height: 30px; border-radius: 50%; border: 2px solid transparent; transition: 0.2s; }
+        .swatch.active { border-color: #fff; transform: scale(1.15); }
+
+        .sliding-toolbar {
+            position: relative; background: var(--card); border-radius: 25px;
+            padding: 3px; display: flex; height: 44px; align-items: center;
+        }
+        .t-item {
+            flex: 1; z-index: 2; height: 100%; border: none; background: transparent;
+            color: #8e8e93; display: flex; align-items: center; justify-content: center;
+            transition: color 0.2s;
+        }
+        .t-item.active { color: #fff; }
+        .t-indicator {
+            position: absolute; background: var(--sec); border-radius: 22px;
+            z-index: 1; transition: transform 0.25s cubic-bezier(0.2, 1, 0.3, 1), width 0.25s;
         }
 
-        canvas { display: block; image-rendering: pixelated; touch-action: none; cursor: crosshair; }
-
-        /* TOOLS & PALETTE */
-        .controls-overlay {
-            padding: 0 20px 10px; display: flex; flex-direction: column; gap: 15px;
+        /* BOTTOM SHELF (Навигация) */
+        .shelf {
+            background: var(--card); padding: 12px 16px calc(20px + env(safe-area-inset-bottom));
+            border-radius: 28px 28px 0 0; border-top: 1px solid rgba(255,255,255,0.05);
         }
-
-        .palette-row {
-            display: flex; justify-content: center; gap: 14px; align-items: center;
+        .row-label { font-size: 10px; font-weight: 800; color: #555; text-transform: uppercase; margin: 0 0 6px 4px; }
+        
+        .segment-nav {
+            position: relative; background: #000; border-radius: 10px;
+            padding: 2px; display: flex; margin-bottom: 12px;
         }
-
-        .color-node {
-            width: 34px; height: 34px; border-radius: 50%; border: 2px solid transparent;
-            transition: 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        .s-item {
+            flex: 1; padding: 7px 0; font-size: 12px; font-weight: 600;
+            color: #8e8e93; z-index: 2; text-align: center;
         }
-        .color-node.active { border-color: #fff; transform: scale(1.2); }
-
-        .toolbar-blur {
-            background: var(--ios-card); backdrop-filter: blur(25px);
-            border-radius: 35px; padding: 6px; display: flex; gap: 4px;
-            border: 1px solid rgba(255,255,255,0.08);
-        }
-
-        .t-btn {
-            flex: 1; height: 48px; border-radius: 30px; border: none;
-            background: transparent; color: #8e8e93; display: flex;
-            align-items: center; justify-content: center; transition: 0.3s;
-        }
-        .t-btn.active { background: var(--ios-active); color: #fff; }
-
-        /* SLIDING NAVIGATION */
-        .bottom-sheet {
-            background: var(--ios-card); backdrop-filter: blur(30px);
-            border-radius: 35px 35px 0 0; padding: 20px 20px calc(25px + env(safe-area-inset-bottom));
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .nav-container {
-            position: relative; background: rgba(0,0,0,0.3);
-            border-radius: 14px; padding: 3px; display: flex; margin-bottom: 16px;
-        }
-
-        .nav-btn {
-            flex: 1; padding: 10px 0; font-size: 13px; font-weight: 600;
-            color: #8e8e93; z-index: 2; transition: color 0.3s;
-        }
-        .nav-btn.active { color: #000; }
-
-        .nav-indicator {
-            position: absolute; top: 3px; left: 3px; bottom: 3px;
-            background: #fff; border-radius: 11px; z-index: 1;
-            transition: all 0.35s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-
-        .section-tag {
-            font-size: 10px; font-weight: 800; color: #444;
-            text-transform: uppercase; letter-spacing: 1px; margin: 0 0 8px 6px;
+        .s-item.active { color: #000; }
+        .s-indicator {
+            position: absolute; background: #fff; border-radius: 8px;
+            z-index: 1; transition: transform 0.3s cubic-bezier(0.2, 1, 0.3, 1), width 0.3s;
         }
     </style>
 </head>
@@ -120,54 +110,55 @@
 
     <header>
         <div class="logo">SKINX</div>
-        <div style="display:flex; gap:12px;">
-            <button class="btn-circle" id="undo"><i data-lucide="undo-2" size="20"></i></button>
-            <button class="btn-circle" style="background: var(--blue);" onclick="exportSkin()"><i data-lucide="download" size="20"></i></button>
+        <div style="display:flex; gap:10px;">
+            <button class="btn-top" id="undoBtn"><i data-lucide="undo-2" size="18"></i></button>
+            <button class="btn-top" id="redoBtn"><i data-lucide="redo-2" size="18"></i></button>
         </div>
     </header>
 
     <div id="viewport">
-        <div class="canvas-frame">
-            <canvas id="paint"></canvas>
+        <div class="canvas-box">
+            <canvas id="editor"></canvas>
         </div>
     </div>
 
-    <div class="controls-overlay">
-        <div class="palette-row" id="palette">
-            <div class="color-node active" style="background: #FF3B30;" data-c="#FF3B30"></div>
-            <div class="color-node" style="background: #4CD964;" data-c="#4CD964"></div>
-            <div class="color-node" style="background: #007AFF;" data-c="#007AFF"></div>
-            <div class="color-node" style="background: #FFD60A;" data-c="#FFD60A"></div>
-            <div class="color-node" style="background: #fff; display: flex; align-items: center; justify-content: center; overflow: hidden;">
-                <input type="color" id="picker" style="transform: scale(3); cursor: pointer;">
+    <div class="controls">
+        <div class="palette" id="palette">
+            <div class="swatch active" style="background: #FF3B30;" data-c="#FF3B30"></div>
+            <div class="swatch" style="background: #4CD964;" data-c="#4CD964"></div>
+            <div class="swatch" style="background: #007AFF;" data-c="#007AFF"></div>
+            <div class="swatch" style="background: #FFCC00;" data-c="#FFCC00"></div>
+            <div class="swatch" style="background: #fff; position:relative; overflow:hidden;">
+                <input type="color" id="p" style="position:absolute; transform:scale(3); border:none; padding:0; background:none; cursor:pointer;">
             </div>
         </div>
 
-        <div class="toolbar-blur">
-            <button class="t-btn active" data-tool="pen"><i data-lucide="pencil"></i></button>
-            <button class="t-btn" data-tool="fill"><i data-lucide="paint-bucket"></i></button>
-            <button class="t-btn" data-tool="eraser"><i data-lucide="eraser"></i></button>
-            <button class="t-btn" data-tool="picker"><i data-lucide="pipette"></i></button>
+        <div class="sliding-toolbar" id="toolBar">
+            <div class="t-indicator" id="toolInd"></div>
+            <button class="t-item active" data-t="pen"><i data-lucide="pencil" size="18"></i></button>
+            <button class="t-item" data-t="fill"><i data-lucide="paint-bucket" size="18"></i></button>
+            <button class="t-item" data-t="eraser"><i data-lucide="eraser" size="18"></i></button>
+            <button class="t-item" data-t="picker"><i data-lucide="pipette" size="18"></i></button>
         </div>
     </div>
 
-    <div class="bottom-sheet">
-        <div class="section-tag">Выбор элемента</div>
-        <div class="nav-container" id="partNav">
-            <div class="nav-indicator" id="partInd"></div>
-            <div class="nav-btn active" data-val="head">Голова</div>
-            <div class="nav-btn" data-val="body">Тело</div>
-            <div class="nav-btn" data-val="arm">Руки</div>
-            <div class="nav-btn" data-val="leg">Ноги</div>
+    <div class="shelf">
+        <div class="row-label">Элемент</div>
+        <div class="segment-nav" id="partNav">
+            <div class="s-indicator" id="partInd"></div>
+            <div class="s-item active" data-v="head">Голова</div>
+            <div class="s-item" data-v="body">Тело</div>
+            <div class="s-item" data-v="arm">Руки</div>
+            <div class="s-item" data-v="leg">Ноги</div>
         </div>
 
-        <div class="section-tag">Сторона</div>
-        <div class="nav-container" id="sideNav">
-            <div class="nav-indicator" id="sideInd"></div>
-            <div class="nav-btn active" data-val="front">Перед</div>
-            <div class="nav-btn" data-val="back">Зад</div>
-            <div class="nav-btn" data-val="top">Верх</div>
-            <div class="nav-btn" data-val="bottom">Низ</div>
+        <div class="row-label">Сторона</div>
+        <div class="segment-nav" id="sideNav">
+            <div class="s-indicator" id="sideInd"></div>
+            <div class="s-item active" data-v="front">Перед</div>
+            <div class="s-item" data-v="back">Зад</div>
+            <div class="s-item" data-v="top">Верх</div>
+            <div class="s-item" data-v="bottom">Низ</div>
         </div>
     </div>
 
@@ -175,48 +166,57 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
         tg.enableClosingConfirmation();
+        tg.MainButton.setParams({ text: 'ЭКСПОРТ СКИНА', color: '#ffffff', text_color: '#000', is_visible: true });
         lucide.createIcons();
 
-        // Стандартная сетка Minecraft 1.8+ (64x64)
         const UV = {
-            head: { s: [8,8], front: [8,8], back: [24,8], top: [8,0], bottom: [16,0] },
-            body: { s: [8,12], front: [20,20], back: [32,20], top: [20,16], bottom: [28,16] },
-            arm: { s: [4,12], front: [44,20], back: [52,20], top: [44,16], bottom: [48,16] },
-            leg: { s: [4,12], front: [4,20], back: [12,20], top: [4,16], bottom: [8,16] }
+            head: { s:[8,8], front:[8,8], back:[24,8], top:[8,0], bottom:[16,0] },
+            body: { s:[8,12], front:[20,20], back:[32,20], top:[20,16], bottom:[28,16] },
+            arm: { s:[4,12], front:[44,20], back:[52,20], top:[44,16], bottom:[48,16] },
+            leg: { s:[4,12], front:[4,20], back:[12,20], top:[4,16], bottom:[8,16] }
         };
 
         let state = {
             part: 'head', side: 'front', tool: 'pen', color: '#FF3B30',
-            history: [], drawing: false,
+            history: [], future: [], drawing: false,
             master: document.createElement('canvas')
         };
         state.master.width = 64; state.master.height = 64;
         const mctx = state.master.getContext('2d');
-
-        const canvas = document.getElementById('paint');
+        const canvas = document.getElementById('editor');
         const ctx = canvas.getContext('2d');
 
-        function init() {
+        function moveIndicator(navId, indId) {
+            const nav = document.getElementById(navId);
+            const ind = document.getElementById(indId);
+            const active = nav.querySelector('.active');
+            ind.style.width = active.offsetWidth + "px";
+            ind.style.transform = `translateX(${active.offsetLeft - 2}px)`;
+            ind.style.height = (active.offsetHeight - 4) + "px";
+            ind.style.top = "2px";
+        }
+
+        function refresh() {
             const conf = UV[state.part];
             canvas.width = conf.s[0]; canvas.height = conf.s[1];
-            
-            // Масштабирование
-            const vWidth = window.innerWidth * 0.75;
-            const zoom = Math.floor(vWidth / canvas.width);
-            canvas.style.width = (canvas.width * zoom) + "px";
-            canvas.style.height = (canvas.height * zoom) + "px";
+            const scale = Math.floor((window.innerWidth * 0.7) / canvas.width);
+            canvas.style.width = (canvas.width * scale) + "px";
+            canvas.style.height = (canvas.height * scale) + "px";
 
             const p = conf[state.side];
             ctx.imageSmoothingEnabled = false;
             ctx.clearRect(0,0,canvas.width,canvas.height);
             ctx.drawImage(state.master, p[0], p[1], canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
             
-            updateIndicators();
+            moveIndicator('partNav', 'partInd');
+            moveIndicator('sideNav', 'sideInd');
+            moveIndicator('toolBar', 'toolInd');
         }
 
-        function pushHistory() {
+        function pushState() {
             state.history.push(mctx.getImageData(0,0,64,64));
-            if(state.history.length > 30) state.history.shift();
+            if(state.history.length > 40) state.history.shift();
+            state.future = [];
         }
 
         function commit() {
@@ -225,97 +225,76 @@
             mctx.drawImage(canvas, p[0], p[1]);
         }
 
-        function handleDraw(e) {
+        function draw(e) {
             if(!state.drawing) return;
             const b = canvas.getBoundingClientRect();
-            const x = Math.floor(((e.clientX || e.touches[0].clientX) - b.left) / (b.width / canvas.width));
-            const y = Math.floor(((e.clientY || e.touches[0].clientY) - b.top) / (b.height / canvas.height));
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            const x = Math.floor((clientX - b.left) / (b.width / canvas.width));
+            const y = Math.floor((clientY - b.top) / (b.height / canvas.height));
             
             if(x >= 0 && x < canvas.width && y >= 0 && y < canvas.height) {
-                if(state.tool === 'pen') {
-                    ctx.fillStyle = state.color;
-                    ctx.fillRect(x,y,1,1);
-                } else if(state.tool === 'eraser') {
-                    ctx.clearRect(x,y,1,1);
+                if(state.tool === 'pen') { ctx.fillStyle = state.color; ctx.fillRect(x,y,1,1); }
+                else if(state.tool === 'eraser') { ctx.clearRect(x,y,1,1); }
+                else if(state.tool === 'picker') {
+                    const d = ctx.getImageData(x,y,1,1).data;
+                    if(d[3]>0) {
+                        const hex = "#" + ((1 << 24) + (d[0] << 16) + (d[1] << 8) + d[2]).toString(16).slice(1);
+                        state.color = hex;
+                        tg.HapticFeedback.impactOccurred('light');
+                    }
                 }
                 commit();
             }
         }
 
-        // NAVIGATION LOGIC
-        function updateIndicators() {
-            ['part', 'side'].forEach(type => {
-                const nav = document.getElementById(type + 'Nav');
-                const ind = document.getElementById(type + 'Ind');
-                const active = nav.querySelector('.active');
-                ind.style.width = active.offsetWidth + "px";
-                ind.style.transform = `translateX(${active.offsetLeft - 3}px)`;
-            });
-        }
-
-        document.querySelectorAll('.nav-container').forEach(nav => {
-            nav.onclick = (e) => {
-                const btn = e.target.closest('.nav-btn');
-                if(!btn) return;
-                nav.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                const type = nav.id === 'partNav' ? 'part' : 'side';
-                state[type] = btn.dataset.val;
-                init();
+        // Event Listeners
+        ['partNav', 'sideNav', 'toolBar'].forEach(id => {
+            document.getElementById(id).onclick = (e) => {
+                const item = e.target.closest('.s-item, .t-item');
+                if(!item) return;
+                item.parentElement.querySelectorAll('.s-item, .t-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                if(id === 'partNav') state.part = item.dataset.v;
+                if(id === 'sideNav') state.side = item.dataset.v;
+                if(id === 'toolBar') state.tool = item.dataset.t;
+                refresh();
                 tg.HapticFeedback.selectionChanged();
             };
         });
 
-        document.querySelectorAll('.t-btn').forEach(btn => {
-            btn.onclick = () => {
-                document.querySelectorAll('.t-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                state.tool = btn.dataset.tool;
-                tg.HapticFeedback.impactOccurred('light');
-            };
-        });
-
         document.getElementById('palette').onclick = (e) => {
-            const node = e.target.closest('.color-node');
-            if(!node || node.id === 'picker') return;
-            document.querySelectorAll('.color-node').forEach(n => n.classList.remove('active'));
-            node.classList.add('active');
-            state.color = node.dataset.c;
+            const s = e.target.closest('.swatch');
+            if(!s) return;
+            document.querySelectorAll('.swatch').forEach(i => i.classList.remove('active'));
+            s.classList.add('active');
+            if(s.dataset.c) state.color = s.dataset.c;
             tg.HapticFeedback.impactOccurred('light');
         };
 
-        document.getElementById('picker').oninput = (e) => {
-            state.color = e.target.value;
-            tg.HapticFeedback.impactOccurred('medium');
-        };
+        document.getElementById('p').oninput = (e) => state.color = e.target.value;
 
-        document.getElementById('undo').onclick = () => {
+        document.getElementById('undoBtn').onclick = () => {
             if(state.history.length === 0) return;
-            mctx.putImageData(state.history.pop(), 0, 0);
-            init();
+            state.future.push(mctx.getImageData(0,0,64,64));
+            mctx.putImageData(state.history.pop(), 0,0);
+            refresh();
             tg.HapticFeedback.notificationOccurred('success');
         };
 
-        canvas.addEventListener('pointerdown', (e) => {
-            state.drawing = true;
-            pushHistory();
-            handleDraw(e);
-            tg.HapticFeedback.impactOccurred('light');
-        });
+        canvas.addEventListener('pointerdown', (e) => { state.drawing = true; pushState(); draw(e); tg.HapticFeedback.impactOccurred('light'); });
         window.addEventListener('pointerup', () => state.drawing = false);
-        canvas.addEventListener('pointermove', handleDraw);
+        canvas.addEventListener('pointermove', draw);
 
-        function exportSkin() {
+        tg.MainButton.onClick(() => {
             const link = document.createElement('a');
-            link.download = 'skinx_pro.png';
+            link.download = 'mc_skin.png';
             link.href = state.master.toDataURL();
             link.click();
             tg.HapticFeedback.notificationOccurred('success');
-            tg.showAlert("Скин сохранен! Теперь его можно импортировать в Minecraft.");
-        }
+        });
 
-        window.onload = init;
-        window.onresize = init;
+        window.onload = refresh;
     </script>
 </body>
 </html>
