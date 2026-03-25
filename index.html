@@ -2,221 +2,366 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Skinx — Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Skin Creator</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;800&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
+        /* Базовые стили iOS */
         :root {
-            --bg: #000;
-            --card: #1C1C1E;
-            --sec: #2C2C2E;
-            --accent: #fff;
-            --blue: #0A84FF;
+            --bg-color: #F2F2F7;
+            --card-color: #FFFFFF;
+            --text-color: #000000;
+            --text-secondary: #8E8E93;
+            --accent-blue: #007AFF;
+            --border-color: #C6C6C8;
         }
 
-        /* Полная фиксация интерфейса */
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; outline: none; }
-        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            user-select: none;
+        }
+
         body {
-            margin: 0; background: var(--bg); color: #fff; font-family: 'Manrope', sans-serif;
-            height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: column;
-            position: fixed; top: 0; left: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow: hidden; /* Запрещаем скролл для удобного рисования */
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
         }
 
-        /* HEADER */
-        header {
-            padding: 12px 18px; display: flex; justify-content: space-between; align-items: center;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); z-index: 100;
+        /* Навигация (Part & Face Selector) */
+        .segmented-control {
+            display: flex;
+            background: #E3E3E8;
+            border-radius: 8px;
+            padding: 2px;
+            margin: 16px;
         }
-        .logo { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
         
-        .btn-top {
-            width: 38px; height: 38px; border-radius: 50%; border: none;
-            background: var(--card); color: #fff; display: flex;
-            align-items: center; justify-content: center; backdrop-filter: blur(10px);
+        .segment {
+            flex: 1;
+            text-align: center;
+            padding: 6px 0;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-color);
+            border-radius: 6px;
         }
 
-        /* VIEWPORT */
-        #viewport { flex: 1; display: flex; align-items: center; justify-content: center; padding: 10px; position: relative; }
-        
-        #canvasFrame {
-            background-color: #111;
-            background-image: linear-gradient(45deg, #181818 25%, transparent 25%), 
-                              linear-gradient(-45deg, #181818 25%, transparent 25%),
-                              linear-gradient(45deg, transparent 75%, #181818 75%),
-                              linear-gradient(-45deg, transparent 75%, #181818 75%);
-            background-size: 16px 16px;
-            box-shadow: 0 15px 50px rgba(0,0,0,0.9);
-            border-radius: 4px; border: 1px solid #333;
-            transition: transform 0.2s cubic-bezier(0.2, 1, 0.3, 1);
-        }
-        canvas { display: block; image-rendering: pixelated; touch-action: none; cursor: crosshair; }
-
-        /* ИНСТРУМЕНТЫ */
-        .controls { padding: 8px 18px; display: flex; flex-direction: column; gap: 10px; z-index: 90; }
-        
-        .palette { display: flex; justify-content: center; gap: 8px; }
-        .swatch { width: 32px; height: 32px; border-radius: 50%; border: 2px solid transparent; transition: 0.15s; }
-        .swatch.active { border-color: #fff; transform: scale(1.15); }
-
-        .sliding-toolbar {
-            position: relative; background: var(--card); border-radius: 25px;
-            padding: 3px; display: flex; height: 48px; align-items: center;
-        }
-        .t-item { flex: 1; z-index: 2; height: 100%; border: none; background: transparent; color: #8e8e93; display: flex; align-items: center; justify-content: center; transition: color 0.2s; }
-        .t-item.active { color: #fff; }
-        
-        .t-indicator {
-            position: absolute; background: var(--sec); border-radius: 22px;
-            z-index: 1; transition: transform 0.2s cubic-bezier(0.2, 1, 0.3, 1), width 0.2s;
+        .segment.active {
+            background: var(--card-color);
+            box-shadow: 0 3px 1px -2px rgba(0,0,0,0.1), 0 2px 2px 0 rgba(0,0,0,0.1);
         }
 
-        /* BOTTOM SHELF */
-        .shelf {
-            background: var(--card); padding: 10px 15px calc(20px + env(safe-area-inset-bottom));
-            border-radius: 28px 28px 0 0; border-top: 1px solid rgba(255,255,255,0.05);
-            z-index: 90;
+        .segment:active {
+            opacity: 0.7; /* Никаких анимаций при наведении, только реакция на тап */
         }
-        .row-label { font-size: 10px; font-weight: 800; color: #555; text-transform: uppercase; margin: 0 0 5px 3px; letter-spacing: 0.5px; }
-        
-        .segment-nav {
-            position: relative; background: #000; border-radius: 12px;
-            padding: 2px; display: flex; margin-bottom: 10px;
+
+        /* Зона рисования */
+        .canvas-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
-        .s-item { flex: 1; padding: 8px 0; font-size: 12px; font-weight: 700; color: #8e8e93; z-index: 2; text-align: center; }
-        .s-item.active { color: #000; }
-        
-        .s-indicator {
-            position: absolute; background: #fff; border-radius: 10px;
-            z-index: 1; transition: transform 0.25s cubic-bezier(0.2, 1, 0.3, 1), width 0.25s;
+
+        .canvas-wrapper {
+            background: var(--card-color);
+            padding: 8px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        canvas#editor {
+            width: 256px;
+            height: 256px;
+            image-rendering: pixelated; /* Чтобы пиксели не мылились */
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            touch-action: none; /* Запрет жестов браузера на холсте */
+        }
+
+        /* Палитра и инструменты */
+        .toolbar {
+            background: var(--card-color);
+            border-top: 1px solid var(--border-color);
+            padding: 16px;
+            padding-bottom: env(safe-area-inset-bottom, 16px);
+        }
+
+        .colors {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .color-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            flex-shrink: 0;
+        }
+
+        .color-btn.active {
+            border-color: var(--accent-blue);
+            transform: scale(1.1); /* Легкий акцент на выбранном */
+        }
+
+        .color-picker-wrapper {
+            position: relative;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red);
+        }
+
+        .color-picker-wrapper input[type="color"] {
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .tools {
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .tool-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-secondary);
+            font-size: 11px;
+            gap: 4px;
+        }
+
+        .tool-btn svg {
+            width: 24px;
+            height: 24px;
+            stroke: currentColor;
+            stroke-width: 1.5;
+            fill: none;
+        }
+
+        .tool-btn.active {
+            color: var(--accent-blue);
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="logo">SKINX PRO</div>
-        <div style="display:flex; gap:10px;">
-            <button class="btn-top" onclick="triggerImport()"><i data-lucide="image-plus" size="18"></i></button>
-            <input type="file" id="fileInput" accept="image/png" style="display:none;" onchange="handleImport()">
-            <button class="btn-top" id="undoBtn"><i data-lucide="undo-2" size="18"></i></button>
-        </div>
-    </header>
-
-    <div id="viewport">
-        <div id="canvasFrame">
-            <canvas id="editor"></canvas>
-        </div>
+    <div class="segmented-control" id="face-selector">
+        <div class="segment active" data-face="front">Front</div>
+        <div class="segment" data-face="back">Back</div>
+        <div class="segment" data-face="left">Left</div>
+        <div class="segment" data-face="right">Right</div>
+        <div class="segment" data-face="top">Top</div>
+        <div class="segment" data-face="bottom">Bottom</div>
     </div>
 
-    <div class="controls">
-        <div class="palette" id="palette">
-            <div class="swatch active" style="background: #FF3B30;" data-c="#FF3B30"></div>
-            <div class="swatch" style="background: #4CD964;" data-c="#4CD964"></div>
-            <div class="swatch" style="background: #007AFF;" data-c="#007AFF"></div>
-            <div class="swatch" style="background: #FFCC00;" data-c="#FFCC00"></div>
-            <div class="swatch" style="background: #fff; position:relative; overflow:hidden;">
-                <input type="color" id="colorInput" style="position:absolute; transform:scale(3); border:none; padding:0; background:none; cursor:pointer;">
+    <div class="canvas-container">
+        <div class="canvas-wrapper">
+            <canvas id="editor" width="8" height="8"></canvas>
+        </div>
+        <p style="margin-top: 12px; color: var(--text-secondary); font-size: 13px;">Голова</p>
+    </div>
+
+    <div class="toolbar">
+        <div class="colors" id="palette">
+            <div class="color-btn active" style="background: #000000;" data-color="#000000"></div>
+            <div class="color-btn" style="background: #333333;" data-color="#333333"></div>
+            <div class="color-btn" style="background: #8E8E93;" data-color="#8E8E93"></div>
+            <div class="color-btn" style="background: #C6C6C8;" data-color="#C6C6C8"></div>
+            <div class="color-btn" style="background: #FFFFFF; border: 1px solid #C6C6C8;" data-color="#FFFFFF"></div>
+            <div class="color-btn" style="background: #007AFF;" data-color="#007AFF"></div>
+            <div class="color-picker-wrapper">
+                <input type="color" id="custom-color" value="#ff0000">
             </div>
         </div>
 
-        <div class="sliding-toolbar" id="toolBar">
-            <div class="t-indicator" id="toolInd"></div>
-            <button class="t-item active" data-t="pen"><i data-lucide="pencil" size="19"></i></button>
-            <button class="t-item" data-t="fill"><i data-lucide="paint-bucket" size="19"></i></button>
-            <button class="t-item" data-t="eraser"><i data-lucide="eraser" size="19"></i></button>
-            <button class="t-item" data-t="picker"><i data-lucide="pipette" size="19"></i></button>
+        <div class="tools">
+            <div class="tool-btn active" data-tool="pencil">
+                <svg viewBox="0 0 24 24">
+                    <path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L16.732 3.732z" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Pencil
+            </div>
+            <div class="tool-btn" data-tool="eraser">
+                <svg viewBox="0 0 24 24">
+                    <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Eraser
+            </div>
         </div>
     </div>
 
-    <div class="shelf">
-        <div class="row-label">Элемент</div>
-        <div class="segment-nav" id="partNav">
-            <div class="s-indicator" id="partInd"></div>
-            <div class="s-item active" data-v="head">Голова</div>
-            <div class="s-item" data-v="body">Тело</div>
-            <div class="s-item" data-v="arm">Руки</div>
-            <div class="s-item" data-v="leg">Ноги</div>
-        </div>
-
-        <div class="row-label">Сторона</div>
-        <div class="segment-nav" id="sideNav">
-            <div class="s-indicator" id="sideInd"></div>
-            <div class="s-item active" data-v="front">Перед</div>
-            <div class="s-item" data-v="back">Зад</div>
-            <div class="s-item" data-v="top">Верх</div>
-            <div class="s-item" data-v="bottom">Низ</div>
-        </div>
-    </div>
+    <canvas id="master" width="64" height="64" style="display:none;"></canvas>
 
     <script>
-        const tg = window.Telegram.WebApp; tg.expand(); tg.MainButton.setParams({ text: 'ЭКСПОРТ СКИНА', color: '#fff', text_color: '#000', is_visible: true }); lucide.createIcons();
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
 
-        // Steve (64x64)
-        const UV = { head:{s:[8,8],front:[8,8],back:[24,8],top:[8,0],bottom:[16,0]}, body:{s:[8,12],front:[20,20],back:[32,20],top:[20,16],bottom:[28,16]}, arm:{s:[4,12],front:[44,20],back:[52,20],top:[44,16],bottom:[48,16]}, leg:{s:[4,12],front:[4,20],back:[12,20],top:[4,16],bottom:[8,16] } };
+        // Настройка MainButton от Telegram для экспорта
+        tg.MainButton.setText("СОХРАНИТЬ В ФОТО");
+        tg.MainButton.color = "#007AFF";
+        tg.MainButton.show();
 
-        let s = { p:'head', v:'front', t:'pen', c:'#FF3B30', stack:[], drawing:false, master:document.createElement('canvas') };
-        s.master.width=64; s.master.height=64; const mctx=s.master.getContext('2d', {alpha: true});
-        const canvas=document.getElementById('editor'); const ctx=canvas.getContext('2d', {alpha: true}); const input=document.getElementById('fileInput');
-
-        // Глобальный фикс для рефреша индикаторов
-        function initInd() { moveInd('partNav','partInd'); moveInd('sideNav','sideInd'); moveInd('toolBar','toolInd'); }
-
-        function moveInd(navId, indId) {
-            const nav = document.getElementById(navId); const ind = document.getElementById(indId); const active = nav.querySelector('.active'); if(!active) return; ind.style.width = active.offsetWidth + "px"; ind.style.transform = `translateX(${active.offsetLeft - (navId === 'toolBar' ? 1 : 2)}px)`; ind.style.height = (active.offsetHeight - 4) + "px"; ind.style.top = "2px";
-        }
-
-        function pushH() { s.stack.push(mctx.getImageData(0,0,64,64)); if(s.stack.length > 50) s.stack.shift(); }
-
-        function commit() { const p = UV[s.p][s.v]; mctx.clearRect(p[0], p[1], canvas.width, canvas.height); mctx.drawImage(canvas, p[0], p[1]); }
-
-        function refreshCanvas() {
-            const conf = UV[s.p]; canvas.width = conf.s[0]; canvas.height = conf.s[1];
-            
-            // Динамический масштаб (фикшен "кривости")
-            const maxDraw = window.innerWidth * 0.72;
-            const ratio = canvas.width / canvas.height;
-            if(ratio >= 1) { canvas.style.width=maxDraw+"px"; canvas.style.height=(maxDraw/ratio)+"px"; }
-            else { canvas.style.height=maxDraw+"px"; canvas.style.width=(maxDraw*ratio)+"px"; }
-
-            const p = conf[s.v]; ctx.imageSmoothingEnabled = false; ctx.clearRect(0,0,canvas.width,canvas.height); ctx.drawImage(s.master, p[0], p[1], canvas.width, canvas.height, 0, 0, canvas.width, canvas.height); initInd();
-        }
-
-        // Рисование и Заливка
-        function draw(e) {
-            if(!s.drawing) return; const b=canvas.getBoundingClientRect(); const clientX=e.touches?e.touches[0].clientX:e.clientX; const clientY=e.touches?e.touches[0].clientY:e.clientY; const x=Math.floor((clientX-b.left)/(b.width/canvas.width)); const y=Math.floor((clientY-b.top)/(b.height/canvas.height));
-            if(x>=0 && x<canvas.width && y>=0 && y<canvas.height) {
-                if(s.t==='pen') { ctx.fillStyle=s.c; ctx.fillRect(x,y,1,1); commit(); }
-                else if(s.t==='eraser') { ctx.clearRect(x,y,1,1); commit(); }
-                else if(s.t==='fill') { pushH(); floodFill(x,y,s.c); s.drawing=false; } // Заливка за раз
-                else if(s.t==='picker') { const d=ctx.getImageData(x,y,1,1).data; if(d[3]>0) { s.c="#"+((1<<24)+(d[0]<<16)+(d[1]<<8)+d[2]).toString(16).slice(1); } }
+        // Развертка Майнкрафт скина (Координаты: x, y на текстуре 64x64. w, h = размер грани)
+        // Пример для Головы. 
+        const skinMap = {
+            head: {
+                front:  { x: 8,  y: 8, w: 8, h: 8 },
+                back:   { x: 24, y: 8, w: 8, h: 8 },
+                left:   { x: 16, y: 8, w: 8, h: 8 },
+                right:  { x: 0,  y: 8, w: 8, h: 8 },
+                top:    { x: 8,  y: 0, w: 8, h: 8 },
+                bottom: { x: 16, y: 0, w: 8, h: 8 }
             }
+        };
+
+        let currentPart = 'head';
+        let currentFace = 'front';
+        let currentColor = '#000000';
+        let currentTool = 'pencil'; // 'pencil' или 'eraser'
+
+        const editorCanvas = document.getElementById('editor');
+        const editorCtx = editorCanvas.getContext('2d');
+        const masterCanvas = document.getElementById('master');
+        const masterCtx = masterCanvas.getContext('2d');
+
+        // Очищаем мастер-канвас прозрачным цветом (важно для скинов)
+        masterCtx.clearRect(0, 0, 64, 64);
+
+        // Функция отрисовки активной грани из мастера в эдитор
+        function renderEditor() {
+            const map = skinMap[currentPart][currentFace];
+            editorCtx.clearRect(0, 0, map.w, map.h);
+            // Копируем пиксели из мастера
+            const imageData = masterCtx.getImageData(map.x, map.y, map.w, map.h);
+            editorCtx.putImageData(imageData, 0, 0);
         }
 
-        function floodFill(startX,startY,fillColor) {
-            const tC = ctx.getImageData(startX,startY,1,1).data; if(s.c==rgbToHex(tC)) return; ctx.fillStyle=fillColor; ctx.fillRect(startX,startY,1,1); commit(); // Простая версия
+        // Рисование пикселя
+        let isDrawing = false;
+        let lastDrawTime = 0;
+
+        function drawPixel(e) {
+            if (!isDrawing) return;
+            
+            // Получаем координаты тапа
+            const rect = editorCanvas.getBoundingClientRect();
+            const touch = e.touches ? e.touches[0] : e;
+            
+            // Размер канваса на экране 256, логический размер 8. Коэффициент = 256/8 = 32.
+            const scale = rect.width / editorCanvas.width; 
+            const x = Math.floor((touch.clientX - rect.left) / scale);
+            const y = Math.floor((touch.clientY - rect.top) / scale);
+
+            // Проверка границ
+            if (x < 0 || y < 0 || x >= editorCanvas.width || y >= editorCanvas.height) return;
+
+            const map = skinMap[currentPart][currentFace];
+
+            if (currentTool === 'pencil') {
+                masterCtx.fillStyle = currentColor;
+                masterCtx.fillRect(map.x + x, map.y + y, 1, 1);
+            } else if (currentTool === 'eraser') {
+                masterCtx.clearRect(map.x + x, map.y + y, 1, 1);
+            }
+
+            // Haptics (вибрация не чаще раза в 100мс)
+            const now = Date.now();
+            if (now - lastDrawTime > 100) {
+                tg.HapticFeedback.impactOccurred('light');
+                lastDrawTime = now;
+            }
+
+            renderEditor();
         }
-        function rgbToHex(c){return"#"+((1<<24)+(c[0]<<16)+(c[1]<<8)+c[2]).toString(16).slice(1);}
 
-        // Импорт из галереи
-        function triggerImport() { input.click(); }
-        function handleImport() { const file=input.files[0]; if(!file)return; const reader=new FileReader(); reader.onload=(e)=>{ const img=new Image(); img.onload=()=>{ if(img.width===64&&img.height===64){mctx.clearRect(0,0,64,64);mctx.drawImage(img,0,0);pushH();refreshCanvas();tg.showAlert("Скин загружен!");} else tg.showAlert("Кривой файл. Нужен 64x64 PNG.");}; img.src=e.target.result; }; reader.readAsDataURL(file); }
+        // Обработчики холста (Touch)
+        editorCanvas.addEventListener('touchstart', (e) => {
+            isDrawing = true;
+            drawPixel(e);
+        });
+        editorCanvas.addEventListener('touchmove', (e) => {
+            e.preventDefault(); // Запрещаем скролл
+            drawPixel(e);
+        }, { passive: false });
+        editorCanvas.addEventListener('touchend', () => isDrawing = false);
+        editorCanvas.addEventListener('touchcancel', () => isDrawing = false);
 
-        // События
-        ['partNav', 'sideNav', 'toolBar'].forEach(id => { document.getElementById(id).onclick = (e) => { const item = e.target.closest('.s-item, .t-item'); if(!item) return; item.parentElement.querySelectorAll('.s-item, .t-item').forEach(i => i.classList.remove('active')); item.classList.add('active'); if(id === 'partNav') s.p = item.dataset.v; if(id === 'sideNav') s.v = item.dataset.v; if(id === 'toolBar') s.t = item.dataset.t; refreshCanvas(); tg.HapticFeedback.selectionChanged(); }; });
-        document.getElementById('palette').onclick = (e) => { const sNode = e.target.closest('.swatch'); if(!sNode||sNode.children.length) return; document.querySelectorAll('.swatch').forEach(i => i.classList.remove('active')); sNode.classList.add('active'); s.c = sNode.dataset.c; tg.HapticFeedback.impactOccurred('light'); };
-        document.getElementById('colorInput').oninput = (e) => s.c = e.target.value;
-        document.getElementById('undoBtn').onclick = () => { if(s.stack.length===0) return; mctx.putImageData(s.stack.pop(), 0,0); refreshCanvas(); tg.HapticFeedback.notificationOccurred('success'); };
-        canvas.addEventListener('pointerdown', (e) => { if(s.t!=='picker'&&s.t!=='fill') pushH(); s.drawing = true; draw(e); tg.HapticFeedback.impactOccurred('light'); });
-        window.addEventListener('pointerup', () => s.drawing = false);
-        canvas.addEventListener('pointermove', draw);
+        // Логика UI
+        document.getElementById('face-selector').addEventListener('click', (e) => {
+            if (e.target.classList.contains('segment')) {
+                document.querySelectorAll('.segment').forEach(el => el.classList.remove('active'));
+                e.target.classList.add('active');
+                currentFace = e.target.dataset.face;
+                tg.HapticFeedback.selectionChanged();
+                renderEditor();
+            }
+        });
 
-        tg.MainButton.onClick(() => { const b = stateToBlob(s.master.toDataURL()); tg.showScanQrPopup({text: 'Скин готов! Скачай QR чтобы сохранить файл.', link: URL.createObjectURL(b)}); tg.HapticFeedback.notificationOccurred('success'); });
-        function stateToBlob(data){const b=atob(data.split(',')[1]);const array=new Uint8Array(b.length);for(let i=0;i<b.length;i++){array[i]=b.charCodeAt(i);}return new Blob([array],{type:'image/png'});}
+        document.getElementById('palette').addEventListener('click', (e) => {
+            if (e.target.classList.contains('color-btn')) {
+                document.querySelectorAll('.color-btn').forEach(el => el.classList.remove('active'));
+                e.target.classList.add('active');
+                currentColor = e.target.dataset.color;
+                currentTool = 'pencil'; // Автоматически переключаем на карандаш
+                document.querySelector('[data-tool="eraser"]').classList.remove('active');
+                document.querySelector('[data-tool="pencil"]').classList.add('active');
+                tg.HapticFeedback.selectionChanged();
+            }
+        });
 
-        window.onload = refreshCanvas; window.onresize = refreshCanvas;
+        document.getElementById('custom-color').addEventListener('input', (e) => {
+            currentColor = e.target.value;
+            currentTool = 'pencil';
+        });
+
+        document.querySelectorAll('.tool-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const target = e.currentTarget;
+                document.querySelectorAll('.tool-btn').forEach(el => el.classList.remove('active'));
+                target.classList.add('active');
+                currentTool = target.dataset.tool;
+                tg.HapticFeedback.selectionChanged();
+            });
+        });
+
+        // Логика экспорта (MainButton)
+        tg.MainButton.onClick(() => {
+            tg.HapticFeedback.impactOccurred('heavy');
+            
+            // Получаем Base64 картинки
+            const dataUrl = masterCanvas.toDataURL('image/png');
+            
+            // Т.к. API телеграма напрямую не сохраняет картинки в галерею, 
+            // мы создаем тег <a> и вызываем скачивание. 
+            // В мобильном Telegram откроется системный диалог поделиться/сохранить фото.
+            const link = document.createElement('a');
+            link.download = 'minecraft_skin.png';
+            link.href = dataUrl;
+            link.click();
+            
+            tg.showAlert('Скин готов к сохранению!');
+        });
+
+        // Первичный рендер
+        renderEditor();
     </script>
 </body>
 </html>
