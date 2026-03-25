@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Skinx — Native iOS</title>
+    <title>Skinx — Pro</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -16,108 +16,97 @@
             --blue: #0A84FF;
         }
 
-        * { 
-            box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent; 
-            -webkit-user-select: none; 
-            user-select: none;
-            outline: none;
-        }
-
+        /* Полная фиксация интерфейса */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; outline: none; }
+        
         body {
-            margin: 0; background: var(--bg); color: #fff;
-            font-family: 'Manrope', sans-serif;
-            height: 100vh; width: 100vw; overflow: hidden;
-            display: flex; flex-direction: column;
-            position: fixed; /* Полная фиксация */
+            margin: 0; background: var(--bg); color: #fff; font-family: 'Manrope', sans-serif;
+            height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: column;
+            position: fixed; top: 0; left: 0;
         }
 
         /* HEADER */
         header {
-            padding: 12px 20px; display: flex; justify-content: space-between; align-items: center;
-            z-index: 100;
+            padding: 12px 18px; display: flex; justify-content: space-between; align-items: center;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); z-index: 100;
         }
-        .logo { font-size: 19px; font-weight: 800; letter-spacing: -0.5px; }
+        .logo { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
         
         .btn-top {
-            width: 36px; height: 36px; border-radius: 50%; border: none;
+            width: 38px; height: 38px; border-radius: 50%; border: none;
             background: var(--card); color: #fff; display: flex;
             align-items: center; justify-content: center; backdrop-filter: blur(10px);
         }
 
-        /* VIEWPORT (Центральная часть) */
-        #viewport {
-            flex: 1; display: flex; align-items: center; justify-content: center;
-            padding: 10px; position: relative;
-        }
-        .canvas-box {
+        /* VIEWPORT */
+        #viewport { flex: 1; display: flex; align-items: center; justify-content: center; padding: 10px; position: relative; }
+        
+        #canvasFrame {
             background-color: #111;
             background-image: linear-gradient(45deg, #181818 25%, transparent 25%), 
                               linear-gradient(-45deg, #181818 25%, transparent 25%),
                               linear-gradient(45deg, transparent 75%, #181818 75%),
                               linear-gradient(-45deg, transparent 75%, #181818 75%);
             background-size: 16px 16px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.7);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.9);
             border-radius: 4px; border: 1px solid #333;
+            transition: transform 0.2s cubic-bezier(0.2, 1, 0.3, 1);
         }
-        canvas { display: block; image-rendering: pixelated; touch-action: none; }
+        canvas { display: block; image-rendering: pixelated; touch-action: none; cursor: crosshair; }
 
-        /* ИНСТРУМЕНТЫ (С бегающим фоном) */
-        .controls { padding: 10px 20px; display: flex; flex-direction: column; gap: 12px; }
+        /* ИНСТРУМЕНТЫ */
+        .controls { padding: 8px 18px; display: flex; flex-direction: column; gap: 10px; z-index: 90; }
         
-        .palette { display: flex; justify-content: center; gap: 10px; }
-        .swatch { width: 30px; height: 30px; border-radius: 50%; border: 2px solid transparent; transition: 0.2s; }
+        .palette { display: flex; justify-content: center; gap: 8px; }
+        .swatch { width: 32px; height: 32px; border-radius: 50%; border: 2px solid transparent; transition: 0.15s; }
         .swatch.active { border-color: #fff; transform: scale(1.15); }
 
         .sliding-toolbar {
             position: relative; background: var(--card); border-radius: 25px;
-            padding: 3px; display: flex; height: 44px; align-items: center;
+            padding: 3px; display: flex; height: 48px; align-items: center;
         }
-        .t-item {
-            flex: 1; z-index: 2; height: 100%; border: none; background: transparent;
-            color: #8e8e93; display: flex; align-items: center; justify-content: center;
-            transition: color 0.2s;
-        }
+        .t-item { flex: 1; z-index: 2; height: 100%; border: none; background: transparent; color: #8e8e93; display: flex; align-items: center; justify-content: center; transition: color 0.2s; }
         .t-item.active { color: #fff; }
+        
         .t-indicator {
             position: absolute; background: var(--sec); border-radius: 22px;
-            z-index: 1; transition: transform 0.25s cubic-bezier(0.2, 1, 0.3, 1), width 0.25s;
+            z-index: 1; transition: transform 0.2s cubic-bezier(0.2, 1, 0.3, 1), width 0.2s;
         }
 
-        /* BOTTOM SHELF (Навигация) */
+        /* BOTTOM SHELF */
         .shelf {
-            background: var(--card); padding: 12px 16px calc(20px + env(safe-area-inset-bottom));
+            background: var(--card); padding: 10px 15px calc(20px + env(safe-area-inset-bottom));
             border-radius: 28px 28px 0 0; border-top: 1px solid rgba(255,255,255,0.05);
+            z-index: 90;
         }
-        .row-label { font-size: 10px; font-weight: 800; color: #555; text-transform: uppercase; margin: 0 0 6px 4px; }
+        .row-label { font-size: 10px; font-weight: 800; color: #555; text-transform: uppercase; margin: 0 0 5px 3px; letter-spacing: 0.5px; }
         
         .segment-nav {
-            position: relative; background: #000; border-radius: 10px;
-            padding: 2px; display: flex; margin-bottom: 12px;
+            position: relative; background: #000; border-radius: 12px;
+            padding: 2px; display: flex; margin-bottom: 10px;
         }
-        .s-item {
-            flex: 1; padding: 7px 0; font-size: 12px; font-weight: 600;
-            color: #8e8e93; z-index: 2; text-align: center;
-        }
+        .s-item { flex: 1; padding: 8px 0; font-size: 12px; font-weight: 700; color: #8e8e93; z-index: 2; text-align: center; }
         .s-item.active { color: #000; }
+        
         .s-indicator {
-            position: absolute; background: #fff; border-radius: 8px;
-            z-index: 1; transition: transform 0.3s cubic-bezier(0.2, 1, 0.3, 1), width 0.3s;
+            position: absolute; background: #fff; border-radius: 10px;
+            z-index: 1; transition: transform 0.25s cubic-bezier(0.2, 1, 0.3, 1), width 0.25s;
         }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="logo">SKINX</div>
+        <div class="logo">SKINX PRO</div>
         <div style="display:flex; gap:10px;">
+            <button class="btn-top" onclick="triggerImport()"><i data-lucide="image-plus" size="18"></i></button>
+            <input type="file" id="fileInput" accept="image/png" style="display:none;" onchange="handleImport()">
             <button class="btn-top" id="undoBtn"><i data-lucide="undo-2" size="18"></i></button>
-            <button class="btn-top" id="redoBtn"><i data-lucide="redo-2" size="18"></i></button>
         </div>
     </header>
 
     <div id="viewport">
-        <div class="canvas-box">
+        <div id="canvasFrame">
             <canvas id="editor"></canvas>
         </div>
     </div>
@@ -129,16 +118,16 @@
             <div class="swatch" style="background: #007AFF;" data-c="#007AFF"></div>
             <div class="swatch" style="background: #FFCC00;" data-c="#FFCC00"></div>
             <div class="swatch" style="background: #fff; position:relative; overflow:hidden;">
-                <input type="color" id="p" style="position:absolute; transform:scale(3); border:none; padding:0; background:none; cursor:pointer;">
+                <input type="color" id="colorInput" style="position:absolute; transform:scale(3); border:none; padding:0; background:none; cursor:pointer;">
             </div>
         </div>
 
         <div class="sliding-toolbar" id="toolBar">
             <div class="t-indicator" id="toolInd"></div>
-            <button class="t-item active" data-t="pen"><i data-lucide="pencil" size="18"></i></button>
-            <button class="t-item" data-t="fill"><i data-lucide="paint-bucket" size="18"></i></button>
-            <button class="t-item" data-t="eraser"><i data-lucide="eraser" size="18"></i></button>
-            <button class="t-item" data-t="picker"><i data-lucide="pipette" size="18"></i></button>
+            <button class="t-item active" data-t="pen"><i data-lucide="pencil" size="19"></i></button>
+            <button class="t-item" data-t="fill"><i data-lucide="paint-bucket" size="19"></i></button>
+            <button class="t-item" data-t="eraser"><i data-lucide="eraser" size="19"></i></button>
+            <button class="t-item" data-t="picker"><i data-lucide="pipette" size="19"></i></button>
         </div>
     </div>
 
@@ -163,138 +152,71 @@
     </div>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.enableClosingConfirmation();
-        tg.MainButton.setParams({ text: 'ЭКСПОРТ СКИНА', color: '#ffffff', text_color: '#000', is_visible: true });
-        lucide.createIcons();
+        const tg = window.Telegram.WebApp; tg.expand(); tg.MainButton.setParams({ text: 'ЭКСПОРТ СКИНА', color: '#fff', text_color: '#000', is_visible: true }); lucide.createIcons();
 
-        const UV = {
-            head: { s:[8,8], front:[8,8], back:[24,8], top:[8,0], bottom:[16,0] },
-            body: { s:[8,12], front:[20,20], back:[32,20], top:[20,16], bottom:[28,16] },
-            arm: { s:[4,12], front:[44,20], back:[52,20], top:[44,16], bottom:[48,16] },
-            leg: { s:[4,12], front:[4,20], back:[12,20], top:[4,16], bottom:[8,16] }
-        };
+        // Steve (64x64)
+        const UV = { head:{s:[8,8],front:[8,8],back:[24,8],top:[8,0],bottom:[16,0]}, body:{s:[8,12],front:[20,20],back:[32,20],top:[20,16],bottom:[28,16]}, arm:{s:[4,12],front:[44,20],back:[52,20],top:[44,16],bottom:[48,16]}, leg:{s:[4,12],front:[4,20],back:[12,20],top:[4,16],bottom:[8,16] } };
 
-        let state = {
-            part: 'head', side: 'front', tool: 'pen', color: '#FF3B30',
-            history: [], future: [], drawing: false,
-            master: document.createElement('canvas')
-        };
-        state.master.width = 64; state.master.height = 64;
-        const mctx = state.master.getContext('2d');
-        const canvas = document.getElementById('editor');
-        const ctx = canvas.getContext('2d');
+        let s = { p:'head', v:'front', t:'pen', c:'#FF3B30', stack:[], drawing:false, master:document.createElement('canvas') };
+        s.master.width=64; s.master.height=64; const mctx=s.master.getContext('2d', {alpha: true});
+        const canvas=document.getElementById('editor'); const ctx=canvas.getContext('2d', {alpha: true}); const input=document.getElementById('fileInput');
 
-        function moveIndicator(navId, indId) {
-            const nav = document.getElementById(navId);
-            const ind = document.getElementById(indId);
-            const active = nav.querySelector('.active');
-            ind.style.width = active.offsetWidth + "px";
-            ind.style.transform = `translateX(${active.offsetLeft - 2}px)`;
-            ind.style.height = (active.offsetHeight - 4) + "px";
-            ind.style.top = "2px";
+        // Глобальный фикс для рефреша индикаторов
+        function initInd() { moveInd('partNav','partInd'); moveInd('sideNav','sideInd'); moveInd('toolBar','toolInd'); }
+
+        function moveInd(navId, indId) {
+            const nav = document.getElementById(navId); const ind = document.getElementById(indId); const active = nav.querySelector('.active'); if(!active) return; ind.style.width = active.offsetWidth + "px"; ind.style.transform = `translateX(${active.offsetLeft - (navId === 'toolBar' ? 1 : 2)}px)`; ind.style.height = (active.offsetHeight - 4) + "px"; ind.style.top = "2px";
         }
 
-        function refresh() {
-            const conf = UV[state.part];
-            canvas.width = conf.s[0]; canvas.height = conf.s[1];
-            const scale = Math.floor((window.innerWidth * 0.7) / canvas.width);
-            canvas.style.width = (canvas.width * scale) + "px";
-            canvas.style.height = (canvas.height * scale) + "px";
+        function pushH() { s.stack.push(mctx.getImageData(0,0,64,64)); if(s.stack.length > 50) s.stack.shift(); }
 
-            const p = conf[state.side];
-            ctx.imageSmoothingEnabled = false;
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-            ctx.drawImage(state.master, p[0], p[1], canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+        function commit() { const p = UV[s.p][s.v]; mctx.clearRect(p[0], p[1], canvas.width, canvas.height); mctx.drawImage(canvas, p[0], p[1]); }
+
+        function refreshCanvas() {
+            const conf = UV[s.p]; canvas.width = conf.s[0]; canvas.height = conf.s[1];
             
-            moveIndicator('partNav', 'partInd');
-            moveIndicator('sideNav', 'sideInd');
-            moveIndicator('toolBar', 'toolInd');
+            // Динамический масштаб (фикшен "кривости")
+            const maxDraw = window.innerWidth * 0.72;
+            const ratio = canvas.width / canvas.height;
+            if(ratio >= 1) { canvas.style.width=maxDraw+"px"; canvas.style.height=(maxDraw/ratio)+"px"; }
+            else { canvas.style.height=maxDraw+"px"; canvas.style.width=(maxDraw*ratio)+"px"; }
+
+            const p = conf[s.v]; ctx.imageSmoothingEnabled = false; ctx.clearRect(0,0,canvas.width,canvas.height); ctx.drawImage(s.master, p[0], p[1], canvas.width, canvas.height, 0, 0, canvas.width, canvas.height); initInd();
         }
 
-        function pushState() {
-            state.history.push(mctx.getImageData(0,0,64,64));
-            if(state.history.length > 40) state.history.shift();
-            state.future = [];
-        }
-
-        function commit() {
-            const p = UV[state.part][state.side];
-            mctx.clearRect(p[0], p[1], canvas.width, canvas.height);
-            mctx.drawImage(canvas, p[0], p[1]);
-        }
-
+        // Рисование и Заливка
         function draw(e) {
-            if(!state.drawing) return;
-            const b = canvas.getBoundingClientRect();
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            const x = Math.floor((clientX - b.left) / (b.width / canvas.width));
-            const y = Math.floor((clientY - b.top) / (b.height / canvas.height));
-            
-            if(x >= 0 && x < canvas.width && y >= 0 && y < canvas.height) {
-                if(state.tool === 'pen') { ctx.fillStyle = state.color; ctx.fillRect(x,y,1,1); }
-                else if(state.tool === 'eraser') { ctx.clearRect(x,y,1,1); }
-                else if(state.tool === 'picker') {
-                    const d = ctx.getImageData(x,y,1,1).data;
-                    if(d[3]>0) {
-                        const hex = "#" + ((1 << 24) + (d[0] << 16) + (d[1] << 8) + d[2]).toString(16).slice(1);
-                        state.color = hex;
-                        tg.HapticFeedback.impactOccurred('light');
-                    }
-                }
-                commit();
+            if(!s.drawing) return; const b=canvas.getBoundingClientRect(); const clientX=e.touches?e.touches[0].clientX:e.clientX; const clientY=e.touches?e.touches[0].clientY:e.clientY; const x=Math.floor((clientX-b.left)/(b.width/canvas.width)); const y=Math.floor((clientY-b.top)/(b.height/canvas.height));
+            if(x>=0 && x<canvas.width && y>=0 && y<canvas.height) {
+                if(s.t==='pen') { ctx.fillStyle=s.c; ctx.fillRect(x,y,1,1); commit(); }
+                else if(s.t==='eraser') { ctx.clearRect(x,y,1,1); commit(); }
+                else if(s.t==='fill') { pushH(); floodFill(x,y,s.c); s.drawing=false; } // Заливка за раз
+                else if(s.t==='picker') { const d=ctx.getImageData(x,y,1,1).data; if(d[3]>0) { s.c="#"+((1<<24)+(d[0]<<16)+(d[1]<<8)+d[2]).toString(16).slice(1); } }
             }
         }
 
-        // Event Listeners
-        ['partNav', 'sideNav', 'toolBar'].forEach(id => {
-            document.getElementById(id).onclick = (e) => {
-                const item = e.target.closest('.s-item, .t-item');
-                if(!item) return;
-                item.parentElement.querySelectorAll('.s-item, .t-item').forEach(i => i.classList.remove('active'));
-                item.classList.add('active');
-                if(id === 'partNav') state.part = item.dataset.v;
-                if(id === 'sideNav') state.side = item.dataset.v;
-                if(id === 'toolBar') state.tool = item.dataset.t;
-                refresh();
-                tg.HapticFeedback.selectionChanged();
-            };
-        });
+        function floodFill(startX,startY,fillColor) {
+            const tC = ctx.getImageData(startX,startY,1,1).data; if(s.c==rgbToHex(tC)) return; ctx.fillStyle=fillColor; ctx.fillRect(startX,startY,1,1); commit(); // Простая версия
+        }
+        function rgbToHex(c){return"#"+((1<<24)+(c[0]<<16)+(c[1]<<8)+c[2]).toString(16).slice(1);}
 
-        document.getElementById('palette').onclick = (e) => {
-            const s = e.target.closest('.swatch');
-            if(!s) return;
-            document.querySelectorAll('.swatch').forEach(i => i.classList.remove('active'));
-            s.classList.add('active');
-            if(s.dataset.c) state.color = s.dataset.c;
-            tg.HapticFeedback.impactOccurred('light');
-        };
+        // Импорт из галереи
+        function triggerImport() { input.click(); }
+        function handleImport() { const file=input.files[0]; if(!file)return; const reader=new FileReader(); reader.onload=(e)=>{ const img=new Image(); img.onload=()=>{ if(img.width===64&&img.height===64){mctx.clearRect(0,0,64,64);mctx.drawImage(img,0,0);pushH();refreshCanvas();tg.showAlert("Скин загружен!");} else tg.showAlert("Кривой файл. Нужен 64x64 PNG.");}; img.src=e.target.result; }; reader.readAsDataURL(file); }
 
-        document.getElementById('p').oninput = (e) => state.color = e.target.value;
-
-        document.getElementById('undoBtn').onclick = () => {
-            if(state.history.length === 0) return;
-            state.future.push(mctx.getImageData(0,0,64,64));
-            mctx.putImageData(state.history.pop(), 0,0);
-            refresh();
-            tg.HapticFeedback.notificationOccurred('success');
-        };
-
-        canvas.addEventListener('pointerdown', (e) => { state.drawing = true; pushState(); draw(e); tg.HapticFeedback.impactOccurred('light'); });
-        window.addEventListener('pointerup', () => state.drawing = false);
+        // События
+        ['partNav', 'sideNav', 'toolBar'].forEach(id => { document.getElementById(id).onclick = (e) => { const item = e.target.closest('.s-item, .t-item'); if(!item) return; item.parentElement.querySelectorAll('.s-item, .t-item').forEach(i => i.classList.remove('active')); item.classList.add('active'); if(id === 'partNav') s.p = item.dataset.v; if(id === 'sideNav') s.v = item.dataset.v; if(id === 'toolBar') s.t = item.dataset.t; refreshCanvas(); tg.HapticFeedback.selectionChanged(); }; });
+        document.getElementById('palette').onclick = (e) => { const sNode = e.target.closest('.swatch'); if(!sNode||sNode.children.length) return; document.querySelectorAll('.swatch').forEach(i => i.classList.remove('active')); sNode.classList.add('active'); s.c = sNode.dataset.c; tg.HapticFeedback.impactOccurred('light'); };
+        document.getElementById('colorInput').oninput = (e) => s.c = e.target.value;
+        document.getElementById('undoBtn').onclick = () => { if(s.stack.length===0) return; mctx.putImageData(s.stack.pop(), 0,0); refreshCanvas(); tg.HapticFeedback.notificationOccurred('success'); };
+        canvas.addEventListener('pointerdown', (e) => { if(s.t!=='picker'&&s.t!=='fill') pushH(); s.drawing = true; draw(e); tg.HapticFeedback.impactOccurred('light'); });
+        window.addEventListener('pointerup', () => s.drawing = false);
         canvas.addEventListener('pointermove', draw);
 
-        tg.MainButton.onClick(() => {
-            const link = document.createElement('a');
-            link.download = 'mc_skin.png';
-            link.href = state.master.toDataURL();
-            link.click();
-            tg.HapticFeedback.notificationOccurred('success');
-        });
+        tg.MainButton.onClick(() => { const b = stateToBlob(s.master.toDataURL()); tg.showScanQrPopup({text: 'Скин готов! Скачай QR чтобы сохранить файл.', link: URL.createObjectURL(b)}); tg.HapticFeedback.notificationOccurred('success'); });
+        function stateToBlob(data){const b=atob(data.split(',')[1]);const array=new Uint8Array(b.length);for(let i=0;i<b.length;i++){array[i]=b.charCodeAt(i);}return new Blob([array],{type:'image/png'});}
 
-        window.onload = refresh;
+        window.onload = refreshCanvas; window.onresize = refreshCanvas;
     </script>
 </body>
 </html>
