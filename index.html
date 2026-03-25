@@ -2,207 +2,252 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Skin Creator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Skin Glass Editor</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* Базовые стили iOS */
         :root {
-            --bg-color: #F2F2F7;
-            --card-color: #FFFFFF;
-            --text-color: #000000;
-            --text-secondary: #8E8E93;
-            --accent-blue: #007AFF;
-            --border-color: #C6C6C8;
+            --bg: #0D0D0D;
+            --glass: rgba(28, 28, 30, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --accent: #007AFF;
+            --text-main: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.5);
         }
 
         * {
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
             -webkit-tap-highlight-color: transparent;
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             user-select: none;
+            margin: 0; padding: 0;
+            font-family: -apple-system, system-ui, sans-serif;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            overflow: hidden; /* Запрещаем скролл для удобного рисования */
+            background-color: var(--bg);
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            height: 100vh;
+            align-items: center;
         }
 
-        /* Навигация (Part & Face Selector) */
-        .segmented-control {
-            display: flex;
-            background: #E3E3E8;
-            border-radius: 8px;
-            padding: 2px;
-            margin: 16px;
-        }
-        
-        .segment {
+        /* --- Сетка и Холст --- */
+        .viewport {
             flex: 1;
-            text-align: center;
-            padding: 6px 0;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-color);
-            border-radius: 6px;
-        }
-
-        .segment.active {
-            background: var(--card-color);
-            box-shadow: 0 3px 1px -2px rgba(0,0,0,0.1), 0 2px 2px 0 rgba(0,0,0,0.1);
-        }
-
-        .segment:active {
-            opacity: 0.7; /* Никаких анимаций при наведении, только реакция на тап */
-        }
-
-        /* Зона рисования */
-        .canvas-container {
-            flex: 1;
+            width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            padding-bottom: 240px; /* Место под модалку */
         }
 
-        .canvas-wrapper {
-            background: var(--card-color);
-            padding: 8px;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        .canvas-card {
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            position: relative;
         }
 
         canvas#editor {
-            width: 256px;
-            height: 256px;
-            image-rendering: pixelated; /* Чтобы пиксели не мылились */
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            touch-action: none; /* Запрет жестов браузера на холсте */
+            image-rendering: pixelated;
+            display: block;
+            width: 280px;
+            height: 280px;
+            background-image: 
+                linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+            background-size: 35px 35px; /* 280 / 8 = 35 */
+            touch-action: none;
         }
 
-        /* Палитра и инструменты */
-        .toolbar {
-            background: var(--card-color);
-            border-top: 1px solid var(--border-color);
-            padding: 16px;
-            padding-bottom: env(safe-area-inset-bottom, 16px);
-        }
-
-        .colors {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 16px;
-            overflow-x: auto;
-            padding-bottom: 4px;
-        }
-
-        .color-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: 2px solid transparent;
-            flex-shrink: 0;
-        }
-
-        .color-btn.active {
-            border-color: var(--accent-blue);
-            transform: scale(1.1); /* Легкий акцент на выбранном */
-        }
-
-        .color-picker-wrapper {
-            position: relative;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red);
-        }
-
-        .color-picker-wrapper input[type="color"] {
-            opacity: 0;
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-
-        .tools {
-            display: flex;
-            justify-content: space-around;
-        }
-
-        .tool-btn {
+        /* --- Селекторы частей тела и граней --- */
+        .top-nav {
+            padding-top: env(safe-area-inset-top, 20px);
             display: flex;
             flex-direction: column;
+            gap: 12px;
+            width: 100%;
             align-items: center;
+            z-index: 10;
+        }
+
+        .scroll-pills {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            width: 100%;
+            padding: 0 20px;
+            scrollbar-width: none;
+        }
+        .scroll-pills::-webkit-scrollbar { display: none; }
+
+        .pill {
+            background: var(--glass);
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
             color: var(--text-secondary);
-            font-size: 11px;
-            gap: 4px;
+        }
+        .pill.active {
+            color: var(--text-main);
+            background: rgba(255,255,255,0.1);
+            border-color: var(--text-main);
         }
 
-        .tool-btn svg {
-            width: 24px;
-            height: 24px;
-            stroke: currentColor;
-            stroke-width: 1.5;
-            fill: none;
+        /* --- Плавающая стеклянная модалка --- */
+        .glass-modal {
+            position: fixed;
+            bottom: calc(20px + env(safe-area-inset-bottom));
+            left: 16px;
+            right: 16px;
+            background: var(--glass);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border-radius: 32px;
+            border: 1px solid var(--glass-border);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 100;
         }
 
-        .tool-btn.active {
-            color: var(--accent-blue);
+        /* Панель инструментов (Top Bar модалки) */
+        .tool-bar {
+            display: flex;
+            justify-content: space-around;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--glass-border);
         }
+
+        .tool-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+        }
+        .tool-icon.active {
+            background: var(--accent);
+            color: white;
+        }
+        .tool-icon svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; }
+
+        /* Контент модалки (Сплит) */
+        .modal-content {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            gap: 15px;
+            height: 100px;
+        }
+
+        .brush-section {
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .dot { background: white; border-radius: 50%; }
+
+        .palette-section {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            overflow-y: auto;
+        }
+
+        .color-sq {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .color-sq.active { border: 2px solid var(--accent); transform: scale(0.9); }
+
+        .custom-picker {
+            grid-column: span 1;
+            background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red);
+            position: relative;
+        }
+        .custom-picker input {
+            position: absolute; opacity: 0; width: 100%; height: 100%; top:0; left:0;
+        }
+
     </style>
 </head>
 <body>
 
-    <div class="segmented-control" id="face-selector">
-        <div class="segment active" data-face="front">Front</div>
-        <div class="segment" data-face="back">Back</div>
-        <div class="segment" data-face="left">Left</div>
-        <div class="segment" data-face="right">Right</div>
-        <div class="segment" data-face="top">Top</div>
-        <div class="segment" data-face="bottom">Bottom</div>
+    <div class="top-nav">
+        <div class="scroll-pills" id="part-selector">
+            <div class="pill active" data-part="head">Голова</div>
+            <div class="pill" data-part="body">Тело</div>
+            <div class="pill" data-part="arms">Руки</div>
+            <div class="pill" data-part="legs">Ноги</div>
+        </div>
+        <div class="scroll-pills" id="face-selector">
+            <div class="pill active" data-face="front">Front</div>
+            <div class="pill" data-face="back">Back</div>
+            <div class="pill" data-face="left">Left</div>
+            <div class="pill" data-face="right">Right</div>
+            <div class="pill" data-face="top">Top</div>
+            <div class="pill" data-face="bottom">Bottom</div>
+        </div>
     </div>
 
-    <div class="canvas-container">
-        <div class="canvas-wrapper">
+    <div class="viewport">
+        <div class="canvas-card">
             <canvas id="editor" width="8" height="8"></canvas>
         </div>
-        <p style="margin-top: 12px; color: var(--text-secondary); font-size: 13px;">Голова</p>
+        <div id="part-label" style="margin-top: 20px; font-weight: 600; font-size: 14px; color: var(--text-secondary)">Голова: Front</div>
     </div>
 
-    <div class="toolbar">
-        <div class="colors" id="palette">
-            <div class="color-btn active" style="background: #000000;" data-color="#000000"></div>
-            <div class="color-btn" style="background: #333333;" data-color="#333333"></div>
-            <div class="color-btn" style="background: #8E8E93;" data-color="#8E8E93"></div>
-            <div class="color-btn" style="background: #C6C6C8;" data-color="#C6C6C8"></div>
-            <div class="color-btn" style="background: #FFFFFF; border: 1px solid #C6C6C8;" data-color="#FFFFFF"></div>
-            <div class="color-btn" style="background: #007AFF;" data-color="#007AFF"></div>
-            <div class="color-picker-wrapper">
-                <input type="color" id="custom-color" value="#ff0000">
+    <div class="glass-modal">
+        <div class="tool-bar">
+            <div class="tool-icon active" data-tool="pencil" id="btn-pencil">
+                <svg viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L16.732 3.732z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="tool-icon" data-tool="eraser">
+                <svg viewBox="0 0 24 24"><path d="M19 11V17C19 18.8856 19 19.8284 18.4142 20.4142C17.8284 21 16.8856 21 15 21H9C7.11438 21 6.17157 21 5.58579 20.4142C5 19.8284 5 18.8856 5 17V11M19 11C19 9.11438 19 8.17157 18.4142 7.58579C17.8284 7 16.8856 7 15 7H9C7.11438 7 6.17157 7 5.58579 7.58579C5 8.17157 5 9.11438 5 11M19 11H5M14 3H10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="tool-icon" data-tool="bucket">
+                <svg viewBox="0 0 24 24"><path d="M18.8533 11.2359L12.7641 5.14674M18.8533 11.2359C19.9579 12.3405 19.9579 14.1339 18.8533 15.2385L13.8824 20.2093C13.3155 20.7762 12.5195 21.0772 11.7225 21.0396C10.9255 21.002 10.1983 20.6288 9.74011 20.022L4.04011 12.472C3.41406 11.6429 3.41406 10.4831 4.04011 9.65399L11.2359 0.123405C12.3405 -0.9812 14.1339 -0.9812 15.2385 0.123405L18.8533 11.2359Z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="tool-icon" data-tool="picker">
+                <svg viewBox="0 0 24 24"><path d="M15 4.5L19.5 9M11.5 8L15.5 12M5 21L8 18M8.5 14.5L14.5 8.5C15.3284 7.67157 16.6716 7.67157 17.5 8.5V8.5C18.3284 9.32843 18.3284 10.6716 17.5 11.5L11.5 17.5L5.5 17.5L5.5 11.5L8.5 14.5Z" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
         </div>
 
-        <div class="tools">
-            <div class="tool-btn active" data-tool="pencil">
-                <svg viewBox="0 0 24 24">
-                    <path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L16.732 3.732z" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                Pencil
+        <div class="modal-content">
+            <div class="brush-section" id="brush-ui">
+                <div class="dot" style="width: 4px; height: 4px; opacity: 0.5;"></div>
+                <div class="dot" style="width: 10px; height: 10px; border: 2px solid var(--accent);"></div>
+                <div class="dot" style="width: 16px; height: 16px; opacity: 0.5;"></div>
             </div>
-            <div class="tool-btn" data-tool="eraser">
-                <svg viewBox="0 0 24 24">
-                    <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                Eraser
+            <div class="palette-section" id="palette">
+                <div class="color-sq active" style="background: #000000;" data-color="#000000"></div>
+                <div class="color-sq" style="background: #FFFFFF;" data-color="#FFFFFF"></div>
+                <div class="color-sq" style="background: #8E8E93;" data-color="#8E8E93"></div>
+                <div class="color-sq" style="background: #007AFF;" data-color="#007AFF"></div>
+                <div class="color-sq" style="background: #FF3B30;" data-color="#FF3B30"></div>
+                <div class="color-sq" style="background: #34C759;" data-color="#34C759"></div>
+                <div class="color-sq" style="background: #FFCC00;" data-color="#FFCC00"></div>
+                <div class="color-sq" style="background: #AF52DE;" data-color="#AF52DE"></div>
+                <div class="color-sq custom-picker">
+                    <input type="color" id="color-input">
+                </div>
             </div>
         </div>
     </div>
@@ -212,156 +257,126 @@
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.ready();
+        tg.MainButton.setText("СОХРАНИТЬ В ГАЛЕРЕЮ").show();
+        tg.backgroundColor = "#0D0D0D";
+        tg.headerColor = "#0D0D0D";
 
-        // Настройка MainButton от Telegram для экспорта
-        tg.MainButton.setText("СОХРАНИТЬ В ФОТО");
-        tg.MainButton.color = "#007AFF";
-        tg.MainButton.show();
+        const master = document.getElementById('master');
+        const mCtx = master.getContext('2d', { willReadFrequently: true });
+        const editor = document.getElementById('editor');
+        const eCtx = editor.getContext('2d');
 
-        // Развертка Майнкрафт скина (Координаты: x, y на текстуре 64x64. w, h = размер грани)
-        // Пример для Головы. 
-        const skinMap = {
-            head: {
-                front:  { x: 8,  y: 8, w: 8, h: 8 },
-                back:   { x: 24, y: 8, w: 8, h: 8 },
-                left:   { x: 16, y: 8, w: 8, h: 8 },
-                right:  { x: 0,  y: 8, w: 8, h: 8 },
-                top:    { x: 8,  y: 0, w: 8, h: 8 },
-                bottom: { x: 16, y: 0, w: 8, h: 8 }
-            }
+        let state = {
+            part: 'head',
+            face: 'front',
+            tool: 'pencil',
+            color: '#000000',
+            isDrawing: false
         };
 
-        let currentPart = 'head';
-        let currentFace = 'front';
-        let currentColor = '#000000';
-        let currentTool = 'pencil'; // 'pencil' или 'eraser'
+        // Развертка 64x64
+        const map = {
+            head: { front: [8,8,8,8], back: [24,8,8,8], left: [16,8,8,8], right: [0,8,8,8], top: [8,0,8,8], bottom: [16,0,8,8] },
+            body: { front: [20,20,8,12], back: [32,20,8,12], left: [28,20,4,12], right: [16,20,4,12], top: [20,16,8,4], bottom: [28,16,8,4] },
+            arms: { front: [44,20,4,12], back: [52,20,4,12], left: [48,20,4,12], right: [40,20,4,12], top: [44,16,4,4], bottom: [48,16,4,4] },
+            legs: { front: [4,20,4,12], back: [12,20,4,12], left: [8,20,4,12], right: [0,20,4,12], top: [4,16,4,4], bottom: [8,16,4,4] }
+        };
 
-        const editorCanvas = document.getElementById('editor');
-        const editorCtx = editorCanvas.getContext('2d');
-        const masterCanvas = document.getElementById('master');
-        const masterCtx = masterCanvas.getContext('2d');
-
-        // Очищаем мастер-канвас прозрачным цветом (важно для скинов)
-        masterCtx.clearRect(0, 0, 64, 64);
-
-        // Функция отрисовки активной грани из мастера в эдитор
-        function renderEditor() {
-            const map = skinMap[currentPart][currentFace];
-            editorCtx.clearRect(0, 0, map.w, map.h);
-            // Копируем пиксели из мастера
-            const imageData = masterCtx.getImageData(map.x, map.y, map.w, map.h);
-            editorCtx.putImageData(imageData, 0, 0);
+        function syncEditor() {
+            const [x,y,w,h] = map[state.part][state.face];
+            editor.width = w; editor.height = h;
+            editor.style.backgroundSize = `${280/w}px ${280/h}px`;
+            eCtx.imageSmoothingEnabled = false;
+            eCtx.clearRect(0,0,w,h);
+            eCtx.drawImage(master, x, y, w, h, 0, 0, w, h);
+            document.getElementById('part-label').innerText = `${state.part.toUpperCase()}: ${state.face}`;
         }
 
-        // Рисование пикселя
-        let isDrawing = false;
-        let lastDrawTime = 0;
-
-        function drawPixel(e) {
-            if (!isDrawing) return;
-            
-            // Получаем координаты тапа
-            const rect = editorCanvas.getBoundingClientRect();
+        function getPointerPos(e) {
+            const rect = editor.getBoundingClientRect();
             const touch = e.touches ? e.touches[0] : e;
-            
-            // Размер канваса на экране 256, логический размер 8. Коэффициент = 256/8 = 32.
-            const scale = rect.width / editorCanvas.width; 
-            const x = Math.floor((touch.clientX - rect.left) / scale);
-            const y = Math.floor((touch.clientY - rect.top) / scale);
-
-            // Проверка границ
-            if (x < 0 || y < 0 || x >= editorCanvas.width || y >= editorCanvas.height) return;
-
-            const map = skinMap[currentPart][currentFace];
-
-            if (currentTool === 'pencil') {
-                masterCtx.fillStyle = currentColor;
-                masterCtx.fillRect(map.x + x, map.y + y, 1, 1);
-            } else if (currentTool === 'eraser') {
-                masterCtx.clearRect(map.x + x, map.y + y, 1, 1);
-            }
-
-            // Haptics (вибрация не чаще раза в 100мс)
-            const now = Date.now();
-            if (now - lastDrawTime > 100) {
-                tg.HapticFeedback.impactOccurred('light');
-                lastDrawTime = now;
-            }
-
-            renderEditor();
+            return {
+                x: Math.floor((touch.clientX - rect.left) / (rect.width / editor.width)),
+                y: Math.floor((touch.clientY - rect.top) / (rect.height / editor.height))
+            };
         }
 
-        // Обработчики холста (Touch)
-        editorCanvas.addEventListener('touchstart', (e) => {
-            isDrawing = true;
-            drawPixel(e);
-        });
-        editorCanvas.addEventListener('touchmove', (e) => {
-            e.preventDefault(); // Запрещаем скролл
-            drawPixel(e);
-        }, { passive: false });
-        editorCanvas.addEventListener('touchend', () => isDrawing = false);
-        editorCanvas.addEventListener('touchcancel', () => isDrawing = false);
+        function draw(e) {
+            if (!state.isDrawing) return;
+            const pos = getPointerPos(e);
+            if (pos.x < 0 || pos.y < 0 || pos.x >= editor.width || pos.y >= editor.height) return;
 
-        // Логика UI
-        document.getElementById('face-selector').addEventListener('click', (e) => {
-            if (e.target.classList.contains('segment')) {
-                document.querySelectorAll('.segment').forEach(el => el.classList.remove('active'));
-                e.target.classList.add('active');
-                currentFace = e.target.dataset.face;
-                tg.HapticFeedback.selectionChanged();
-                renderEditor();
+            const [mx, my] = [map[state.part][state.face][0] + pos.x, map[state.part][state.face][1] + pos.y];
+
+            if (state.tool === 'pencil') {
+                mCtx.fillStyle = state.color;
+                mCtx.fillRect(mx, my, 1, 1);
+            } else if (state.tool === 'eraser') {
+                mCtx.clearRect(mx, my, 1, 1);
+            } else if (state.tool === 'picker') {
+                const data = mCtx.getImageData(mx, my, 1, 1).data;
+                if (data[3] > 0) {
+                    state.color = `#${((1 << 24) + (data[0] << 16) + (data[1] << 8) + data[2]).toString(16).slice(1)}`;
+                    document.getElementById('btn-pencil').click();
+                }
             }
-        });
+            // Haptics light
+            if (Math.random() > 0.8) tg.HapticFeedback.impactOccurred('light');
+            syncEditor();
+        }
 
-        document.getElementById('palette').addEventListener('click', (e) => {
-            if (e.target.classList.contains('color-btn')) {
-                document.querySelectorAll('.color-btn').forEach(el => el.classList.remove('active'));
+        // Listeners
+        editor.addEventListener('touchstart', (e) => { state.isDrawing = true; draw(e); });
+        editor.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); });
+        editor.addEventListener('touchend', () => state.isDrawing = false);
+
+        document.querySelectorAll('.pill').forEach(p => {
+            p.addEventListener('click', (e) => {
+                const parent = e.target.parentElement;
+                parent.querySelectorAll('.pill').forEach(el => el.classList.remove('active'));
                 e.target.classList.add('active');
-                currentColor = e.target.dataset.color;
-                currentTool = 'pencil'; // Автоматически переключаем на карандаш
-                document.querySelector('[data-tool="eraser"]').classList.remove('active');
-                document.querySelector('[data-tool="pencil"]').classList.add('active');
+                if (e.target.dataset.part) state.part = e.target.dataset.part;
+                if (e.target.dataset.face) state.face = e.target.dataset.face;
                 tg.HapticFeedback.selectionChanged();
-            }
-        });
-
-        document.getElementById('custom-color').addEventListener('input', (e) => {
-            currentColor = e.target.value;
-            currentTool = 'pencil';
-        });
-
-        document.querySelectorAll('.tool-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const target = e.currentTarget;
-                document.querySelectorAll('.tool-btn').forEach(el => el.classList.remove('active'));
-                target.classList.add('active');
-                currentTool = target.dataset.tool;
-                tg.HapticFeedback.selectionChanged();
+                syncEditor();
             });
         });
 
-        // Логика экспорта (MainButton)
-        tg.MainButton.onClick(() => {
-            tg.HapticFeedback.impactOccurred('heavy');
-            
-            // Получаем Base64 картинки
-            const dataUrl = masterCanvas.toDataURL('image/png');
-            
-            // Т.к. API телеграма напрямую не сохраняет картинки в галерею, 
-            // мы создаем тег <a> и вызываем скачивание. 
-            // В мобильном Telegram откроется системный диалог поделиться/сохранить фото.
-            const link = document.createElement('a');
-            link.download = 'minecraft_skin.png';
-            link.href = dataUrl;
-            link.click();
-            
-            tg.showAlert('Скин готов к сохранению!');
+        document.querySelectorAll('.tool-icon').forEach(t => {
+            t.addEventListener('click', (e) => {
+                document.querySelectorAll('.tool-icon').forEach(el => el.classList.remove('active'));
+                const btn = e.currentTarget;
+                btn.classList.add('active');
+                state.tool = btn.dataset.tool;
+                // Скрываем/показываем кисти
+                document.getElementById('brush-ui').style.opacity = (state.tool === 'bucket' || state.tool === 'picker') ? '0.2' : '1';
+                tg.HapticFeedback.impactOccurred('light');
+            });
         });
 
-        // Первичный рендер
-        renderEditor();
+        document.getElementById('palette').addEventListener('click', (e) => {
+            if (e.target.dataset.color) {
+                document.querySelectorAll('.color-sq').forEach(el => el.classList.remove('active'));
+                e.target.classList.add('active');
+                state.color = e.target.dataset.color;
+                tg.HapticFeedback.selectionChanged();
+            }
+        });
+
+        document.getElementById('color-input').addEventListener('input', (e) => {
+            state.color = e.target.value;
+        });
+
+        tg.MainButton.onClick(() => {
+            const link = document.createElement('a');
+            link.download = 'skin.png';
+            link.href = master.toDataURL();
+            link.click();
+            tg.HapticFeedback.notificationOccurred('success');
+        });
+
+        // Запуск
+        syncEditor();
     </script>
 </body>
 </html>
