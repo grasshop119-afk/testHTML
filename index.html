@@ -8,7 +8,6 @@
     <link href="https://fonts.cdnfonts.com/css/common-pixel" rel="stylesheet">
     
     <style>
-        /* Глобальные настройки */
         * { 
             box-sizing: border-box; 
             margin: 0; 
@@ -23,11 +22,9 @@
             color: #ffffff; 
             font-family: 'Common Pixel', sans-serif;
             height: 100vh;
-            width: 100vw;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            position: fixed;
         }
 
         /* --- ХЕДЕР --- */
@@ -35,24 +32,22 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 25px;
-            background: linear-gradient(180deg, #252525 0%, #1a1a1a 100%);
+            padding: 15px 25px;
+            background: #1a1a1a;
         }
 
         .logo {
-            font-size: 24px;
-            letter-spacing: 2px;
+            font-size: 20px;
+            letter-spacing: 1px;
         }
-        .logo span { color: #f3bc18; } /* Буква A акцентом */
+        .logo span { color: #f3bc18; }
 
         .tg-icon {
-            width: 24px;
-            height: 24px;
-            opacity: 0.8;
-            transition: opacity 0.2s;
+            width: 22px;
+            height: 22px;
+            opacity: 0.7;
             cursor: pointer;
         }
-        .tg-icon:hover { opacity: 1; }
 
         /* --- КОНТЕНТ --- */
         main {
@@ -61,90 +56,84 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 25px;
-            padding-bottom: 40px;
+            gap: 15px; /* Компактные отступы между плашками */
+            padding-bottom: 20px;
         }
 
         /* --- КАРТОЧКИ --- */
         .card {
             position: relative;
-            width: 90%;
-            max-width: 400px;
-            height: 140px;
+            width: 85%;
+            max-width: 360px;
+            height: 110px; /* Уменьшенная высота */
             background-color: #2b2b2b;
-            /* Наш фирменный стиль рамок */
-            border-top: 1px solid #444;
-            border-left: 1px solid #444;
+            border-top: 1px solid #3d3d3d;
+            border-left: 1px solid #3d3d3d;
             border-bottom: 2px solid #111;
             border-right: 1px solid #111;
             border-radius: 4px;
-            padding: 20px;
+            padding: 15px;
             display: flex;
-            flex-direction: column;
-            justify-content: center;
+            align-items: center;
             cursor: pointer;
-            transition: transform 0.1s, background-color 0.2s;
-            /* Скрываем картинку снизу и по бокам */
             overflow: visible; 
+            transition: background 0.2s;
         }
 
-        .card:hover {
-            background-color: #333;
-            transform: translateY(-2px);
-        }
+        .card:hover { background-color: #313131; }
 
-        .card:active {
-            transform: translateY(1px);
-            background-color: #252525;
-        }
-
-        /* Текстовый блок */
         .card-content {
             width: 65%;
             z-index: 2;
         }
 
         .card-title {
-            font-size: 18px;
-            margin-bottom: 10px;
+            font-size: 14px; /* Контент мельче */
+            margin-bottom: 6px;
             text-transform: uppercase;
-            color: #fff;
         }
 
         .card-desc {
-            font-size: 10px;
-            line-height: 1.4;
-            color: #888;
-            text-transform: none;
+            font-size: 9px; /* Контент мельче */
+            line-height: 1.3;
+            color: #7a7a7a;
         }
 
-        /* Контейнер для обрезки картинки (бока и низ) */
+        /* Маска для обрезки картинок по бокам и снизу */
         .img-mask {
             position: absolute;
-            top: -20px; /* Позволяем картинке вылезать сверху */
+            top: -30px; /* Запас для вылета сверху */
             right: 0;
             bottom: 0;
             left: 0;
-            overflow: hidden; /* Обрезаем всё, что выходит за границы плашки, КРОМЕ верха */
+            overflow: hidden;
             border-radius: 4px;
             pointer-events: none;
         }
 
-        /* Сама картинка */
         .card-img {
             position: absolute;
-            right: -10px;
-            bottom: -10px;
-            width: 140px; /* Крупнее, чем на макете */
-            height: auto;
             z-index: 1;
-            /* Эффект легкого свечения */
-            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.4));
-            transition: transform 0.3s ease;
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
         }
 
-        .card:hover .card-img {
-            transform: scale(1.05) rotate(-2deg);
+        /* Специфичные настройки для каждого типа (Req: позиции и размеры) */
+        .img-skin {
+            width: 110px;
+            right: -5px;
+            bottom: -55px; /* Виден по пояс */
+        }
+
+        .img-block {
+            width: 100px;
+            right: 0;
+            bottom: 15px; /* Чуть выше */
+        }
+
+        .img-item {
+            width: 75px; /* Мельче */
+            right: 10px;
+            bottom: -10px; /* Ниже */
         }
 
     </style>
@@ -153,28 +142,27 @@
 
     <header>
         <div class="logo"><span>A</span>PIXEL</div>
-        <img src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png" class="tg-icon" alt="Telegram">
+        <img src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png" class="tg-icon" alt="TG">
     </header>
 
     <main>
-        
-        <div class="card" onclick="location.href='editor.html'">
+        <div class="card">
             <div class="card-content">
                 <div class="card-title">Create Skin</div>
                 <div class="card-desc">Create your own Minecraft™ skin. You also can edit or choose skin from the list.</div>
             </div>
             <div class="img-mask">
-                <img src="Logos/skin.PNG" alt="Skin" class="card-img">
+                <img src="Logos/skin.PNG" alt="Skin" class="card-img img-skin">
             </div>
         </div>
 
         <div class="card">
             <div class="card-content">
                 <div class="card-title">Create Block</div>
-                <div class="card-desc">Design unique textures and properties for new in-game blocks. Real-time preview included.</div>
+                <div class="card-desc">Design unique textures and properties for new in-game blocks. Real-time preview.</div>
             </div>
             <div class="img-mask">
-                <img src="Logos/block.PNG" alt="Block" class="card-img">
+                <img src="Logos/block.PNG" alt="Block" class="card-img img-block">
             </div>
         </div>
 
@@ -184,10 +172,9 @@
                 <div class="card-desc">Add custom weapons, tools, and rare artifacts to your world with ease.</div>
             </div>
             <div class="img-mask">
-                <img src="Logos/item.PNG" alt="Item" class="card-img" style="width: 120px; right: 0;">
+                <img src="Logos/item.PNG" alt="Item" class="card-img img-item">
             </div>
         </div>
-
     </main>
 
 </body>
