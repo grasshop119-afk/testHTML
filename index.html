@@ -3,59 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>APixel - Создавай</title>
+    <title>APixel - Создавай в Minecraft</title>
     <style>
+        /* Подключение шрифта */
         @font-face {
             font-family: '00 Starmap';
             src: url('fonts/00-Starmap.ttf') format('truetype');
         }
+
+        /* Базовые настройки стиля Mojang + Apple */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: none; /* Пиксельная резкость */
+        }
+
+        body {
+            background-color: #121212; /* Глубокий темный фон */
+            color: #FFFFFF;
+            font-family: '00 Starmap', sans-serif;
+            line-height: 1.2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Шапка в стиле Apple Dark (без тени) */
+        header {
+            width: 100%;
+            background-color: #242426; /* Светлее фона */
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+        }
+
+        .logo {
+            font-size: 22px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .logo span {
+            color: #FFD60A; /* Желтая буква A */
+        }
+
+        .tg-link img {
+            width: 26px;
+            filter: invert(1);
+            image-rendering: pixelated;
+        }
+
+        /* Контентная область */
+        .content {
+            width: 100%;
+            max-width: 550px;
+            padding: 40px 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        /* Прямоугольные плашки */
+        .card {
+            background-color: #2C2C2E; /* Тон Apple Dark */
+            height: 140px; /* Фиксированная высота */
+            position: relative;
+            overflow: hidden; /* Обрезка вылетающих картинок */
+            display: flex;
+            align-items: center;
+            padding-left: 30px;
+            transition: background 0.15s ease;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            background-color: #3A3A3C;
+        }
+
+        /* Блок текста слева */
+        .card-text {
+            position: relative;
+            z-index: 5;
+            width: 60%;
+        }
+
+        .card-text h2 {
+            font-size: 20px;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .card-text p {
+            font-size: 11px;
+            color: #8E8E93; /* Серый текст */
+            max-width: 200px;
+        }
+
+        /* Графика справа */
+        .card-img {
+            position: absolute;
+            right: -5px;
+            bottom: -35px; /* Жестко урезаем низ картинки */
+            height: 125%;   /* Картинка крупнее плашки */
+            z-index: 1;
+            transform: rotate(-12deg); /* Наклон для динамики */
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .card-img img {
+            height: 100%;
+            width: auto;
+            image-rendering: pixelated; /* Сохраняем пиксели */
+            display: block;
+        }
+
+        /* Индивидуальная подгонка для блока (чуть меньше остальных по ТЗ) */
+        .block-adjust {
+            height: 105% !important;
+            bottom: -20px !important;
+            right: 5px !important;
+        }
+
     </style>
-    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <header class="navbar">
-        <div class="container header-content">
-            <div class="logo">
-                <span class="letter-a">A</span>Pixel
-            </div>
-            <a href="https://t.me/your_link" target="_blank" class="tg-link">
-                <img src="https://cdn.iconscout.com/icon/premium/png-512-thumb/send-icon-svg-download-png-14350353.png?f=webp&w=512" alt="Telegram">
-            </a>
-        </div>
+    <header>
+        <div class="logo"><span>A</span>PIXEL</div>
+        <a href="https://t.me/pixel" target="_blank" class="tg-link">
+            <img src="https://cdn.iconscout.com/icon/premium/png-512-thumb/send-icon-svg-download-png-14350353.png?f=webp&w=512" alt="Telegram">
+        </a>
     </header>
 
-    <main class="container main-content">
-        <section class="card">
-            <div class="card-info">
-                <h2 class="card-title">Создать скин</h2>
-                <p class="card-desc">Персонализируйте своего персонажа уникальным дизайном.</p>
+    <div class="content">
+        <div class="card">
+            <div class="card-text">
+                <h2>Создать скин</h2>
+                <p>Настройте внешний вид своего персонажа в редакторе.</p>
             </div>
-            <div class="card-image-container skin-img">
-                <img src="Logos/skin.PNG" alt="Skin">
+            <div class="card-img">
+                <img src="Logos/skin.PNG" alt="">
             </div>
-        </section>
+        </div>
 
-        <section class="card">
-            <div class="card-info">
-                <h2 class="card-title">Создать блок</h2>
-                <p class="card-desc">Разработайте новые текстуры строительных элементов мира.</p>
+        <div class="card">
+            <div class="card-text">
+                <h2>Создать блок</h2>
+                <p>Создавайте уникальные текстуры для игровых блоков.</p>
             </div>
-            <div class="card-image-container block-img">
-                <img src="Logos/block.PNG" alt="Block">
+            <div class="card-img block-adjust">
+                <img src="Logos/block.PNG" alt="">
             </div>
-        </section>
+        </div>
 
-        <section class="card">
-            <div class="card-info">
-                <h2 class="card-title">Создать предмет</h2>
-                <p class="card-desc">Добавьте кастомные инструменты, оружие или ресурсы.</p>
+        <div class="card">
+            <div class="card-text">
+                <h2>Создать предмет</h2>
+                <p>Добавляйте кастомное оружие и редкие артефакты.</p>
             </div>
-            <div class="card-image-container item-img">
-                <img src="Logos/item.PNG" alt="Item">
+            <div class="card-img">
+                <img src="Logos/item.PNG" alt="">
             </div>
-        </section>
-    </main>
+        </div>
+    </div>
 
 </body>
 </html>
