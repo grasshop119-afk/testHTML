@@ -3,183 +3,289 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>APixel — Minecraft Creator</title>
+    <title>APixel - Minecraft Skin Editor</title>
+    <script src="https://unpkg.com/skinview3d@3.0.0-alpha.1/bundles/skinview3d.bundle.js"></script>
     <style>
-        /* Подключение пиксельного шрифта Minecraft */
-        @font-face {
-            font-family: 'Minecraft';
-            src: url('https://raw.githubusercontent.com/IdreesInc/Minecraft-Font/master/Minecraft.ttf') format('truetype');
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-font-smoothing: none;
-            image-rendering: pixelated; /* Глобальная пикселизация для всех картинок */
-        }
-
-        body {
-            background-color: #121212;
-            color: #FFFFFF;
-            font-family: 'Minecraft', sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            overflow-x: hidden;
-        }
-
-        /* Шапка Apple Dark */
-        header {
-            width: 100%;
-            background-color: #242426;
-            padding: 18px 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #2C2C2E;
-        }
-
-        .logo {
-            font-size: 24px;
-            letter-spacing: 1px;
-        }
-
-        .logo span {
-            color: #FFD60A;
-        }
-
-        .tg-link img {
-            width: 26px;
-            filter: invert(1);
-        }
-
-        /* Контент */
-        .content {
-            width: 100%;
-            max-width: 500px;
-            padding: 40px 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        /* Плашки-прямоугольники */
-        .card {
-            background-color: #2C2C2E;
-            height: 120px;
-            position: relative;
+        /* Базовый сброс и шрифты (под Apple-стайл чистоту) */
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        body { 
+            background-color: #1e1e1e; 
+            color: #b0b0b0; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
             overflow: hidden;
+        }
+
+        /* Имитация 1px рамок Aseprite (светлый верх, темный низ) */
+        .panel {
+            background-color: #2b2b2b;
+            border-top: 1px solid #3c3c3c;
+            border-left: 1px solid #3c3c3c;
+            border-bottom: 1px solid #151515;
+            border-right: 1px solid #151515;
+        }
+
+        /* Верхнее меню */
+        .top-menu {
+            display: flex;
+            padding: 4px 8px;
+            font-size: 12px;
+            background-color: #222;
+            border-bottom: 1px solid #111;
+        }
+        .top-menu span { margin-right: 15px; cursor: pointer; }
+        .top-menu span:hover { color: #fff; }
+
+        /* Панель вкладок */
+        .tabs {
+            display: flex;
+            background-color: #1e1e1e;
+            padding: 4px 4px 0 4px;
+        }
+        .tab {
+            background-color: #2b2b2b;
+            padding: 4px 12px;
+            font-size: 12px;
+            border-radius: 4px 4px 0 0;
+            margin-right: 2px;
+            border-top: 1px solid #444;
+            border-left: 1px solid #444;
+            border-right: 1px solid #111;
             display: flex;
             align-items: center;
-            padding-left: 30px;
-            transition: background 0.1s;
-            cursor: pointer;
+            gap: 6px;
+            color: #888;
+        }
+        .tab.active {
+            background-color: #333;
+            color: #fff;
+            border-bottom: 1px solid #333; /* Сливаемся с фоном рабочей зоны */
         }
 
-        .card:hover {
-            background-color: #363638;
-        }
-
-        .card-text {
-            position: relative;
-            z-index: 10;
-            width: 55%;
-        }
-
-        .card-text h2 {
-            font-size: 24px; /* Крупный пиксельный текст */
-            margin-bottom: 5px;
-            text-shadow: 2px 2px 0px #1a1a1a;
-        }
-
-        .card-text p {
-            font-size: 11px;
-            color: #8E8E93;
-            line-height: 1.2;
-            text-shadow: 1px 1px 0px #1a1a1a;
-        }
-
-        /* Картинки */
-        .card-img {
-            position: absolute;
-            z-index: 1;
-            transform: rotate(-5deg); /* Тот самый наклон */
+        /* Основная рабочая зона */
+        .workspace {
             display: flex;
-            align-items: flex-end;
+            flex: 1;
+            background-color: #333;
         }
 
-        .card-img img {
-            height: 100%;
-            width: auto;
-            display: block;
+        /* Левый и правый тулбары */
+        .toolbar {
+            width: 40px;
+            background-color: #252525;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 0;
+            gap: 8px;
+            border-right: 1px solid #111;
+            border-left: 1px solid #444;
+        }
+        .tool-btn {
+            width: 28px;
+            height: 28px;
+            background-color: #333;
+            border-top: 1px solid #4a4a4a;
+            border-left: 1px solid #4a4a4a;
+            border-bottom: 1px solid #1a1a1a;
+            border-right: 1px solid #1a1a1a;
+            border-radius: 2px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 14px;
+            color: #ccc;
+        }
+        .tool-btn:active, .tool-btn.active {
+            border-top: 1px solid #1a1a1a;
+            border-left: 1px solid #1a1a1a;
+            border-bottom: 1px solid #4a4a4a;
+            border-right: 1px solid #4a4a4a;
+            background-color: #2a2a2a;
         }
 
-        /* ПОЗИЦИОНИРОВАНИЕ И МАСШТАБ */
-
-        /* Скин: Самый крупный, урезан снизу */
-        .skin-img {
-            height: 165%;
-            right: -20px;
-            bottom: -55px;
+        /* Центральный холст (3D Viewer) */
+        .canvas-area {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #1a1a1a;
+            position: relative;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+        
+        #skin_container {
+            width: 300px;
+            height: 400px;
+            /* Легкий эффект свечения для презентации */
+            filter: drop-shadow(0px 10px 20px rgba(0,0,0,0.8));
         }
 
-        /* Блок: Крупнее, выше и правее */
-        .block-img {
-            height: 110%; /* Стал крупнее */
-            right: -5px;  /* Правее */
-            top: 5px;     /* Выше */
+        /* Плашка загрузки скина */
+        .upload-overlay {
+            position: absolute;
+            top: 20px;
+            background: rgba(43, 43, 43, 0.8);
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            backdrop-filter: blur(4px);
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .upload-overlay input[type="file"] { display: none; }
+        .upload-btn {
+            background: #4CAF50;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
         }
 
-        /* Айтем: Правее, чуть ниже, крупнее */
-        .item-img {
-            height: 130%; /* Увеличил масштаб */
-            right: 5px;   /* Сдвинул правее */
-            bottom: -25px; /* Чуть ниже, чтобы урезался гранью */
+        /* Нижний бар с соцсетями */
+        .bottom-bar {
+            height: 40px;
+            background-color: #222;
+            border-top: 1px solid #444;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 12px;
         }
-
+        .social-badge {
+            display: flex;
+            align-items: center;
+            background-color: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 11px;
+            color: #aaa;
+            gap: 6px;
+        }
+        .social-badge span:first-child { color: #555; } /* Имитация иконки */
+        .social-badge input {
+            background: transparent;
+            border: none;
+            color: #ddd;
+            font-size: 11px;
+            width: 100px;
+            outline: none;
+            pointer-events: none;
+        }
+        
+        /* Статусы справа внизу */
+        .status-area {
+            margin-left: auto;
+            display: flex;
+            gap: 15px;
+            font-size: 11px;
+            color: #666;
+        }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="logo"><span>A</span>PIXEL</div>
-        <a href="https://t.me/pixel" target="_blank" class="tg-link">
-            <img src="https://cdn.iconscout.com/icon/premium/png-512-thumb/send-icon-svg-download-png-14350353.png?f=webp&w=512" alt="tg">
-        </a>
-    </header>
+    <div class="top-menu">
+        <span>File</span>
+        <span>Edit</span>
+        <span>View</span>
+        <span>Layer</span>
+        <span>Select</span>
+    </div>
 
-    <div class="content">
-        <div class="card">
-            <div class="card-text">
-                <h2>Создать скин</h2>
-                <p>Твой стиль в игре.</p>
+    <div class="tabs">
+        <div class="tab">🏠 APixel</div>
+        <div class="tab active">✏️ skin.png <span style="font-size: 10px;">×</span></div>
+    </div>
+
+    <div class="workspace">
+        <div class="toolbar">
+            <div class="tool-btn" style="background-color: #4CAF50;"></div>
+            <div class="tool-btn" style="background-color: #2196F3;"></div>
+            <div style="height: 1px; width: 20px; background: #111; margin: 5px 0;"></div>
+            <div class="tool-btn">🔲</div> <div class="tool-btn">👁️</div> </div>
+
+        <div class="canvas-area">
+            <div class="upload-overlay">
+                <span>Проверка модели:</span>
+                <label class="upload-btn">
+                    Загрузить PNG скин
+                    <input type="file" id="skin_upload" accept="image/png">
+                </label>
             </div>
-            <div class="card-img skin-img">
-                <img src="Logos/skin.PNG" alt="">
-            </div>
+            
+            <div id="skin_container"></div>
         </div>
 
-        <div class="card">
-            <div class="card-text">
-                <h2>Создать блок</h2>
-                <p>Меняй мир вокруг.</p>
-            </div>
-            <div class="card-img block-img">
-                <img src="Logos/block.PNG" alt="">
-            </div>
+        <div class="toolbar">
+            <div class="tool-btn active">✏️</div>
+            <div class="tool-btn">🧽</div>
+            <div class="tool-btn">🪣</div>
+            <div class="tool-btn">🔍</div>
+            <div class="tool-btn">🧊</div> </div>
+    </div>
+
+    <div class="bottom-bar">
+        <div class="social-badge">
+            <span>🅱️ boosty</span>
+            <input type="text" value="@your_boosty">
+        </div>
+        <div class="social-badge">
+            <span>✈️ telegram</span>
+            <input type="text" value="@apixel_skins">
+        </div>
+        <div class="social-badge">
+            <span>🦋 bluesky</span>
+            <input type="text" value="@your_bluesky">
         </div>
 
-        <div class="card">
-            <div class="card-text">
-                <h2>Создать предмет</h2>
-                <p>Редкие артефакты.</p>
-            </div>
-            <div class="card-img item-img">
-                <img src="Logos/item.PNG" alt="">
-            </div>
+        <div class="status-area">
+            <span>Model: Steve (4px)</span>
+            <span>Zoom: 100%</span>
         </div>
     </div>
 
+    <script>
+        // Инициализация 3D просмотрщика скинов
+        let skinViewer = new skinview3d.SkinViewer({
+            canvas: document.createElement("canvas"),
+            width: 300,
+            height: 400,
+            skin: "https://minotar.net/skin/MHF_Steve.png" // Скин по умолчанию
+        });
+        
+        // Добавляем рендер в наш контейнер
+        document.getElementById("skin_container").appendChild(skinViewer.canvas);
+
+        // Включаем вращение мышкой
+        let control = skinview3d.createOrbitControls(skinViewer);
+        control.enableRotate = true;
+        control.enableZoom = true;
+        control.enablePan = false;
+
+        // Включаем легкую анимацию ходьбы для живости
+        skinViewer.animation = new skinview3d.WalkingAnimation();
+
+        // Логика загрузки своего скина через кнопку
+        document.getElementById('skin_upload').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Применяем загруженную картинку на 3D модель
+                    skinViewer.loadSkin(e.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
 </body>
 </html>
