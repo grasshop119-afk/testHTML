@@ -3,166 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>APixel</title>
+    <title>APixel - Создавай</title>
     <style>
         @font-face {
             font-family: '00 Starmap';
             src: url('fonts/00-Starmap.ttf') format('truetype');
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-font-smoothing: none;
-        }
-
-        body {
-            background-color: #121212;
-            color: #FFFFFF;
-            font-family: '00 Starmap', sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* Шапка */
-        header {
-            width: 100%;
-            background-color: #242426;
-            padding: 12px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            /* Без тени, просто граница */
-            border-bottom: 1px solid #2c2c2e;
-        }
-
-        .logo {
-            font-size: 18px;
-            text-transform: uppercase;
-        }
-
-        .logo span {
-            color: #FFD60A;
-        }
-
-        .tg-link img {
-            width: 22px;
-            filter: invert(1);
-            image-rendering: pixelated;
-        }
-
-        /* Контент */
-        .content {
-            width: 100%;
-            max-width: 500px;
-            padding: 30px 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        /* Компактные плашки */
-        .card {
-            background-color: #2C2C2E;
-            height: 110px; /* Уменьшил высоту */
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
-            transition: background 0.1s;
-        }
-
-        .card:hover {
-            background-color: #363638;
-        }
-
-        .card-text {
-            position: relative;
-            z-index: 2;
-            width: 70%;
-        }
-
-        .card-text h2 {
-            font-size: 16px;
-            margin-bottom: 4px;
-            text-transform: uppercase;
-        }
-
-        .card-text p {
-            font-size: 10px;
-            color: #8E8E93;
-            line-height: 1.2;
-            max-width: 220px;
-        }
-
-        /* Картинки */
-        .card-img {
-            position: absolute;
-            right: 10px;
-            bottom: -10px; /* Урезаем только низ */
-            height: 85%;   /* Не касается верха */
-            z-index: 1;
-            display: flex;
-            align-items: flex-end;
-        }
-
-        .card-img img {
-            height: 100%;
-            width: auto;
-            image-rendering: pixelated;
-            display: block;
-        }
-
-        /* Специфика для блока (чуть меньше остальных) */
-        .block-card img {
-            height: 85%;
-        }
-
     </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <header>
-        <div class="logo"><span>A</span>PIXEL</div>
-        <a href="https://t.me/pixel" class="tg-link">
-            <img src="https://cdn.iconscout.com/icon/premium/png-512-thumb/send-icon-svg-download-png-14350353.png?f=webp&w=512" alt="tg">
-        </a>
+    <header class="navbar">
+        <div class="container header-content">
+            <div class="logo">
+                <span class="letter-a">A</span>Pixel
+            </div>
+            <a href="https://t.me/your_link" target="_blank" class="tg-link">
+                <img src="https://cdn.iconscout.com/icon/premium/png-512-thumb/send-icon-svg-download-png-14350353.png?f=webp&w=512" alt="Telegram">
+            </a>
+        </div>
     </header>
 
-    <div class="content">
-        <div class="card">
-            <div class="card-text">
-                <h2>Создать скин</h2>
-                <p>Настройте внешний вид своего персонажа с помощью пиксельного редактора.</p>
+    <main class="container main-content">
+        <section class="card">
+            <div class="card-info">
+                <h2 class="card-title">Создать скин</h2>
+                <p class="card-desc">Персонализируйте своего персонажа уникальным дизайном.</p>
             </div>
-            <div class="card-img">
-                <img src="Logos/skin.PNG" alt="">
+            <div class="card-image-container skin-img">
+                <img src="Logos/skin.PNG" alt="Skin">
             </div>
-        </div>
+        </section>
 
-        <div class="card">
-            <div class="card-text">
-                <h2>Создать блок</h2>
-                <p>Создавайте уникальные текстуры и свойства для новых игровых блоков.</p>
+        <section class="card">
+            <div class="card-info">
+                <h2 class="card-title">Создать блок</h2>
+                <p class="card-desc">Разработайте новые текстуры строительных элементов мира.</p>
             </div>
-            <div class="card-img block-card">
-                <img src="Logos/block.PNG" alt="">
+            <div class="card-image-container block-img">
+                <img src="Logos/block.PNG" alt="Block">
             </div>
-        </div>
+        </section>
 
-        <div class="card">
-            <div class="card-text">
-                <h2>Создать предмет</h2>
-                <p>Добавляйте кастомное оружие, инструменты и редкие артефакты.</p>
+        <section class="card">
+            <div class="card-info">
+                <h2 class="card-title">Создать предмет</h2>
+                <p class="card-desc">Добавьте кастомные инструменты, оружие или ресурсы.</p>
             </div>
-            <div class="card-img">
-                <img src="Logos/item.PNG" alt="">
+            <div class="card-image-container item-img">
+                <img src="Logos/item.PNG" alt="Item">
             </div>
-        </div>
-    </div>
+        </section>
+    </main>
 
 </body>
 </html>
