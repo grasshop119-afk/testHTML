@@ -25,8 +25,7 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow-x: hidden;
-            overflow-y: auto;
+            overflow: hidden;
         }
 
         /* --- ГЕРОЙ-ШАПКА --- */
@@ -36,20 +35,18 @@
             height: 200px;
             overflow: hidden;
             border-bottom: 2px solid #111;
-            /* Для 3D эффекта наклона */
-            perspective: 1000px; 
+            perspective: 1200px;
         }
 
         .home-pic {
-            width: 110%; /* Запас для сдвига при наклоне */
-            height: 110%;
+            width: 120%; /* Увеличил запас для параллакса */
+            height: 120%;
             object-fit: cover;
-            display: block;
             position: absolute;
-            top: -5%;
-            left: -5%;
-            transition: transform 0.1s ease-out;
+            top: -10%;
+            left: -10%;
             will-change: transform;
+            transition: transform 0.15s ease-out;
         }
 
         .banner-nav {
@@ -64,7 +61,6 @@
             z-index: 5;
         }
 
-        /* Тонкая перегородка и HOME с прозрачностью 0.7 */
         .nav-secondary {
             display: flex;
             align-items: center;
@@ -78,15 +74,15 @@
             background-color: #fff;
         }
 
-        /* --- КОНТЕНТ --- */
+        /* --- КОНТЕНТ И АНИМАЦИЯ --- */
         main {
             flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
             gap: 18px;
             padding: 25px 0;
+            perspective: 1000px; /* Для 3D влета */
         }
 
         .card-wrapper {
@@ -95,6 +91,21 @@
             display: flex;
             flex-direction: column;
             gap: 6px;
+            opacity: 0; /* Начальное состояние для анимации */
+            transform: translateX(100px) rotateY(-20deg);
+            animation: slideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Задержки для каждой карточки */
+        .card-wrapper:nth-child(1) { animation-delay: 0.1s; }
+        .card-wrapper:nth-child(2) { animation-delay: 0.2s; }
+        .card-wrapper:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateX(0) rotateY(0);
+            }
         }
 
         .card {
@@ -112,37 +123,24 @@
             align-items: center;
             cursor: pointer;
             overflow: visible; 
+            transition: transform 0.1s;
         }
+
+        .card:active { transform: scale(0.96); }
 
         .card-content {
             width: 65%;
             z-index: 2;
-            padding-left: 5px;
         }
 
-        .card-title {
-            font-size: 16px; /* Чуть крупнее */
-            margin-bottom: 8px;
-            text-transform: uppercase;
-        }
-
-        .card-desc {
-            font-size: 10px; /* Чуть крупнее */
-            line-height: 1.4;
-            color: #7a7a7a;
-        }
-
-        .card-footer-text {
-            font-size: 8px;
-            color: #444;
-            padding-left: 8px;
-        }
-        
+        .card-title { font-size: 16px; margin-bottom: 8px; text-transform: uppercase; }
+        .card-desc { font-size: 10px; line-height: 1.4; color: #7a7a7a; }
+        .card-footer-text { font-size: 8px; color: #444; padding-left: 8px; }
         .card-footer-text span { color: #4CAF50; }
 
         .img-mask {
             position: absolute;
-            top: -30px; 
+            top: -40px; 
             right: 0;
             bottom: 0;
             left: 0;
@@ -155,11 +153,22 @@
             position: absolute;
             z-index: 1;
             filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
+            transition: transform 0.3s ease-out;
         }
 
         .img-skin { width: 110px; right: -5px; bottom: -55px; }
         .img-block { width: 95px; right: 5px; bottom: 12px; }
-        .img-item { width: 75px; right: 10px; bottom: -5px; } /* Опустили тотем еще ниже */
+        
+        /* ТОТЕМ: Исходно наклонен на 7 градусов (Req 2) */
+        .img-item { 
+            width: 75px; 
+            right: 10px; 
+            bottom: -12px; 
+            transform: rotate(7deg);
+        }
+
+        /* Легкий доворот при наведении */
+        .card:hover .img-item { transform: rotate(0deg) scale(1.05); }
 
     </style>
 </head>
@@ -218,23 +227,49 @@
     </main>
 
     <script>
-        // Инициализация Telegram WebApp
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Развернуть на весь экран
+        tg.expand();
+        tg.ready();
 
-        // Гироскоп / Параллакс эффект для фона
         const pic = document.getElementById('gyro_pic');
-        
-        window.addEventListener('deviceorientation', (event) => {
-            // Ограничиваем наклон, чтобы картинка не улетала слишком далеко
-            const beta = Math.min(Math.max(event.beta, -30), 30);  // Наклон вперед/назад
-            const gamma = Math.min(Math.max(event.gamma, -30), 30); // Наклон влево/вправо
 
-            // Рассчитываем смещение (делим на 2 для мягкости)
-            const xMove = gamma / 2;
-            const yMove = (beta - 45) / 2; // -45 — примерный угол, под которым обычно держат телефон
+        // ФУНКЦИЯ ВКЛЮЧЕНИЯ ГИРОСКОПА
+        function initGyro() {
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                // Для iOS 13+ нужно разрешение (сработает после первого клика пользователя по экрану)
+                DeviceOrientationEvent.requestPermission()
+                    .then(response => {
+                        if (response == 'granted') {
+                            window.addEventListener('deviceorientation', handleOrientation);
+                        }
+                    })
+                    .catch(console.error);
+            } else {
+                // Для Android и старых iOS
+                window.addEventListener('deviceorientation', handleOrientation);
+            }
+        }
 
-            pic.style.transform = `translate(${xMove}px, ${yMove}px) scale(1.1)`;
+        function handleOrientation(event) {
+            let x = event.gamma; // влево/вправо [-90, 90]
+            let y = event.beta;  // вперед/назад [-180, 180]
+
+            // Ограничиваем чувствительность
+            let xLimit = Math.max(Math.min(x, 20), -20);
+            let yLimit = Math.max(Math.min(y - 45, 20), -20); // 45 - средний угол наклона в руках
+
+            // Плавное смещение
+            pic.style.transform = `translate(${xLimit * -1}px, ${yLimit * -1}px) scale(1.15)`;
+        }
+
+        // Запускаем гироскоп при первом же клике по документу (требование браузеров)
+        document.body.addEventListener('click', initGyro, { once: true });
+
+        // Легкая вибрация при клике на карточки
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('click', () => {
+                if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            });
         });
     </script>
 </body>
