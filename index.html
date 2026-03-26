@@ -3,162 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>APixel - Mojang Style Creator</title>
+    <title>APixel - Minecraft Interface</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
-        /* Основные стили Mojang */
+        /* Сброс стилей и общие настройки в стиле Mojang */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            /* Отключаем плавное сглаживание для всего */
             -webkit-font-smoothing: none;
-            font-smooth: never;
-            image-rendering: pixelated; /* Для всех картинок */
+            image-rendering: pixelated;
         }
 
         body {
-            background-color: #101015; /* Глубокий темный фон */
+            background-color: #1c1c1e; /* Темный Apple тон */
             color: #ffffff;
-            font-family: 'Press Start 2P', cursive; /* Пиксельный шрифт */
-            line-height: 1.4;
-            overflow-x: hidden;
+            font-family: 'Press Start 2P', cursive;
+            padding-top: 80px; /* Отступ под фиксированную шапку */
         }
 
         .container {
-            max-width: 1100px;
+            max-width: 900px;
             margin: 0 auto;
             padding: 0 20px;
         }
 
-        /* Шапка */
+        /* ЗАКРЕПЛЕННАЯ ШАПКА */
         .navbar {
-            background-color: #3c3c4a; /* Светлее фона, без тени */
-            padding: 20px 0;
-            position: sticky;
+            position: fixed;
             top: 0;
+            left: 0;
+            right: 0;
+            background-color: #2c2c2e; /* Светлее фона */
+            height: 70px;
             z-index: 1000;
-            border-bottom: 4px double #5c5c6a; /* Пиксельная граница */
+            display: flex;
+            align-items: center;
+            border-bottom: 4px solid #3a3a3c;
         }
 
         .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            width: 100%;
         }
 
         .logo {
-            font-size: 20px;
+            font-size: 18px;
             letter-spacing: 1px;
             text-transform: uppercase;
         }
 
         .letter-a {
-            color: #ffcc00; /* Желтая буква А */
+            color: #ffcc00; /* Желтая А */
         }
 
         .tg-link img {
-            width: 32px;
-            height: 32px;
-            filter: invert(1); /* Белая иконка */
-            transition: opacity 0.1s; /* Быстрый переход */
+            width: 28px;
+            height: 28px;
+            filter: invert(1);
+            transition: transform 0.1s;
         }
 
         .tg-link img:hover {
-            opacity: 0.7;
+            transform: scale(1.1);
         }
 
-        /* Основной контент */
+        /* ОСНОВНОЙ КОНТЕНТ */
         .main-content {
-            margin-top: 50px;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr); /* Три плашки в ряд */
-            gap: 25px;
-            padding-bottom: 80px;
-        }
-
-        /* Плашки */
-        .card {
-            background-color: #3c3c4a; /* Светлее фона, без тени */
-            border: 4px double #5c5c6a; /* Жесткая пиксельная граница */
-            position: relative;
-            height: 350px; /* Высота плашки */
-            overflow: hidden; /* Ключевой момент для обрезки */
+            margin-top: 40px;
             display: flex;
             flex-direction: column;
-            justify-content: flex-end; /* Текст внизу */
-            padding: 30px;
-            transition: transform 0.1s; /* Жесткая анимация */
+            gap: 25px;
+            padding-bottom: 60px;
+        }
+
+        /* ПРЯМОУГОЛЬНЫЕ ПЛАШКИ */
+        .card {
+            background-color: #2c2c2e; /* Светлее фона */
+            height: 160px; /* Невысокая прямоугольная форма */
+            display: flex;
+            position: relative;
+            overflow: hidden; /* Обрезает картинку по границе */
+            border: 4px solid #3a3a3c;
+            transition: background-color 0.2s;
+            text-decoration: none;
+            color: inherit;
         }
 
         .card:hover {
-            transform: translateY(-5px); /* Легкий подъем */
-            background-color: #4c4c5a;
+            background-color: #3a3a3c;
         }
 
-        /* Контейнер урезанной картинки PNG */
-        .card-image-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-
-        .card-image-container img {
-            position: absolute;
-            width: 160%; /* Картинка огромная */
-            height: auto;
-            image-rendering: pixelated; /* Сохраняет пиксели */
-            opacity: 0.9;
-        }
-
-        /* Позиционирование каждой картинки (чтобы урезать низ и право) */
-        .skin-img img {
-            bottom: -50px; /* Урезаем низ */
-            right: -60px;  /* Урезаем право */
-        }
-
-        .block-img img {
-            bottom: -80px; /* Урезаем низ */
-            right: -100px; /* Урезаем право */
-        }
-
-        .item-img img {
-            bottom: -30px; /* Урезаем низ */
-            right: -50px;  /* Урезаем право */
-        }
-
-        /* Текст внутри плашки */
+        /* Контент слева */
         .card-info {
-            position: relative;
-            z-index: 10;
+            flex: 1;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            z-index: 5;
         }
 
         .card-title {
-            font-size: 22px;
-            margin-bottom: 15px;
+            font-size: 18px;
+            margin-bottom: 12px;
             color: #ffffff;
-            line-height: 1.2;
-            text-transform: uppercase; /* Все заглавные */
         }
 
         .card-desc {
-            font-size: 10px; /* Маленький пиксельный текст */
-            color: #aaaaaa; /* Серый текст описания */
-            max-width: 250px;
-            line-height: 1.6;
+            font-size: 10px;
+            color: #8e8e93; /* Серый Apple тон */
+            line-height: 1.5;
+            max-width: 60%;
         }
 
-        /* Адаптивность для мобильных */
-        @media (max-width: 900px) {
-            .main-content {
-                grid-template-columns: 1fr; /* Одна плашка на строку */
-            }
+        /* КАРТИНКА СПРАВА */
+        .card-image-wrapper {
+            position: absolute;
+            right: 10px;
+            bottom: -20px; /* Урезаем низ границей плашки */
+            width: 180px;
+            height: 180px;
+            z-index: 1;
+        }
 
+        .card-image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            /* Смещение для эффекта "выглядывания" */
+            transform: rotate(-5deg); 
+        }
+
+        /* Адаптивность */
+        @media (max-width: 600px) {
             .card {
-                height: 300px;
+                height: auto;
+                min-height: 140px;
+            }
+            .card-desc {
+                max-width: 100%;
+            }
+            .card-image-wrapper {
+                width: 100px;
+                height: 100px;
+                bottom: -10px;
+                opacity: 0.5; /* На мобилках картинка фоном, чтобы не мешать тексту */
             }
         }
     </style>
@@ -177,35 +169,37 @@
     </header>
 
     <main class="container main-content">
-        <section class="card">
-            <div class="card-image-container skin-img">
-                <img src="Logos/skin.PNG" alt="Skin">
-            </div>
+        
+        <a href="#" class="card">
             <div class="card-info">
                 <h2 class="card-title">Создать скин</h2>
-                <p class="card-desc">Персонализируйте персонажа уникальным дизайном.</p>
+                <p class="card-desc">Настройте внешний вид своего персонажа с помощью пиксельного редактора.</p>
             </div>
-        </section>
+            <div class="card-image-wrapper">
+                <img src="Logos/skin.PNG" alt="Skin">
+            </div>
+        </a>
 
-        <section class="card">
-            <div class="card-image-container block-img">
-                <img src="Logos/block.PNG" alt="Block">
-            </div>
+        <a href="#" class="card">
             <div class="card-info">
                 <h2 class="card-title">Создать блок</h2>
-                <p class="card-desc">Разработайте новые текстуры строительных элементов.</p>
+                <p class="card-desc">Создавайте уникальные текстуры и свойства для новых игровых блоков.</p>
             </div>
-        </section>
+            <div class="card-image-wrapper">
+                <img src="Logos/block.PNG" alt="Block">
+            </div>
+        </a>
 
-        <section class="card">
-            <div class="card-image-container item-img">
-                <img src="Logos/item.PNG" alt="Item">
-            </div>
+        <a href="#" class="card">
             <div class="card-info">
                 <h2 class="card-title">Создать предмет</h2>
-                <p class="card-desc">Добавьте кастомные инструменты, оружие или ресурсы.</p>
+                <p class="card-desc">Добавляйте кастомное оружие, инструменты и редкие артефакты.</p>
             </div>
-        </section>
+            <div class="card-image-wrapper">
+                <img src="Logos/item.PNG" alt="Item">
+            </div>
+        </a>
+
     </main>
 
 </body>
