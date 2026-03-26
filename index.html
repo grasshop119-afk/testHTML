@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>APixel — Creator</title>
+    <title>APixel — Minecraft Creator</title>
     <style>
-        /* Подключение оригинального шрифта Minecraft */
+        /* Подключение пиксельного шрифта Minecraft */
         @font-face {
             font-family: 'Minecraft';
             src: url('https://raw.githubusercontent.com/IdreesInc/Minecraft-Font/master/Minecraft.ttf') format('truetype');
@@ -16,22 +16,24 @@
             padding: 0;
             box-sizing: border-box;
             -webkit-font-smoothing: none;
+            image-rendering: pixelated; /* Глобальная пикселизация для всех картинок */
         }
 
         body {
-            background-color: #121212; /* Apple Dark Background */
+            background-color: #121212;
             color: #FFFFFF;
             font-family: 'Minecraft', sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
+            overflow-x: hidden;
         }
 
-        /* Шапка */
+        /* Шапка Apple Dark */
         header {
             width: 100%;
-            background-color: #242426; 
-            padding: 16px 25px;
+            background-color: #242426;
+            padding: 18px 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -39,39 +41,38 @@
         }
 
         .logo {
-            font-size: 22px;
-            letter-spacing: 2px;
+            font-size: 24px;
+            letter-spacing: 1px;
         }
 
         .logo span {
-            color: #FFD60A; /* Желтая A */
+            color: #FFD60A;
         }
 
         .tg-link img {
-            width: 24px;
+            width: 26px;
             filter: invert(1);
-            image-rendering: pixelated;
         }
 
         /* Контент */
         .content {
             width: 100%;
-            max-width: 480px; 
-            padding: 30px 15px;
+            max-width: 500px;
+            padding: 40px 15px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 14px;
         }
 
-        /* Плашки */
+        /* Плашки-прямоугольники */
         .card {
             background-color: #2C2C2E;
-            height: 110px; /* Компактный прямоугольник */
+            height: 120px;
             position: relative;
             overflow: hidden;
             display: flex;
             align-items: center;
-            padding-left: 25px;
+            padding-left: 30px;
             transition: background 0.1s;
             cursor: pointer;
         }
@@ -83,30 +84,29 @@
         .card-text {
             position: relative;
             z-index: 10;
-            width: 65%;
+            width: 55%;
         }
 
         .card-text h2 {
-            font-size: 22px; /* Увеличенный заголовок */
-            margin-bottom: 4px;
-            text-shadow: 2px 2px 0px #1e1e1e;
-            color: #FFFFFF;
+            font-size: 24px; /* Крупный пиксельный текст */
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 0px #1a1a1a;
         }
 
         .card-text p {
-            font-size: 10px;
+            font-size: 11px;
             color: #8E8E93;
-            max-width: 190px;
-            font-family: 'Minecraft', sans-serif;
-            opacity: 0.8;
+            line-height: 1.2;
+            text-shadow: 1px 1px 0px #1a1a1a;
         }
 
-        /* Общие настройки для картинок */
+        /* Картинки */
         .card-img {
             position: absolute;
             z-index: 1;
-            transform: rotate(-4deg); /* Минимальный наклон для стиля */
-            image-rendering: pixelated;
+            transform: rotate(-5deg); /* Тот самый наклон */
+            display: flex;
+            align-items: flex-end;
         }
 
         .card-img img {
@@ -115,27 +115,27 @@
             display: block;
         }
 
-        /* ТОЧЕЧНОЕ ПОЗИЦИОНИРОВАНИЕ */
-        
-        /* Скин: Огромный, правее и ниже всех */
+        /* ПОЗИЦИОНИРОВАНИЕ И МАСШТАБ */
+
+        /* Скин: Самый крупный, урезан снизу */
         .skin-img {
-            height: 160%;
-            right: -25px;
-            bottom: -50px;
+            height: 165%;
+            right: -20px;
+            bottom: -55px;
         }
 
-        /* Блок: Выше и правее */
+        /* Блок: Крупнее, выше и правее */
         .block-img {
-            height: 85%; 
-            right: 0px; 
-            top: 5px; /* Поднят выше */
+            height: 110%; /* Стал крупнее */
+            right: -5px;  /* Правее */
+            top: 5px;     /* Выше */
         }
 
-        /* Предмет (Item): Выше и левее (относительно своего угла) */
+        /* Айтем: Правее, чуть ниже, крупнее */
         .item-img {
-            height: 115%;
-            right: 20px; /* Левее от края */
-            top: -10px;  /* Выше, уходит за верхний край немного */
+            height: 130%; /* Увеличил масштаб */
+            right: 5px;   /* Сдвинул правее */
+            bottom: -25px; /* Чуть ниже, чтобы урезался гранью */
         }
 
     </style>
@@ -153,7 +153,7 @@
         <div class="card">
             <div class="card-text">
                 <h2>Создать скин</h2>
-                <p>Измени свой стиль.</p>
+                <p>Твой стиль в игре.</p>
             </div>
             <div class="card-img skin-img">
                 <img src="Logos/skin.PNG" alt="">
@@ -163,7 +163,7 @@
         <div class="card">
             <div class="card-text">
                 <h2>Создать блок</h2>
-                <p>Новые текстуры мира.</p>
+                <p>Меняй мир вокруг.</p>
             </div>
             <div class="card-img block-img">
                 <img src="Logos/block.PNG" alt="">
@@ -173,7 +173,7 @@
         <div class="card">
             <div class="card-text">
                 <h2>Создать предмет</h2>
-                <p>Крафт уникальных вещей.</p>
+                <p>Редкие артефакты.</p>
             </div>
             <div class="card-img item-img">
                 <img src="Logos/item.PNG" alt="">
