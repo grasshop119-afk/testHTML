@@ -6,6 +6,7 @@
     <title>APixel - Entrance</title>
     
     <link href="https://fonts.cdnfonts.com/css/common-pixel" rel="stylesheet">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
     <style>
         * { 
@@ -25,7 +26,7 @@
             display: flex;
             flex-direction: column;
             overflow-x: hidden;
-            overflow-y: auto; /* Позволяем скролл, если контента много */
+            overflow-y: auto;
         }
 
         /* --- ГЕРОЙ-ШАПКА --- */
@@ -35,16 +36,22 @@
             height: 200px;
             overflow: hidden;
             border-bottom: 2px solid #111;
+            /* Для 3D эффекта наклона */
+            perspective: 1000px; 
         }
 
         .home-pic {
-            width: 100%;
-            height: 100%;
+            width: 110%; /* Запас для сдвига при наклоне */
+            height: 110%;
             object-fit: cover;
             display: block;
+            position: absolute;
+            top: -5%;
+            left: -5%;
+            transition: transform 0.1s ease-out;
+            will-change: transform;
         }
 
-        /* Навигация в углу: APIXEL | HOME */
         .banner-nav {
             position: absolute;
             left: 15px;
@@ -57,10 +64,18 @@
             z-index: 5;
         }
 
+        /* Тонкая перегородка и HOME с прозрачностью 0.7 */
+        .nav-secondary {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0.7;
+        }
+
         .nav-divider {
             width: 1px;
             height: 16px;
-            background-color: rgba(255, 255, 255, 0.7);
+            background-color: #fff;
         }
 
         /* --- КОНТЕНТ --- */
@@ -70,17 +85,16 @@
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
-            gap: 20px; /* Увеличил отступ из-за подписей под плашками */
+            gap: 18px;
             padding: 25px 0;
         }
 
-        /* Обертка для карточки и подписи */
         .card-wrapper {
             width: 88%;
             max-width: 380px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
         }
 
         .card {
@@ -91,17 +105,14 @@
             border: 1px solid #111; 
             border-radius: 4px;
             box-shadow: 
-                inset 3px 3px 0px #3d3d3d, 
-                inset -3px -3px 0px #1a1a1a;
+                inset 3.5px 3.5px 0px #3d3d3d, 
+                inset -3.5px -3.5px 0px #1a1a1a;
             padding: 15px;
             display: flex;
             align-items: center;
             cursor: pointer;
             overflow: visible; 
-            transition: transform 0.1s;
         }
-
-        .card:active { transform: scale(0.97); }
 
         .card-content {
             width: 65%;
@@ -110,28 +121,24 @@
         }
 
         .card-title {
-            font-size: 14px;
-            margin-bottom: 6px;
+            font-size: 16px; /* Чуть крупнее */
+            margin-bottom: 8px;
             text-transform: uppercase;
         }
 
         .card-desc {
-            font-size: 9px;
-            line-height: 1.3;
+            font-size: 10px; /* Чуть крупнее */
+            line-height: 1.4;
             color: #7a7a7a;
         }
 
-        /* Текст под плашкой */
         .card-footer-text {
             font-size: 8px;
-            color: #555;
-            padding-left: 5px;
+            color: #444;
+            padding-left: 8px;
         }
         
-        .card-footer-text span {
-            color: #4CAF50; /* Зеленый "Learn more" */
-            cursor: pointer;
-        }
+        .card-footer-text span { color: #4CAF50; }
 
         .img-mask {
             position: absolute;
@@ -150,35 +157,22 @@
             filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
         }
 
-        /* ПОЗИЦИИ */
-        .img-skin {
-            width: 110px;
-            right: -5px;
-            bottom: -55px;
-        }
-
-        .img-block {
-            width: 95px;
-            right: 5px;
-            bottom: 12px;
-        }
-
-        .img-item {
-            width: 75px;
-            right: 10px;
-            bottom: 0px; /* Тотем опустили чуть ниже */
-        }
+        .img-skin { width: 110px; right: -5px; bottom: -55px; }
+        .img-block { width: 95px; right: 5px; bottom: 12px; }
+        .img-item { width: 75px; right: 10px; bottom: -5px; } /* Опустили тотем еще ниже */
 
     </style>
 </head>
 <body>
 
     <div class="home-banner">
-        <img src="Logos/HomePic.PNG" alt="Home" class="home-pic">
+        <img src="Logos/HomePic.PNG" alt="Home" class="home-pic" id="gyro_pic">
         <div class="banner-nav">
             <span>APIXEL</span>
-            <div class="nav-divider"></div>
-            <span style="opacity: 0.9;">HOME</span>
+            <div class="nav-secondary">
+                <div class="nav-divider"></div>
+                <span>HOME</span>
+            </div>
         </div>
     </div>
 
@@ -223,5 +217,25 @@
         </div>
     </main>
 
+    <script>
+        // Инициализация Telegram WebApp
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Развернуть на весь экран
+
+        // Гироскоп / Параллакс эффект для фона
+        const pic = document.getElementById('gyro_pic');
+        
+        window.addEventListener('deviceorientation', (event) => {
+            // Ограничиваем наклон, чтобы картинка не улетала слишком далеко
+            const beta = Math.min(Math.max(event.beta, -30), 30);  // Наклон вперед/назад
+            const gamma = Math.min(Math.max(event.gamma, -30), 30); // Наклон влево/вправо
+
+            // Рассчитываем смещение (делим на 2 для мягкости)
+            const xMove = gamma / 2;
+            const yMove = (beta - 45) / 2; // -45 — примерный угол, под которым обычно держат телефон
+
+            pic.style.transform = `translate(${xMove}px, ${yMove}px) scale(1.1)`;
+        });
+    </script>
 </body>
 </html>
