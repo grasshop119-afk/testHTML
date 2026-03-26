@@ -2,52 +2,74 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>APixel - Minecraft Skin Editor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>APixel - Skin Showcase</title>
+    
+    <link href="https://fonts.cdnfonts.com/css/common-pixel" rel="stylesheet">
+    
     <script src="https://unpkg.com/skinview3d@3.0.0-alpha.1/bundles/skinview3d.bundle.js"></script>
+    
     <style>
-        /* Базовый сброс и шрифты (под Apple-стайл чистоту) */
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-        body { 
-            background-color: #1e1e1e; 
-            color: #b0b0b0; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            height: 100vh; 
-            display: flex; 
-            flex-direction: column; 
-            overflow: hidden;
+        /* 1 & 6. Глобальные стили: Шрифт, фиксация и запрет выделения */
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            /* Запрет выделения текста и объектов */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            /* Четкие пиксели для картинок и шрифта */
+            image-rendering: pixelated; 
         }
 
-        /* Имитация 1px рамок Aseprite (светлый верх, темный низ) */
-        .panel {
+        body { 
+            background-color: #1a1a1a; 
+            color: #b0b0b0; 
+            /* Применяем Common Pixel */
+            font-family: 'Common Pixel', sans-serif;
+            font-size: 14px;
+            height: 100vh; 
+            width: 100vw;
+            display: flex; 
+            flex-direction: column; 
+            /* Фиксация страницы (никаких скроллов) */
+            overflow: hidden; 
+            position: fixed;
+        }
+
+        /* Дефолтные URL для скинов Стива и Алекс для теста */
+        :root {
+            --skin-steve: "https://minotar.net/skin/MHF_Steve.png";
+            --skin-alex: "https://minotar.net/skin/MHF_Alex.png";
+        }
+
+        /* --- ШАПКА --- */
+        .header {
             background-color: #2b2b2b;
-            border-top: 1px solid #3c3c3c;
-            border-left: 1px solid #3c3c3c;
-            border-bottom: 1px solid #151515;
-            border-right: 1px solid #151515;
+            border-bottom: 1px solid #111;
+            z-index: 10;
         }
 
         /* Верхнее меню */
         .top-menu {
             display: flex;
-            padding: 4px 8px;
-            font-size: 12px;
+            padding: 6px 10px;
             background-color: #222;
             border-bottom: 1px solid #111;
         }
-        .top-menu span { margin-right: 15px; cursor: pointer; }
+        .top-menu span { margin-right: 18px; cursor: pointer; }
         .top-menu span:hover { color: #fff; }
 
-        /* Панель вкладок */
+        /* Вкладки */
         .tabs {
             display: flex;
-            background-color: #1e1e1e;
-            padding: 4px 4px 0 4px;
+            padding: 5px 5px 0 5px;
+            background-color: #2b2b2b;
         }
         .tab {
-            background-color: #2b2b2b;
-            padding: 4px 12px;
-            font-size: 12px;
+            padding: 6px 14px;
             border-radius: 4px 4px 0 0;
             margin-right: 2px;
             border-top: 1px solid #444;
@@ -55,235 +77,298 @@
             border-right: 1px solid #111;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+            cursor: pointer;
             color: #888;
+            transition: color 0.2s;
         }
+        .tab:hover { color: #ccc; }
         .tab.active {
             background-color: #333;
             color: #fff;
-            border-bottom: 1px solid #333; /* Сливаемся с фоном рабочей зоны */
+            border-bottom: 1px solid #333; /* Слияние с рабочей зоной */
+        }
+        
+        /* Иконки в табах */
+        .tab-icon {
+            width: 16px;
+            height: 16px;
+            object-fit: contain;
+        }
+        
+        /* Фикс для иконки домика (светлая) */
+        .tab-home-icon {
+            filter: invert(1) brightness(0.7); 
+        }
+        .tab.active .tab-home-icon {
+            filter: invert(1) brightness(1);
         }
 
-        /* Основная рабочая зона */
+        /* --- РАБОЧАЯ ОБЛАСТЬ --- */
         .workspace {
-            display: flex;
             flex: 1;
             background-color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
         }
 
-        /* Левый и правый тулбары */
-        .toolbar {
-            width: 40px;
-            background-color: #252525;
+        /* Контейнер 3D рендера */
+        #skin_container {
+            width: 100%;
+            height: 100%;
+            /* Фикс для корректного отображения canvas внутри флекса */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: grab;
+        }
+        #skin_container:active { cursor: grabbing; }
+
+        /* --- ПАНЕЛЬ УПРАВЛЕНИЯ МОДЕЛЯМИ (Req 2) --- */
+        .model-controls {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            background: rgba(34, 34, 34, 0.9);
+            padding: 15px;
+            border: 1px solid #444;
+            border-radius: 6px;
+            backdrop-filter: blur(4px);
             display: flex;
             flex-direction: column;
-            align-items: center;
-            padding: 8px 0;
-            gap: 8px;
-            border-right: 1px solid #111;
-            border-left: 1px solid #444;
-        }
-        .tool-btn {
-            width: 28px;
-            height: 28px;
-            background-color: #333;
-            border-top: 1px solid #4a4a4a;
-            border-left: 1px solid #4a4a4a;
-            border-bottom: 1px solid #1a1a1a;
-            border-right: 1px solid #1a1a1a;
-            border-radius: 2px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            font-size: 14px;
-            color: #ccc;
-        }
-        .tool-btn:active, .tool-btn.active {
-            border-top: 1px solid #1a1a1a;
-            border-left: 1px solid #1a1a1a;
-            border-bottom: 1px solid #4a4a4a;
-            border-right: 1px solid #4a4a4a;
-            background-color: #2a2a2a;
-        }
-
-        /* Центральный холст (3D Viewer) */
-        .canvas-area {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #1a1a1a;
-            position: relative;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
-        }
-        
-        #skin_container {
-            width: 300px;
-            height: 400px;
-            /* Легкий эффект свечения для презентации */
-            filter: drop-shadow(0px 10px 20px rgba(0,0,0,0.8));
-        }
-
-        /* Плашка загрузки скина */
-        .upload-overlay {
-            position: absolute;
-            top: 20px;
-            background: rgba(43, 43, 43, 0.8);
-            padding: 8px 12px;
-            border-radius: 6px;
-            border: 1px solid #444;
-            backdrop-filter: blur(4px);
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .upload-overlay input[type="file"] { display: none; }
-        .upload-btn {
-            background: #4CAF50;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        /* Нижний бар с соцсетями */
-        .bottom-bar {
-            height: 40px;
-            background-color: #222;
-            border-top: 1px solid #444;
-            display: flex;
-            align-items: center;
-            padding: 0 16px;
             gap: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            pointer-events: auto; /* Разрешаем клики */
         }
-        .social-badge {
+
+        .control-group {
             display: flex;
-            align-items: center;
-            background-color: #1a1a1a;
-            border: 1px solid #333;
-            border-radius: 4px;
-            padding: 2px 8px;
-            font-size: 11px;
-            color: #aaa;
             gap: 6px;
         }
-        .social-badge span:first-child { color: #555; } /* Имитация иконки */
-        .social-badge input {
-            background: transparent;
-            border: none;
-            color: #ddd;
-            font-size: 11px;
-            width: 100px;
-            outline: none;
-            pointer-events: none;
+
+        /* Кнопки переключения (Aseprite style) */
+        .model-btn {
+            padding: 6px 12px;
+            background-color: #3e3e3e;
+            color: #ccc;
+            border-top: 1px solid #555;
+            border-left: 1px solid #555;
+            border-bottom: 1px solid #222;
+            border-right: 1px solid #222;
+            border-radius: 2px;
+            cursor: pointer;
+            font-family: 'Common Pixel', sans-serif;
+            font-size: 12px;
+            text-transform: uppercase;
         }
-        
-        /* Статусы справа внизу */
-        .status-area {
-            margin-left: auto;
-            display: flex;
-            gap: 15px;
-            font-size: 11px;
-            color: #666;
+        .model-btn:active {
+            border-top: 1px solid #222;
+            border-left: 1px solid #222;
+            border-bottom: 1px solid #555;
+            border-right: 1px solid #555;
+            background-color: #2a2a2a;
         }
+        .model-btn.active {
+            background-color: #555;
+            color: #fff;
+            border: 1px solid #fff;
+        }
+
+        /* Кнопка загрузки */
+        .upload-wrapper {
+            width: 100%;
+        }
+        .upload-wrapper input[type="file"] { display: none; }
+        .upload-btn-main {
+            display: block;
+            width: 100%;
+            text-align: center;
+            background: #4a90e2;
+            color: white;
+            padding: 8px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px solid #fff;
+            box-shadow: inset 0 2px 0 rgba(255,255,255,0.3);
+        }
+        .upload-btn-main:active { background: #357abd; box-shadow: none; }
     </style>
 </head>
 <body>
 
-    <div class="top-menu">
-        <span>File</span>
-        <span>Edit</span>
-        <span>View</span>
-        <span>Layer</span>
-        <span>Select</span>
-    </div>
+    <div class="header">
+        <div class="top-menu">
+            <span>File</span>
+            <span>Edit</span>
+            <span>View</span>
+            <span>Showcase</span>
+        </div>
 
-    <div class="tabs">
-        <div class="tab">🏠 APixel</div>
-        <div class="tab active">✏️ skin.png <span style="font-size: 10px;">×</span></div>
+        <div class="tabs">
+            <div class="tab" id="tab_home">
+                <img src="https://cdn.iconscout.com/icon/premium/png-512-thumb/home-icon-svg-download-png-14350290.png?f=webp&w=512" class="tab-icon tab-home-icon" alt="Home">
+                APixel
+            </div>
+            <div class="tab active" id="tab_file">
+                <img src="https://cdn.iconscout.com/icon/premium/png-512-thumb/document-icon-svg-download-png-14350271.png?f=webp&w=512" class="tab-icon" alt="Doc">
+                <span id="file_name_display">Steve.png</span>
+            </div>
+        </div>
     </div>
 
     <div class="workspace">
-        <div class="toolbar">
-            <div class="tool-btn" style="background-color: #4CAF50;"></div>
-            <div class="tool-btn" style="background-color: #2196F3;"></div>
-            <div style="height: 1px; width: 20px; background: #111; margin: 5px 0;"></div>
-            <div class="tool-btn">🔲</div> <div class="tool-btn">👁️</div> </div>
+        
+        <div id="skin_container"></div>
 
-        <div class="canvas-area">
-            <div class="upload-overlay">
-                <span>Проверка модели:</span>
-                <label class="upload-btn">
-                    Загрузить PNG скин
+        <div class="model-controls">
+            <div style="font-size: 11px; color: #888;">Select Base Model:</div>
+            <div class="control-group">
+                <button class="model-btn active" id="btn_steve">Steve (Wide)</button>
+                <button class="model-btn" id="btn_alex">Alex (Slim)</button>
+            </div>
+            
+            <div style="height: 1px; background: #444; margin: 5px 0;"></div>
+            
+            <div class="upload-wrapper">
+                <label class="upload-btn-main">
+                    Upload Custom PNG
                     <input type="file" id="skin_upload" accept="image/png">
                 </label>
             </div>
-            
-            <div id="skin_container"></div>
-        </div>
-
-        <div class="toolbar">
-            <div class="tool-btn active">✏️</div>
-            <div class="tool-btn">🧽</div>
-            <div class="tool-btn">🪣</div>
-            <div class="tool-btn">🔍</div>
-            <div class="tool-btn">🧊</div> </div>
-    </div>
-
-    <div class="bottom-bar">
-        <div class="social-badge">
-            <span>🅱️ boosty</span>
-            <input type="text" value="@your_boosty">
-        </div>
-        <div class="social-badge">
-            <span>✈️ telegram</span>
-            <input type="text" value="@apixel_skins">
-        </div>
-        <div class="social-badge">
-            <span>🦋 bluesky</span>
-            <input type="text" value="@your_bluesky">
-        </div>
-
-        <div class="status-area">
-            <span>Model: Steve (4px)</span>
-            <span>Zoom: 100%</span>
         </div>
     </div>
 
     <script>
-        // Инициализация 3D просмотрщика скинов
-        let skinViewer = new skinview3d.SkinViewer({
-            canvas: document.createElement("canvas"),
-            width: 300,
-            height: 400,
-            skin: "https://minotar.net/skin/MHF_Steve.png" // Скин по умолчанию
+        // DOM Элементы
+        const fileNameDisplay = document.getElementById('file_name_display');
+        const btnSteve = document.getElementById('btn_steve');
+        const btnAlex = document.getElementById('btn_alex');
+
+        // Глобальная переменная для вьюера
+        let skinViewer;
+
+        // --- ИНИЦИАЛИЗАЦИЯ 3D ВЬЮЕРА ---
+        function initSkinViewer() {
+            // Очищаем контейнер, если он не пуст
+            document.getElementById("skin_container").innerHTML = '';
+
+            skinViewer = new skinview3d.SkinViewer({
+                canvas: document.createElement("canvas"),
+                width: window.innerWidth, // Растягиваем на весь экран
+                height: window.innerHeight - 80, // Минус высота шапки
+                skin: "https://minotar.net/skin/MHF_Steve.png" // Дефолт
+            });
+            
+            document.getElementById("skin_container").appendChild(skinViewer.canvas);
+
+            // Настройки камеры и анимации
+            let control = skinview3d.createOrbitControls(skinViewer);
+            control.enableRotate = true;
+            control.enableZoom = true; // Зум внутри канваса разрешаем (это не зум сайта)
+            control.enablePan = false;
+            
+            skinViewer.animation = new skinview3d.WalkingAnimation();
+            skinViewer.animation.speed = 0.5;
+            
+            // Задаем начальную модель
+            skinViewer.model = 'steve';
+        }
+
+        // --- ЛОГИКА ПЕРЕКЛЮЧЕНИЯ КНОПОК ---
+        function updateActiveButtons(activeBtn) {
+            btnSteve.classList.remove('active');
+            btnAlex.classList.remove('active');
+            activeBtn.classList.add('active');
+        }
+
+        // Клик по Стиву
+        btnSteve.addEventListener('click', () => {
+            skinViewer.loadSkin("https://minotar.net/skin/MHF_Steve.png");
+            skinViewer.model = 'steve';
+            updateActiveButtons(btnSteve);
+            fileNameDisplay.innerText = "Steve.png";
         });
-        
-        // Добавляем рендер в наш контейнер
-        document.getElementById("skin_container").appendChild(skinViewer.canvas);
 
-        // Включаем вращение мышкой
-        let control = skinview3d.createOrbitControls(skinViewer);
-        control.enableRotate = true;
-        control.enableZoom = true;
-        control.enablePan = false;
+        // Клик по Алекс
+        btnAlex.addEventListener('click', () => {
+            skinViewer.loadSkin("https://minotar.net/skin/MHF_Alex.png");
+            // ВАЖНО: У Алекс руки тонкие
+            skinViewer.model = 'alex'; 
+            updateActiveButtons(btnAlex);
+            fileNameDisplay.innerText = "Alex.png";
+        });
 
-        // Включаем легкую анимацию ходьбы для живости
-        skinViewer.animation = new skinview3d.WalkingAnimation();
 
-        // Логика загрузки своего скина через кнопку
+        // --- ОБРАБОТКА ЗАГРУЗКИ СВОЕГО СКИНА ---
         document.getElementById('skin_upload').addEventListener('change', function(event) {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    // Применяем загруженную картинку на 3D модель
-                    skinViewer.loadSkin(e.target.result);
+                    const dataUrl = e.target.result;
+                    
+                    // 1. Создаем Image объект для анализа PNG
+                    const img = new Image();
+                    img.onload = function() {
+                        // Анализ: Стив или Алекс?
+                        const modelType = detectSkinModel(img);
+                        
+                        // 2. Применяем загруженную картинку
+                        skinViewer.loadSkin(dataUrl);
+                        
+                        // 3. Устанавливаем автоматически определенную модель
+                        skinViewer.model = modelType;
+
+                        // 4. Обновляем UI
+                        fileNameDisplay.innerText = file.name;
+                        
+                        // Визуально подсвечиваем кнопку модели
+                        if(modelType === 'steve') {
+                            updateActiveButtons(btnSteve);
+                        } else {
+                            updateActiveButtons(btnAlex);
+                        }
+                    };
+                    img.src = dataUrl;
                 }
                 reader.readAsDataURL(file);
+            }
+        });
+
+        // --- ФУНКЦИЯ АВТОМАТИЧЕСКОГО ОПРЕДЕЛЕНИЯ МОДЕЛИ ---
+        // Работает только для современных 64x64 скинов
+        function detectSkinModel(image) {
+            if (image.width !== 64 || image.height !== 64) {
+                // Старый формат скинов - всегда Стив
+                return 'steve';
+            }
+
+            // Создаем временный канвас для проверки пикселей
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 64;
+            canvas.height = 64;
+            ctx.drawImage(image, 0, 0);
+
+            // Проверяем пиксель в области правой руки (Alex формат имеет прозрачность там, где у Steve пиксели)
+            // Координаты для 64x64: (50, 16) - это часть руки
+            const pixelData = ctx.getImageData(50, 16, 1, 1).data;
+            const alpha = pixelData[3]; // Альфа-канал
+
+            // Если пиксель прозрачный (alpha == 0), это скорее всего модель Alex
+            return (alpha === 0) ? 'alex' : 'steve';
+        }
+
+        // --- СТАРТ ---
+        window.addEventListener('load', initSkinViewer);
+        
+        // Фикс при ресайзе окна (хотя мы запретили зум, на всякий случай)
+        window.addEventListener('resize', () => {
+            if(skinViewer) {
+                skinViewer.width = window.innerWidth;
+                skinViewer.height = window.innerHeight - 80;
             }
         });
     </script>
