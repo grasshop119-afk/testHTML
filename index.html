@@ -2,410 +2,546 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Minecraft Skin Studio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SKINX PRO</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    
     <style>
         :root {
-            --bg: #000000;
-            --glass: rgba(24, 24, 26, 0.85);
-            --border: rgba(255, 255, 255, 0.1);
-            --accent: #007AFF;
-            --text: #FFFFFF;
-            --text-muted: #8E8E93;
-            --radius-main: 34px;
+            --bg: #121212;
+            --panel: #252525;
+            --border: #3d3d3d;
+            --text: #e0e0e0;
+            --accent: #5c5c5c;
+            --active: #ffffff;
         }
 
         * {
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            margin: 0; padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
         }
 
         body {
-            background: var(--bg);
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg);
             color: var(--text);
-            height: 100vh;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 8px;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
+            touch-action: none; /* Запрет скролла/зума страницы */
         }
 
-        /* --- Header: Part Selection --- */
-        header {
-            padding-top: env(safe-area-inset-top, 20px);
+        /* 3D Container */
+        #viewport {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+
+        /* Hidden Canvas */
+        #sourceCanvas {
+            display: none;
+        }
+
+        /* UI Overlay */
+        #ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             z-index: 10;
-        }
-
-        .segment-container {
-            display: flex;
-            overflow-x: auto;
-            padding: 10px 20px;
-            gap: 12px;
-            scrollbar-width: none;
-        }
-        .segment-container::-webkit-scrollbar { display: none; }
-
-        .part-pill {
-            padding: 8px 18px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            background: rgba(255,255,255,0.05);
-            color: var(--text-muted);
-            transition: all 0.2s;
-            border: 0.5px solid transparent;
-        }
-        .part-pill.active {
-            background: #FFFFFF;
-            color: #000000;
-        }
-
-        /* --- Canvas Area --- */
-        .workspace {
-            flex: 1;
+            pointer-events: none;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding-bottom: 220px; /* Оставляем место под плавающую консоль */
+            justify-content: space-between;
         }
 
-        .canvas-wrapper {
-            position: relative;
-            padding: 4px;
-            border-radius: 12px;
-            border: 0.5px solid var(--border);
+        .panel {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            pointer-events: auto;
         }
 
-        canvas#editor {
-            display: block;
-            width: 300px;
-            height: 300px;
-            image-rendering: pixelated;
-            /* Сетка как в дизайн-инструментах */
-            background-image: 
-                linear-gradient(var(--border) 0.5px, transparent 0.5px),
-                linear-gradient(90deg, var(--border) 0.5px, transparent 0.5px);
-            touch-action: none;
-        }
-
-        .face-indicator {
-            margin-top: 15px;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-        }
-
-        /* --- Floating Glass Console --- */
-        .console {
-            position: fixed;
-            bottom: calc(25px + env(safe-area-inset-bottom));
-            left: 16px;
-            right: 16px;
-            background: var(--glass);
-            backdrop-filter: blur(40px) saturate(150%);
-            -webkit-backdrop-filter: blur(40px) saturate(150%);
-            border-radius: var(--radius-main);
-            border: 0.5px solid rgba(255,255,255,0.15);
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            z-index: 100;
-        }
-
-        .tool-strip {
+        /* Header */
+        header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 10px;
+            padding: 8px;
+            border-bottom: 1px solid var(--border);
+            background-color: var(--bg);
+            pointer-events: auto;
         }
 
-        .icon-btn {
+        .title {
+            font-size: 10px;
+            color: var(--active);
+        }
+
+        button {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 8px;
+            padding: 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        button:active {
+            background: var(--accent);
+            color: var(--active);
+        }
+
+        button.active {
+            background: var(--text);
+            color: var(--bg);
+        }
+
+        /* Sidebars */
+        .workspace {
+            display: flex;
+            justify-content: space-between;
+            flex-grow: 1;
+            padding: 8px;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .vis-btn {
+            width: 40px;
+            height: 24px;
+        }
+
+        /* Color Picker */
+        #colorPicker {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border: 1px solid var(--border);
+            background: none;
+            cursor: pointer;
+            pointer-events: auto;
+        }
+        #colorPicker::-webkit-color-swatch-wrapper { padding: 0; }
+        #colorPicker::-webkit-color-swatch { border: none; }
+
+        /* Bottom Toolbar */
+        .toolbar {
+            display: flex;
+            justify-content: space-around;
+            padding: 8px;
+            background-color: var(--panel);
+            border-top: 1px solid var(--border);
+            pointer-events: auto;
+        }
+
+        .tool-btn {
             width: 44px;
             height: 44px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 50%;
-            color: var(--text-muted);
-            transition: transform 0.1s;
-        }
-        .icon-btn.active {
-            color: var(--accent);
-            background: rgba(0, 122, 255, 0.1);
-        }
-        .icon-btn:active { transform: scale(0.9); }
-
-        .icon-btn svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-
-        .console-divider {
-            height: 0.5px;
-            background: var(--border);
-            margin: 0 10px;
         }
 
-        .lower-controls {
-            display: flex;
-            gap: 15px;
-            height: 80px;
-            padding: 0 8px;
+        .tool-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
         }
-
-        .brush-controls {
-            width: 60px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 14px;
-            border-right: 0.5px solid var(--border);
-        }
-
-        .brush-dot { background: white; border-radius: 50%; opacity: 0.3; }
-        .brush-dot.active { opacity: 1; box-shadow: 0 0 10px white; }
-
-        .color-grid {
-            flex: 1;
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
-            padding-right: 5px;
-        }
-
-        .swatch {
-            aspect-ratio: 1;
-            border-radius: 10px;
-            border: 1px solid transparent;
-        }
-        .swatch.active { border-color: #FFF; transform: scale(0.9); }
-
-        .picker-btn {
-            background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red);
-            position: relative;
-            overflow: hidden;
-        }
-        .picker-btn input { position: absolute; opacity: 0; inset: 0; }
-
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="segment-container" id="part-selector">
-            <div class="part-pill active" data-part="head">Head</div>
-            <div class="part-pill" data-part="body">Torso</div>
-            <div class="part-pill" data-part="arms">Arms</div>
-            <div class="part-pill" data-part="legs">Legs</div>
-        </div>
-        <div class="segment-container" id="face-selector" style="padding-top: 0;">
-            <div class="part-pill active" data-face="front">Front</div>
-            <div class="part-pill" data-face="back">Back</div>
-            <div class="part-pill" data-face="left">Left</div>
-            <div class="part-pill" data-face="right">Right</div>
-            <div class="part-pill" data-face="top">Top</div>
-            <div class="part-pill" data-face="bottom">Bottom</div>
-        </div>
-    </header>
+    <div id="viewport"></div>
+    <canvas id="sourceCanvas" width="64" height="64"></canvas>
 
-    <main class="workspace">
-        <div class="canvas-wrapper">
-            <canvas id="editor" width="8" height="8"></canvas>
-        </div>
-        <div class="face-indicator" id="current-label">Head: Front</div>
-    </main>
+    <div id="ui">
+        <header>
+            <div class="title">SKINX PRO</div>
+            <button id="btnLayer">LAYER: BASE</button>
+            <button id="btnExport">EXPORT</button>
+        </header>
 
-    <div class="console">
-        <div class="tool-strip">
-            <div class="icon-btn active" data-tool="pencil" title="Карандаш">
-                <svg viewBox="0 0 24 24"><path d="M13.5 6.5l4 4M4 20h3.5l10.5-10.5a2.828 2.828 0 10-4-4L3.5 16V20H4z"/></svg>
+        <div class="workspace">
+            <div class="sidebar">
+                <input type="color" id="colorPicker" value="#ff0000">
+                <button class="tool-btn" id="btnShadeDown" onclick="setShading(-0.1)">-10%</button>
+                <button class="tool-btn" id="btnShadeUp" onclick="setShading(0.1)">+10%</button>
             </div>
-            <div class="icon-btn" data-tool="eraser" title="Ластик">
-                <svg viewBox="0 0 24 24"><path d="M7 11l5-5m0 0l5 5m-5-5v12m-8 4h16"/></svg>
-            </div>
-            <div class="icon-btn" data-tool="bucket" title="Заливка">
-                <svg viewBox="0 0 24 24"><path d="M19 11l-8-8-8 8c-2 2-2 5 0 7s5 2 7 0l9-9zM5 11h14"/></svg>
-            </div>
-            <div class="icon-btn" data-tool="picker" id="picker-tool" title="Пипетка">
-                <svg viewBox="0 0 24 24"><path d="M10 14l-6 6m12-12l2-2a2 2 0 112.828 2.828l-2 2M15 7L7 15l-1-1 1-1-1-1 8-8z"/></svg>
+
+            <div class="sidebar panel" style="padding: 4px;">
+                <div style="margin-bottom: 4px; text-align: center;">VIS</div>
+                <button class="vis-btn active" onclick="togglePart('Head', this)">HD</button>
+                <button class="vis-btn active" onclick="togglePart('Body', this)">BD</button>
+                <button class="vis-btn active" onclick="togglePart('ArmR', this)">AR</button>
+                <button class="vis-btn active" onclick="togglePart('ArmL', this)">AL</button>
+                <button class="vis-btn active" onclick="togglePart('LegR', this)">LR</button>
+                <button class="vis-btn active" onclick="togglePart('LegL', this)">LL</button>
             </div>
         </div>
 
-        <div class="console-divider"></div>
-
-        <div class="lower-controls">
-            <div class="brush-controls" id="brush-size">
-                <div class="brush-dot" style="width: 4px; height: 4px;"></div>
-                <div class="brush-dot active" style="width: 8px; height: 8px;"></div>
-                <div class="brush-dot" style="width: 12px; height: 12px;"></div>
-            </div>
-
-            <div class="color-grid" id="palette">
-                <div class="swatch active" style="background: #FFFFFF;" data-color="#FFFFFF"></div>
-                <div class="swatch" style="background: #000000;" data-color="#000000"></div>
-                <div class="swatch" style="background: #007AFF;" data-color="#007AFF"></div>
-                <div class="swatch" style="background: #FF3B30;" data-color="#FF3B30"></div>
-                <div class="swatch picker-btn">
-                    <input type="color" id="custom-color">
-                </div>
-            </div>
+        <div class="toolbar">
+            <button class="tool-btn active" onclick="setTool('pencil', this)">
+                <svg viewBox="0 0 24 24"><path d="M14.06 9l.94.94L5.92 19H5v-.92L14.06 9m3.6-6c-.25 0-.51.1-.7.29l-1.83 1.83 3.75 3.75 1.83-1.83c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.2-.2-.45-.29-.71-.29m-3.6 3.18L5.34 15H3v2.34l8.82 8.82 3.75-3.75z"/></svg>
+            </button>
+            <button class="tool-btn" onclick="setTool('eraser', this)">
+                <svg viewBox="0 0 24 24"><path d="M15.14 3c-.51 0-1.02.2-1.41.59L2.59 14.73c-.78.77-.78 2.04 0 2.83L5.42 20.4c.39.39.9.59 1.41.59s1.02-.2 1.41-.59l2.83-2.83h9.93v-2h-7.1l6.45-6.45c.78-.77.78-2.04 0-2.83l-2.83-2.83c-.39-.39-.9-.59-1.41-.59z"/></svg>
+            </button>
+            <button class="tool-btn" onclick="setTool('picker', this)">
+                <svg viewBox="0 0 24 24"><path d="M20.71 5.63l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-3.12 3.12-1.93-1.91-1.41 1.41 1.42 1.42L3 16.25V21h4.75l8.92-8.92 1.42 1.42 1.41-1.41-1.92-1.92 3.12-3.12c.4-.4.4-1.03.01-1.42zM6.92 19L5 17.08l8.06-8.06 1.92 1.92L6.92 19z"/></svg>
+            </button>
+            <button class="tool-btn" onclick="setTool('fill', this)">
+                <svg viewBox="0 0 24 24"><path d="M19 11.5s-2 2.17-2 3.5c0 1.1.9 2 2 2s2-.9 2-2c0-1.33-2-3.5-2-3.5zM12.96 5.29c-.39-.39-1.02-.39-1.41 0L5.3 11.54C4.65 12.19 5.11 13 6.03 13h4.63l-2.81 7.23c-.15.4.15.8.58.8h.01c.21 0 .4-.12.49-.31L13.1 11h4.87c.92 0 1.38-.81.73-1.46L12.96 5.29z"/></svg>
+            </button>
         </div>
     </div>
 
-    <canvas id="master" width="64" height="64" style="display:none;"></canvas>
-
     <script>
+        // === Инициализация Telegram WebApp ===
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.enableClosingConfirmation();
-        tg.headerColor = '#000000';
-        tg.backgroundColor = '#000000';
+        tg.ready();
 
-        const master = document.getElementById('master');
-        const mCtx = master.getContext('2d', { willReadFrequently: true });
-        const editor = document.getElementById('editor');
-        const eCtx = editor.getContext('2d');
+        // === Глобальные переменные ===
+        let currentTool = 'pencil';
+        let currentColor = '#ff0000';
+        let shadingMultiplier = 1.0;
+        let isOuterLayer = false;
+        const parts = {};
+        
+        // 2D Canvas (Source of Truth)
+        const canvas = document.getElementById('sourceCanvas');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        
+        // Инициализация базового цвета (прозрачный)
+        ctx.clearRect(0, 0, 64, 64);
 
-        let appState = {
-            part: 'head',
-            face: 'front',
-            tool: 'pencil',
-            color: '#FFFFFF',
-            isDrawing: false
-        };
+        // Обновление цвета
+        document.getElementById('colorPicker').addEventListener('input', (e) => {
+            currentColor = e.target.value;
+            if (currentTool === 'picker') setTool('pencil', document.querySelector('.toolbar button'));
+        });
 
-        const skinMap = {
-            head: { front:[8,8,8,8], back:[24,8,8,8], left:[16,8,8,8], right:[0,8,8,8], top:[8,0,8,8], bottom:[16,0,8,8] },
-            body: { front:[20,20,8,12], back:[32,20,8,12], left:[16,20,4,12], right:[28,20,4,12], top:[20,16,8,4], bottom:[28,16,8,4] },
-            arms: { front:[44,20,4,12], back:[52,20,4,12], left:[40,20,4,12], right:[48,20,4,12], top:[44,16,4,4], bottom:[48,16,4,4] },
-            legs: { front:[4,20,4,12], back:[12,20,4,12], left:[0,20,4,12], right:[8,20,4,12], top:[4,16,4,4], bottom:[8,16,4,4] }
-        };
+        // === Three.js Setup ===
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 0, 40);
 
-        function refresh() {
-            const [x, y, w, h] = skinMap[appState.part][appState.face];
-            editor.width = w; editor.height = h;
-            // Update grid size dynamically
-            editor.style.backgroundSize = `${300/w}px ${300/h}px`;
-            eCtx.imageSmoothingEnabled = false;
-            eCtx.clearRect(0,0,w,h);
-            eCtx.drawImage(master, x, y, w, h, 0, 0, w, h);
-            document.getElementById('current-label').innerText = `${appState.part}: ${appState.face}`;
-        }
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: false });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.getElementById('viewport').appendChild(renderer.domElement);
 
-        function getCoords(e) {
-            const rect = editor.getBoundingClientRect();
-            const t = e.touches ? e.touches[0] : e;
-            return {
-                x: Math.floor((t.clientX - rect.left) / (rect.width / editor.width)),
-                y: Math.floor((t.clientY - rect.top) / (rect.height / editor.height))
-            };
-        }
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enablePan = false;
+        // Ограничиваем OrbitControls
+        controls.touches = { ONE: THREE.TOUCH.NONE, TWO: THREE.TOUCH.ROTATE };
 
-        // Flood Fill Algorithm
-        function floodFill(startX, startY, fillRGB) {
-            const [mx, my, mw, mh] = skinMap[appState.part][appState.face];
-            const img = mCtx.getImageData(mx, my, mw, mh);
-            const data = img.data;
-            const targetPos = (startY * mw + startX) * 4;
-            const targetR = data[targetPos], targetG = data[targetPos+1], targetB = data[targetPos+2], targetA = data[targetPos+3];
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.4);
+        dirLight.position.set(10, 20, 10);
+        scene.add(dirLight);
+
+        // === Texture Setup ===
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.magFilter = THREE.NearestFilter; // Pixel-perfect
+        texture.minFilter = THREE.NearestFilter;
+        const material = new THREE.MeshStandardMaterial({ map: texture, transparent: true, alphaTest: 0.1 });
+
+        // === Генерация частей тела и UV-маппинг ===
+        function createPart(name, w, h, d, x, y, z, u, v, isOuter) {
+            const geometry = new THREE.BoxGeometry(w, h, d);
             
-            const fillR = parseInt(fillRGB.slice(1,3), 16), fillG = parseInt(fillRGB.slice(3,5), 16), fillB = parseInt(fillRGB.slice(5,7), 16);
-            if (targetR === fillR && targetG === fillG && targetB === fillB) return;
+            // Настройка UV-развертки (Minecraft Standard)
+            const faces = [
+                { dir: 'right',  x: u,         y: v + d, w: d, h: h }, // 0
+                { dir: 'left',   x: u + d + w, y: v + d, w: d, h: h }, // 1
+                { dir: 'top',    x: u + d,     y: v,     w: w, h: d }, // 2
+                { dir: 'bottom', x: u + d + w, y: v,     w: w, h: d }, // 3
+                { dir: 'front',  x: u + d,     y: v + d, w: w, h: h }, // 4
+                { dir: 'back',   x: u + d + w + d, y: v + d, w: w, h: h }  // 5
+            ];
+
+            const uvs = geometry.attributes.uv;
+            for (let i = 0; i < 6; i++) {
+                const f = faces[i];
+                const u0 = f.x / 64;
+                const v0 = 1.0 - (f.y / 64);
+                const u1 = (f.x + f.w) / 64;
+                const v1 = 1.0 - ((f.y + f.h) / 64);
+
+                uvs.setXY(i * 4 + 0, u0, v0);
+                uvs.setXY(i * 4 + 1, u0, v1);
+                uvs.setXY(i * 4 + 2, u1, v0);
+                uvs.setXY(i * 4 + 3, u1, v1);
+            }
+
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.set(x, y, z);
+            if (isOuter) {
+                mesh.scale.set(1.05, 1.05, 1.05);
+                mesh.visible = false; // По умолчанию outer выключен
+            }
+            
+            // Сохраняем данные для алгоритма заливки (Fill Tool)
+            mesh.userData = { isOuter, faces };
+            scene.add(mesh);
+            return mesh;
+        }
+
+        // Base Layer (u, v)
+        parts.Head_Base = createPart('Head', 8, 8, 8, 0, 12, 0, 0, 0, false);
+        parts.Body_Base = createPart('Body', 8, 12, 4, 0, 2, 0, 16, 16, false);
+        parts.ArmR_Base = createPart('ArmR', 4, 12, 4, -6, 2, 0, 40, 16, false);
+        parts.ArmL_Base = createPart('ArmL', 4, 12, 4, 6, 2, 0, 32, 48, false);
+        parts.LegR_Base = createPart('LegR', 4, 12, 4, -2, -10, 0, 0, 16, false);
+        parts.LegL_Base = createPart('LegL', 4, 12, 4, 2, -10, 0, 16, 48, false);
+
+        // Outer Layer (u, v)
+        parts.Head_Outer = createPart('Head', 8, 8, 8, 0, 12, 0, 32, 0, true);
+        parts.Body_Outer = createPart('Body', 8, 12, 4, 0, 2, 0, 16, 32, true);
+        parts.ArmR_Outer = createPart('ArmR', 4, 12, 4, -6, 2, 0, 40, 32, true);
+        parts.ArmL_Outer = createPart('ArmL', 4, 12, 4, 6, 2, 0, 48, 48, true);
+        parts.LegR_Outer = createPart('LegR', 4, 12, 4, -2, -10, 0, 0, 32, true);
+        parts.LegL_Outer = createPart('LegL', 4, 12, 4, 2, -10, 0, 0, 48, true);
+
+        // === Логика инструментов ===
+        function setTool(tool, btn) {
+            currentTool = tool;
+            document.querySelectorAll('.toolbar .tool-btn').forEach(b => b.classList.remove('active'));
+            if(btn) btn.classList.add('active');
+        }
+
+        function setShading(amount) {
+            currentTool = 'shade';
+            shadingMultiplier = 1.0 + amount;
+            document.querySelectorAll('.toolbar .tool-btn').forEach(b => b.classList.remove('active'));
+        }
+
+        function togglePart(partName, btn) {
+            btn.classList.toggle('active');
+            const isVis = btn.classList.contains('active');
+            parts[`${partName}_Base`].visible = isVis && !isOuterLayer;
+            parts[`${partName}_Outer`].visible = isVis && isOuterLayer;
+        }
+
+        document.getElementById('btnLayer').addEventListener('click', function() {
+            isOuterLayer = !isOuterLayer;
+            this.innerText = isOuterLayer ? 'LAYER: OUTER' : 'LAYER: BASE';
+            
+            // Синхронизация видимости
+            ['Head', 'Body', 'ArmR', 'ArmL', 'LegR', 'LegL'].forEach(part => {
+                const btn = document.querySelector(`button[onclick="togglePart('${part}', this)"]`);
+                const isVis = btn.classList.contains('active');
+                parts[`${part}_Base`].visible = isVis && !isOuterLayer;
+                parts[`${part}_Outer`].visible = isVis && isOuterLayer;
+            });
+        });
+
+        // === Raycasting & Drawing ===
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        function hexToRgb(hex) {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return [r, g, b, 255];
+        }
+
+        function rgbToHex(r, g, b) {
+            return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1);
+        }
+
+        function drawOnCanvas(uv, faceIndex, mesh) {
+            const px = Math.floor(uv.x * 64);
+            const py = Math.floor((1.0 - uv.y) * 64);
+
+            if (currentTool === 'picker') {
+                const imgData = ctx.getImageData(px, py, 1, 1).data;
+                if (imgData[3] > 0) {
+                    currentColor = rgbToHex(imgData[0], imgData[1], imgData[2]);
+                    document.getElementById('colorPicker').value = currentColor;
+                }
+                return;
+            }
+
+            if (currentTool === 'pencil') {
+                ctx.fillStyle = currentColor;
+                ctx.fillRect(px, py, 1, 1);
+            } 
+            else if (currentTool === 'eraser') {
+                ctx.clearRect(px, py, 1, 1);
+            }
+            else if (currentTool === 'shade') {
+                const imgData = ctx.getImageData(px, py, 1, 1).data;
+                if (imgData[3] > 0) {
+                    const r = Math.min(255, Math.floor(imgData[0] * shadingMultiplier));
+                    const g = Math.min(255, Math.floor(imgData[1] * shadingMultiplier));
+                    const b = Math.min(255, Math.floor(imgData[2] * shadingMultiplier));
+                    ctx.fillStyle = `rgba(${r},${g},${b},1)`;
+                    ctx.fillRect(px, py, 1, 1);
+                }
+            }
+            else if (currentTool === 'fill') {
+                floodFill(px, py, faceIndex, mesh);
+            }
+
+            texture.needsUpdate = true;
+        }
+
+        function floodFill(startX, startY, faceIndex, mesh) {
+            // Ограничиваем заливку конкретной плоскостью
+            const sideIndex = Math.floor(faceIndex / 2);
+            const faceBounds = mesh.userData.faces[sideIndex];
+            
+            const minX = faceBounds.x;
+            const maxX = faceBounds.x + faceBounds.w - 1;
+            const minY = faceBounds.y;
+            const maxY = faceBounds.y + faceBounds.h - 1;
+
+            if (startX < minX || startX > maxX || startY < minY || startY > maxY) return;
+
+            const imgData = ctx.getImageData(0, 0, 64, 64);
+            const data = imgData.data;
+            
+            const getIndex = (x, y) => (y * 64 + x) * 4;
+            
+            const startIdx = getIndex(startX, startY);
+            const startR = data[startIdx], startG = data[startIdx+1], startB = data[startIdx+2], startA = data[startIdx+3];
+            
+            const targetColor = hexToRgb(currentColor);
+            if (startR === targetColor[0] && startG === targetColor[1] && startB === targetColor[2] && startA === targetColor[3]) return;
 
             const stack = [[startX, startY]];
-            while(stack.length) {
+            
+            while(stack.length > 0) {
                 const [x, y] = stack.pop();
-                const pos = (y * mw + x) * 4;
-                if (x>=0 && x<mw && y>=0 && y<mh && data[pos]===targetR && data[pos+1]===targetG && data[pos+2]===targetB) {
-                    data[pos]=fillR; data[pos+1]=fillG; data[pos+2]=fillB; data[pos+3]=255;
+                
+                if (x < minX || x > maxX || y < minY || y > maxY) continue;
+                
+                const idx = getIndex(x, y);
+                if (data[idx] === startR && data[idx+1] === startG && data[idx+2] === startB && data[idx+3] === startA) {
+                    data[idx] = targetColor[0];
+                    data[idx+1] = targetColor[1];
+                    data[idx+2] = targetColor[2];
+                    data[idx+3] = targetColor[3];
+                    
                     stack.push([x+1, y], [x-1, y], [x, y+1], [x, y-1]);
                 }
             }
-            mCtx.putImageData(img, mx, my);
-            refresh();
+            ctx.putImageData(imgData, 0, 0);
         }
 
-        function handleDraw(e) {
-            if(!appState.isDrawing) return;
-            const p = getCoords(e);
-            if(p.x < 0 || p.y < 0 || p.x >= editor.width || p.y >= editor.height) return;
+        // === Взаимодействие и Мобильный Контроль ===
+        let isDrawing = false;
 
-            const [mx, my] = [skinMap[appState.part][appState.face][0] + p.x, skinMap[appState.part][appState.face][1] + p.y];
+        function handlePointer(event, isDown) {
+            // Если 1 палец — блокируем OrbitControls и рисуем
+            if (event.touches && event.touches.length > 1) {
+                controls.enabled = true;
+                isDrawing = false;
+                return;
+            }
+            
+            controls.enabled = false; // Блокируем камеру
+            if (event.cancelable) event.preventDefault();
 
-            if(appState.tool === 'pencil') {
-                mCtx.fillStyle = appState.color;
-                mCtx.fillRect(mx, my, 1, 1);
-                if(Math.random() > 0.8) tg.HapticFeedback.impactOccurred('light');
-            } else if(appState.tool === 'eraser') {
-                mCtx.clearRect(mx, my, 1, 1);
-            } else if(appState.tool === 'picker') {
-                const d = mCtx.getImageData(mx, my, 1, 1).data;
-                if(d[3] > 0) {
-                    appState.color = '#' + [d[0], d[1], d[2]].map(x => x.toString(16).padStart(2, '0')).join('');
-                    document.querySelector('[data-tool="pencil"]').click();
+            const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+            const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+
+            mouse.x = (clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(scene.children).filter(obj => obj.object.visible);
+
+            if (intersects.length > 0) {
+                if (isDown) isDrawing = true;
+                if (isDrawing) {
+                    drawOnCanvas(intersects[0].uv, intersects[0].faceIndex, intersects[0].object);
                 }
-            } else if(appState.tool === 'bucket') {
-                floodFill(p.x, p.y, appState.color);
-                appState.isDrawing = false; // Заливка — разовое действие
             }
-            refresh();
         }
 
-        // Listeners
-        editor.addEventListener('touchstart', (e) => { appState.isDrawing = true; handleDraw(e); });
-        editor.addEventListener('touchmove', (e) => { e.preventDefault(); handleDraw(e); });
-        editor.addEventListener('touchend', () => appState.isDrawing = false);
-
-        document.querySelectorAll('.icon-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.icon-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                appState.tool = btn.dataset.tool;
-                tg.HapticFeedback.selectionChanged();
-            });
+        const domElement = renderer.domElement;
+        
+        domElement.addEventListener('pointerdown', (e) => {
+            if(e.pointerType === 'mouse' && e.button !== 0) return; // Только ЛКМ
+            handlePointer(e, true);
+        });
+        domElement.addEventListener('pointermove', (e) => {
+            if (!isDrawing) return;
+            handlePointer(e, false);
+        });
+        domElement.addEventListener('pointerup', () => {
+            isDrawing = false;
+            controls.enabled = true;
         });
 
-        document.querySelectorAll('.part-pill').forEach(pill => {
-            pill.addEventListener('click', (e) => {
-                const parent = pill.parentElement;
-                parent.querySelectorAll('.part-pill').forEach(p => p.classList.remove('active'));
-                pill.classList.add('active');
-                if(pill.dataset.part) appState.part = pill.dataset.part;
-                if(pill.dataset.face) appState.face = pill.dataset.face;
-                tg.HapticFeedback.selectionChanged();
-                refresh();
-            });
+        // Touch дублирование для жесткого захвата
+        domElement.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) handlePointer(e, true);
+        }, { passive: false });
+        domElement.addEventListener('touchmove', (e) => {
+            if (isDrawing) handlePointer(e, false);
+        }, { passive: false });
+        domElement.addEventListener('touchend', () => {
+            isDrawing = false;
+            controls.enabled = true;
         });
 
-        document.getElementById('palette').addEventListener('click', (e) => {
-            const swatch = e.target.closest('.swatch');
-            if(swatch && swatch.dataset.color) {
-                document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
-                swatch.classList.add('active');
-                appState.color = swatch.dataset.color;
-                if(appState.tool === 'eraser') document.querySelector('[data-tool="pencil"]').click();
-                tg.HapticFeedback.impactOccurred('light');
+
+        // === Экспорт ===
+        document.getElementById('btnExport').addEventListener('click', () => {
+            const dataURL = canvas.toDataURL('image/png');
+            if (tg && tg.sendData) {
+                tg.sendData(dataURL);
+            } else {
+                // Фолбэк для теста в браузере
+                const link = document.createElement('a');
+                link.download = 'skin_pro.png';
+                link.href = dataURL;
+                link.click();
             }
         });
 
-        document.getElementById('custom-color').addEventListener('change', (e) => {
-            appState.color = e.target.value;
-            tg.HapticFeedback.notificationOccurred('success');
+        // === Рендер Loop ===
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        tg.MainButton.setText("ЭКСПОРТ В ФОТО").show().onClick(() => {
-            const link = document.createElement('a');
-            link.download = 'mc_skin.png';
-            link.href = master.toDataURL();
-            link.click();
-            tg.HapticFeedback.notificationOccurred('success');
-        });
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
 
-        refresh();
+        // Инициализация стартовой сетки для наглядности (опционально)
+        ctx.fillStyle = '#1e1e1e'; // Base skin color hint
+        ctx.fillRect(8, 8, 8, 8); // Face front hint
+        texture.needsUpdate = true;
+
     </script>
 </body>
 </html>
