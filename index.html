@@ -4,11 +4,153 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>APixel - Minecraft Creator</title>
-    <link rel="stylesheet" href="style.css">
     <style>
         @font-face {
             font-family: '00 Starmap';
             src: url('fonts/00-Starmap.ttf') format('truetype');
+        }
+
+        /* Общие настройки */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #1c1c1e; /* Темный тон Apple */
+            color: #ffffff;
+            font-family: '00 Starmap', sans-serif;
+            line-height: 1.6;
+            -webkit-font-smoothing: none; /* Усиливает пиксельный эффект */
+            overflow-x: hidden; /* Предотвращает горизонтальную прокрутку */
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Шапка */
+        .navbar {
+            background-color: #2c2c2e; /* Светлее фона, без тени */
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .letter-a {
+            color: #ffcc00; /* Желтая буква А */
+        }
+
+        .tg-link img {
+            width: 30px;
+            height: 30px;
+            filter: invert(1); /* Делаем иконку белой в стиле Apple */
+            transition: opacity 0.3s;
+        }
+
+        .tg-link img:hover {
+            opacity: 0.7;
+        }
+
+        /* Основной контент */
+        .main-content {
+            margin-top: 40px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* Три карточки в ряд */
+            gap: 20px;
+            padding-bottom: 50px;
+        }
+
+        /* Общие стили для карточек (плашек) */
+        .card {
+            background-color: #2c2c2e; /* Светлее фона, без тени */
+            padding: 30px;
+            border: 2px solid #3a3a3c; /* Тонкая пиксельная граница вместо тени */
+            transition: transform 0.2s, background-color 0.3s;
+            overflow: hidden; /* Ключевой момент для обрезки */
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end; /* Текст внизу */
+            height: 300px; /* Фиксированная высота карточки */
+        }
+
+        .card:hover {
+            transform: scale(1.03);
+            background-color: #3a3a3c;
+        }
+
+        /* Контейнер текста */
+        .card-info {
+            position: relative;
+            z-index: 10;
+        }
+
+        .card-title {
+            font-size: 28px;
+            margin-bottom: 8px;
+            color: #ffffff;
+            line-height: 1.1;
+        }
+
+        .card-desc {
+            font-size: 14px;
+            color: #8e8e93; /* Серый текст описания */
+        }
+
+        /* Изображения внутри карточек (урезанные) */
+        .card-image {
+            position: absolute;
+            top: 0;
+            left: -20px; /* Смещаем влево, чтобы урезать низ */
+            width: 130%; /* Делаем изображение больше карточки */
+            height: 100%;
+            background-position: left bottom; /* Картинка от левого нижнего угла */
+            background-repeat: no-repeat;
+            background-size: cover; /* Или contain, если картинки уже пиксельные */
+            image-rendering: pixelated; /* Сохраняет четкость пикселей */
+            opacity: 0.8; /* Легкая прозрачность для стиля */
+            z-index: 1;
+        }
+
+        /* Подстановка картинок */
+        .skin-card {
+            background-image: url('Logos/skin.png');
+        }
+
+        .block-card {
+            background-image: url('Logos/block.png');
+        }
+
+        .item-card {
+            background-image: url('Logos/item.png');
+        }
+
+        /* Адаптивность для мобильных устройств */
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr; /* По одной карточке на строку */
+            }
+
+            .card {
+                height: 250px;
+            }
         }
     </style>
 </head>
@@ -19,7 +161,7 @@
             <div class="logo">
                 <span class="letter-a">A</span>Pixel
             </div>
-            <a href="https://t.me/your_link" class="tg-link">
+            <a href="https://t.me/your_link" target="_blank" class="tg-link">
                 <img src="https://cdn.iconscout.com/icon/premium/png-512-thumb/send-icon-svg-download-png-14350353.png?f=webp&w=512" alt="Telegram">
             </a>
         </div>
@@ -27,32 +169,26 @@
 
     <main class="container main-content">
         <section class="card">
+            <div class="card-image skin-card"></div>
             <div class="card-info">
                 <h2 class="card-title">Создать скин</h2>
                 <p class="card-desc">Персонализируйте своего персонажа уникальным дизайном.</p>
             </div>
-            <div class="card-image">
-                <img src="Logos/skin.png" alt="Skin">
-            </div>
         </section>
 
         <section class="card">
+            <div class="card-image block-card"></div>
             <div class="card-info">
                 <h2 class="card-title">Создать блок</h2>
-                <p class="card-desc">Разработайте новые текстуры для строительных элементов мира.</p>
-            </div>
-            <div class="card-image">
-                <img src="Logos/block.png" alt="Block">
+                <p class="card-desc">Разработайте новые текстуры строительных элементов мира.</p>
             </div>
         </section>
 
         <section class="card">
+            <div class="card-image item-card"></div>
             <div class="card-info">
                 <h2 class="card-title">Создать предмет</h2>
-                <p class="card-desc">Добавьте в игру кастомные инструменты, оружие или ресурсы.</p>
-            </div>
-            <div class="card-image">
-                <img src="Logos/item.png" alt="Item">
+                <p class="card-desc">Добавьте кастомные инструменты, оружие или ресурсы.</p>
             </div>
         </section>
     </main>
