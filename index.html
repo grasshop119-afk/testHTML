@@ -24,7 +24,8 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto; /* Позволяем скролл, если контента много */
         }
 
         /* --- ГЕРОЙ-ШАПКА --- */
@@ -43,16 +44,23 @@
             display: block;
         }
 
-        /* Белое название в углу */
-        .banner-logo {
+        /* Навигация в углу: APIXEL | HOME */
+        .banner-nav {
             position: absolute;
-            right: 15px;
-            bottom: 10px;
-            font-size: 22px;
-            letter-spacing: 2px;
-            color: #ffffff;
+            left: 15px;
+            bottom: 12px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
             text-shadow: 2px 2px 0px #000;
             z-index: 5;
+        }
+
+        .nav-divider {
+            width: 1px;
+            height: 16px;
+            background-color: rgba(255, 255, 255, 0.7);
         }
 
         /* --- КОНТЕНТ --- */
@@ -62,27 +70,29 @@
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
-            gap: 12px;
-            padding-top: 25px;
+            gap: 20px; /* Увеличил отступ из-за подписей под плашками */
+            padding: 25px 0;
         }
 
-        /* --- КАРТОЧКИ --- */
-        .card {
-            position: relative;
+        /* Обертка для карточки и подписи */
+        .card-wrapper {
             width: 88%;
             max-width: 380px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .card {
+            position: relative;
+            width: 100%;
             height: 110px;
             background-color: #2b2b2b;
-            
-            /* Внешние границы */
             border: 1px solid #111; 
             border-radius: 4px;
-            
-            /* ЖИРНАЯ ВНУТРЕННЯЯ ОБВОДКА (Pixel-style inset) */
             box-shadow: 
-                inset 3px 3px 0px #3d3d3d, /* Светлый верх и лево внутри */
-                inset -3px -3px 0px #1a1a1a; /* Темный низ и право внутри */
-            
+                inset 3px 3px 0px #3d3d3d, 
+                inset -3px -3px 0px #1a1a1a;
             padding: 15px;
             display: flex;
             align-items: center;
@@ -96,7 +106,7 @@
         .card-content {
             width: 65%;
             z-index: 2;
-            padding-left: 5px; /* Чтобы текст не прилипал к толстой рамке */
+            padding-left: 5px;
         }
 
         .card-title {
@@ -109,6 +119,18 @@
             font-size: 9px;
             line-height: 1.3;
             color: #7a7a7a;
+        }
+
+        /* Текст под плашкой */
+        .card-footer-text {
+            font-size: 8px;
+            color: #555;
+            padding-left: 5px;
+        }
+        
+        .card-footer-text span {
+            color: #4CAF50; /* Зеленый "Learn more" */
+            cursor: pointer;
         }
 
         .img-mask {
@@ -128,23 +150,23 @@
             filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
         }
 
-        /* ПОЗИЦИИ (Твои правки) */
+        /* ПОЗИЦИИ */
         .img-skin {
             width: 110px;
             right: -5px;
-            bottom: -55px; /* Без изменений, по пояс */
+            bottom: -55px;
         }
 
         .img-block {
             width: 95px;
             right: 5px;
-            bottom: 12px; /* Поднят выше (было 5) */
+            bottom: 12px;
         }
 
         .img-item {
             width: 75px;
             right: 10px;
-            bottom: 5px; /* Поднят выше (было -10) */
+            bottom: 0px; /* Тотем опустили чуть ниже */
         }
 
     </style>
@@ -153,38 +175,51 @@
 
     <div class="home-banner">
         <img src="Logos/HomePic.PNG" alt="Home" class="home-pic">
-        <div class="banner-logo">APIXEL</div>
+        <div class="banner-nav">
+            <span>APIXEL</span>
+            <div class="nav-divider"></div>
+            <span style="opacity: 0.9;">HOME</span>
+        </div>
     </div>
 
     <main>
-        <div class="card" onclick="location.href='skin_editor.html'">
-            <div class="card-content">
-                <div class="card-title">Create Skin</div>
-                <div class="card-desc">Create your own Minecraft™ skin. You also can edit or choose skin from the list.</div>
+        <div class="card-wrapper">
+            <div class="card" onclick="location.href='skin_editor.html'">
+                <div class="card-content">
+                    <div class="card-title">Create Skin</div>
+                    <div class="card-desc">Create your own Minecraft™ skin. You also can edit or choose skin from the list.</div>
+                </div>
+                <div class="img-mask">
+                    <img src="Logos/skin.PNG" alt="Skin" class="card-img img-skin">
+                </div>
             </div>
-            <div class="img-mask">
-                <img src="Logos/skin.PNG" alt="Skin" class="card-img img-skin">
-            </div>
+            <div class="card-footer-text">Skins creating rules. <span>Learn more ></span></div>
         </div>
 
-        <div class="card">
-            <div class="card-content">
-                <div class="card-title">Create Block</div>
-                <div class="card-desc">Design unique textures and properties for new in-game blocks. Real-time preview.</div>
+        <div class="card-wrapper">
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-title">Create Block</div>
+                    <div class="card-desc">Design unique textures and properties for new in-game blocks. Real-time preview.</div>
+                </div>
+                <div class="img-mask">
+                    <img src="Logos/block.PNG" alt="Block" class="card-img img-block">
+                </div>
             </div>
-            <div class="img-mask">
-                <img src="Logos/block.PNG" alt="Block" class="card-img img-block">
-            </div>
+            <div class="card-footer-text">Block texture guidelines. <span>Learn more ></span></div>
         </div>
 
-        <div class="card">
-            <div class="card-content">
-                <div class="card-title">Create Item</div>
-                <div class="card-desc">Add custom weapons, tools, and rare artifacts to your world with ease.</div>
+        <div class="card-wrapper">
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-title">Create Item</div>
+                    <div class="card-desc">Add custom weapons, tools, and rare artifacts to your world with ease.</div>
+                </div>
+                <div class="img-mask">
+                    <img src="Logos/item.PNG" alt="Item" class="card-img img-item">
+                </div>
             </div>
-            <div class="img-mask">
-                <img src="Logos/item.PNG" alt="Item" class="card-img img-item">
-            </div>
+            <div class="card-footer-text">Items & Artifacts policy. <span>Learn more ></span></div>
         </div>
     </main>
 
