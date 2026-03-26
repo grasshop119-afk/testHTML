@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>APixel - Создавай</title>
+    <title>APixel</title>
     <style>
-        /* Подключаем пиксельный шрифт для подстраховки */
         @font-face {
             font-family: '00 Starmap';
             src: url('fonts/00-Starmap.ttf') format('truetype');
@@ -16,100 +15,110 @@
             padding: 0;
             box-sizing: border-box;
             -webkit-font-smoothing: none;
-            image-rendering: pixelated;
         }
 
         body {
-            background-color: #121212; /* Глубокий темный фон */
+            background-color: #121212;
             color: #FFFFFF;
-            font-family: '00 Starmap', 'Press Start 2P', sans-serif;
-            padding-bottom: 40px;
+            font-family: '00 Starmap', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         /* Шапка */
         header {
-            background-color: #242426; /* Светлее фона, без тени */
-            padding: 20px;
+            width: 100%;
+            background-color: #242426;
+            padding: 12px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid #333;
+            /* Без тени, просто граница */
+            border-bottom: 1px solid #2c2c2e;
         }
 
         .logo {
-            font-size: 24px;
+            font-size: 18px;
             text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
         .logo span {
-            color: #FFD60A; /* Желтая A (Apple Yellow) */
+            color: #FFD60A;
         }
 
         .tg-link img {
-            width: 24px;
+            width: 22px;
             filter: invert(1);
+            image-rendering: pixelated;
         }
 
-        /* Контейнер */
+        /* Контент */
         .content {
-            max-width: 600px; /* Сужаем для мобильного вида как на скрине */
-            margin: 40px auto;
+            width: 100%;
+            max-width: 500px;
+            padding: 30px 15px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
-            padding: 0 15px;
+            gap: 12px;
         }
 
-        /* Плашки */
+        /* Компактные плашки */
         .card {
-            background-color: #2C2C2E; /* Тон плашки (Apple Dark Grey) */
-            height: 180px;
+            background-color: #2C2C2E;
+            height: 110px; /* Уменьшил высоту */
             position: relative;
-            overflow: hidden; /* Обрезаем картинку по краям */
+            overflow: hidden;
             display: flex;
             align-items: center;
-            padding: 25px;
-            border: none; /* Без теней и границ, только на контрасте */
+            padding: 0 20px;
+            transition: background 0.1s;
+        }
+
+        .card:hover {
+            background-color: #363638;
         }
 
         .card-text {
             position: relative;
             z-index: 2;
-            width: 60%; /* Ограничиваем текст, чтобы не заезжал на картинку */
+            width: 70%;
         }
 
         .card-text h2 {
-            font-size: 20px;
-            margin-bottom: 12px;
+            font-size: 16px;
+            margin-bottom: 4px;
             text-transform: uppercase;
         }
 
         .card-text p {
-            font-size: 11px;
-            color: #8E8E93; /* Серый текст */
-            line-height: 1.4;
+            font-size: 10px;
+            color: #8E8E93;
+            line-height: 1.2;
+            max-width: 220px;
         }
 
         /* Картинки */
         .card-img {
             position: absolute;
-            right: -10px; /* Прижимаем вправо */
-            bottom: -15px; /* Урезаем низ */
-            height: 130%; /* Увеличиваем масштаб */
+            right: 10px;
+            bottom: -10px; /* Урезаем только низ */
+            height: 85%;   /* Не касается верха */
             z-index: 1;
+            display: flex;
+            align-items: flex-end;
         }
 
         .card-img img {
             height: 100%;
             width: auto;
+            image-rendering: pixelated;
             display: block;
         }
 
-        /* Ховер эффект в стиле Minecraft */
-        .card:hover {
-            background-color: #3A3A3C;
-            cursor: pointer;
+        /* Специфика для блока (чуть меньше остальных) */
+        .block-card img {
+            height: 85%;
         }
 
     </style>
@@ -117,7 +126,7 @@
 <body>
 
     <header>
-        <div class="logo"><span>A</span>Pixel</div>
+        <div class="logo"><span>A</span>PIXEL</div>
         <a href="https://t.me/pixel" class="tg-link">
             <img src="https://cdn.iconscout.com/icon/premium/png-512-thumb/send-icon-svg-download-png-14350353.png?f=webp&w=512" alt="tg">
         </a>
@@ -139,7 +148,7 @@
                 <h2>Создать блок</h2>
                 <p>Создавайте уникальные текстуры и свойства для новых игровых блоков.</p>
             </div>
-            <div class="card-img">
+            <div class="card-img block-card">
                 <img src="Logos/block.PNG" alt="">
             </div>
         </div>
