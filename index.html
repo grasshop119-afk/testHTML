@@ -27,27 +27,33 @@
             overflow: hidden;
         }
 
-        /* --- ХЕДЕР --- */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 25px;
-            background: #1a1a1a;
+        /* --- ГЕРОЙ-ШАПКА --- */
+        .home-banner {
+            position: relative;
+            width: 100%;
+            height: 200px; /* Высота шапки */
+            overflow: hidden;
+            border-bottom: 2px solid #111;
         }
 
-        .logo {
-            font-size: 20px;
-            letter-spacing: 1px;
+        .home-pic {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Заполняем область */
+            display: block;
         }
-        .logo span { color: #f3bc18; }
 
-        .tg-icon {
-            width: 22px;
-            height: 22px;
-            opacity: 0.7;
-            cursor: pointer;
+        /* Название в углу картинки */
+        .banner-logo {
+            position: absolute;
+            right: 15px;
+            bottom: 10px;
+            font-size: 22px;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 0px #000; /* Чтобы читалось на любом фоне */
+            z-index: 5;
         }
+        .banner-logo span { color: #f3bc18; }
 
         /* --- КОНТЕНТ --- */
         main {
@@ -55,17 +61,17 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            gap: 15px; /* Компактные отступы между плашками */
-            padding-bottom: 20px;
+            justify-content: flex-start; /* Начинаем сверху под шапкой */
+            gap: 12px;
+            padding-top: 25px; /* Отступ от шапки до первой кнопки */
         }
 
         /* --- КАРТОЧКИ --- */
         .card {
             position: relative;
-            width: 85%;
-            max-width: 360px;
-            height: 110px; /* Уменьшенная высота */
+            width: 88%;
+            max-width: 380px;
+            height: 110px;
             background-color: #2b2b2b;
             border-top: 1px solid #3d3d3d;
             border-left: 1px solid #3d3d3d;
@@ -77,10 +83,10 @@
             align-items: center;
             cursor: pointer;
             overflow: visible; 
-            transition: background 0.2s;
+            transition: transform 0.1s;
         }
 
-        .card:hover { background-color: #313131; }
+        .card:active { transform: scale(0.98); }
 
         .card-content {
             width: 65%;
@@ -88,21 +94,21 @@
         }
 
         .card-title {
-            font-size: 14px; /* Контент мельче */
+            font-size: 14px;
             margin-bottom: 6px;
             text-transform: uppercase;
         }
 
         .card-desc {
-            font-size: 9px; /* Контент мельче */
+            font-size: 9px;
             line-height: 1.3;
             color: #7a7a7a;
+            text-transform: none;
         }
 
-        /* Маска для обрезки картинок по бокам и снизу */
         .img-mask {
             position: absolute;
-            top: -30px; /* Запас для вылета сверху */
+            top: -30px; 
             right: 0;
             bottom: 0;
             left: 0;
@@ -117,36 +123,36 @@
             filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
         }
 
-        /* Специфичные настройки для каждого типа (Req: позиции и размеры) */
+        /* Позиционирование по твоему плану */
         .img-skin {
             width: 110px;
             right: -5px;
-            bottom: -55px; /* Виден по пояс */
+            bottom: -55px; /* По пояс */
         }
 
         .img-block {
-            width: 100px;
-            right: 0;
-            bottom: 15px; /* Чуть выше */
+            width: 95px;
+            right: 5px;
+            bottom: 5px; /* Сдвинут чуть ниже (был 15) */
         }
 
         .img-item {
-            width: 75px; /* Мельче */
+            width: 75px;
             right: 10px;
-            bottom: -10px; /* Ниже */
+            bottom: -10px; /* Мелкий и внизу */
         }
 
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="logo"><span>A</span>PIXEL</div>
-        <img src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png" class="tg-icon" alt="TG">
-    </header>
+    <div class="home-banner">
+        <img src="Logos/HomePic.PNG" alt="Home" class="home-pic">
+        <div class="banner-logo"><span>A</span>PIXEL</div>
+    </div>
 
     <main>
-        <div class="card">
+        <div class="card" onclick="location.href='skin_editor.html'">
             <div class="card-content">
                 <div class="card-title">Create Skin</div>
                 <div class="card-desc">Create your own Minecraft™ skin. You also can edit or choose skin from the list.</div>
