@@ -4,61 +4,74 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>APixel</title>
-    <link href="https://fonts.cdnfonts.com/css/common-pixel" rel="stylesheet">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        @font-face { font-family: 'PixelCustom'; src: url('00.fon'); }
+        
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-user-select: none; user-select: none; image-rendering: pixelated; }
-        body { background-color: #1a1a1a; color: #fff; font-family: 'Common Pixel', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        body { background-color: #1a1a1a; color: #fff; font-family: 'PixelCustom', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
         .home-banner { position: relative; width: 100%; height: 200px; overflow: hidden; border-bottom: 2px solid #111; perspective: 1200px; }
         .home-pic { width: 120%; height: 120%; object-fit: cover; position: absolute; top: -10%; left: -10%; will-change: transform; }
+        
         .banner-nav { position: absolute; left: 15px; bottom: 12px; font-size: 18px; display: flex; align-items: center; gap: 10px; text-shadow: 2px 2px 0px #000; z-index: 5; }
+        .nav-secondary { display: flex; align-items: center; gap: 10px; opacity: 0.7; }
+        .nav-divider { width: 1px; height: 16px; background-color: #fff; }
 
-        main { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 25px 0; }
+        main { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 25px 0; perspective: 1000px; }
         
         /* Новая быстрая анимация */
-        .card-wrapper { width: 88%; max-width: 380px; display: flex; flex-direction: column; gap: 6px; opacity: 0; transform: translateY(15px); animation: quickIn 0.4s ease-out forwards; }
-        .card-wrapper:nth-child(1) { animation-delay: 0.05s; }
-        .card-wrapper:nth-child(2) { animation-delay: 0.12s; opacity: 0.7; }
-        .card-wrapper:nth-child(3) { animation-delay: 0.19s; opacity: 0.7; }
+        .card-wrapper { width: 88%; max-width: 380px; display: flex; flex-direction: column; gap: 6px; opacity: 0; transform: translateY(var(--start-y, 20px)); transition: 0.4s cubic-bezier(0.1, 1, 0.3, 1); }
+        .card-wrapper.show { opacity: 1; transform: translateY(0); }
+        .card-wrapper:nth-child(2), .card-wrapper:nth-child(3) { opacity: 0.6; }
 
-        @keyframes quickIn { to { opacity: 1; transform: translateY(0); } }
-
-        .card { position: relative; width: 100%; height: 110px; background-color: #2b2b2b; border: 1px solid #111; border-radius: 4px; box-shadow: inset 3.5px 3.5px 0px #3d3d3d, inset -3.5px -3.5px 0px #1a1a1a; padding: 15px; display: flex; align-items: center; transition: 0.3s; overflow: hidden; }
-        .card-content, .img-mask { transition: 0.2s; }
+        .card { position: relative; width: 100%; height: 110px; background-color: #2b2b2b; border: 1px solid #111; border-radius: 4px; box-shadow: inset 3.5px 3.5px 0px #3d3d3d, inset -3.5px -3.5px 0px #1a1a1a; display: flex; align-items: center; transition: 0.3s; overflow: hidden; }
+        
+        /* Защита текста от заезда на картинку */
+        .card-content { width: 100%; padding: 15px 105px 15px 15px; z-index: 2; transition: 0.2s; }
         .card-title { font-size: 16px; margin-bottom: 8px; text-transform: uppercase; }
-        .card-desc { font-size: 10px; line-height: 1.4; color: #7a7a7a; }
+        .card-desc { font-size: 10px; line-height: 1.3; color: #7a7a7a; }
+        
         .card-footer-text { font-size: 8px; color: #444; padding-left: 8px; }
+        .card-footer-text span { color: #4CAF50; }
 
         .img-mask { position: absolute; top: -40px; right: 0; bottom: 0; left: 0; overflow: hidden; pointer-events: none; }
         .card-img { position: absolute; z-index: 1; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5)); }
-        .img-skin { width: 110px; right: -5px; bottom: -55px; }
+        .img-skin { width: 105px; right: 0; bottom: -50px; }
+        .img-block { width: 90px; right: 5px; bottom: 12px; }
+        .img-item { width: 70px; right: 12px; bottom: 2px; transform: rotate(7deg); }
 
         /* --- SELECTOR --- */
-        .model-selector { position: absolute; inset: 0; display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: 0.2s; z-index: 10; padding: 12px; }
-        .selector-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-        .selector-title { font-size: 10px; color: #888; text-transform: uppercase; }
-        .selector-close { font-size: 14px; color: #555; cursor: pointer; padding: 0 10px; font-weight: bold; }
+        .model-selector { position: absolute; inset: 0; display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 10; padding: 12px; background: #2b2b2b; }
+        .selector-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .selector-title { font-size: 10px; color: #aaa; text-transform: uppercase; }
+        .selector-close { font-size: 12px; color: #666; cursor: pointer; padding: 5px; font-weight: bold; }
         
-        .options-grid { display: flex; width: 100%; height: 72px; gap: 8px; }
-        .model-option { flex: 1; border-radius: 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border: 3px solid #333; box-shadow: inset 3px 3px 0px rgba(255,255,255,0.05); cursor: pointer; }
-        .model-option:active { transform: scale(0.95); }
-        .model-option img { width: 28px; height: 28px; }
-        .model-option span { font-size: 8px; text-transform: uppercase; color: rgba(255,255,255,0.9); }
+        .options-grid { display: flex; width: 100%; height: 70px; gap: 8px; }
+        .model-option { 
+            flex: 1; border-radius: 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; 
+            border: 3px solid #333; /* Темно-серый контур */
+            cursor: pointer; transition: 0.1s;
+        }
+        .model-option:active { transform: scale(0.92); }
+        .model-option img { width: 26px; height: 26px; }
+        .model-option span { font-size: 8px; text-transform: uppercase; }
 
-        .opt-steve { background-color: #2e4a73; }
-        .opt-alex { background-color: #435d2d; }
-        .opt-rand { background-color: #855e21; }
+        /* Жирный цветной контур внутри */
+        .opt-steve { background-color: #3b5a8a; box-shadow: inset 0 0 0 3px #4a90e2; }
+        .opt-alex { background-color: #5a7a3b; box-shadow: inset 0 0 0 3px #7ed321; }
+        .opt-import { background-color: #a67a2e; box-shadow: inset 0 0 0 3px #f5a623; }
 
         .card.selecting .card-content, .card.selecting .img-mask { opacity: 0; transform: scale(0.95); }
         .card.selecting .model-selector { opacity: 1; pointer-events: auto; }
     </style>
 </head>
 <body>
-    <div class="home-banner"><img src="Logos/HomePic.PNG" class="home-pic" id="bg">
-        <div class="banner-nav"><span>APIXEL</span></div>
+    <div class="home-banner">
+        <img src="Logos/HomePic.PNG" class="home-pic" id="p">
+        <div class="banner-nav"><span>APIXEL</span><div class="nav-secondary"><div class="nav-divider"></div><span>HOME</span></div></div>
     </div>
-    <main>
+    <main id="m">
         <div class="card-wrapper">
             <div class="card" id="sc">
                 <div class="card-content">
@@ -67,64 +80,75 @@
                 </div>
                 <div class="img-mask"><img src="Logos/skin.PNG" class="card-img img-skin"></div>
                 <div class="model-selector">
-                    <div class="selector-header">
-                        <span class="selector-title">Choose a template</span>
-                        <span class="selector-close" id="cl">X</span>
-                    </div>
+                    <div class="selector-header"><span class="selector-title">Choose a template</span><span class="selector-close" id="cl">X</span></div>
                     <div class="options-grid">
-                        <div class="model-option opt-steve" onclick="location.href='editor.html?m=steve'">
-                            <img src="Logos/steve.WEBP"><span>Steve</span>
-                        </div>
-                        <div class="model-option opt-alex" onclick="location.href='editor.html?m=alex'">
-                            <img src="Logos/alex.WEBP"><span>Alex</span>
-                        </div>
-                        <div class="model-option opt-rand" onclick="pickRnd()">
-                            <img src="Logos/import.webp"><span>Random</span>
-                        </div>
+                        <div class="model-option opt-steve" onclick="location.href='editor.html?m=steve'"><img src="Logos/steve.WEBP"><span>Steve</span></div>
+                        <div class="model-option opt-alex" onclick="location.href='editor.html?m=alex'"><img src="Logos/alex.WEBP"><span>Alex</span></div>
+                        <div class="model-option opt-import" onclick="pickRnd()"><img src="Logos/skin.PNG"><span>Random</span></div>
                     </div>
                 </div>
             </div>
-            <div class="card-footer-text">Skins creating rules. <span style="color:#4CAF50">Learn more ></span></div>
+            <div class="card-footer-text">Skins creating rules. <span>Learn more ></span></div>
         </div>
 
         <div class="card-wrapper" onclick="alert('Coming soon')">
-            <div class="card"><div class="card-content"><div class="card-title">Create Block</div><div class="card-desc">Design unique textures and properties for new in-game blocks.</div></div>
-                <div class="img-mask" style="opacity:0.6"><img src="Logos/block.PNG" class="card-img" style="width:95px; right:5px; bottom:12px;"></div>
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-title">Create Block</div>
+                    <div class="card-desc">Design unique textures and properties for new in-game blocks.</div>
+                </div>
+                <div class="img-mask"><img src="Logos/block.PNG" class="card-img img-block"></div>
             </div>
+            <div class="card-footer-text">Block texture guidelines. <span>Learn more ></span></div>
         </div>
 
         <div class="card-wrapper" onclick="alert('Coming soon')">
-            <div class="card"><div class="card-content"><div class="card-title">Create Item</div><div class="card-desc">Add custom weapons and rare artifacts to your world with ease.</div></div>
-                <div class="img-mask" style="opacity:0.6"><img src="Logos/item.PNG" class="card-img" style="width:75px; right:10px; bottom:5px; transform:rotate(7deg)"></div>
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-title">Create Item</div>
+                    <div class="card-desc">Add custom weapons and rare artifacts to your world with ease.</div>
+                </div>
+                <div class="img-mask"><img src="Logos/item.PNG" class="card-img img-item"></div>
             </div>
+            <div class="card-footer-text">Items & Artifacts policy. <span>Learn more ></span></div>
         </div>
     </main>
 
     <script>
         const tg = window.Telegram.WebApp; tg.expand(); tg.ready();
-        const bg = document.getElementById('bg'), sc = document.getElementById('sc'), cl = document.getElementById('cl');
+        const p = document.getElementById('p'), sc = document.getElementById('sc'), cl = document.getElementById('cl');
         let cX = 0, cY = 0, tX = 0, tY = 0;
 
-        function update() { cX += (tX - cX) * 0.1; cY += (tY - cY) * 0.1; bg.style.transform = `translate(${cX}px, ${cY}px) scale(1.1)`; requestAnimationFrame(update); }
-        update();
+        // 1. Рандомная анимация появления
+        document.querySelectorAll('.card-wrapper').forEach((w, i) => {
+            const rndY = 15 + Math.random() * 20;
+            const rndDelay = i * 0.1 + Math.random() * 0.2;
+            w.style.setProperty('--start-y', `${rndY}px`);
+            setTimeout(() => w.classList.add('show'), rndDelay * 1000);
+        });
 
-        window.addEventListener('deviceorientation', e => { tX = Math.max(Math.min(e.gamma, 12), -12) * -1; tY = Math.max(Math.min(e.beta - 45, 12), -12) * -1; });
+        // 2. Плавный фон
+        function u() { cX += (tX - cX) * 0.1; cY += (tY - cY) * 0.1; p.style.transform = `translate(${cX}px, ${cY}px) scale(1.15)`; requestAnimationFrame(u); }
+        u();
+        window.addEventListener('deviceorientation', e => { tX = Math.max(Math.min(e.gamma, 15), -15) * -1; tY = Math.max(Math.min(e.beta - 45, 15), -15) * -1; });
 
+        // 3. Логика селектора
         sc.onclick = (e) => { 
             if (sc.classList.contains('selecting') || e.target === cl) return;
             sc.classList.add('selecting');
             if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
         };
-
         cl.onclick = (e) => { e.stopPropagation(); sc.classList.remove('selecting'); };
 
+        // 4. Рандомный импорт (скриншот папки Random/Import)
         function pickRnd() {
-            const list = ['IMG_6578.WEBP','IMG_6579.WEBP','IMG_6582.WEBP','IMG_6583.WEBP','IMG_6584.WEBP','IMG_6585.WEBP','IMG_6586.WEBP','IMG_6587.WEBP','IMG_6588.WEBP','IMG_6598.WEBP','IMG_6600.WEBP','IMG_6602.WEBP'];
-            const file = list[Math.floor(Math.random() * list.length)];
-            location.href = `editor.html?m=random&path=Logos/Random/Import/${file}`;
+            const skins = ["IMG_6578.WEBP", "IMG_6579.WEBP", "IMG_6582.WEBP", "IMG_6583.WEBP", "IMG_6584.WEBP", "IMG_6585.WEBP"];
+            const res = skins[Math.floor(Math.random() * skins.length)];
+            location.href = `editor.html?m=random&path=Random/Import/${res}`;
         }
 
         document.querySelectorAll('.card').forEach(c => c.addEventListener('click', () => { if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); }));
+        document.body.onclick = () => { if(typeof DeviceOrientationEvent !== 'undefined' && DeviceOrientationEvent.requestPermission) DeviceOrientationEvent.requestPermission(); };
     </script>
 </body>
 </html>
