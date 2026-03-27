@@ -4,166 +4,85 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>APixel</title>
+    <link href="https://fonts.cdnfonts.com/css/common-pixel" rel="stylesheet">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        @font-face { font-family: 'Pixel'; src: url('00TT.TTF'); }
-        
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-user-select: none; user-select: none; image-rendering: pixelated; }
-        body { background-color: #1a1a1a; color: #fff; font-family: 'Pixel', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        body { background-color: #1a1a1a; color: #fff; font-family: 'Common Pixel', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* Banner */
-        .home-banner { position: relative; width: 100%; height: 200px; overflow: hidden; border-bottom: 2px solid #111; }
+        .home-banner { position: relative; width: 100%; height: 200px; overflow: hidden; border-bottom: 2px solid #111; perspective: 1200px; }
         .home-pic { width: 120%; height: 120%; object-fit: cover; position: absolute; top: -10%; left: -10%; will-change: transform; }
+        
         .banner-nav { position: absolute; left: 15px; bottom: 12px; font-size: 18px; display: flex; align-items: center; gap: 10px; text-shadow: 2px 2px 0px #000; z-index: 5; }
-        .nav-divider { width: 1px; height: 16px; background-color: #fff; opacity: 0.7; }
+        .nav-secondary { display: flex; align-items: center; gap: 10px; opacity: 0.7; }
+        .nav-divider { width: 1px; height: 16px; background-color: #fff; }
 
-        main { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 25px 0; }
-        
-        /* Animations */
-        .card-wrapper { width: 88%; max-width: 380px; display: flex; flex-direction: column; gap: 6px; opacity: 0; transform: translateX(50px); animation: slide 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.1) forwards; }
+        main { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 25px 0; perspective: 1000px; }
+        .card-wrapper { width: 88%; max-width: 380px; display: flex; flex-direction: column; gap: 6px; opacity: 0; transform: translateX(100px); animation: slideIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .card-wrapper:nth-child(1) { animation-delay: 0.1s; }
-        .card-wrapper:nth-child(2) { animation-delay: 0.2s; opacity: 0.7; }
-        .card-wrapper:nth-child(3) { animation-delay: 0.3s; opacity: 0.7; }
+        .card-wrapper:nth-child(2) { animation-delay: 0.2s; }
+        .card-wrapper:nth-child(3) { animation-delay: 0.3s; }
 
-        @keyframes slide { to { opacity: 1; transform: translateX(0); } }
+        @keyframes slideIn { to { opacity: 1; transform: translateX(0); } }
 
-        .card { position: relative; width: 100%; height: 110px; background-color: #2b2b2b; border: 1px solid #111; border-radius: 4px; box-shadow: inset 3.5px 3.5px 0px #3d3d3d, inset -3.5px -3.5px 0px #1a1a1a; display: flex; align-items: center; transition: 0.2s; overflow: hidden; }
-        
-        .card-content { width: 100%; padding-right: 110px; padding-left: 15px; z-index: 2; transition: 0.2s; }
-        .card-title { font-size: 18px; margin-bottom: 6px; text-transform: uppercase; }
-        .card-desc { font-size: 10px; line-height: 1.3; color: #7a7a7a; }
-        
-        .card-footer-text { font-size: 9px; color: #444; padding-left: 8px; }
+        .card { position: relative; width: 100%; height: 110px; background-color: #2b2b2b; border: 1px solid #111; border-radius: 4px; box-shadow: inset 3.5px 3.5px 0px #3d3d3d, inset -3.5px -3.5px 0px #1a1a1a; padding: 15px; display: flex; align-items: center; cursor: pointer; }
+        .card:active { transform: scale(0.96); transition: 0.1s; }
+        .card-content { width: 65%; z-index: 2; }
+        .card-title { font-size: 16px; margin-bottom: 8px; text-transform: uppercase; }
+        .card-desc { font-size: 10px; line-height: 1.4; color: #7a7a7a; }
+        .card-footer-text { font-size: 8px; color: #444; padding-left: 8px; }
         .card-footer-text span { color: #4CAF50; }
 
-        .img-mask { position: absolute; top: 0; right: 0; bottom: 0; width: 110px; overflow: hidden; pointer-events: none; transition: 0.2s; }
-        .card-img { position: absolute; right: 0; bottom: -45px; width: 110px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); }
-        .img-block { width: 90px; bottom: 10px; right: 5px; }
-        .img-item { width: 75px; bottom: 0px; right: 10px; transform: rotate(7deg); }
-
-        /* Selector UI */
-        .model-selector { position: absolute; inset: 0; display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: 0.25s; z-index: 10; padding: 12px; background: #2b2b2b; }
-        .selector-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .selector-title { font-size: 10px; color: #aaa; text-transform: uppercase; }
-        .selector-close { font-size: 14px; color: #555; cursor: pointer; padding: 2px 8px; }
-        
-        .options-grid { display: flex; flex: 1; gap: 8px; align-items: stretch; }
-        .model-option { 
-            flex: 1; border-radius: 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; 
-            border: 3px solid #333; /* Тот самый темно-серый */
-            cursor: pointer; 
-        }
-        .model-option img { width: 30px; height: 30px; }
-        .model-option span { font-size: 8px; text-transform: uppercase; }
-
-        /* Внутренние цветные рамки */
-        .opt-steve { background-color: #3b5a8a; box-shadow: inset 4px 4px 0px #4a90e2; }
-        .opt-alex { background-color: #5a7a3b; box-shadow: inset 4px 4px 0px #7ed321; }
-        .opt-import { background-color: #a67a2e; box-shadow: inset 4px 4px 0px #f5a623; }
-
-        .card.selecting .card-content, .card.selecting .img-mask { opacity: 0; transform: scale(0.96); }
-        .card.selecting .model-selector { opacity: 1; pointer-events: auto; }
+        .img-mask { position: absolute; top: -40px; right: 0; bottom: 0; left: 0; overflow: hidden; pointer-events: none; }
+        .card-img { position: absolute; z-index: 1; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5)); }
+        .img-skin { width: 110px; right: -5px; bottom: -55px; }
+        .img-block { width: 95px; right: 5px; bottom: 12px; }
+        .img-item { width: 75px; right: 10px; bottom: -5px; transform: rotate(7deg); }
     </style>
 </head>
 <body>
-    <div class="home-banner">
-        <img src="Logos/HomePic.PNG" class="home-pic" id="p">
-        <div class="banner-nav"><span>APIXEL</span><div class="nav-divider"></div><span>HOME</span></div>
+    <div class="home-banner"><img src="Logos/HomePic.PNG" class="home-pic" id="p">
+        <div class="banner-nav"><span>APIXEL</span><div class="nav-secondary"><div class="nav-divider"></div><span>HOME</span></div></div>
     </div>
-
     <main>
         <div class="card-wrapper">
-            <div class="card" id="sc">
-                <div class="card-content">
-                    <div class="card-title">Create Skin</div>
-                    <div class="card-desc">Create your own Minecraft™ skin. You also can edit or choose skin from the list.</div>
-                </div>
-                <div class="img-mask"><img src="Logos/skin.PNG" class="card-img"></div>
-                
-                <div class="model-selector">
-                    <div class="selector-header">
-                        <span class="selector-title">Choose a template</span>
-                        <span class="selector-close" id="cl">X</span>
-                    </div>
-                    <div class="options-grid">
-                        <div class="model-option opt-steve" onclick="location.href='editor.html?m=steve'">
-                            <img src="Logos/steve.WEBP"><span>Steve</span>
-                        </div>
-                        <div class="model-option opt-alex" onclick="location.href='editor.html?m=alex'">
-                            <img src="Logos/alex.WEBP"><span>Alex</span>
-                        </div>
-                        <div class="model-option opt-import" onclick="pickRnd()">
-                            <img src="Logos/skin.PNG"><span>Random</span>
-                        </div>
-                    </div>
-                </div>
+            <div class="card" onclick="location.href='skin_editor.html'"><div class="card-content"><div class="card-title">Create Skin</div><div class="card-desc">Create your own Minecraft™ skin. You also can edit or choose skin from the list.</div></div>
+                <div class="img-mask"><img src="Logos/skin.PNG" class="card-img img-skin"></div>
             </div>
             <div class="card-footer-text">Skins creating rules. <span>Learn more ></span></div>
         </div>
-
-        <div class="card-wrapper" onclick="alert('Coming soon')">
-            <div class="card">
-                <div class="card-content">
-                    <div class="card-title">Create Block</div>
-                    <div class="card-desc">Design unique textures and properties for new in-game blocks.</div>
-                </div>
+        <div class="card-wrapper">
+            <div class="card"><div class="card-content"><div class="card-title">Create Block</div><div class="card-desc">Design unique textures and properties for new in-game blocks. Real-time preview.</div></div>
                 <div class="img-mask"><img src="Logos/block.PNG" class="card-img img-block"></div>
             </div>
+            <div class="card-footer-text">Block texture guidelines. <span>Learn more ></span></div>
         </div>
-
-        <div class="card-wrapper" onclick="alert('Coming soon')">
-            <div class="card">
-                <div class="card-content">
-                    <div class="card-title">Create Item</div>
-                    <div class="card-desc">Add custom weapons and rare artifacts to your world with ease.</div>
-                </div>
+        <div class="card-wrapper">
+            <div class="card"><div class="card-content"><div class="card-title">Create Item</div><div class="card-desc">Add custom weapons, tools, and rare artifacts to your world with ease.</div></div>
                 <div class="img-mask"><img src="Logos/item.PNG" class="card-img img-item"></div>
             </div>
+            <div class="card-footer-text">Items & Artifacts policy. <span>Learn more ></span></div>
         </div>
     </main>
-
     <script>
         const tg = window.Telegram.WebApp; tg.expand(); tg.ready();
-        const p = document.getElementById('p'), sc = document.getElementById('sc'), cl = document.getElementById('cl');
-        let cX = 0, cY = 0, tX = 0, tY = 0;
+        const p = document.getElementById('p');
+        let curX = 0, curY = 0, tarX = 0, tarY = 0;
 
-        // Плавный параллакс фона
-        function u() { 
-            cX += (tX - cX) * 0.1; cY += (tY - cY) * 0.1; 
-            p.style.transform = `translate(${cX}px, ${cY}px) scale(1.15)`; 
-            requestAnimationFrame(u); 
+        function update() {
+            curX += (tarX - curX) * 0.1; curY += (tarY - curY) * 0.1;
+            p.style.transform = `translate(${curX}px, ${curY}px) scale(1.15)`;
+            requestAnimationFrame(update);
         }
-        u();
+        update();
 
-        window.addEventListener('deviceorientation', e => { 
-            tX = Math.max(Math.min(e.gamma, 15), -15) * -1; 
-            tY = Math.max(Math.min(e.beta - 45, 15), -15) * -1; 
+        window.addEventListener('deviceorientation', e => {
+            tarX = Math.max(Math.min(e.gamma, 20), -20) * -1;
+            tarY = Math.max(Math.min(e.beta - 45, 20), -20) * -1;
         });
 
-        // Открытие выбора
-        sc.onclick = (e) => { 
-            if (sc.classList.contains('selecting') || e.target === cl) return;
-            sc.classList.add('selecting');
-            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-        };
-
-        // Закрытие выбора
-        cl.onclick = (e) => { e.stopPropagation(); sc.classList.remove('selecting'); };
-
-        // Тот самый Рандом из папки Random/Import/
-        function pickRnd() {
-            const files = [
-                "IMG_6578.WEBP", "IMG_6579.WEBP", "IMG_6582.WEBP", "IMG_6583.WEBP", 
-                "IMG_6584.WEBP", "IMG_6585.WEBP", "IMG_6586.WEBP", "IMG_6587.WEBP", 
-                "IMG_6588.WEBP", "IMG_6598.WEBP", "IMG_6600.WEBP", "IMG_6602.WEBP"
-            ];
-            const file = files[Math.floor(Math.random() * files.length)];
-            location.href = `editor.html?m=random&path=Random/Import/${file}`;
-        }
-
-        document.querySelectorAll('.card').forEach(c => {
-            c.addEventListener('click', () => { if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); });
-        });
+        document.querySelectorAll('.card').forEach(c => c.onclick = () => { if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); });
+        document.body.onclick = () => { if(typeof DeviceOrientationEvent !== 'undefined' && DeviceOrientationEvent.requestPermission) DeviceOrientationEvent.requestPermission(); };
     </script>
 </body>
 </html>
