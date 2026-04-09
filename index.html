@@ -1,88 +1,233 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>APixel</title>
-    <link href="https://fonts.cdnfonts.com/css/common-pixel" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>iOS 26 Stealth Liquid</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-user-select: none; user-select: none; image-rendering: pixelated; }
-        body { background-color: #1a1a1a; color: #fff; font-family: 'Common Pixel', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        
-        .home-banner { position: relative; width: 100%; height: 200px; overflow: hidden; border-bottom: 2px solid #111; perspective: 1200px; }
-        .home-pic { width: 120%; height: 120%; object-fit: cover; position: absolute; top: -10%; left: -10%; will-change: transform; }
-        
-        .banner-nav { position: absolute; left: 15px; bottom: 12px; font-size: 18px; display: flex; align-items: center; gap: 10px; text-shadow: 2px 2px 0px #000; z-index: 5; }
-        .nav-secondary { display: flex; align-items: center; gap: 10px; opacity: 0.7; }
-        .nav-divider { width: 1px; height: 16px; background-color: #fff; }
+        :root {
+            --bg-color: #000000;
+            --tab-bar-bg: rgba(28, 28, 30, 0.92);
+            --active-accent: #007AFF;
+            --inactive-color: #8e8e93;
+            --pill-bg: rgba(255, 255, 255, 0.12);
+            /* Сделали контур темнее */
+            --pill-border-moving: rgba(255, 255, 255, 0.25); 
+        }
 
-        main { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 25px 0; perspective: 1000px; }
-        .card-wrapper { width: 88%; max-width: 380px; display: flex; flex-direction: column; gap: 6px; opacity: 0; transform: translateX(100px); animation: slideIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .card-wrapper:nth-child(1) { animation-delay: 0.1s; }
-        .card-wrapper:nth-child(2) { animation-delay: 0.2s; }
-        .card-wrapper:nth-child(3) { animation-delay: 0.3s; }
+        body {
+            margin: 0;
+            background: var(--bg-color);
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            overflow: hidden;
+        }
 
-        @keyframes slideIn { to { opacity: 1; transform: translateX(0); } }
+        .tab-bar-container {
+            margin-bottom: calc(15px + env(safe-area-inset-bottom));
+            width: 92%;
+            max-width: 400px;
+            display: flex;
+            justify-content: center;
+        }
 
-        .card { position: relative; width: 100%; height: 110px; background-color: #2b2b2b; border: 1px solid #111; border-radius: 4px; box-shadow: inset 3.5px 3.5px 0px #3d3d3d, inset -3.5px -3.5px 0px #1a1a1a; padding: 15px; display: flex; align-items: center; cursor: pointer; }
-        .card:active { transform: scale(0.96); transition: 0.1s; }
-        .card-content { width: 65%; z-index: 2; }
-        .card-title { font-size: 16px; margin-bottom: 8px; text-transform: uppercase; }
-        .card-desc { font-size: 10px; line-height: 1.4; color: #7a7a7a; }
-        .card-footer-text { font-size: 8px; color: #444; padding-left: 8px; }
-        .card-footer-text span { color: #4CAF50; }
+        .ios-tab-bar {
+            position: relative;
+            background: var(--tab-bar-bg);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border-radius: 38px;
+            display: flex;
+            padding: 4px;
+            border: 0.5px solid rgba(255, 255, 255, 0.08);
+            width: 100%;
+            justify-content: space-around;
+        }
 
-        .img-mask { position: absolute; top: -40px; right: 0; bottom: 0; left: 0; overflow: hidden; pointer-events: none; }
-        .card-img { position: absolute; z-index: 1; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5)); }
-        .img-skin { width: 110px; right: -5px; bottom: -55px; }
-        .img-block { width: 95px; right: 5px; bottom: 12px; }
-        .img-item { width: 75px; right: 10px; bottom: -5px; transform: rotate(7deg); }
+        .tab-item {
+            position: relative;
+            z-index: 2;
+            padding: 8px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: none;
+            border: none;
+            flex: 1;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .icon-wrapper {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 4px;
+            background-color: var(--inactive-color);
+            -webkit-mask-size: contain;
+            -webkit-mask-repeat: no-repeat;
+            -webkit-mask-position: center;
+            mask-size: contain;
+            mask-repeat: no-repeat;
+            mask-position: center;
+            transition: background-color 0.25s ease;
+        }
+
+        .tab-text {
+            font-size: 10px;
+            font-weight: 500;
+            color: var(--inactive-color);
+            transition: color 0.25s ease;
+        }
+
+        .tab-item.active .icon-wrapper { background-color: var(--active-accent); }
+        .tab-item.active .tab-text { color: var(--active-accent); }
+
+        .liquid-slider {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            height: calc(100% - 8px);
+            background: var(--pill-bg);
+            border-radius: 34px;
+            z-index: 1;
+            pointer-events: none;
+            transform-origin: center center;
+            box-sizing: border-box;
+            border: 1px solid transparent;
+            will-change: transform, left, width, background-color, border-color;
+            /* Быстрая и плавная смена состояний */
+            transition: background-color 0.16s ease-out, border-color 0.16s ease-out;
+        }
+
+        /* Состояние полета: без заливки и с темным контуром */
+        .liquid-slider.flying {
+            background-color: transparent !important; 
+            border-color: var(--pill-border-moving);
+        }
     </style>
 </head>
 <body>
-    <div class="home-banner"><img src="Logos/HomePic.PNG" class="home-pic" id="p">
-        <div class="banner-nav"><span>APIXEL</span><div class="nav-secondary"><div class="nav-divider"></div><span>HOME</span></div></div>
-    </div>
-    <main>
-        <div class="card-wrapper">
-            <div class="card" onclick="location.href='skin_editor.html'"><div class="card-content"><div class="card-title">Create Skin</div><div class="card-desc">Create your own Minecraft™ skin. You also can edit or choose skin from the list.</div></div>
-                <div class="img-mask"><img src="Logos/skin.PNG" class="card-img img-skin"></div>
-            </div>
-            <div class="card-footer-text">Skins creating rules. <span>Learn more ></span></div>
-        </div>
-        <div class="card-wrapper">
-            <div class="card"><div class="card-content"><div class="card-title">Create Block</div><div class="card-desc">Design unique textures and properties for new in-game blocks. Real-time preview.</div></div>
-                <div class="img-mask"><img src="Logos/block.PNG" class="card-img img-block"></div>
-            </div>
-            <div class="card-footer-text">Block texture guidelines. <span>Learn more ></span></div>
-        </div>
-        <div class="card-wrapper">
-            <div class="card"><div class="card-content"><div class="card-title">Create Item</div><div class="card-desc">Add custom weapons, tools, and rare artifacts to your world with ease.</div></div>
-                <div class="img-mask"><img src="Logos/item.PNG" class="card-img img-item"></div>
-            </div>
-            <div class="card-footer-text">Items & Artifacts policy. <span>Learn more ></span></div>
-        </div>
-    </main>
-    <script>
-        const tg = window.Telegram.WebApp; tg.expand(); tg.ready();
-        const p = document.getElementById('p');
-        let curX = 0, curY = 0, tarX = 0, tarY = 0;
 
-        function update() {
-            curX += (tarX - curX) * 0.1; curY += (tarY - curY) * 0.1;
-            p.style.transform = `translate(${curX}px, ${curY}px) scale(1.15)`;
-            requestAnimationFrame(update);
+<div class="tab-bar-container">
+    <nav class="ios-tab-bar" id="tabBar">
+        <div class="liquid-slider" id="slider"></div>
+
+        <button class="tab-item active" data-index="0">
+            <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/6997/6997164.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/6997/6997164.png');"></div>
+            <span class="tab-text">Главная</span>
+        </button>
+
+        <button class="tab-item" data-index="1">
+            <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/2769/2769160.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/2769/2769160.png');"></div>
+            <span class="tab-text">Меню</span>
+        </button>
+
+        <button class="tab-item" data-index="2">
+            <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/9959/9959489.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/9959/9959489.png');"></div>
+            <span class="tab-text">Настройки</span>
+        </button>
+    </nav>
+</div>
+
+<script>
+    const PHYSICS = {
+        pos: { k: 380, d: 38, m: 1 },    
+        scale: { k: 420, d: 24, m: 1 }   
+    };
+
+    const slider = document.getElementById('slider');
+    const tabs = document.querySelectorAll('.tab-item');
+
+    let state = {
+        x: 0, tx: 0, vx: 0,
+        w: 0, tw: 0, vw: 0,
+        sx: 1, tsx: 1, vsx: 0,
+        sy: 1, tsy: 1, vsy: 0,
+        isMoving: false,
+        intensity: 1,
+        currentIndex: 0
+    };
+
+    function spring(current, target, velocity, config) {
+        const force = -config.k * (current - target);
+        const damping = -config.d * velocity;
+        const acceleration = (force + damping) / config.m;
+        velocity += acceleration * 0.016;
+        current += velocity * 0.016;
+        return [current, velocity];
+    }
+
+    function update() {
+        const dist = Math.abs(state.x - state.tx);
+        const vel = Math.abs(state.vx);
+
+        if (state.isMoving) {
+            if (dist > 15) { 
+                slider.classList.add('flying');
+                // Рост на дальних дистанциях +5% к предыдущему значению
+                state.tsy = 1 + ((0.27) * state.intensity); 
+                state.tsx = 1 - (0.10 * state.intensity); 
+            } else if (dist <= 15 && dist > 0.5) {
+                slider.classList.remove('flying');
+                state.tsy = 1 - (0.05 * state.intensity); 
+                state.tsx = 1 + (0.08 * state.intensity); 
+            } else {
+                state.tsx = 1;
+                state.tsy = 1;
+                if (vel < 0.2 && Math.abs(state.vsx) < 0.2) {
+                    state.isMoving = false;
+                    slider.classList.remove('flying');
+                }
+            }
         }
-        update();
 
-        window.addEventListener('deviceorientation', e => {
-            tarX = Math.max(Math.min(e.gamma, 20), -20) * -1;
-            tarY = Math.max(Math.min(e.beta - 45, 20), -20) * -1;
-        });
+        [state.x, state.vx] = spring(state.x, state.tx, state.vx, PHYSICS.pos);
+        [state.w, state.vw] = spring(state.w, state.tw, state.vw, PHYSICS.pos);
+        [state.sx, state.vsx] = spring(state.sx, state.tsx, state.vsx, PHYSICS.scale);
+        [state.sy, state.vsy] = spring(state.sy, state.tsy, state.vsy, PHYSICS.scale);
 
-        document.querySelectorAll('.card').forEach(c => c.onclick = () => { if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); });
-        document.body.onclick = () => { if(typeof DeviceOrientationEvent !== 'undefined' && DeviceOrientationEvent.requestPermission) DeviceOrientationEvent.requestPermission(); };
-    </script>
+        slider.style.left = `${state.x}px`;
+        slider.style.width = `${state.w}px`;
+        slider.style.transform = `scale(${state.sx}, ${state.sy})`;
+
+        requestAnimationFrame(update);
+    }
+
+    function setActive(el, instant = false) {
+        const newIdx = parseInt(el.dataset.index);
+        const diff = Math.abs(newIdx - (state.currentIndex || 0));
+
+        tabs.forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+
+        state.tx = el.offsetLeft;
+        state.tw = el.offsetWidth;
+        state.currentIndex = newIdx;
+        
+        if (instant) {
+            state.x = state.tx;
+            state.w = state.tw;
+            state.sx = 1; state.sy = 1;
+        } else {
+            state.intensity = diff > 1 ? 1 : 0.6;
+            state.isMoving = true;
+
+            if (window.Telegram?.WebApp?.HapticFeedback) {
+                Telegram.WebApp.HapticFeedback.selectionChanged();
+            }
+        }
+    }
+
+    tabs.forEach(tab => tab.addEventListener('click', () => setActive(tab)));
+
+    const initial = document.querySelector('.tab-item.active');
+    setActive(initial, true);
+    requestAnimationFrame(update);
+</script>
+
 </body>
 </html>
