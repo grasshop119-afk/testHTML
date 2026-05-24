@@ -147,12 +147,14 @@
         if (state.isMoving) {
             if (dist > 15) { 
                 slider.classList.add('flying');
-                state.tsx = 1 + (0.18 * state.intensity); 
-                state.tsy = 1 - (0.12 * state.intensity); 
+                // Дальний полет: сужаемся с боков по X и раздуваемся выше таббара по Y
+                state.tsx = 1 - (0.15 * state.intensity); 
+                state.tsy = 1 + (0.25 * state.intensity); 
             } else if (dist <= 15 && dist > 0.5) {
                 slider.classList.remove('flying');
-                state.tsx = 1 - (0.05 * state.intensity); 
-                state.tsy = 1 + (0.05 * state.intensity); 
+                // Приземление: классический небольшой шлепок-амортизация
+                state.tsx = 1 + (0.08 * state.intensity); 
+                state.tsy = 1 - (0.05 * state.intensity); 
             } else {
                 state.tsx = state.tsy = 1;
                 if (Math.abs(state.vx) < 0.2 && Math.abs(state.vsx) < 0.2) {
