@@ -9,7 +9,6 @@
             --active-accent: #ffffff;
             --inactive-color: rgba(255, 255, 255, 0.75);
             --p-top: #fff; --p-right: #fff; --p-bottom: #fff; --p-left: #fff;
-            --p-fly: #fff; /* Отдельный цвет для летящей капли */
             --tabbar-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
             --slider-bg: rgba(0, 0, 0, 0.42);
         }
@@ -132,8 +131,8 @@
 
         .liquid-slider.flying {
             background-color: transparent !important; 
-            border: 1.5px solid var(--p-fly) !important; /* Используем отдельную супер-светлую переменную */
-            box-shadow: 0 0 8px var(--p-fly); /* Добавили легкий неоновый упор, чтобы полет считывался круче */
+            border: 1.5px solid var(--p-top) !important; /* Цвет теперь строго совпадает с ярким контуром таббара */
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15); /* Едва заметная аккуратная тень вместо свечения */
         }
     </style>
 </head>
@@ -235,36 +234,24 @@
             rootStyle.setProperty('--inactive-color', 'rgba(255, 255, 255, 0.75)');
         }
 
-        // 1. КОРРЕКЦИЯ КОНТУРА ТАББАРА: делаем его явно светлее за счет умножения (множитель контраста)
-        const getGlowColor = () => {
-            const factor = isDarkTheme ? 2.5 : 1.6; // Сильнее вытягиваем цвета на темном фоне
-            const r = Math.min(255, avgR * factor + 20);
-            const g = Math.min(255, avgG * factor + 20);
-            const b = Math.min(255, avgB * factor + 20);
-            const op = isDarkTheme ? 0.65 : 0.55; // Подняли прозрачность, чтобы контур не тускнел
-            return `rgba(${r}, ${g}, ${b}, ${op})`;
-        };
-
-        // 2. КОРРЕКЦИЯ ЛЕТЯЩЕЙ КАПЛИ: В два раза светлее и плотнее основного контура
-        const getFlyColor = () => {
+        // Высчитываем единый, хорошо читаемый светлый контур для таббара и летящей капли
+        const getUnifiedGlowColor = () => {
             const factor = isDarkTheme ? 4.0 : 2.2; 
             const r = Math.min(255, avgR * factor + 50);
             const g = Math.min(255, avgG * factor + 50);
             const b = Math.min(255, avgB * factor + 50);
-            const op = isDarkTheme ? 0.95 : 0.85; // Практически непрозрачный, чистый свет в полете
+            const op = isDarkTheme ? 0.95 : 0.85; // Высокая плотность цвета без размытого свечения
             return `rgba(${r}, ${g}, ${b}, ${op})`;
         };
 
-        const glowColor = getGlowColor();
-        const flyColor = getFlyColor();
+        const finalContourColor = getUnifiedGlowColor();
 
-        // Применяем цвета
-        rootStyle.setProperty('--p-top', glowColor);
-        rootStyle.setProperty('--p-right', glowColor);
-        rootStyle.setProperty('--p-bottom', glowColor);
-        rootStyle.setProperty('--p-left', glowColor);
-        
-        rootStyle.setProperty('--p-fly', flyColor);
+        // Применяем один и тот же цвет ко всем сторонам градиента таббара
+        // За счет этого летящая капля автоматически получит этот же цвет через var(--p-top)
+        rootStyle.setProperty('--p-top', finalContourColor);
+        rootStyle.setProperty('--p-right', finalContourColor);
+        rootStyle.setProperty('--p-bottom', finalContourColor);
+        rootStyle.setProperty('--p-left', finalContourColor);
     }
 
     function spring(curr, tgt, vel, cfg) {
