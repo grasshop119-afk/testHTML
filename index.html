@@ -8,14 +8,15 @@
         :root {
             --active-accent: #ffffff;
             --inactive-color: rgba(255, 255, 255, 0.75);
-            --p-fly: #fff; /* Общий яркий контур для таббара и летящей капли */
+            --p-fly: rgba(255, 255, 255, 0.6); /* Динамический контур */
             --tabbar-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
             --slider-bg: rgba(0, 0, 0, 0.42);
         }
 
         body {
             margin: 0;
-            background: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRkLiZZofuMdxDrT1-l8xUj0r7hEpeStNzrFqFqgayAjeO5YdDEWEJXo_lQ&s=10') no-repeat center center fixed;
+            /* Случайное качественное абстрактное фото с Unsplash */
+            background: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80') no-repeat center center fixed;
             background-size: cover;
             height: 100vh;
             display: flex;
@@ -41,8 +42,8 @@
             align-items: center;
             border-radius: 38px;
             background: var(--tabbar-bg);
-            /* Добавляем контур таббара, идентичный капле в полете */
-            border: 1.5px solid var(--p-fly); 
+            /* Тонкий контур 1px, полностью идентичный капле */
+            border: 1px solid var(--p-fly); 
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
             transition: background 0.35s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.2s ease;
             z-index: 1;
@@ -108,7 +109,8 @@
 
         .liquid-slider.flying {
             background-color: transparent !important; 
-            border: 1.5px solid var(--p-fly) !important; /* Точно такой же контур, как у таббара */
+            /* Тонкий контур 1px у летящей капли, как у таббара */
+            border: 1px solid var(--p-fly) !important; 
             box-shadow: none; 
         }
     </style>
@@ -156,7 +158,7 @@
     const ctx = canvas.getContext('2d');
     const bgImg = new Image();
     bgImg.crossOrigin = "anonymous"; 
-    bgImg.src = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRkLiZZofuMdxDrT1-l8xUj0r7hEpeStNzrFqFqgayAjeO5YdDEWEJXo_lQ&s=10';
+    bgImg.src = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80';
 
     bgImg.onload = () => {
         canvas.width = bgImg.width; canvas.height = bgImg.height;
@@ -209,12 +211,12 @@
             rootStyle.setProperty('--inactive-color', 'rgba(255, 255, 255, 0.75)');
         }
 
-        // Вычисляем контур: увеличили множители примерно на 30% для лучшей яркости
+        // Приглушили контур на 50% от прошлого варианта (изменили базовые множители и константу)
         const getFlyColor = () => {
-            const factor = isDarkTheme ? 4.55 : 2.6; // Множители увеличены на 30% (были 3.5 и 2.0)
-            const r = Math.min(255, avgR * factor + 52);
-            const g = Math.min(255, avgG * factor + 52);
-            const b = Math.min(255, avgB * factor + 52);
+            const factor = isDarkTheme ? 4.0 : 2.3; 
+            const r = Math.min(255, avgR * factor + 26);
+            const g = Math.min(255, avgG * factor + 26);
+            const b = Math.min(255, avgB * factor + 26);
             return `rgb(${r}, ${g}, ${b})`; 
         };
 
