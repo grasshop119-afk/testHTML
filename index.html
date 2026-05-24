@@ -3,22 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Dynamic Liquid Tabbar with Smooth Rounded Border</title>
+    <title>Dynamic Liquid Tabbar - Ultra Elegant</title>
     <style>
+        /* Регистрируем переменные, чтобы браузер умел плавно анимировать цвета */
+        @property --border-color-t { syntax: '<color>'; inherits: false; initial-value: rgb(255, 255, 255); }
+        @property --border-color-r { syntax: '<color>'; inherits: false; initial-value: rgb(255, 255, 255); }
+        @property --border-color-b { syntax: '<color>'; inherits: false; initial-value: rgb(255, 255, 255); }
+        @property --border-color-l { syntax: '<color>'; inherits: false; initial-value: rgb(255, 255, 255); }
+
         :root {
             --active-accent: #ffffff;
             --inactive-color: rgba(255, 255, 255, 0.70);
             --p-fly-drop: rgba(255, 255, 255, 0.5);   
             
-            /* Статический фон таббара (не трогаем) */
             --tabbar-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
             --slider-bg: rgba(0, 0, 0, 0.20);
-
-            /* Переменные для 4 точек замера контура */
-            --border-color-l: rgb(255, 255, 255);
-            --border-color-r: rgb(255, 255, 255);
-            --border-color-t: rgb(255, 255, 255);
-            --border-color-b: rgb(255, 255, 255);
         }
 
         body {
@@ -52,33 +51,35 @@
             justify-content: space-around;
             align-items: center;
             border-radius: 38px;
-            
-            /* СТРОГО СТАТИЧЕСКИЙ ФОН */
             background: var(--tabbar-bg);
             
-            /* Мягкие тени для объема */
             box-shadow: 
-                0 0 0 1px rgba(0, 0, 0, 0.03), 
+                0 0 0 1px rgba(0, 0, 0, 0.02), 
                 0 12px 30px rgba(0, 0, 0, 0.12), 
                 0 4px 8px rgba(0, 0, 0, 0.05);   
             
-            transition: box-shadow 0.35s ease;
             z-index: 1;
             
-            /* Механика блюра и "жидкости" (не тронута) */
             backdrop-filter: blur(4px) url(#liquid-lens) saturate(140%);
             -webkit-backdrop-filter: blur(4px) saturate(140%);
+
+            /* Плавное изменение самих CSS-переменных при обновлении через JS */
+            transition: 
+                --border-color-t 0.4s cubic-bezier(0.25, 1, 0.5, 1),
+                --border-color-r 0.4s cubic-bezier(0.25, 1, 0.5, 1),
+                --border-color-b 0.4s cubic-bezier(0.25, 1, 0.5, 1),
+                --border-color-l 0.4s cubic-bezier(0.25, 1, 0.5, 1),
+                box-shadow 0.35s ease;
         }
 
-        /* --- МАГИЯ: ЗАКРУГЛЕННЫЙ КОНТУР В 1px ЧЕРЕЗ PSEUDO-ELEMENT --- */
+        /* --- ТОНКИЙ И ПЛАВНЫЙ КОНТУР --- */
         .ios-tab-bar::after {
             content: "";
             position: absolute;
             inset: 0;
-            border-radius: 38px; /* Идеальное круглое ребро */
-            padding: 1px; /* Толщина нашего контура */
+            border-radius: 38px;
+            padding: 0.5px; /* Ультратонкая подгонка контура */
             
-            /* Конический градиент для плавной склейки 4 сторон */
             background: conic-gradient(
                 from 0deg, 
                 var(--border-color-r), 
@@ -88,8 +89,6 @@
                 var(--border-color-r)
             );
             
-            /* Хитрый маскинг: вырезаем внутреннюю часть псевдоэлемента, 
-               оставляя видимым только border шириной в 1px, заданный через padding */
             -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             -webkit-mask-composite: xor;
             mask-composite: exclude;
@@ -125,7 +124,6 @@
             mask-repeat: no-repeat;
             mask-position: center;
             transition: background-color 0.25s ease;
-            -webkit-filter: invert(0); 
         }
 
         .tab-text {
@@ -149,15 +147,14 @@
             z-index: 2;
             pointer-events: none;
             box-sizing: border-box;
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            border: 0.5px solid rgba(255, 255, 255, 0.15);
             box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.15);
             will-change: transform, left, width;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
         .liquid-slider.flying {
             background-color: transparent !important; 
-            border: 1px solid var(--p-fly-drop) !important; 
+            border: 0.5px solid var(--p-fly-drop) !important; 
             box-shadow: none; 
         }
     </style>
@@ -246,26 +243,28 @@
         const pLeft   = getPixelColor(rct.left + 5, cy);
         const pTop    = getPixelColor(cx, rct.top + 5);
         const pRight  = getPixelColor(rct.right - 5, cy);
-        const pBottom = getPixelColor(cx, rct.bottom - 5);
+        const pBottom = getPixelColor(cx, rct.bottom + 5);
 
-        const rootStyle = document.documentElement.style;
+        const tabBarEl = document.getElementById('tabBar');
 
-        const lighten = (p) => [Math.min(255, p[0] + 64), Math.min(255, p[1] + 64), Math.min(255, p[2] + 64)];
+        // Оставляем мягкое глянцевое осветление точек
+        const lighten = (p) => [Math.min(255, p[0] + 50), Math.min(255, p[1] + 50), Math.min(255, p[2] + 50)];
 
         const cLeft   = lighten(pLeft);
         const cTop    = lighten(pTop);
         const cRight  = lighten(pRight);
         const cBottom = lighten(pBottom);
 
-        rootStyle.setProperty('--border-color-l', `rgb(${cLeft[0]}, ${cLeft[1]}, ${cLeft[2]})`);
-        rootStyle.setProperty('--border-color-t', `rgb(${cTop[0]}, ${cTop[1]}, ${cTop[2]})`);
-        rootStyle.setProperty('--border-color-r', `rgb(${cRight[0]}, ${cRight[1]}, ${cRight[2]})`);
-        rootStyle.setProperty('--border-color-b', `rgb(${cBottom[0]}, ${cBottom[1]}, ${cBottom[2]})`);
+        // Меняем инлайн-стили напрямую на элементе — CSS плавно интерполирует зарегистрированные свойства
+        tabBarEl.style.setProperty('--border-color-l', `rgb(${cLeft[0]}, ${cLeft[1]}, ${cLeft[2]})`);
+        tabBarEl.style.setProperty('--border-color-t', `rgb(${cTop[0]}, ${cTop[1]}, ${cTop[2]})`);
+        tabBarEl.style.setProperty('--border-color-r', `rgb(${cRight[0]}, ${cRight[1]}, ${cRight[2]})`);
+        tabBarEl.style.setProperty('--border-color-b', `rgb(${cBottom[0]}, ${cBottom[1]}, ${cBottom[2]})`);
 
         const avgR = (pLeft[0] + pTop[0] + pRight[0] + pBottom[0]) / 4;
         const avgG = (pLeft[1] + pTop[1] + pRight[1] + pBottom[1]) / 4;
         const avgB = (pLeft[2] + pTop[2] + pRight[2] + pBottom[2]) / 4;
-        rootStyle.setProperty('--p-fly-drop', `rgb(${Math.min(255, avgR + 89)}, ${Math.min(255, avgG + 89)}, ${Math.min(255, avgB + 89)})`);
+        document.documentElement.style.setProperty('--p-fly-drop', `rgb(${Math.min(255, avgR + 89)}, ${Math.min(255, avgG + 89)}, ${Math.min(255, avgB + 89)})`);
     }
 
     function spring(curr, tgt, vel, cfg) {
