@@ -3,18 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iOS 26 Liquid Glass Tabbar</title>
+    <title>iOS 26 Liquid Glass Engine</title>
     <style>
         :root {
             --active-accent: #ffffff;
             --inactive-color: rgba(255, 255, 255, 0.7);
             --slider-bg: rgba(0, 0, 0, 0.25);
-            --slider-border-flying: rgba(0, 0, 0, 0.35);
+            
+            /* Эти переменные будут динамически рассчитываться скриптом из Canvas */
+            --dynamic-glass-glow: rgba(255, 255, 255, 0.45);
+            --dynamic-flying-border: rgba(255, 255, 255, 0.35);
         }
 
         body {
             margin: 0;
-            background: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRkLiZZofuMdxDrT1-l8xUj0r7hEpeStNzrFqFqgayAjeO5YdDEWEJXo_lQ&s=10') no-repeat center center fixed;
+            /* Используем Unsplash с поддержкой CORS, чтобы JS мог читать цвета пикселей */
+            background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80') no-repeat center center fixed;
             background-size: cover;
             height: 100vh;
             display: flex;
@@ -39,36 +43,17 @@
             align-items: center;
             border: 1px solid transparent;
             border-radius: 38px;
-            /* Градиентный глянцевый контур (вверху-слева и внизу-справа светлее) */
-            background: 
-                linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%) padding-box,
-                linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.08) 45%, rgba(255, 255, 255, 0.08) 55%, rgba(255, 255, 255, 0.4) 100%) border-box;
             
-            box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.1), 
+            /* Настоящее матовое стекло возвращено через backdrop-filter */
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+            backdrop-filter: blur(8px) saturate(130%);
+            -webkit-backdrop-filter: blur(8px) saturate(130%);
+            
+            /* Контур динамически подкрашивается смесью цветов с фона */
+            border: 1.2px solid var(--dynamic-glass-glow);
+            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.15), 
                         0 10px 30px rgba(0, 0, 0, 0.15);
-        }
-
-        /* ДИНАМИЧЕСКАЯ ЛИНЗА-РЕФРАКТОР */
-        .glass-refraction {
-            position: absolute;
-            inset: 0;
-            border-radius: 36px;
-            overflow: hidden;
-            z-index: 0;
-            pointer-events: none;
-        }
-        
-        .glass-refraction::before {
-            content: '';
-            position: absolute;
-            /* Опережающий размер для компенсации сдвигов и scale */
-            top: -20px; left: -20px; right: -20px; bottom: -20px;
-            background: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRkLiZZofuMdxDrT1-l8xUj0r7hEpeStNzrFqFqgayAjeO5YdDEWEJXo_lQ&s=10') no-repeat;
-            background-size: cover;
-            /* Небольшой блур + увеличение создают честный эффект преломления стекла */
-            filter: blur(4px) saturate(130%);
-            transform: scale(1.06); 
-            will-change: background-position;
+            transition: border-color 0.3s ease;
         }
 
         .tab-item {
@@ -120,15 +105,16 @@
             z-index: 1;
             pointer-events: none;
             box-sizing: border-box;
-            border: 1px solid rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.04);
             box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.08);
             will-change: transform, left, width, background-color, border-color;
             transition: background-color 0.16s ease-out, border-color 0.16s ease-out;
         }
 
+        /* Во время перемещения контур капли адаптируется под окружение и становится светлее фона */
         .liquid-slider.flying {
             background-color: transparent !important; 
-            border-color: var(--slider-border-flying) !important;
+            border: 1.5px solid var(--dynamic-flying-border) !important;
             box-shadow: none;
         }
     </style>
@@ -137,7 +123,6 @@
 
 <div class="tab-bar-container">
     <nav class="ios-tab-bar" id="tabBar">
-        <div class="glass-refraction" id="refraction"></div>
         <div class="liquid-slider" id="slider"></div>
 
         <button class="tab-item active" data-index="0">
@@ -165,25 +150,58 @@
 
     let state = { x: 0, tx: 0, vx: 0, w: 0, tw: 0, vw: 0, sx: 1, tsx: 1, vsx: 0, sy: 1, tsy: 1, vsy: 0, isMoving: false, intensity: 1, currentIndex: 0 };
 
-    // Функция точной синхронизации линзы подложки с реальным фоном за ней
-    function syncRefraction() {
-        const rect = tabBar.getBoundingClientRect();
-        // Рассчитываем точное смещение фона внутри таббара относительно окна браузера
-        const bgX = -rect.left + 20; 
-        const bgY = -rect.top + 20;
-        // Задаем координаты, имитируя, что таббар — это прозрачный вырез
-        tabBar.style.setProperty('--refract-x', `${bgX}px`);
-        tabBar.style.setProperty('--refract-y', `${bgY}px`);
+    // ДВИЖОК СЭМПЛИНГА ЦВЕТА (ЦВЕТОВАЯ ЛИНЗА)
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const bgImg = new Image();
+    bgImg.crossOrigin = "anonymous"; 
+    bgImg.src = 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80';
+
+    bgImg.onload = () => {
+        canvas.width = bgImg.width;
+        canvas.height = bgImg.height;
+        ctx.drawImage(bgImg, 0, 0);
+        updateDynamicColors(); // Первый просчет при загрузке фонового изображения
+    };
+
+    function getPixelColor(clientX, clientY) {
+        if (!canvas.width) return [255, 255, 255];
+        // Проекция экранных координат на реальный масштаб картинки в Canvas
+        const imgX = Math.floor((clientX / window.innerWidth) * canvas.width);
+        const imgY = Math.floor((clientY / window.innerHeight) * canvas.height);
         
-        const refractionStyle = document.querySelector('.glass-refraction').style;
-        refractionStyle.setProperty('--bg-pos-x', `${bgX}px`);
-        refractionStyle.setProperty('--bg-pos-y', `${bgY}px`);
+        if (imgX < 0 || imgX >= canvas.width || imgY < 0 || imgY >= canvas.height) return [255,255,255];
+        const data = ctx.getImageData(imgX, imgY, 1, 1).data;
+        return [data[0], data[1], data[2]];
     }
 
-    // Внедряем динамические переменные в псевдоэлемент линзы
-    const styleSheet = document.createElement("style");
-    styleSheet.innerText = `.glass-refraction::before { background-position: var(--bg-pos-x, 0px) var(--bg-pos-y, 0px) !important; }`;
-    document.head.appendChild(styleSheet);
+    function updateDynamicColors() {
+        const sliderRect = slider.getBoundingClientRect();
+        const cx = sliderRect.left + sliderRect.width / 2;
+        const cy = sliderRect.top + sliderRect.height / 2;
+        const offset = 40; // Смещение в пикселях (слева, справа, сверху, снизу) для анализа окружения
+
+        // Вытаскиваем 4 точки вокруг капли
+        const pLeft  = getPixelColor(cx - offset, cy);
+        const pRight = getPixelColor(cx + offset, cy);
+        const pTop   = getPixelColor(cx, cy - offset);
+        const pBottom= getPixelColor(cx, cy + offset);
+
+        // Смешиваем каналы
+        let r = (pLeft[0] + pRight[0] + pTop[0] + pBottom[0]) / 4;
+        let g = (pLeft[1] + pRight[1] + pTop[1] + pBottom[1]) / 4;
+        let b = (pLeft[2] + pRight[2] + pTop[2] + pBottom[2]) / 4;
+
+        // Осветляем полученный микс (делаем контур выразительным глянцем)
+        const lightenFactor = 1.6; 
+        r = Math.min(255, r * lightenFactor);
+        g = Math.min(255, g * lightenFactor);
+        b = Math.min(255, b * lightenFactor);
+
+        // Передаем цвета в CSS переменные в реальном времени
+        document.documentElement.style.setProperty('--dynamic-glass-glow', `rgba(${r}, ${g}, ${b}, 0.5)`);
+        document.documentElement.style.setProperty('--dynamic-flying-border', `rgba(${r}, ${g}, ${b}, 0.75)`);
+    }
 
     function spring(curr, tgt, vel, cfg) {
         const acc = (-cfg.k * (curr - tgt) - cfg.d * vel) / cfg.m;
@@ -195,6 +213,9 @@
         const dist = Math.abs(state.x - state.tx);
 
         if (state.isMoving) {
+            // Если капля в движении — непрерывно пересчитываем цвета под ней
+            updateDynamicColors();
+
             if (dist > 15) { 
                 slider.classList.add('flying');
                 state.tsx = 1 - (0.07 * state.intensity); 
@@ -244,11 +265,6 @@
 
     tabs.forEach(tab => tab.addEventListener('click', () => setActive(tab)));
     setActive(document.querySelector('.tab-item.active'), true);
-    
-    // Инициализируем и следим за изменениями экрана/скролла
-    syncRefraction();
-    window.addEventListener('resize', syncRefraction);
-    
     requestAnimationFrame(update);
 </script>
 
