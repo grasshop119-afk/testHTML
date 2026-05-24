@@ -8,7 +8,7 @@
         :root {
             --active-accent: #ffffff;
             --inactive-color: rgba(255, 255, 255, 0.75);
-            --p-fly: rgba(255, 255, 255, 0.4); 
+            --p-fly: rgba(255, 255, 255, 0.45); 
             --tabbar-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
             --slider-bg: rgba(0, 0, 0, 0.25);
         }
@@ -193,7 +193,7 @@
 
         const rootStyle = document.documentElement.style;
 
-        // Настройка капли по правилу: темная тема (светлый фон) -> белая 15%, светлая тема (темный фон) -> темная 25%
+        // Капля: темная тема (светлый фон) -> белая 15%, светлая тема (темный фон) -> темная 25%
         if (avgBrightness > 125) { 
             rootStyle.setProperty('--tabbar-bg', 'linear-gradient(180deg, rgba(10, 10, 12, 0.86) 0%, rgba(6, 6, 8, 0.82) 100%)');
             rootStyle.setProperty('--slider-bg', 'rgba(255, 255, 255, 0.15)'); 
@@ -206,10 +206,10 @@
             rootStyle.setProperty('--inactive-color', 'rgba(255, 255, 255, 0.75)');
         }
 
-        // Строгое правило: берем результат и делаем ровно на 25% (255 * 0.25 = 64) светлее/ярче
-        const r = Math.min(255, avgR + 64);
-        const g = Math.min(255, avgG + 64);
-        const b = Math.min(255, avgB + 64);
+        // Контур: берем результат и делаем ровно на 35% (255 * 0.35 = 89) светлее/ярче
+        const r = Math.min(255, avgR + 89);
+        const g = Math.min(255, avgG + 89);
+        const b = Math.min(255, avgB + 89);
         
         rootStyle.setProperty('--p-fly', `rgb(${r}, ${g}, ${b})`);
     }
