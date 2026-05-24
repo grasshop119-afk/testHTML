@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iOS 26 Liquid Glass Generative Engine</title>
+    <title>Tabbar</title>
     <style>
         :root {
             --active-accent: #ffffff;
             --inactive-color: rgba(255, 255, 255, 0.75);
+            --p-top: #fff; --p-right: #fff; --p-bottom: #fff; --p-left: #fff;
+            --tabbar-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
             --slider-bg: rgba(0, 0, 0, 0.28);
-            /* Эти переменные будут динамически рассчитываться скриптом из Canvas */
-            --p-top: #ffffff; --p-right: #ffffff; --p-bottom: #ffffff; --p-left: #ffffff;
         }
 
         body {
@@ -32,7 +32,6 @@
             max-width: 400px;
         }
 
-        /* ТОЧНЫЕ РАЗМЕРЫ ИЗ ПЕРВОГО ВАРИАНТА */
         .ios-tab-bar {
             position: relative;
             display: flex;
@@ -40,19 +39,14 @@
             justify-content: space-around;
             align-items: center;
             border-radius: 38px;
-            
-            /* Настоящее матовое стекло, блур убавлен наполовину (4px) */
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
+            background: var(--tabbar-bg);
             backdrop-filter: blur(4px) saturate(135%);
             -webkit-backdrop-filter: blur(4px) saturate(135%);
-            
-            /* Создаем "бублик" для градиента */
             border: 1px solid transparent;
-            box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.15), 
-                        0 10px 30px rgba(0, 0, 0, 0.15);
+            box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.15), 0 10px 30px rgba(0, 0, 0, 0.15);
+            transition: background 0.3s ease;
         }
 
-        /* ГЕНЕРАТИВНЫЙ АДАПТИВНЫЙ КОНТУР (ВЕСЬ КОД ТЕПЕРЬ ТУТ) */
         .tab-gradient-layer {
             position: absolute;
             inset: -1px;
@@ -72,18 +66,8 @@
             mask-composite: xor;
             -webkit-mask-image: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             -webkit-mask-composite: xor;
-            
-            /* Революция контура: плавное перетекание цветов в каждой четверти круга */
-            background: conic-gradient(
-                from 135deg at 50% 50%,
-                var(--p-top) 0%,   /* Переход с Топа на Правый */
-                var(--p-right) 25%, /* Точно Правый */
-                var(--p-bottom) 50%, /* Переход с Правого на Низ */
-                var(--p-left) 75%, /* Переход с Низа на Левый */
-                var(--p-top) 100%   /* С Левого на Топ */
-            );
+            background: conic-gradient(from 135deg at 50% 50%, var(--p-top) 0%, var(--p-right) 25%, var(--p-bottom) 50%, var(--p-left) 75%, var(--p-top) 100%);
             filter: blur(1.5px) saturate(110%);
-            transition: opacity 0.4s ease;
         }
 
         .tab-item {
@@ -141,7 +125,6 @@
             transition: background-color 0.16s ease-out, border-color 0.16s ease-out;
         }
 
-        /* При прыжке капля адаптирует контур из усредненного цвета */
         .liquid-slider.flying {
             background-color: transparent !important; 
             border: 1.5px solid var(--p-top) !important;
@@ -181,7 +164,6 @@
 
     let state = { x: 0, tx: 0, vx: 0, w: 0, tw: 0, vw: 0, sx: 1, tsx: 1, vsx: 0, sy: 1, tsy: 1, vsy: 0, isMoving: false, intensity: 1, currentIndex: 0 };
 
-    // ДВИЖОК СЭМПЛИНГА ЦВЕТА И ГРАДИЕНТОВ
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     const bgImg = new Image();
@@ -191,7 +173,7 @@
     bgImg.onload = () => {
         canvas.width = bgImg.width; canvas.height = bgImg.height;
         ctx.drawImage(bgImg, 0, 0);
-        updateDynamicColors(); // Первый просчет
+        updateDynamicColors();
     };
 
     function getPixelColor(clientX, clientY) {
@@ -204,27 +186,41 @@
     }
 
     function updateDynamicColors() {
-        const tabBarRect = tabBar.getBoundingClientRect();
-        const cx = tabBarRect.left + tabBarRect.width / 2;
-        const cy = tabBarRect.top + tabBarRect.height / 2;
-        // Смещение от центра для анализа 4 четвертей контура (лево, верх, право, низ)
+        const rct = tabBar.getBoundingClientRect();
+        const cx = rct.left + rct.width / 2;
+        const cy = rct.top + rct.height / 2;
         const sampleDist = 80;
 
-        const pLeft   = getPixelColor(tabBarRect.left + 30, cy);
-        const pTop    = getPixelColor(cx, tabBarRect.top - sampleDist);
-        const pRight  = getPixelColor(tabBarRect.right - 30, cy);
-        const pBottom = getPixelColor(cx, tabBarRect.bottom + sampleDist);
+        const pLeft   = getPixelColor(rct.left + 30, cy);
+        const pTop    = getPixelColor(cx, rct.top - sampleDist);
+        const pRight  = getPixelColor(rct.right - 30, cy);
+        const pBottom = getPixelColor(cx, rct.bottom + sampleDist);
 
-        // Функция осветления: делаем цвета контура выразительным глянцем
-        const lighten = (p, factor = 1.7) => {
-            const r = Math.min(255, p[0] * factor);
-            const g = Math.min(255, p[1] * factor);
-            const b = Math.min(255, p[2] * factor);
-            return `rgba(${r}, ${g}, ${b}, 0.5)`; // Прозрачность 0.5 для стекла
+        const avgBrightness = (
+            (pLeft[0]*0.299 + pLeft[1]*0.587 + pLeft[2]*0.114) +
+            (pTop[0]*0.299 + pTop[1]*0.587 + pTop[2]*0.114) +
+            (pRight[0]*0.299 + pRight[1]*0.587 + pRight[2]*0.114) +
+            (pBottom[0]*0.299 + pBottom[1]*0.587 + pBottom[2]*0.114)
+        ) / 4;
+
+        const rootStyle = document.documentElement.style;
+
+        if (avgBrightness > 127) {
+            rootStyle.setProperty('--tabbar-bg', 'linear-gradient(180deg, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.15) 100%)');
+            rootStyle.setProperty('--slider-bg', 'rgba(255, 255, 255, 0.25)');
+            rootStyle.setProperty('--active-accent', '#ffffff');
+            rootStyle.setProperty('--inactive-color', 'rgba(255, 255, 255, 0.6)');
+        } else {
+            rootStyle.setProperty('--tabbar-bg', 'linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%)');
+            rootStyle.setProperty('--slider-bg', 'rgba(0, 0, 0, 0.28)');
+            rootStyle.setProperty('--active-accent', '#ffffff');
+            rootStyle.setProperty('--inactive-color', 'rgba(255, 255, 255, 0.75)');
         }
 
-        // Передаем 4 цвета в CSS, они мгновенно перекрашивают конический градиент
-        const rootStyle = document.documentElement.style;
+        const lighten = (p, f = 1.7) => {
+            return `rgba(${Math.min(255, p[0]*f)}, ${Math.min(255, p[1]*f)}, ${Math.min(255, p[2]*f)}, 0.5)`;
+        }
+
         rootStyle.setProperty('--p-top', lighten(pTop));
         rootStyle.setProperty('--p-right', lighten(pRight));
         rootStyle.setProperty('--p-bottom', lighten(pBottom));
@@ -241,9 +237,6 @@
         const dist = Math.abs(state.x - state.tx);
 
         if (state.isMoving) {
-            // При движении капли пересчитываем только если нужно, но контур таббара статичен
-            // updateDynamicColors(); 
-
             if (dist > 15) { 
                 slider.classList.add('flying');
                 state.tsx = 1 - (0.07 * state.intensity); 
@@ -293,10 +286,6 @@
 
     tabs.forEach(tab => tab.addEventListener('click', () => setActive(tab)));
     setActive(document.querySelector('.tab-item.active'), true);
-    
-    // Пересчитываем контур таббара только если он сам сдвинулся по экрану (не нужно в Update)
-    // syncRefraction(); 
-
     requestAnimationFrame(update);
 </script>
 
