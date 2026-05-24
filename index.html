@@ -6,17 +6,18 @@
     <title>Dynamic Liquid Tabbar</title>
     <style>
         :root {
+            /* Оставляем единую универсальную палитру */
             --active-accent: #ffffff;
-            --inactive-color: rgba(255, 255, 255, 0.75);
-            --p-fly-tabbar: rgba(255, 255, 255, 0.3); /* Контур таббара */
-            --p-fly-drop: rgba(255, 255, 255, 0.5);   /* Контур капли */
+            --inactive-color: rgba(255, 255, 255, 0.70);
+            --p-fly-tabbar: rgba(255, 255, 255, 0.3); 
+            --p-fly-drop: rgba(255, 255, 255, 0.5);   
             --tabbar-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
-            --slider-bg: rgba(0, 0, 0, 0.25);
+            --slider-bg: rgba(0, 0, 0, 0.20);
         }
 
         body {
             margin: 0;
-            background: #212121; /* Дефолтный фон */
+            background: #212121; 
             background-size: cover;
             background-position: center center;
             background-repeat: no-repeat;
@@ -32,7 +33,7 @@
         }
 
         .tab-bar-container {
-            margin-bottom: calc(15px + max(env(safe-area-inset-bottom), 12px)); /* Сейф-зона + фолбек */
+            margin-bottom: calc(15px + max(env(safe-area-inset-bottom), 12px)); 
             width: 92%;
             max-width: 400px;
             position: relative;
@@ -46,19 +47,17 @@
             align-items: center;
             border-radius: 38px;
             background: var(--tabbar-bg);
-            /* Убрал жесткий белый border */
             border: 1px solid var(--p-fly-tabbar); 
             
-            /* --- НОВАЯ МНОГОСЛОЙНАЯ ТЕНЬ ДЛЯ КОНТРАСТА --- */
+            /* Мягкие тени: спасают на белом и подчеркивают объем на темном */
             box-shadow: 
-                0 0 0 1px rgba(0, 0, 0, 0.04), /* Тонкая темная обводка для белого фона */
-                0 12px 30px rgba(0, 0, 0, 0.12), /* Глубокая тень для объема */
-                0 4px 8px rgba(0, 0, 0, 0.06);   /* Ближняя тень для четкости */
+                0 0 0 1px rgba(0, 0, 0, 0.03), 
+                0 12px 30px rgba(0, 0, 0, 0.12), 
+                0 4px 8px rgba(0, 0, 0, 0.05);   
             
-            transition: background 0.35s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.2s ease, box-shadow 0.35s ease;
+            transition: border-color 0.2s ease, box-shadow 0.35s ease;
             z-index: 1;
             
-            /* ТВОИ РОДНЫЕ ФИЛЬТРЫ НЕ ТРОГАЛ */
             backdrop-filter: blur(4px) url(#liquid-lens) saturate(140%);
             -webkit-backdrop-filter: blur(4px) saturate(140%);
         }
@@ -90,7 +89,6 @@
             mask-repeat: no-repeat;
             mask-position: center;
             transition: background-color 0.25s ease;
-            /* Исправление для WebKit */
             -webkit-filter: invert(0); 
         }
 
@@ -117,8 +115,8 @@
             box-sizing: border-box;
             border: 1px solid rgba(255, 255, 255, 0.12);
             box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.15);
-            will-change: transform, left, width, background-color, border-color;
-            transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+            will-change: transform, left, width;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
         .liquid-slider.flying {
@@ -166,18 +164,18 @@
 
     let state = { x: 0, tx: 0, vx: 0, w: 0, tw: 0, vw: 0, sx: 1, tsx: 1, vsx: 0, sy: 1, tsy: 1, vsy: 0, isMoving: false, intensity: 1, currentIndex: 0 };
 
-    // --- НОВЫЙ МАССИВ ФОНОВ ---
+    // 10 фонов для теста адаптивности стекла (включая светлые и контрастные)
     const backgrounds = [
-        'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80', // Синий
-        'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=1200&q=80', // Градиент
-        'https://images.unsplash.com/photo-1524169113142-b054817a0a65?auto=format&fit=crop&w=1200&q=80', // Яркие мазки
-        'https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=1200&q=80', // Красный градиент
-        'https://images.unsplash.com/photo-1511376777868-611b54f68947?auto=format&fit=crop&w=1200&q=80', // Светлый абстракт
-        'https://images.unsplash.com/photo-1579547621113-e4bb2a19bdd6?auto=format&fit=crop&w=1200&q=80', // Зеленый градиент
-        'https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=1200&q=80', // Пестрая текстура
-        'https://images.unsplash.com/photo-1520038410233-7141be7e6f97?auto=format&fit=crop&w=1200&q=80', // Чистый минимализм
-        'https://images.unsplash.com/photo-1511376777868-611b54f68947?auto=format&fit=crop&w=1200&q=80', // Повтор для баланса
-        'https://images.unsplash.com/photo-1524169113142-b054817a0a65?auto=format&fit=crop&w=1200&q=80'  // Повтор
+        'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80', // Сине-розовый
+        'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=1200&q=80', // Мягкий градиент
+        'https://images.unsplash.com/photo-1511376777868-611b54f68947?auto=format&fit=crop&w=1200&q=80', // Ультра-светлый абстракт (тест белого)
+        'https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=1200&q=80', // Красный глубокий
+        'https://images.unsplash.com/photo-1579547621113-e4bb2a19bdd6?auto=format&fit=crop&w=1200&q=80', // Кислотно-зеленый
+        'https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=1200&q=80', // Темный гранж
+        'https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&w=1200&q=80', // Светло-серый минимализм
+        'https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?auto=format&fit=crop&w=1200&q=80', // Пастельный песок
+        'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=1200&q=80', // Абстрактные яркие волны
+        'https://images.unsplash.com/photo-1531315630201-bb15abeb1653?auto=format&fit=crop&w=1200&q=80'  // Космический синий
     ];
 
     const canvas = document.createElement('canvas');
@@ -185,7 +183,6 @@
     const bgImg = new Image();
     bgImg.crossOrigin = "anonymous"; 
 
-    // --- ЛОГИКА СЛУЧАЙНОГО ФОНА ---
     function setRandomBackground() {
         const randomUrl = backgrounds[Math.floor(Math.random() * backgrounds.length)];
         bgImg.src = randomUrl;
@@ -195,7 +192,7 @@
     bgImg.onload = () => {
         canvas.width = bgImg.width; canvas.height = bgImg.height;
         ctx.drawImage(bgImg, 0, 0);
-        updateDynamicColors(); // Обновляем цвета после загрузки фона
+        updateDynamicColors();
     };
 
     function getPixelColor(clientX, clientY) {
@@ -216,39 +213,19 @@
         const pRight  = getPixelColor(rct.right - 15, cy);
         const pBottom = getPixelColor(cx, rct.bottom - 10);
 
-        const avgBrightness = (
-            (pLeft[0]*0.299 + pLeft[1]*0.587 + pLeft[2]*0.114) +
-            (pTop[0]*0.299 + pTop[1]*0.587 + pTop[2]*0.114) +
-            (pRight[0]*0.299 + pRight[1]*0.587 + pRight[2]*0.114) +
-            (pBottom[0]*0.299 + pBottom[1]*0.587 + pBottom[2]*0.114)
-        ) / 4;
-
         const avgR = (pLeft[0] + pTop[0] + pRight[0] + pBottom[0]) / 4;
         const avgG = (pLeft[1] + pTop[1] + pRight[1] + pBottom[1]) / 4;
         const avgB = (pLeft[2] + pTop[2] + pRight[2] + pBottom[2]) / 4;
 
         const rootStyle = document.documentElement.style;
 
-        // Настройка прозрачности капли по правилу
-        if (avgBrightness > 125) { 
-            rootStyle.setProperty('--tabbar-bg', 'linear-gradient(180deg, rgba(10, 10, 12, 0.86) 0%, rgba(6, 6, 8, 0.82) 100%)');
-            rootStyle.setProperty('--slider-bg', 'rgba(255, 255, 255, 0.15)'); 
-            rootStyle.setProperty('--active-accent', '#ffffff');
-            rootStyle.setProperty('--inactive-color', 'rgba(255, 255, 255, 0.45)');
-        } else {
-            rootStyle.setProperty('--tabbar-bg', 'linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.04) 100%)');
-            rootStyle.setProperty('--slider-bg', 'rgba(0, 0, 0, 0.25)'); 
-            rootStyle.setProperty('--active-accent', '#ffffff');
-            rootStyle.setProperty('--inactive-color', 'rgba(255, 255, 255, 0.75)');
-        }
-
-        // 1. Контур таббара: делаем ровно на 25% светлее фона
+        // Полностью выпилил жесткую инверсию темы. 
+        // Алгоритм теперь считает только цвет динамических контуров линзы.
         const tabR = Math.min(255, avgR + 64);
         const tabG = Math.min(255, avgG + 64);
         const tabB = Math.min(255, avgB + 64);
         rootStyle.setProperty('--p-fly-tabbar', `rgb(${tabR}, ${tabG}, ${tabB})`);
 
-        // 2. Контур капли: делаем ровно на 35% светлее фона
         const dropR = Math.min(255, avgR + 89);
         const dropG = Math.min(255, avgG + 89);
         const dropB = Math.min(255, avgB + 89);
@@ -308,7 +285,6 @@
         } else {
             state.intensity = Math.abs(newIdx - state.currentIndex) > 1 ? 1.2 : 0.7;
             state.isMoving = true;
-            // --- МЕНЯЕМ ФОН ПРИ КАЖДОМ КЛИКЕ ДЛЯ ТЕСТОВ ---
             setRandomBackground();
         }
         state.currentIndex = newIdx;
@@ -316,7 +292,6 @@
 
     tabs.forEach(tab => tab.addEventListener('click', () => setActive(tab)));
     
-    // Устанавливаем первый фон
     setRandomBackground();
     setActive(document.querySelector('.tab-item.active'), true);
     
