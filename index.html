@@ -8,7 +8,8 @@
         :root {
             --active-accent: #ffffff;
             --inactive-color: rgba(255, 255, 255, 0.75);
-            --p-fly: rgba(255, 255, 255, 0.45); 
+            --p-fly-tabbar: rgba(255, 255, 255, 0.3); /* Контур таббара */
+            --p-fly-drop: rgba(255, 255, 255, 0.5);   /* Контур капли */
             --tabbar-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
             --slider-bg: rgba(0, 0, 0, 0.25);
         }
@@ -41,7 +42,8 @@
             align-items: center;
             border-radius: 38px;
             background: var(--tabbar-bg);
-            border: 1px solid var(--p-fly); 
+            /* Контур таббара на 25% светлее фона */
+            border: 1px solid var(--p-fly-tabbar); 
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
             transition: background 0.35s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.2s ease;
             z-index: 1;
@@ -107,7 +109,8 @@
 
         .liquid-slider.flying {
             background-color: transparent !important; 
-            border: 1px solid var(--p-fly) !important; 
+            /* Контур капли в полете на 35% светлее фона */
+            border: 1px solid var(--p-fly-drop) !important; 
             box-shadow: none; 
         }
     </style>
@@ -193,7 +196,7 @@
 
         const rootStyle = document.documentElement.style;
 
-        // Капля: темная тема (светлый фон) -> белая 15%, светлая тема (темный фон) -> темная 25%
+        // Настройка прозрачности капли по правилу
         if (avgBrightness > 125) { 
             rootStyle.setProperty('--tabbar-bg', 'linear-gradient(180deg, rgba(10, 10, 12, 0.86) 0%, rgba(6, 6, 8, 0.82) 100%)');
             rootStyle.setProperty('--slider-bg', 'rgba(255, 255, 255, 0.15)'); 
@@ -206,12 +209,17 @@
             rootStyle.setProperty('--inactive-color', 'rgba(255, 255, 255, 0.75)');
         }
 
-        // Контур: берем результат и делаем ровно на 35% (255 * 0.35 = 89) светлее/ярче
-        const r = Math.min(255, avgR + 89);
-        const g = Math.min(255, avgG + 89);
-        const b = Math.min(255, avgB + 89);
-        
-        rootStyle.setProperty('--p-fly', `rgb(${r}, ${g}, ${b})`);
+        // 1. Контур таббара: делаем ровно на 25% светлее фона (255 * 0.25 = 64)
+        const tabR = Math.min(255, avgR + 64);
+        const tabG = Math.min(255, avgG + 64);
+        const tabB = Math.min(255, avgB + 64);
+        rootStyle.setProperty('--p-fly-tabbar', `rgb(${tabR}, ${tabG}, ${tabB})`);
+
+        // 2. Контур капли: делаем ровно на 35% светлее фона (255 * 0.35 = 89)
+        const dropR = Math.min(255, avgR + 89);
+        const dropG = Math.min(255, avgG + 89);
+        const dropB = Math.min(255, avgB + 89);
+        rootStyle.setProperty('--p-fly-drop', `rgb(${dropR}, ${dropG}, ${dropB})`);
     }
 
     function spring(curr, tgt, vel, cfg) {
