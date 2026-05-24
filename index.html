@@ -8,7 +8,7 @@
         :root {
             --active-accent: #ffffff;
             --inactive-color: rgba(255, 255, 255, 0.75);
-            --p-top: #fff; --p-right: #fff; --p-bottom: #fff; --p-left: #fff;
+            --p-accent: rgba(255, 255, 255, 0.4);
             --tabbar-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
             --slider-bg: rgba(0, 0, 0, 0.4);
         }
@@ -48,8 +48,8 @@
             box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.12), 0 15px 35px rgba(0, 0, 0, 0.35);
             transition: background 0.3s ease;
             z-index: 1;
-            backdrop-filter: blur(12px) url(#liquid-lens) saturate(140%);
-            -webkit-backdrop-filter: blur(12px) saturate(140%);
+            backdrop-filter: blur(20px) url(#liquid-lens) saturate(140%);
+            -webkit-backdrop-filter: blur(20px) saturate(140%);
         }
 
         .tab-gradient-layer {
@@ -71,8 +71,8 @@
             mask-composite: xor;
             -webkit-mask-image: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             -webkit-mask-composite: xor;
-            background: conic-gradient(from 135deg at 50% 50%, var(--p-top) 0%, var(--p-right) 25%, var(--p-bottom) 50%, var(--p-left) 75%, var(--p-top) 100%);
-            filter: blur(0.4px);
+            background: var(--p-accent);
+            filter: blur(0.3px);
         }
 
         .tab-item {
@@ -132,7 +132,7 @@
 
         .liquid-slider.flying {
             background: transparent !important; 
-            border: 1.5px solid var(--p-top) !important;
+            border: 1.5px solid var(--p-accent) !important;
             box-shadow: none;
         }
     </style>
@@ -141,8 +141,8 @@
 
 <svg style="position: absolute; width: 0; height: 0;">
     <filter id="liquid-lens">
-        <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="1" result="noise" />
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale="12" xChannelSelector="R" yChannelSelector="G" />
+        <feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="1" result="noise" />
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="9" xChannelSelector="R" yChannelSelector="G" />
     </filter>
 </svg>
 
@@ -216,18 +216,8 @@
         const cx = rct.left + rct.width / 2;
         const cy = rct.top + rct.height / 2;
 
-        const pLeft   = getPixelColor(rct.left + 15, cy);
-        const pTop    = getPixelColor(cx, rct.top + 10);
-        const pRight  = getPixelColor(rct.right - 15, cy);
-        const pBottom = getPixelColor(cx, rct.bottom - 10);
-
-        const brightness = (
-            (pLeft[0]*0.299 + pLeft[1]*0.587 + pLeft[2]*0.114) +
-            (pTop[0]*0.299 + pTop[1]*0.587 + pTop[2]*0.114) +
-            (pRight[0]*0.299 + pRight[1]*0.587 + pRight[2]*0.114) +
-            (pBottom[0]*0.299 + pBottom[1]*0.587 + pBottom[2]*0.114)
-        ) / 4;
-
+        const pCenter = getPixelColor(cx, cy);
+        const brightness = pCenter[0] * 0.299 + pCenter[1] * 0.587 + pCenter[2] * 0.114;
         const rootStyle = document.documentElement.style;
 
         if (brightness > 125) { 
@@ -242,14 +232,10 @@
             rootStyle.setProperty('--inactive-color', 'rgba(255, 255, 255, 0.75)');
         }
 
-        const lgt = (p) => {
-            return `rgba(${Math.min(255, p[0] + 85)}, ${Math.min(255, p[1] + 85)}, ${Math.min(255, p[2] + 85)}, 0.8)`;
-        };
-
-        rootStyle.setProperty('--p-top', lgt(pTop));
-        rootStyle.setProperty('--p-right', lgt(pRight));
-        rootStyle.setProperty('--p-bottom', lgt(pBottom));
-        rootStyle.setProperty('--p-left', lgt(pLeft));
+        const nr = Math.min(255, pCenter[0] + 95);
+        const ng = Math.min(255, pCenter[1] + 95);
+        const nb = Math.min(255, pCenter[2] + 95);
+        rootStyle.setProperty('--p-accent', `rgba(${nr}, ${ng}, ${nb}, 0.85)`);
     }
 
     function spring(curr, tgt, vel, cfg) {
