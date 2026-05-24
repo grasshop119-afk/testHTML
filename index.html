@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Dynamic Liquid Tabbar with Smooth Region Border</title>
+    <title>Dynamic Interactive Liquid Tabbar</title>
     <style>
         :root {
             --active-accent: #ffffff;
             --inactive-color: rgba(255, 255, 255, 0.70);
             --p-fly-drop: rgba(255, 255, 255, 0.5);   
             
-            /* Статический фон таббара */
+            /* Фиксированный фон таббара */
             --tabbar-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
             --slider-bg: rgba(0, 0, 0, 0.20);
 
@@ -23,7 +23,8 @@
 
         body {
             margin: 0;
-            background: #212121; 
+            /* Фиксированный абстрактный фон без рандома */
+            background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80');
             background-size: cover;
             background-position: center center;
             background-repeat: no-repeat;
@@ -35,7 +36,6 @@
             overflow: hidden;
             -webkit-user-select: none;
             user-select: none;
-            transition: background 0.3s ease;
         }
 
         .tab-bar-container {
@@ -59,20 +59,18 @@
                 0 12px 30px rgba(0, 0, 0, 0.12), 
                 0 4px 8px rgba(0, 0, 0, 0.05);   
             
-            transition: box-shadow 0.35s ease;
             z-index: 1;
-            
             backdrop-filter: blur(4px) url(#liquid-lens) saturate(140%);
             -webkit-backdrop-filter: blur(4px) saturate(140%);
         }
 
-        /* Идеально скругленный контур через маску */
+        /* Наш идеальный контур */
         .ios-tab-bar::after {
             content: "";
             position: absolute;
             inset: 0;
             border-radius: 38px;
-            padding: 1px; /* Толщина ребра */
+            padding: 1px;
             
             background: conic-gradient(
                 from 0deg, 
@@ -131,6 +129,7 @@
         .tab-item.active .icon-wrapper { background-color: var(--active-accent); }
         .tab-item.active .tab-text { color: var(--active-accent); }
 
+        /* Включаемpointer-events и ставим правильный курсор для перетаскивания */
         .liquid-slider {
             position: absolute;
             top: 4px;
@@ -139,12 +138,15 @@
             background: var(--slider-bg);
             border-radius: 34px;
             z-index: 2;
-            pointer-events: none;
+            pointer-events: auto; 
+            cursor: -webkit-grab;
+            cursor: grab;
             box-sizing: border-box;
             border: 1px solid rgba(255, 255, 255, 0.12);
             box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.15);
             will-change: transform, left, width;
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            touch-action: none; /* Отключаем системный скролл при перетаскивании на мобилках */
         }
 
         .liquid-slider.flying {
@@ -190,31 +192,22 @@
     const tabBar = document.getElementById('tabBar');
     const tabs = document.querySelectorAll('.tab-item');
 
-    let state = { x: 0, tx: 0, vx: 0, w: 0, tw: 0, vw: 0, sx: 1, tsx: 1, vsx: 0, sy: 1, tsy: 1, vsy: 0, isMoving: false, intensity: 1, currentIndex: 0 };
+    let state = { 
+        x: 0, tx: 0, vx: 0, 
+        w: 0, tw: 0, vw: 0, 
+        sx: 1, tsx: 1, vsx: 0, 
+        sy: 1, tsy: 1, vsy: 0, 
+        isMoving: false, isDragging: false, intensity: 1, currentIndex: 0 
+    };
 
-    const backgrounds = [
-        'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80', 
-        'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=1200&q=80', 
-        'https://images.unsplash.com/photo-1511376777868-611b54f68947?auto=format&fit=crop&w=1200&q=80', 
-        'https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=1200&q=80', 
-        'https://images.unsplash.com/photo-1579547621113-e4bb2a19bdd6?auto=format&fit=crop&w=1200&q=80', 
-        'https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=1200&q=80', 
-        'https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&w=1200&q=80', 
-        'https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?auto=format&fit=crop&w=1200&q=80', 
-        'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=1200&q=80', 
-        'https://images.unsplash.com/photo-1531315630201-bb15abeb1653?auto=format&fit=crop&w=1200&q=80'  
-    ];
+    let dragStartX = 0;
+    let dragStartSliderX = 0;
 
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     const bgImg = new Image();
     bgImg.crossOrigin = "anonymous"; 
-
-    function setRandomBackground() {
-        const randomUrl = backgrounds[Math.floor(Math.random() * backgrounds.length)];
-        bgImg.src = randomUrl;
-        document.body.style.backgroundImage = `url('${randomUrl}')`;
-    }
+    bgImg.src = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80';
 
     bgImg.onload = () => {
         canvas.width = bgImg.width; canvas.height = bgImg.height;
@@ -222,37 +215,21 @@
         updateDynamicColors();
     };
 
-    // --- НАДЁЖНЫЙ АНАЛИЗАТОР ПРЕОБЛАДАЮЩЕГО ЦВЕТА ИЗ ОБЛАСТИ ---
     function getAverageRegionColor(clientX, clientY, size = 16) {
         if (!canvas.width) return [255, 255, 255];
-        
-        // Переводим координаты экрана в координаты канваса
         const imgX = Math.floor((clientX / window.innerWidth) * canvas.width);
         const imgY = Math.floor((clientY / window.innerHeight) * canvas.height);
-        
-        // Центрируем область замера вокруг нужной точки
         const startX = Math.min(canvas.width - size, Math.max(0, imgX - Math.floor(size / 2)));
         const startY = Math.min(canvas.height - size, Math.max(0, imgY - Math.floor(size / 2)));
         
-        // Забираем массив пикселей региона (размером size x size)
         const imgData = ctx.getImageData(startX, startY, size, size).data;
-        
         let totalR = 0, totalG = 0, totalB = 0, count = 0;
         
-        // Шагаем по пикселям области (каждый пиксель занимает 4 элемента: R, G, B, A)
         for (let i = 0; i < imgData.length; i += 4) {
-            totalR += imgData[i];
-            totalG += imgData[i + 1];
-            totalB += imgData[i + 2];
+            totalR += imgData[i]; totalG += imgData[i + 1]; totalB += imgData[i + 2];
             count++;
         }
-        
-        // Возвращаем чистый средний арифметический цвет региона
-        return [
-            Math.floor(totalR / count),
-            Math.floor(totalG / count),
-            Math.floor(totalB / count)
-        ];
+        return [Math.floor(totalR / count), Math.floor(totalG / count), Math.floor(totalB / count)];
     }
 
     function updateDynamicColors() {
@@ -260,36 +237,96 @@
         const cx = rct.left + rct.width / 2;
         const cy = rct.top + rct.height / 2;
 
-        // Вместо одной точки берем средний цвет квадрата 16x16 пикселей вокруг центров сторон
         const pLeft   = getAverageRegionColor(rct.left + 5, cy, 16);
         const pTop    = getAverageRegionColor(cx, rct.top + 5, 16);
         const pRight  = getAverageRegionColor(rct.right - 5, cy, 16);
         const pBottom = getAverageRegionColor(cx, rct.bottom - 5, 16);
 
         const rootStyle = document.documentElement.style;
-
-        // Осветляем полученные преобладающие цвета на 25% для сочности граней
         const lighten = (p) => [Math.min(255, p[0] + 64), Math.min(255, p[1] + 64), Math.min(255, p[2] + 64)];
 
-        const cLeft   = lighten(pLeft);
-        const cTop    = lighten(pTop);
-        const cRight  = lighten(pRight);
-        const cBottom = lighten(pBottom);
+        const cLeft   = lighten(pLeft); const cTop    = lighten(pTop);
+        const cRight  = lighten(pRight); const cBottom = lighten(pBottom);
 
-        // Обновляем градиент контура
         rootStyle.setProperty('--border-color-l', `rgb(${cLeft[0]}, ${cLeft[1]}, ${cLeft[2]})`);
         rootStyle.setProperty('--border-color-t', `rgb(${cTop[0]}, ${cTop[1]}, ${cTop[2]})`);
         rootStyle.setProperty('--border-color-r', `rgb(${cRight[0]}, ${cRight[1]}, ${cRight[2]})`);
         rootStyle.setProperty('--border-color-b', `rgb(${cBottom[0]}, ${cBottom[1]}, ${cBottom[2]})`);
 
-        // Усредненный цвет для летающей капли
         const avgR = (pLeft[0] + pTop[0] + pRight[0] + pBottom[0]) / 4;
         const avgG = (pLeft[1] + pTop[1] + pRight[1] + pBottom[1]) / 4;
         const avgB = (pLeft[2] + pTop[2] + pRight[2] + pBottom[2]) / 4;
         rootStyle.setProperty('--p-fly-drop', `rgb(${Math.min(255, avgR + 89)}, ${Math.min(255, avgG + 89)}, ${Math.min(255, avgB + 89)})`);
     }
 
-    // Логика анимации и физики
+    // --- ЛОГИКА ОПРЕДЕЛЕНИЯ БЛИЖАЙШЕГО ТАБА ---
+    function getClosestTab() {
+        let closestTab = tabs[0];
+        let minDistance = Infinity;
+        const sliderCenter = state.x + state.w / 2;
+        
+        tabs.forEach(tab => {
+            const tabCenter = tab.offsetLeft + tab.offsetWidth / 2;
+            const dist = Math.abs(sliderCenter - tabCenter);
+            if (dist < minDistance) {
+                minDistance = dist;
+                closestTab = tab;
+            }
+        });
+        return closestTab;
+    }
+
+    // --- МЕХАНИКА DRAG-AND-DROP ---
+    slider.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        state.isDragging = true;
+        dragStartX = e.clientX;
+        dragStartSliderX = state.x;
+        slider.style.cursor = 'grabbing';
+        
+        // Захватываем указатель, чтобы тащить капсулу даже за пределами таббара
+        slider.setPointerCapture(e.pointerId);
+    });
+
+    slider.addEventListener('pointermove', (e) => {
+        if (!state.isDragging) return;
+        
+        let deltaX = e.clientX - dragStartX;
+        let newX = dragStartSliderX + deltaX;
+        
+        // Ограничиваем перемещение внутренними границами таббара
+        const minX = 4;
+        const maxX = tabBar.offsetWidth - state.w - 4;
+        state.x = Math.max(minX, Math.min(maxX, newX));
+        
+        // Пока тащим, подсматриваем ближайший таб и берем его ширину мимикрии
+        const targetTab = getClosestTab();
+        if (targetTab) {
+            state.tw = targetTab.offsetWidth;
+        }
+    });
+
+    slider.addEventListener('pointerup', (e) => {
+        if (!state.isDragging) return;
+        state.isDragging = false;
+        slider.style.cursor = 'grab';
+        slider.releasePointerCapture(e.pointerId);
+        
+        // При отпускании находим финишный ближайший таб и активируем его пружиной
+        const finalTab = getClosestTab();
+        if (finalTab) {
+            setActive(finalTab);
+        }
+    });
+
+    slider.addEventListener('pointercancel', () => {
+        if (!state.isDragging) return;
+        state.isDragging = false;
+        slider.style.cursor = 'grab';
+        const finalTab = getClosestTab();
+        if (finalTab) setActive(finalTab);
+    });
+
     function spring(curr, tgt, vel, cfg) {
         const acc = (-cfg.k * (curr - tgt) - cfg.d * vel) / cfg.m;
         vel += acc * 0.016;
@@ -299,7 +336,7 @@
     function update() {
         const dist = Math.abs(state.x - state.tx);
 
-        if (state.isMoving) {
+        if (state.isMoving && !state.isDragging) {
             if (dist > 15) { 
                 slider.classList.add('flying');
                 state.tsx = 1 - (0.07 * state.intensity); 
@@ -317,8 +354,16 @@
             }
         }
 
-        [state.x, state.vx] = spring(state.x, state.tx, state.vx, PHYSICS.pos);
+        // Если тащим рукой — отключаем пружину для X, пишем координаты напрямую
+        if (!state.isDragging) {
+            [state.x, state.vx] = spring(state.x, state.tx, state.vx, PHYSICS.pos);
+        } else {
+            state.vx = 0; 
+        }
+
+        // Ширина меняется через пружину ВСЕГДА, чтобы капсула «жидко» растягивалась при пролете секторов
         [state.w, state.vw] = spring(state.w, state.tw, state.vw, PHYSICS.pos);
+        
         [state.sx, state.vsx] = spring(state.sx, state.tsx, state.vsx, PHYSICS.scale);
         [state.sy, state.vsy] = spring(state.sy, state.tsy, state.vsy, PHYSICS.scale);
 
@@ -343,20 +388,18 @@
         } else {
             state.intensity = Math.abs(newIdx - state.currentIndex) > 1 ? 1.2 : 0.7;
             state.isMoving = true;
-            setRandomBackground();
         }
         state.currentIndex = newIdx;
     }
 
-    tabs.forEach(tab => tab.addEventListener('click', () => setActive(tab)));
+    tabs.forEach(tab => tab.addEventListener('click', (e) => {
+        // Защита: если клик произошел в процессе отпускания драга, не перезапускаем анимацию
+        if (state.isDragging) return;
+        setActive(tab);
+    }));
     
-    setRandomBackground();
     setActive(document.querySelector('.tab-item.active'), true);
-    
-    window.addEventListener('resize', () => {
-        updateDynamicColors();
-    });
-
+    window.addEventListener('resize', updateDynamicColors);
     requestAnimationFrame(update);
 </script>
 
