@@ -3,22 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iOS 26 Liquid Glass Engine</title>
+    <title>iOS 26 Liquid Glass Generative Engine</title>
     <style>
         :root {
             --active-accent: #ffffff;
-            --inactive-color: rgba(255, 255, 255, 0.7);
-            --slider-bg: rgba(0, 0, 0, 0.25);
-            
+            --inactive-color: rgba(255, 255, 255, 0.75);
+            --slider-bg: rgba(0, 0, 0, 0.28);
             /* Эти переменные будут динамически рассчитываться скриптом из Canvas */
-            --dynamic-glass-glow: rgba(255, 255, 255, 0.45);
-            --dynamic-flying-border: rgba(255, 255, 255, 0.35);
+            --p-top: #ffffff; --p-right: #ffffff; --p-bottom: #ffffff; --p-left: #ffffff;
         }
 
         body {
             margin: 0;
-            /* Используем Unsplash с поддержкой CORS, чтобы JS мог читать цвета пикселей */
-            background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80') no-repeat center center fixed;
+            background: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRkLiZZofuMdxDrT1-l8xUj0r7hEpeStNzrFqFqgayAjeO5YdDEWEJXo_lQ&s=10') no-repeat center center fixed;
             background-size: cover;
             height: 100vh;
             display: flex;
@@ -35,25 +32,58 @@
             max-width: 400px;
         }
 
+        /* ТОЧНЫЕ РАЗМЕРЫ ИЗ ПЕРВОГО ВАРИАНТА */
         .ios-tab-bar {
             position: relative;
             display: flex;
             padding: 4px;
             justify-content: space-around;
             align-items: center;
-            border: 1px solid transparent;
             border-radius: 38px;
             
-            /* Настоящее матовое стекло возвращено через backdrop-filter */
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
-            backdrop-filter: blur(8px) saturate(130%);
-            -webkit-backdrop-filter: blur(8px) saturate(130%);
+            /* Настоящее матовое стекло, блур убавлен наполовину (4px) */
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
+            backdrop-filter: blur(4px) saturate(135%);
+            -webkit-backdrop-filter: blur(4px) saturate(135%);
             
-            /* Контур динамически подкрашивается смесью цветов с фона */
-            border: 1.2px solid var(--dynamic-glass-glow);
-            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.15), 
+            /* Создаем "бублик" для градиента */
+            border: 1px solid transparent;
+            box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.15), 
                         0 10px 30px rgba(0, 0, 0, 0.15);
-            transition: border-color 0.3s ease;
+        }
+
+        /* ГЕНЕРАТИВНЫЙ АДАПТИВНЫЙ КОНТУР (ВЕСЬ КОД ТЕПЕРЬ ТУТ) */
+        .tab-gradient-layer {
+            position: absolute;
+            inset: -1px;
+            border-radius: 38px;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .tab-gradient-layer::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border: 1px solid transparent;
+            border-radius: 38px;
+            mask-image: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: xor;
+            -webkit-mask-image: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            
+            /* Революция контура: плавное перетекание цветов в каждой четверти круга */
+            background: conic-gradient(
+                from 135deg at 50% 50%,
+                var(--p-top) 0%,   /* Переход с Топа на Правый */
+                var(--p-right) 25%, /* Точно Правый */
+                var(--p-bottom) 50%, /* Переход с Правого на Низ */
+                var(--p-left) 75%, /* Переход с Низа на Левый */
+                var(--p-top) 100%   /* С Левого на Топ */
+            );
+            filter: blur(1.5px) saturate(110%);
+            transition: opacity 0.4s ease;
         }
 
         .tab-item {
@@ -111,10 +141,10 @@
             transition: background-color 0.16s ease-out, border-color 0.16s ease-out;
         }
 
-        /* Во время перемещения контур капли адаптируется под окружение и становится светлее фона */
+        /* При прыжке капля адаптирует контур из усредненного цвета */
         .liquid-slider.flying {
             background-color: transparent !important; 
-            border: 1.5px solid var(--dynamic-flying-border) !important;
+            border: 1.5px solid var(--p-top) !important;
             box-shadow: none;
         }
     </style>
@@ -123,6 +153,7 @@
 
 <div class="tab-bar-container">
     <nav class="ios-tab-bar" id="tabBar">
+        <div class="tab-gradient-layer"></div>
         <div class="liquid-slider" id="slider"></div>
 
         <button class="tab-item active" data-index="0">
@@ -150,57 +181,54 @@
 
     let state = { x: 0, tx: 0, vx: 0, w: 0, tw: 0, vw: 0, sx: 1, tsx: 1, vsx: 0, sy: 1, tsy: 1, vsy: 0, isMoving: false, intensity: 1, currentIndex: 0 };
 
-    // ДВИЖОК СЭМПЛИНГА ЦВЕТА (ЦВЕТОВАЯ ЛИНЗА)
+    // ДВИЖОК СЭМПЛИНГА ЦВЕТА И ГРАДИЕНТОВ
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     const bgImg = new Image();
     bgImg.crossOrigin = "anonymous"; 
-    bgImg.src = 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80';
+    bgImg.src = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRkLiZZofuMdxDrT1-l8xUj0r7hEpeStNzrFqFqgayAjeO5YdDEWEJXo_lQ&s=10';
 
     bgImg.onload = () => {
-        canvas.width = bgImg.width;
-        canvas.height = bgImg.height;
+        canvas.width = bgImg.width; canvas.height = bgImg.height;
         ctx.drawImage(bgImg, 0, 0);
-        updateDynamicColors(); // Первый просчет при загрузке фонового изображения
+        updateDynamicColors(); // Первый просчет
     };
 
     function getPixelColor(clientX, clientY) {
         if (!canvas.width) return [255, 255, 255];
-        // Проекция экранных координат на реальный масштаб картинки в Canvas
         const imgX = Math.floor((clientX / window.innerWidth) * canvas.width);
         const imgY = Math.floor((clientY / window.innerHeight) * canvas.height);
-        
         if (imgX < 0 || imgX >= canvas.width || imgY < 0 || imgY >= canvas.height) return [255,255,255];
         const data = ctx.getImageData(imgX, imgY, 1, 1).data;
         return [data[0], data[1], data[2]];
     }
 
     function updateDynamicColors() {
-        const sliderRect = slider.getBoundingClientRect();
-        const cx = sliderRect.left + sliderRect.width / 2;
-        const cy = sliderRect.top + sliderRect.height / 2;
-        const offset = 40; // Смещение в пикселях (слева, справа, сверху, снизу) для анализа окружения
+        const tabBarRect = tabBar.getBoundingClientRect();
+        const cx = tabBarRect.left + tabBarRect.width / 2;
+        const cy = tabBarRect.top + tabBarRect.height / 2;
+        // Смещение от центра для анализа 4 четвертей контура (лево, верх, право, низ)
+        const sampleDist = 80;
 
-        // Вытаскиваем 4 точки вокруг капли
-        const pLeft  = getPixelColor(cx - offset, cy);
-        const pRight = getPixelColor(cx + offset, cy);
-        const pTop   = getPixelColor(cx, cy - offset);
-        const pBottom= getPixelColor(cx, cy + offset);
+        const pLeft   = getPixelColor(tabBarRect.left + 30, cy);
+        const pTop    = getPixelColor(cx, tabBarRect.top - sampleDist);
+        const pRight  = getPixelColor(tabBarRect.right - 30, cy);
+        const pBottom = getPixelColor(cx, tabBarRect.bottom + sampleDist);
 
-        // Смешиваем каналы
-        let r = (pLeft[0] + pRight[0] + pTop[0] + pBottom[0]) / 4;
-        let g = (pLeft[1] + pRight[1] + pTop[1] + pBottom[1]) / 4;
-        let b = (pLeft[2] + pRight[2] + pTop[2] + pBottom[2]) / 4;
+        // Функция осветления: делаем цвета контура выразительным глянцем
+        const lighten = (p, factor = 1.7) => {
+            const r = Math.min(255, p[0] * factor);
+            const g = Math.min(255, p[1] * factor);
+            const b = Math.min(255, p[2] * factor);
+            return `rgba(${r}, ${g}, ${b}, 0.5)`; // Прозрачность 0.5 для стекла
+        }
 
-        // Осветляем полученный микс (делаем контур выразительным глянцем)
-        const lightenFactor = 1.6; 
-        r = Math.min(255, r * lightenFactor);
-        g = Math.min(255, g * lightenFactor);
-        b = Math.min(255, b * lightenFactor);
-
-        // Передаем цвета в CSS переменные в реальном времени
-        document.documentElement.style.setProperty('--dynamic-glass-glow', `rgba(${r}, ${g}, ${b}, 0.5)`);
-        document.documentElement.style.setProperty('--dynamic-flying-border', `rgba(${r}, ${g}, ${b}, 0.75)`);
+        // Передаем 4 цвета в CSS, они мгновенно перекрашивают конический градиент
+        const rootStyle = document.documentElement.style;
+        rootStyle.setProperty('--p-top', lighten(pTop));
+        rootStyle.setProperty('--p-right', lighten(pRight));
+        rootStyle.setProperty('--p-bottom', lighten(pBottom));
+        rootStyle.setProperty('--p-left', lighten(pLeft));
     }
 
     function spring(curr, tgt, vel, cfg) {
@@ -213,8 +241,8 @@
         const dist = Math.abs(state.x - state.tx);
 
         if (state.isMoving) {
-            // Если капля в движении — непрерывно пересчитываем цвета под ней
-            updateDynamicColors();
+            // При движении капли пересчитываем только если нужно, но контур таббара статичен
+            // updateDynamicColors(); 
 
             if (dist > 15) { 
                 slider.classList.add('flying');
@@ -265,6 +293,10 @@
 
     tabs.forEach(tab => tab.addEventListener('click', () => setActive(tab)));
     setActive(document.querySelector('.tab-item.active'), true);
+    
+    // Пересчитываем контур таббара только если он сам сдвинулся по экрану (не нужно в Update)
+    // syncRefraction(); 
+
     requestAnimationFrame(update);
 </script>
 
