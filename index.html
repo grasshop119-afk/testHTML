@@ -3,21 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iOS 26 Stealth Liquid</title>
+    <title>iOS Liquid Glass Tabbar</title>
     <style>
         :root {
-            --bg-color: #000000;
-            --tab-bar-bg: rgba(28, 28, 30, 0.92);
-            --active-accent: #007AFF;
-            --inactive-color: #8e8e93;
-            --pill-bg: rgba(255, 255, 255, 0.12);
-            --pill-border-moving: rgba(255, 255, 255, 0.25); 
+            /* Универсальная стеклянная палитра, адаптирующаяся под фон */
+            --glass-bg: rgba(255, 255, 255, 0.12);
+            --glass-edge: rgba(255, 255, 255, 0.45);
+            --glass-shadow: rgba(0, 0, 0, 0.15);
+            --pill-glass: rgba(255, 255, 255, 0.22);
+            --pill-moving-edge: rgba(255, 255, 255, 0.6);
+            --text-inactive: rgba(255, 255, 255, 0.65);
+            --text-active: #ffffff;
         }
 
         body {
             margin: 0;
-            background: var(--bg-color);
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            /* Ставим твою картинку на фон */
+            background: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRkLiZZofuMdxDrT1-l8xUj0r7hEpeStNzrFqFqgayAjeO5YdDEWEJXo_lQ&s=10') no-repeat center center;
+            background-size: cover;
             height: 100vh;
             display: flex;
             justify-content: center;
@@ -28,27 +31,36 @@
         }
 
         .tab-bar-container {
-            margin-bottom: calc(15px + env(safe-area-inset-bottom));
-            width: 92%;
-            max-width: 400px;
+            margin-bottom: calc(25px + env(safe-area-inset-bottom));
+            width: 90%;
+            max-width: 420px;
         }
 
+        /* ЭФФЕКТ ЖИДКОГО СТЕКЛА (Основа таббара) */
         .ios-tab-bar {
             position: relative;
-            background: var(--tab-bar-bg);
-            backdrop-filter: blur(25px) saturate(180%);
-            -webkit-backdrop-filter: blur(25px) saturate(180%);
-            border-radius: 38px;
+            background: var(--glass-bg);
+            /* Мощный блур + насыщение цвета подложки, как в iOS */
+            backdrop-filter: blur(30px) saturate(190%);
+            -webkit-backdrop-filter: blur(30px) saturate(190%);
+            border-radius: 40px;
             display: flex;
-            padding: 4px;
-            border: 0.5px solid rgba(255, 255, 255, 0.08);
+            padding: 6px;
+            box-sizing: border-box;
             justify-content: space-around;
+            
+            /* Эффект преломления света по краям (объемное стекло) */
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 
+                inset 0 2px 4px rgba(255, 255, 255, 0.3),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.1),
+                0 10px 30px var(--glass-shadow);
         }
 
         .tab-item {
             position: relative;
             z-index: 2;
-            padding: 8px 0;
+            padding: 10px 0;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -64,44 +76,64 @@
             width: 24px;
             height: 24px;
             margin-bottom: 4px;
-            background-color: var(--inactive-color);
+            background-color: var(--text-inactive);
             -webkit-mask-size: contain;
             -webkit-mask-repeat: no-repeat;
             -webkit-mask-position: center;
             mask-size: contain;
             mask-repeat: no-repeat;
             mask-position: center;
-            transition: background-color 0.25s ease;
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.25s;
         }
 
         .tab-text {
-            font-size: 10px;
-            font-weight: 500;
-            color: var(--inactive-color);
-            transition: color 0.25s ease;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-inactive);
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.25s;
         }
 
-        .tab-item.active .icon-wrapper { background-color: var(--active-accent); }
-        .tab-item.active .tab-text { color: var(--active-accent); }
+        /* Эффект лупы/подсветки при наведении капли */
+        .tab-item.active .icon-wrapper { 
+            background-color: var(--text-active); 
+            transform: scale(1.1);
+        }
+        .tab-item.active .tab-text { 
+            color: var(--text-active);
+            transform: scale(1.05);
+        }
 
+        /* КАПЛЯ (Жидкая линза) */
         .liquid-slider {
             position: absolute;
-            top: 4px;
-            left: 4px;
-            height: calc(100% - 8px);
-            background: var(--pill-bg);
+            top: 6px;
+            left: 6px;
+            height: calc(100% - 12px);
+            background: var(--pill-glass);
             border-radius: 34px;
             z-index: 1;
             pointer-events: none;
             box-sizing: border-box;
-            border: 1px solid transparent;
+            
+            /* Двойной стеклянный контур для капли */
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 
+                inset 0 1px 3px rgba(255, 255, 255, 0.4),
+                0 4px 12px rgba(0, 0, 0, 0.12);
+
+            /* Внутреннее искажение линзы */
+            backdrop-filter: blur(5px) brightness(1.1);
+            -webkit-backdrop-filter: blur(5px) brightness(1.1);
+
             will-change: transform, left, width, background-color, border-color;
-            transition: background-color 0.16s ease-out, border-color 0.16s ease-out;
+            transition: background-color 0.2s, border-color 0.2s;
         }
 
+        /* Состояние перелета (Капля оторвалась и вытянулась вверх) */
         .liquid-slider.flying {
-            background-color: transparent !important; 
-            border-color: var(--pill-border-moving) !important;
+            background-color: rgba(255, 255, 255, 0.05) !important; 
+            border-color: var(--pill-moving-edge) !important;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
         }
     </style>
 </head>
@@ -113,23 +145,24 @@
 
         <button class="tab-item active" data-index="0">
             <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/6997/6997164.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/6997/6997164.png');"></div>
-            <span class="tab-text">Главная</span>
+            <span class="tab-text">Home</span>
         </button>
 
         <button class="tab-item" data-index="1">
             <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/2769/2769160.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/2769/2769160.png');"></div>
-            <span class="tab-text">Меню</span>
+            <span class="tab-text">Radio</span>
         </button>
 
         <button class="tab-item" data-index="2">
             <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/9959/9959489.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/9959/9959489.png');"></div>
-            <span class="tab-text">Настройки</span>
+            <span class="tab-text">Library</span>
         </button>
     </nav>
 </div>
 
 <script>
-    const PHYSICS = { pos: { k: 380, d: 38, m: 1 }, scale: { k: 420, d: 24, m: 1 } };
+    // Увеличили жесткость пружины для веса "стекла", чтобы оно двигалось упруго
+    const PHYSICS = { pos: { k: 420, d: 40, m: 1 }, scale: { k: 460, d: 26, m: 1 } };
     const slider = document.getElementById('slider');
     const tabs = document.querySelectorAll('.tab-item');
 
@@ -147,14 +180,14 @@
         if (state.isMoving) {
             if (dist > 15) { 
                 slider.classList.add('flying');
-                // Дальний полет: сужаемся с боков по X и раздуваемся выше таббара по Y
-                state.tsx = 1 - (0.15 * state.intensity); 
-                state.tsy = 1 + (0.25 * state.intensity); 
+                // Реализация ТВОЕГО ТЗ: Сужение по бокам (X) и раздувание ВВЕРХ (Y) выше таббара
+                state.tsx = 1 - (0.14 * state.intensity); 
+                state.tsy = 1 + (0.28 * state.intensity); 
             } else if (dist <= 15 && dist > 0.5) {
                 slider.classList.remove('flying');
-                // Приземление: классический небольшой шлепок-амортизация
+                // Эффект шлепка при падении обратно в пазы
                 state.tsx = 1 + (0.08 * state.intensity); 
-                state.tsy = 1 - (0.05 * state.intensity); 
+                state.tsy = 1 - (0.04 * state.intensity); 
             } else {
                 state.tsx = state.tsy = 1;
                 if (Math.abs(state.vx) < 0.2 && Math.abs(state.vsx) < 0.2) {
@@ -188,7 +221,7 @@
             state.x = state.tx; state.w = state.tw;
             state.sx = state.sy = 1;
         } else {
-            state.intensity = Math.abs(newIdx - state.currentIndex) > 1 ? 1.4 : 0.8;
+            state.intensity = Math.abs(newIdx - state.currentIndex) > 1 ? 1.3 : 0.7;
             state.isMoving = true;
         }
         state.currentIndex = newIdx;
