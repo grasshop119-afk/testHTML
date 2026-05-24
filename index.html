@@ -3,20 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Dynamic Liquid Tabbar</title>
+    <title>Dynamic Liquid Tabbar with Smooth Border</title>
     <style>
         :root {
+            /* Оставляем единую универсальную палитру для элементов */
             --active-accent: #ffffff;
             --inactive-color: rgba(255, 255, 255, 0.70);
             --p-fly-drop: rgba(255, 255, 255, 0.5);   
+            
+            /* Статический фон таббара (не трогаем) */
             --tabbar-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
             --slider-bg: rgba(0, 0, 0, 0.20);
 
-            /* 4 базовые точки для плавного кругового перетекания */
-            --border-top: rgb(255, 255, 255);
-            --border-right: rgb(255, 255, 255);
-            --border-bottom: rgb(255, 255, 255);
-            --border-left: rgb(255, 255, 255);
+            /* Переменные для 4 точек замера контура */
+            --border-color-l: rgb(255, 255, 255);
+            --border-color-r: rgb(255, 255, 255);
+            --border-color-t: rgb(255, 255, 255);
+            --border-color-b: rgb(255, 255, 255);
         }
 
         body {
@@ -51,28 +54,35 @@
             align-items: center;
             border-radius: 38px;
             
-            /* --- НАСТОЯЩИЙ ПЛАВНЫЙ КОНТУР ИЗ 4 ЧЕТВЕРТЕЙ --- */
-            border: 1px solid transparent; /* Резервируем 1px под контур */
-            background-image: 
-                var(--tabbar-bg), 
-                conic-gradient(
-                    from 0deg at 50% 50%, 
-                    var(--border-right) 0deg 45deg, 
-                    var(--border-bottom) 135deg, 
-                    var(--border-left) 225deg, 
-                    var(--border-top) 315deg, 
-                    var(--border-right) 360deg
-                );
-            background-origin: border-box;
-            background-clip: padding-box, border-box; /* Первый фон ложится внутрь, второй — строго на рамку */
+            /* СТРОГО СТАТИЧЕСКИЙ ФОН */
+            background: var(--tabbar-bg);
             
+            /* --- МАГИЯ: ПЛАВНЫЙ КОНТУР ЧЕРЕЗ BORDER-IMAGE --- */
+            border: 1px solid transparent; /* Прозрачный border как база */
+            border-image-slice: 1; /* Растягиваем градиент на весь border */
+            
+            /* Конический градиент плавно смешивает 4 цвета по кругу, 
+               начиная с правой стороны и идя по часовой стрелке. 
+               Это создает бесшовный переход строго на рамке. */
+            border-image-source: conic-gradient(
+                from 0deg, 
+                var(--border-color-r), 
+                var(--border-color-b), 
+                var(--border-color-l), 
+                var(--border-color-t), 
+                var(--border-color-r)
+            );
+            
+            /* Мягкие тени для объема */
             box-shadow: 
                 0 0 0 1px rgba(0, 0, 0, 0.03), 
                 0 12px 30px rgba(0, 0, 0, 0.12), 
                 0 4px 8px rgba(0, 0, 0, 0.05);   
             
+            transition: box-shadow 0.35s ease;
             z-index: 1;
             
+            /* Механика блюра и "жидкости" (не тронута) */
             backdrop-filter: blur(4px) url(#liquid-lens) saturate(140%);
             -webkit-backdrop-filter: blur(4px) saturate(140%);
         }
@@ -179,17 +189,18 @@
 
     let state = { x: 0, tx: 0, vx: 0, w: 0, tw: 0, vw: 0, sx: 1, tsx: 1, vsx: 0, sy: 1, tsy: 1, vsy: 0, isMoving: false, intensity: 1, currentIndex: 0 };
 
+    // Набор фонов для теста адаптивности
     const backgrounds = [
-        'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80', 
-        'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=1200&q=80', 
-        'https://images.unsplash.com/photo-1511376777868-611b54f68947?auto=format&fit=crop&w=1200&q=80', 
-        'https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=1200&q=80', 
-        'https://images.unsplash.com/photo-1579547621113-e4bb2a19bdd6?auto=format&fit=crop&w=1200&q=80', 
-        'https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=1200&q=80', 
-        'https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&w=1200&q=80', 
-        'https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?auto=format&fit=crop&w=1200&q=80', 
-        'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=1200&q=80', 
-        'https://images.unsplash.com/photo-1531315630201-bb15abeb1653?auto=format&fit=crop&w=1200&q=80'  
+        'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80', // Сине-розовый
+        'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=1200&q=80', // Мягкий градиент
+        'https://images.unsplash.com/photo-1511376777868-611b54f68947?auto=format&fit=crop&w=1200&q=80', // Светлый абстракт
+        'https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=1200&q=80', // Красный глубокий
+        'https://images.unsplash.com/photo-1579547621113-e4bb2a19bdd6?auto=format&fit=crop&w=1200&q=80', // Кислотно-зеленый
+        'https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=1200&q=80', // Темный гранж
+        'https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&w=1200&q=80', // Светло-серый
+        'https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?auto=format&fit=crop&w=1200&q=80', // Пастельный песок
+        'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=1200&q=80', // Яркие волны
+        'https://images.unsplash.com/photo-1531315630201-bb15abeb1653?auto=format&fit=crop&w=1200&q=80'  // Космический
     ];
 
     const canvas = document.createElement('canvas');
@@ -209,6 +220,7 @@
         updateDynamicColors();
     };
 
+    // Функция получения цвета пикселя с фона
     function getPixelColor(clientX, clientY) {
         if (!canvas.width) return [255, 255, 255];
         const imgX = Math.min(canvas.width - 1, Math.max(0, Math.floor((clientX / window.innerWidth) * canvas.width)));
@@ -222,15 +234,16 @@
         const cx = rct.left + rct.width / 2;
         const cy = rct.top + rct.height / 2;
 
-        // Замеряем цвета за границами таббара
-        const pLeft   = getPixelColor(rct.left - 6, cy);
-        const pTop    = getPixelColor(cx, rct.top - 6);
-        const pRight  = getPixelColor(rct.right + 6, cy);
-        const pBottom = getPixelColor(rct.bottom + 6, cy);
+        // Замеряем цвет фона строго по 4 точкам *внутри* таббара, 
+        // чтобы контур мимикрировал под то, что находится непосредственно под ним.
+        const pLeft   = getPixelColor(rct.left + 5, cy);
+        const pTop    = getPixelColor(cx, rct.top + 5);
+        const pRight  = getPixelColor(rct.right - 5, cy);
+        const pBottom = getPixelColor(cx, rct.bottom - 5);
 
         const rootStyle = document.documentElement.style;
 
-        // Освежаем цвета ребра на 25% ярче фона
+        // Функция осветления пикселя на 25% (64 пункта) для эффекта глянцевого ребра
         const lighten = (p) => [Math.min(255, p[0] + 64), Math.min(255, p[1] + 64), Math.min(255, p[2] + 64)];
 
         const cLeft   = lighten(pLeft);
@@ -238,19 +251,20 @@
         const cRight  = lighten(pRight);
         const cBottom = lighten(pBottom);
 
-        // Обновляем CSS-переменные сторон
-        rootStyle.setProperty('--border-top', `rgb(${cTop[0]}, ${cTop[1]}, ${cTop[2]})`);
-        rootStyle.setProperty('--border-right', `rgb(${cRight[0]}, ${cRight[1]}, ${cRight[2]})`);
-        rootStyle.setProperty('--border-bottom', `rgb(${cBottom[0]}, ${cBottom[1]}, ${cBottom[2]})`);
-        rootStyle.setProperty('--border-left', `rgb(${cLeft[0]}, ${cLeft[1]}, ${cLeft[2]})`);
+        // Передаем 4 разных цвета в CSS-переменные
+        rootStyle.setProperty('--border-color-l', `rgb(${cLeft[0]}, ${cLeft[1]}, ${cLeft[2]})`);
+        rootStyle.setProperty('--border-color-t', `rgb(${cTop[0]}, ${cTop[1]}, ${cTop[2]})`);
+        rootStyle.setProperty('--border-color-r', `rgb(${cRight[0]}, ${cRight[1]}, ${cRight[2]})`);
+        rootStyle.setProperty('--border-color-b', `rgb(${cBottom[0]}, ${cBottom[1]}, ${cBottom[2]})`);
 
-        // Цвет для капли
+        // Усредненный цвет для капли (не трогаем)
         const avgR = (pLeft[0] + pTop[0] + pRight[0] + pBottom[0]) / 4;
         const avgG = (pLeft[1] + pTop[1] + pRight[1] + pBottom[1]) / 4;
         const avgB = (pLeft[2] + pTop[2] + pRight[2] + pBottom[2]) / 4;
         rootStyle.setProperty('--p-fly-drop', `rgb(${Math.min(255, avgR + 89)}, ${Math.min(255, avgG + 89)}, ${Math.min(255, avgB + 89)})`);
     }
 
+    // Физика пружин и логика табов (не тронута)
     function spring(curr, tgt, vel, cfg) {
         const acc = (-cfg.k * (curr - tgt) - cfg.d * vel) / cfg.m;
         vel += acc * 0.016;
@@ -304,6 +318,7 @@
         } else {
             state.intensity = Math.abs(newIdx - state.currentIndex) > 1 ? 1.2 : 0.7;
             state.isMoving = true;
+            // Меняем фон при каждом клике для теста
             setRandomBackground();
         }
         state.currentIndex = newIdx;
@@ -311,6 +326,7 @@
 
     tabs.forEach(tab => tab.addEventListener('click', () => setActive(tab)));
     
+    // Инициализация
     setRandomBackground();
     setActive(document.querySelector('.tab-item.active'), true);
     
