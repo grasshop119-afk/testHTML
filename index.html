@@ -23,7 +23,6 @@
             justify-content: center;
             align-items: flex-end;
             overflow: hidden;
-            /* Запрет выделения по всему экрану */
             -webkit-user-select: none;
             user-select: none;
         }
@@ -58,7 +57,6 @@
             flex: 1;
             cursor: pointer;
             outline: none;
-            /* Отключаем дефолтную серую вспышку при тапе на iOS */
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -100,6 +98,11 @@
             will-change: transform, left, width, background-color, border-color;
             transition: background-color 0.16s ease-out, border-color 0.16s ease-out;
         }
+
+        .liquid-slider.flying {
+            background-color: transparent !important; 
+            border-color: var(--pill-border-moving) !important;
+        }
     </style>
 </head>
 <body>
@@ -115,7 +118,7 @@
 
         <button class="tab-item" data-index="1">
             <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/2769/2769160.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/2769/2769160.png');"></div>
-            <span class="tab-text">Menu</span>
+            <span class="tab-text">Меню</span>
         </button>
 
         <button class="tab-item" data-index="2">
@@ -143,18 +146,19 @@
 
         if (state.isMoving) {
             if (dist > 15) { 
+                slider.classList.add('flying');
                 state.tsx = 1 + (0.18 * state.intensity); 
                 state.tsy = 1 - (0.12 * state.intensity); 
-                slider.style.backgroundColor = 'transparent';
-                slider.style.borderColor = 'var(--pill-border-moving)';
             } else if (dist <= 15 && dist > 0.5) {
+                slider.classList.remove('flying');
                 state.tsx = 1 - (0.05 * state.intensity); 
                 state.tsy = 1 + (0.05 * state.intensity); 
-                slider.style.backgroundColor = 'var(--pill-bg)';
-                slider.style.borderColor = 'transparent';
             } else {
                 state.tsx = state.tsy = 1;
-                if (Math.abs(state.vx) < 0.2 && Math.abs(state.vsx) < 0.2) state.isMoving = false;
+                if (Math.abs(state.vx) < 0.2 && Math.abs(state.vsx) < 0.2) {
+                    state.isMoving = false;
+                    slider.classList.remove('flying');
+                }
             }
         }
 
@@ -163,7 +167,9 @@
         [state.sx, state.vsx] = spring(state.sx, state.tsx, state.vsx, PHYSICS.scale);
         [state.sy, state.vsy] = spring(state.sy, state.tsy, state.vsy, PHYSICS.scale);
 
-        slider.style.cssText = `left:${state.x}px; width:${state.w}px; transform:scale(${state.sx},${state.sy}); background-color:${dist > 15 && state.isMoving ? 'transparent' : 'var(--pill-bg)'}; border-color:${dist > 15 && state.isMoving ? 'var(--pill-border-moving)' : 'transparent'}`;
+        slider.style.left = `${state.x}px`;
+        slider.style.width = `${state.w}px`;
+        slider.style.transform = `scale(${state.sx}, ${state.sy})`;
 
         requestAnimationFrame(update);
     }
