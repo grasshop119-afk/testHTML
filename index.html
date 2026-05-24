@@ -8,9 +8,9 @@
         :root {
             --active-accent: #ffffff;
             --inactive-color: rgba(255, 255, 255, 0.75);
-            --p-top: #fff; --p-right: #fff; --p-bottom: #fff; --p-left: #fff;
+            --p-fly: #fff; /* Единый яркий цвет для контура таббара и летящей капли */
             --tabbar-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
-            --slider-bg: rgba(0, 0, 0, 0.28); /* Сделали на 30% светлее (прозрачнее) в светлой теме */
+            --slider-bg: rgba(0, 0, 0, 0.42);
         }
 
         body {
@@ -60,6 +60,7 @@
             overflow: hidden;
         }
 
+        /* Контур таббара теперь точь-в-точь дублирует цвет капли через переменную --p-fly */
         .tab-gradient-layer::before {
             content: '';
             position: absolute;
@@ -70,8 +71,7 @@
             mask-composite: xor;
             -webkit-mask-image: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             -webkit-mask-composite: xor;
-            /* Использует те же динамические цвета, что и капля в полете */
-            background: conic-gradient(from 135deg at 50% 50%, var(--p-top) 0%, var(--p-right) 25%, var(--p-bottom) 50%, var(--p-left) 75%, var(--p-top) 100%);
+            background: conic-gradient(from 135deg at 50% 50%, var(--p-fly) 0%, var(--p-fly) 25%, var(--p-fly) 50%, var(--p-fly) 75%, var(--p-fly) 100%);
             filter: blur(0.4px);
         }
 
@@ -132,9 +132,7 @@
 
         .liquid-slider.flying {
             background-color: transparent !important; 
-            /* Капля в полете заимствует цвет верхней грани таббара (var(--p-top)), */
-            /* который теперь вычисляется по новой ультра-яркой формуле */
-            border: 1.5px solid var(--p-top) !important; 
+            border: 1.5px solid var(--p-fly) !important; 
             box-shadow: none; 
         }
     </style>
@@ -216,9 +214,12 @@
             (pBottom[0]*0.299 + pBottom[1]*0.587 + pBottom[2]*0.114)
         ) / 4;
 
+        const avgR = (pLeft[0] + pTop[0] + pRight[0] + pBottom[0]) / 4;
+        const avgG = (pLeft[1] + pTop[1] + pRight[1] + pBottom[1]) / 4;
+        const avgB = (pLeft[2] + pTop[2] + pRight[2] + pBottom[2]) / 4;
+
         const rootStyle = document.documentElement.style;
 
-        // Переключение тем и прозрачности капли
         if (avgBrightness > 125) { 
             isDarkTheme = true;
             rootStyle.setProperty('--tabbar-bg', 'linear-gradient(180deg, rgba(10, 10, 12, 0.86) 0%, rgba(6, 6, 8, 0.82) 100%)');
@@ -228,25 +229,21 @@
         } else {
             isDarkTheme = false;
             rootStyle.setProperty('--tabbar-bg', 'linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.04) 100%)');
-            rootStyle.setProperty('--slider-bg', 'rgba(0, 0, 0, 0.28)'); // Сделали на ~30% светлее для идеального баланса
+            rootStyle.setProperty('--slider-bg', 'rgba(0, 0, 0, 0.42)');
             rootStyle.setProperty('--active-accent', '#ffffff');
             rootStyle.setProperty('--inactive-color', 'rgba(255, 255, 255, 0.75)');
         }
 
-        // Общая функция вычисления яркого контура (бывшее определение летящей капли)
-        const processColor = (pixel) => {
-            const factor = isDarkTheme ? 3.5 : 2.0; 
-            const r = Math.min(255, pixel[0] * factor + 40);
-            const g = Math.min(255, pixel[1] * factor + 40);
-            const b = Math.min(255, pixel[2] * factor + 40);
+        // Вычисляем общую переменную цвета: сделали её на ~30% светлее текущей за счёт увеличения factor
+        const getFlyColor = () => {
+            const factor = isDarkTheme ? 4.6 : 2.6; // Подняли множители для заметного осветления границ
+            const r = Math.min(255, avgR * factor + 50);
+            const g = Math.min(255, avgG * factor + 50);
+            const b = Math.min(255, avgB * factor + 50);
             return `rgb(${r}, ${g}, ${b})`;
         };
 
-        // Теперь таббар и летящая капля используют одну и ту же формулу высокой контрастности
-        rootStyle.setProperty('--p-top', processColor(pTop));
-        rootStyle.setProperty('--p-right', processColor(pRight));
-        rootStyle.setProperty('--p-bottom', processColor(pBottom));
-        rootStyle.setProperty('--p-left', processColor(pLeft));
+        rootStyle.setProperty('--p-fly', getFlyColor());
     }
 
     function spring(curr, tgt, vel, cfg) {
