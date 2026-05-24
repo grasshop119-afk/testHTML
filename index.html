@@ -10,7 +10,7 @@
             --inactive-color: rgba(255, 255, 255, 0.75);
             --p-top: #fff; --p-right: #fff; --p-bottom: #fff; --p-left: #fff;
             --tabbar-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
-            --slider-bg: rgba(0, 0, 0, 0.28);
+            --slider-bg: rgba(0, 0, 0, 0.42);
         }
 
         body {
@@ -201,7 +201,6 @@
         const cx = rct.left + rct.width / 2;
         const cy = rct.top + rct.height / 2;
 
-        // Берём пробы строго ИЗНУТРИ подложки, чтобы не ловить побочные объекты
         const pLeft   = getPixelColor(rct.left + 15, cy);
         const pTop    = getPixelColor(cx, rct.top + 10);
         const pRight  = getPixelColor(rct.right - 15, cy);
@@ -214,33 +213,47 @@
             (pBottom[0]*0.299 + pBottom[1]*0.587 + pBottom[2]*0.114)
         ) / 4;
 
+        // Вычисляем средний цвет фона по 4 точкам для мягкого контура
+        const avgR = (pLeft[0] + pTop[0] + pRight[0] + pBottom[0]) / 4;
+        const avgG = (pLeft[1] + pTop[1] + pRight[1] + pBottom[1]) / 4;
+        const avgB = (pLeft[2] + pTop[2] + pRight[2] + pBottom[2]) / 4;
+
         const rootStyle = document.documentElement.style;
 
-        // Корректная инверсия темной/светлой тем
+        // Новая инверсия темной/светлой тем для капли
         if (avgBrightness > 125) { 
             isDarkTheme = true;
             rootStyle.setProperty('--tabbar-bg', 'linear-gradient(180deg, rgba(10, 10, 12, 0.86) 0%, rgba(6, 6, 8, 0.82) 100%)');
+            // В темной теме капля становится светлой
             rootStyle.setProperty('--slider-bg', 'rgba(255, 255, 255, 0.24)');
             rootStyle.setProperty('--active-accent', '#ffffff');
             rootStyle.setProperty('--inactive-color', 'rgba(255, 255, 255, 0.45)');
         } else {
             isDarkTheme = false;
             rootStyle.setProperty('--tabbar-bg', 'linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.04) 100%)');
-            rootStyle.setProperty('--slider-bg', 'rgba(0, 0, 0, 0.32)');
+            // В светлой теме капля становится темной и плотной (0.42 для хорошей читаемости)
+            rootStyle.setProperty('--slider-bg', 'rgba(0, 0, 0, 0.42)');
             rootStyle.setProperty('--active-accent', '#ffffff');
             rootStyle.setProperty('--inactive-color', 'rgba(255, 255, 255, 0.75)');
         }
 
-        const lighten = (p) => {
-            const f = isDarkTheme ? 2.9 : 1.4; 
-            const op = isDarkTheme ? 0.9 : 0.45;
-            return `rgba(${Math.min(255, p[0]*f)}, ${Math.min(255, p[1]*f)}, ${Math.min(255, p[2]*f)}, ${op})`;
-        }
+        // Логика контура: усредняем пиксели со всех сторон и деликатно их осветляем
+        const getGlowColor = () => {
+            const boost = 40; // Мягкая фиксированная прибавка к яркости
+            const r = Math.min(255, avgR + boost);
+            const g = Math.min(255, avgG + boost);
+            const b = Math.min(255, avgB + boost);
+            const op = isDarkTheme ? 0.35 : 0.5; // Сдержанная прозрачность
+            return `rgba(${r}, ${g}, ${b}, ${op})`;
+        };
 
-        rootStyle.setProperty('--p-top', lighten(pTop));
-        rootStyle.setProperty('--p-right', lighten(pRight));
-        rootStyle.setProperty('--p-bottom', lighten(pBottom));
-        rootStyle.setProperty('--p-left', lighten(pLeft));
+        const glowColor = getGlowColor();
+
+        // Применяем ровный светящийся тон ко всему контуру
+        rootStyle.setProperty('--p-top', glowColor);
+        rootStyle.setProperty('--p-right', glowColor);
+        rootStyle.setProperty('--p-bottom', glowColor);
+        rootStyle.setProperty('--p-left', glowColor);
     }
 
     function spring(curr, tgt, vel, cfg) {
