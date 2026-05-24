@@ -9,6 +9,7 @@
             --active-accent: #ffffff;
             --inactive-color: rgba(255, 255, 255, 0.75);
             --p-top: #fff; --p-right: #fff; --p-bottom: #fff; --p-left: #fff;
+            --p-fly: #fff; /* Отдельный цвет для летящей капли */
             --tabbar-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
             --slider-bg: rgba(0, 0, 0, 0.42);
         }
@@ -131,8 +132,8 @@
 
         .liquid-slider.flying {
             background-color: transparent !important; 
-            border: 1.5px solid var(--p-top) !important;
-            box-shadow: none;
+            border: 1.5px solid var(--p-fly) !important; /* Используем отдельную супер-светлую переменную */
+            box-shadow: 0 0 8px var(--p-fly); /* Добавили легкий неоновый упор, чтобы полет считывался круче */
         }
     </style>
 </head>
@@ -213,47 +214,57 @@
             (pBottom[0]*0.299 + pBottom[1]*0.587 + pBottom[2]*0.114)
         ) / 4;
 
-        // Вычисляем средний цвет фона по 4 точкам для мягкого контура
+        // Вычисляем средний цвет фона по 4 точкам
         const avgR = (pLeft[0] + pTop[0] + pRight[0] + pBottom[0]) / 4;
         const avgG = (pLeft[1] + pTop[1] + pRight[1] + pBottom[1]) / 4;
         const avgB = (pLeft[2] + pTop[2] + pRight[2] + pBottom[2]) / 4;
 
         const rootStyle = document.documentElement.style;
 
-        // Новая инверсия темной/светлой тем для капли
         if (avgBrightness > 125) { 
             isDarkTheme = true;
             rootStyle.setProperty('--tabbar-bg', 'linear-gradient(180deg, rgba(10, 10, 12, 0.86) 0%, rgba(6, 6, 8, 0.82) 100%)');
-            // В темной теме капля становится светлой
             rootStyle.setProperty('--slider-bg', 'rgba(255, 255, 255, 0.24)');
             rootStyle.setProperty('--active-accent', '#ffffff');
             rootStyle.setProperty('--inactive-color', 'rgba(255, 255, 255, 0.45)');
         } else {
             isDarkTheme = false;
             rootStyle.setProperty('--tabbar-bg', 'linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.04) 100%)');
-            // В светлой теме капля становится темной и плотной (0.42 для хорошей читаемости)
             rootStyle.setProperty('--slider-bg', 'rgba(0, 0, 0, 0.42)');
             rootStyle.setProperty('--active-accent', '#ffffff');
             rootStyle.setProperty('--inactive-color', 'rgba(255, 255, 255, 0.75)');
         }
 
-        // Логика контура: усредняем пиксели со всех сторон и деликатно их осветляем
+        // 1. КОРРЕКЦИЯ КОНТУРА ТАББАРА: делаем его явно светлее за счет умножения (множитель контраста)
         const getGlowColor = () => {
-            const boost = 40; // Мягкая фиксированная прибавка к яркости
-            const r = Math.min(255, avgR + boost);
-            const g = Math.min(255, avgG + boost);
-            const b = Math.min(255, avgB + boost);
-            const op = isDarkTheme ? 0.35 : 0.5; // Сдержанная прозрачность
+            const factor = isDarkTheme ? 2.5 : 1.6; // Сильнее вытягиваем цвета на темном фоне
+            const r = Math.min(255, avgR * factor + 20);
+            const g = Math.min(255, avgG * factor + 20);
+            const b = Math.min(255, avgB * factor + 20);
+            const op = isDarkTheme ? 0.65 : 0.55; // Подняли прозрачность, чтобы контур не тускнел
+            return `rgba(${r}, ${g}, ${b}, ${op})`;
+        };
+
+        // 2. КОРРЕКЦИЯ ЛЕТЯЩЕЙ КАПЛИ: В два раза светлее и плотнее основного контура
+        const getFlyColor = () => {
+            const factor = isDarkTheme ? 4.0 : 2.2; 
+            const r = Math.min(255, avgR * factor + 50);
+            const g = Math.min(255, avgG * factor + 50);
+            const b = Math.min(255, avgB * factor + 50);
+            const op = isDarkTheme ? 0.95 : 0.85; // Практически непрозрачный, чистый свет в полете
             return `rgba(${r}, ${g}, ${b}, ${op})`;
         };
 
         const glowColor = getGlowColor();
+        const flyColor = getFlyColor();
 
-        // Применяем ровный светящийся тон ко всему контуру
+        // Применяем цвета
         rootStyle.setProperty('--p-top', glowColor);
         rootStyle.setProperty('--p-right', glowColor);
         rootStyle.setProperty('--p-bottom', glowColor);
         rootStyle.setProperty('--p-left', glowColor);
+        
+        rootStyle.setProperty('--p-fly', flyColor);
     }
 
     function spring(curr, tgt, vel, cfg) {
