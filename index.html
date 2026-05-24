@@ -2,9 +2,8 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iOS 26 Stealth Liquid</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>iOS Stealth Liquid</title>
     <style>
         :root {
             --bg-color: #000000;
@@ -12,220 +11,102 @@
             --active-accent: #007AFF;
             --inactive-color: #8e8e93;
             --pill-bg: rgba(255, 255, 255, 0.12);
-            /* Сделали контур темнее */
             --pill-border-moving: rgba(255, 255, 255, 0.25); 
         }
-
         body {
-            margin: 0;
-            background: var(--bg-color);
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            overflow: hidden;
+            margin: 0; background: var(--bg-color);
+            height: 100vh; display: flex; justify-content: center; align-items: flex-end;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif; overflow: hidden;
         }
-
-        .tab-bar-container {
-            margin-bottom: calc(15px + env(safe-area-inset-bottom));
-            width: 92%;
-            max-width: 400px;
-            display: flex;
-            justify-content: center;
-        }
-
+        .tab-bar-container { margin-bottom: calc(15px + env(safe-area-inset-bottom)); width: 92%; max-width: 400px; }
         .ios-tab-bar {
-            position: relative;
-            background: var(--tab-bar-bg);
-            backdrop-filter: blur(25px) saturate(180%);
-            -webkit-backdrop-filter: blur(25px) saturate(180%);
-            border-radius: 38px;
-            display: flex;
-            padding: 4px;
-            border: 0.5px solid rgba(255, 255, 255, 0.08);
-            width: 100%;
-            justify-content: space-around;
+            position: relative; background: var(--tab-bar-bg);
+            backdrop-filter: blur(25px) saturate(180%); -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border-radius: 38px; display: flex; padding: 4px; border: 0.5px solid rgba(255, 255, 255, 0.08);
         }
-
         .tab-item {
-            position: relative;
-            z-index: 2;
-            padding: 8px 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: none;
-            border: none;
-            flex: 1;
-            cursor: pointer;
-            outline: none;
+            position: relative; z-index: 2; padding: 8px 0; display: flex;
+            flex-direction: column; align-items: center; background: none; border: none; flex: 1; cursor: pointer;
         }
-
         .icon-wrapper {
-            width: 24px;
-            height: 24px;
-            margin-bottom: 4px;
-            background-color: var(--inactive-color);
-            -webkit-mask-size: contain;
-            -webkit-mask-repeat: no-repeat;
-            -webkit-mask-position: center;
-            mask-size: contain;
-            mask-repeat: no-repeat;
-            mask-position: center;
-            transition: background-color 0.25s ease;
+            width: 24px; height: 24px; margin-bottom: 4px; background-color: var(--inactive-color);
+            -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; -webkit-mask-position: center;
+            transition: background-color 0.25s;
         }
-
-        .tab-text {
-            font-size: 10px;
-            font-weight: 500;
-            color: var(--inactive-color);
-            transition: color 0.25s ease;
-        }
-
+        .tab-text { font-size: 10px; font-weight: 500; color: var(--inactive-color); transition: color 0.25s; }
         .tab-item.active .icon-wrapper { background-color: var(--active-accent); }
         .tab-item.active .tab-text { color: var(--active-accent); }
-
         .liquid-slider {
-            position: absolute;
-            top: 4px;
-            left: 4px;
-            height: calc(100% - 8px);
-            background: var(--pill-bg);
-            border-radius: 34px;
-            z-index: 1;
-            pointer-events: none;
-            transform-origin: center center;
-            box-sizing: border-box;
-            border: 1px solid transparent;
-            will-change: transform, left, width, background-color, border-color;
-            /* Быстрая и плавная смена состояний */
-            transition: background-color 0.16s ease-out, border-color 0.16s ease-out;
-        }
-
-        /* Состояние полета: без заливки и с темным контуром */
-        .liquid-slider.flying {
-            background-color: transparent !important; 
-            border-color: var(--pill-border-moving);
+            position: absolute; top: 4px; left: 4px; height: calc(100% - 8px);
+            background: var(--pill-bg); border-radius: 34px; z-index: 1; box-sizing: border-box;
+            border: 1px solid transparent; will-change: transform, left, width;
         }
     </style>
 </head>
 <body>
 
 <div class="tab-bar-container">
-    <nav class="ios-tab-bar" id="tabBar">
+    <nav class="ios-tab-bar">
         <div class="liquid-slider" id="slider"></div>
-
-        <button class="tab-item active" data-index="0">
-            <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/6997/6997164.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/6997/6997164.png');"></div>
+        <button class="tab-item active" data-idx="0">
+            <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/6997/6997164.png');"></div>
             <span class="tab-text">Главная</span>
         </button>
-
-        <button class="tab-item" data-index="1">
-            <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/2769/2769160.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/2769/2769160.png');"></div>
+        <button class="tab-item" data-idx="1">
+            <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/2769/2769160.png');"></div>
             <span class="tab-text">Меню</span>
         </button>
-
-        <button class="tab-item" data-index="2">
-            <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/9959/9959489.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/9959/9959489.png');"></div>
+        <button class="tab-item" data-idx="2">
+            <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/9959/9959489.png');"></div>
             <span class="tab-text">Настройки</span>
         </button>
     </nav>
 </div>
 
 <script>
-    const PHYSICS = {
-        pos: { k: 380, d: 38, m: 1 },    
-        scale: { k: 420, d: 24, m: 1 }   
-    };
-
-    const slider = document.getElementById('slider');
-    const tabs = document.querySelectorAll('.tab-item');
-
-    let state = {
-        x: 0, tx: 0, vx: 0,
-        w: 0, tw: 0, vw: 0,
-        sx: 1, tsx: 1, vsx: 0,
-        sy: 1, tsy: 1, vsy: 0,
-        isMoving: false,
-        intensity: 1,
-        currentIndex: 0
-    };
-
-    function spring(current, target, velocity, config) {
-        const force = -config.k * (current - target);
-        const damping = -config.d * velocity;
-        const acceleration = (force + damping) / config.m;
-        velocity += acceleration * 0.016;
-        current += velocity * 0.016;
-        return [current, velocity];
-    }
+    const slider = document.getElementById('slider'), tabs = document.querySelectorAll('.tab-item');
+    let x = 0, tx = 0, vx = 0, w = 0, tw = 0, vw = 0, curIdx = 0;
 
     function update() {
-        const dist = Math.abs(state.x - state.tx);
-        const vel = Math.abs(state.vx);
+        // Рассчитываем физику движения (X и Width)
+        vx += (-380 * (x - tx) - 38 * vx) * 0.016; x += vx * 0.016;
+        vw += (-380 * (w - tw) - 38 * vw) * 0.016; w += vw * 0.016;
 
-        if (state.isMoving) {
-            if (dist > 15) { 
-                slider.classList.add('flying');
-                // Рост на дальних дистанциях +5% к предыдущему значению
-                state.tsy = 1 + ((0.27) * state.intensity); 
-                state.tsx = 1 - (0.10 * state.intensity); 
-            } else if (dist <= 15 && dist > 0.5) {
-                slider.classList.remove('flying');
-                state.tsy = 1 - (0.05 * state.intensity); 
-                state.tsx = 1 + (0.08 * state.intensity); 
-            } else {
-                state.tsx = 1;
-                state.tsy = 1;
-                if (vel < 0.2 && Math.abs(state.vsx) < 0.2) {
-                    state.isMoving = false;
-                    slider.classList.remove('flying');
-                }
-            }
+        const dist = Math.abs(x - tx);
+        
+        // Считаем деформацию: при разгоне вытягиваемся по X, сжимаемся по Y. При торможении — наоборот.
+        // Переменная velM задает силу эффекта в зависимости от расстояния прыжка
+        const velM = Math.min(Math.abs(vx) * (Math.abs(curIdx - (tx / w)) > 1 ? 0.0015 : 0.0008), 0.3);
+        const sx = vx > 0 ? 1 + velM : 1 - velM;
+        const sy = 1 - velM * 0.6;
+
+        // Смена визуального состояния (полёт / статика) на основе расстояния до цели
+        if (dist > 15) {
+            slider.style.backgroundColor = 'transparent';
+            slider.style.borderColor = 'var(--pill-border-moving)';
+        } else {
+            slider.style.backgroundColor = 'var(--pill-bg)';
+            slider.style.borderColor = 'transparent';
         }
 
-        [state.x, state.vx] = spring(state.x, state.tx, state.vx, PHYSICS.pos);
-        [state.w, state.vw] = spring(state.w, state.tw, state.vw, PHYSICS.pos);
-        [state.sx, state.vsx] = spring(state.sx, state.tsx, state.vsx, PHYSICS.scale);
-        [state.sy, state.vsy] = spring(state.sy, state.tsy, state.vsy, PHYSICS.scale);
-
-        slider.style.left = `${state.x}px`;
-        slider.style.width = `${state.w}px`;
-        slider.style.transform = `scale(${state.sx}, ${state.sy})`;
+        slider.style.left = `${x}px`;
+        slider.style.width = `${w}px`;
+        slider.style.transform = `scale(${sx}, ${sy})`;
 
         requestAnimationFrame(update);
     }
 
-    function setActive(el, instant = false) {
-        const newIdx = parseInt(el.dataset.index);
-        const diff = Math.abs(newIdx - (state.currentIndex || 0));
-
+    tabs.forEach(tab => tab.addEventListener('click', () => {
         tabs.forEach(t => t.classList.remove('active'));
-        el.classList.add('active');
+        tab.classList.add('active');
+        curIdx = parseInt(tab.dataset.idx);
+        tx = tab.offsetLeft;
+        tw = tab.offsetWidth;
+    }));
 
-        state.tx = el.offsetLeft;
-        state.tw = el.offsetWidth;
-        state.currentIndex = newIdx;
-        
-        if (instant) {
-            state.x = state.tx;
-            state.w = state.tw;
-            state.sx = 1; state.sy = 1;
-        } else {
-            state.intensity = diff > 1 ? 1 : 0.6;
-            state.isMoving = true;
-
-            if (window.Telegram?.WebApp?.HapticFeedback) {
-                Telegram.WebApp.HapticFeedback.selectionChanged();
-            }
-        }
-    }
-
-    tabs.forEach(tab => tab.addEventListener('click', () => setActive(tab)));
-
-    const initial = document.querySelector('.tab-item.active');
-    setActive(initial, true);
+    // Инициализация при старте
+    const init = document.querySelector('.tab-item.active');
+    x = tx = init.offsetLeft; w = tw = init.offsetWidth;
     requestAnimationFrame(update);
 </script>
 
