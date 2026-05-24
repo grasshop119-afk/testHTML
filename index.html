@@ -3,32 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Tabbar</title>
+    <title>Tabbar with Background Switcher</title>
     <style>
         :root {
             --active-accent: #ffffff;
             --inactive-color: rgba(255, 255, 255, 0.75);
             --p-fly-tabbar: rgba(255, 255, 255, 0.3); /* Контур таббара */
             --p-fly-drop: rgba(255, 255, 255, 0.5);   /* Контур капли */
+            /* Дефолтные значения темы, будут переписываться JS */
             --tabbar-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
             --slider-bg: rgba(0, 0, 0, 0.25);
+            --text-shadow: none;
         }
 
         body {
             margin: 0;
-            background: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80') no-repeat center center fixed;
-            background-size: cover;
+            background-color: #000; /* Фолбек */
             height: 100vh;
             display: flex;
-            justify-content: center;
-            align-items: flex-end;
+            flex-direction: column; /* Вертикальный лейаут */
             overflow: hidden;
             -webkit-user-select: none;
             user-select: none;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            transition: background-image 0.5s ease-in-out; /* Плавная смена фона */
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
+        /* Зона контента и таббара */
+        .app-view {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end; /* Таббар внизу */
+            width: 100%;
         }
 
         .tab-bar-container {
-            margin-bottom: calc(15px + env(safe-area-inset-bottom));
+            margin-bottom: calc(25px + env(safe-area-inset-bottom)); /* Чуть больше отступ */
             width: 92%;
             max-width: 400px;
             position: relative;
@@ -42,14 +56,28 @@
             align-items: center;
             border-radius: 38px;
             background: var(--tabbar-bg);
-            /* Контур таббара на 25% светлее фона */
-            border: 1px solid var(--p-fly-tabbar); 
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
-            transition: background 0.35s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.2s ease;
+            
+            /* --- [НОВОЕ: ТЕНИ ДЛЯ ОБЪЕМА И КОНТРАСТА] --- */
+            border: none; /* Убираем бордер, заменяем тенями */
+            box-shadow: 
+                /* 1. Микро-блик на фаске сверху */
+                inset 0 1px 0.5px rgba(255, 255, 255, 0.15),
+                /* 2. Тонкая тень снизу для объема */
+                inset 0 -1px 0.5px rgba(0, 0, 0, 0.1),
+                /* 3. Тонкий темный контур (для супер-светлых фонов) */
+                0 0 0 0.5px rgba(0, 0, 0, 0.03),
+                /* 4. Большая мягкая тень, отделяющая стекло от фона */
+                0 15px 35px rgba(0, 0, 0, 0.2),
+                /* 5. Четкая ближняя тень */
+                0 4px 10px rgba(0, 0, 0, 0.1);
+            /* ------------------------------------------ */
+
+            transition: background 0.35s cubic-bezier(0.25, 1, 0.5, 1);
             z-index: 1;
             
-            backdrop-filter: blur(4px) url(#liquid-lens) saturate(140%);
-            -webkit-backdrop-filter: blur(4px) saturate(140%);
+            /* SVG-фильтр в backdrop-filter */
+            backdrop-filter: blur(8px) url(#liquid-lens) saturate(140%);
+            -webkit-backdrop-filter: blur(8px) saturate(140%);
         }
 
         .tab-item {
@@ -83,9 +111,10 @@
 
         .tab-text {
             font-size: 10px;
-            font-weight: 500;
+            font-weight: 600; /* Чуть жирнее */
             color: var(--inactive-color);
             transition: color 0.25s ease;
+            text-shadow: var(--text-shadow); /* Динамическая тень текста */
         }
 
         .tab-item.active .icon-wrapper { background-color: var(--active-accent); }
@@ -101,48 +130,88 @@
             z-index: 2;
             pointer-events: none;
             box-sizing: border-box;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.15);
+            
+            /* [НОВОЕ: ОБЪЕМ СЛАЙДЕРА] */
+            box-shadow: 
+                inset 0 1px 1px rgba(255, 255, 255, 0.1),
+                inset 0 -1px 1px rgba(0, 0, 0, 0.05),
+                0 4px 6px rgba(0, 0, 0, 0.15);
+            /* -------------------- */
+                
             will-change: transform, left, width, background-color, border-color;
-            transition: background-color 0.2s ease, border-color 0.2s ease;
+            transition: background-color 0.2s ease;
         }
 
         .liquid-slider.flying {
             background-color: transparent !important; 
-            /* Контур капли в полете на 35% светлее фона */
-            border: 1px solid var(--p-fly-drop) !important; 
             box-shadow: none; 
+            /* Добавляем только внешний контур в полете */
+            border: 1px solid var(--p-fly-drop) !important;
         }
+
+        /* --- [НОВОЕ: ПЕРЕКЛЮЧАТЕЛЬ ФОНОВ] --- */
+        .bg-switcher-container {
+            position: absolute;
+            top: env(safe-area-inset-top, 20px);
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .bg-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: 2px solid white;
+            cursor: pointer;
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: transform 0.2s ease, border-color 0.2s ease;
+            outline: none;
+        }
+
+        .bg-btn:hover, .bg-btn.active {
+            transform: scale(1.1);
+            border-color: #007aff; /* Акцентный цвет iOS */
+        }
+        /* ----------------------------------- */
     </style>
 </head>
 <body>
 
 <svg style="position: absolute; width: 0; height: 0;">
     <filter id="liquid-lens">
-        <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="1" result="noise" />
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale="8" xChannelSelector="R" yChannelSelector="G" />
+        <feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="1" result="noise" />
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" xChannelSelector="R" yChannelSelector="G" />
     </filter>
 </svg>
 
-<div class="tab-bar-container">
-    <nav class="ios-tab-bar" id="tabBar">
-        <div class="liquid-slider" id="slider"></div>
+<div class="bg-switcher-container" id="bgSwitcher"></div>
 
-        <button class="tab-item active" data-index="0">
-            <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/6997/6997164.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/6997/6997164.png');"></div>
-            <span class="tab-text">Home</span>
-        </button>
+<div class="app-view">
+    <div class="tab-bar-container">
+        <nav class="ios-tab-bar" id="tabBar">
+            <div class="liquid-slider" id="slider"></div>
 
-        <button class="tab-item" data-index="1">
-            <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/2769/2769160.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/2769/2769160.png');"></div>
-            <span class="tab-text">Menu</span>
-        </button>
+            <button class="tab-item active" data-index="0">
+                <div class="icon-wrapper" style="-webkit-mask-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAACXBIWXMAAAsTAAALEwEAmpwYAAAByUlEQVR4nO2YvUoDQRRGb9XGxE4L9SAt9A5E8AFE8AFE8AFE8AFE8AFEi9b4BPYpLCxt9REshIggIggigaSytND4C8bM6szuDrNZN3ODC+fCDHO+nTN7Z++EAhE6mABWwDrQC1wDo8AmS6E4w4fAOvANvAEX5X9VwA/5PZ8pB3VlMAn8K3+Uf+H/XwFXuXb/jU99fJpBvFDuKvfy38z/E8A6L3VwA9/kG/mGfK7cb/Z322e70f6+6FwI91bH5L5+VvP4EbgCHstL44H+Gv0XwCXwApxIvxS99uH8D4B54B44A745/wVgC5gGZqQPfP4TQKp2YF7G5PzbAF6An8oD598FcAZ8AxeS17pW84j7bwOYp5tTjS86LzZ9pP+3Y/5O44vX9N+O+bsPzP9M99H+3zO/58X9tx74Z+P+/X/yG6/vv/P+7wPTPmG/V/uM/V7ts/Z7t8/e79M+v7f9YfN8b4/8XscXjff81wBfNH7ReK/xfvN41f9X/T8p/VfX84jxZ4D6K9H+5Gg9bX70Z6G7/O/KvzH0V6P94tBfyW9jZ3f5u+v49V2D9o9G/4b5+p5e/8X169tW/3jS+YtX/wbL5r3B3mN4HAAAAABJRU5ErkJggg=='); mask-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAACXBIWXMAAAsTAAALEwEAmpwYAAAByUlEQVR4nO2YvUoDQRRGb9XGxE4L9SAt9A5E8AFE8AFE8AFE8AFE8AFEi9b4BPYpLCxt9REshIggIggigaSytND4C8bM6szuDrNZN3ODC+fCDHO+nTN7Z++EAhE6mABWwDrQC1wDo8AmS6E4w4fAOvANvAEX5X9VwA/5PZ8pB3VlMAn8K3+Uf+H/XwFXuXb/jU99fJpBvFDuKvfy38z/E8A6L3VwA9/kG/mGfK7cb/Z322e70f6+6FwI91bH5L5+VvP4EbgCHstL44H+Gv0XwCXwApxIvxS99uH8D4B54B44A745/wVgC5gGZqQPfP4TQKp2YF7G5PzbAF6An8oD598FcAZ8AxeS17pW84j7bwOYp5tTjS86LzZ9pP+3Y/5O44vX9N+O+bsPzP9M99H+3zO/58X9tx74Z+P+/X/yG6/vv/P+7wPTPmG/V/uM/V7ts/Z7t8/e79M+v7f9YfN8b4/8XscXjff81wBfNH7ReK/xfvN41f9X/T8p/VfX84jxZ4D6K9H+5Gg9bX70Z6G7/O/KvzH0V6P94tBfyW9jZ3f5u+v49V2D9o9G/4b5+p5e/8X169tW/3jS+YtX/wbL5r3B3mN4HAAAAABJRU5ErkJggg==');"></div>
+                <span class="tab-text">Home</span>
+            </button>
 
-        <button class="tab-item" data-index="2">
-            <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/9959/9959489.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/9959/9959489.png');"></div>
-            <span class="tab-text">Settings</span>
-        </button>
-    </nav>
+            <button class="tab-item" data-index="1">
+                <div class="icon-wrapper" style="-webkit-mask-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAACXBIWXMAAAsTAAALEwEAmpwYAAACTElEQVR4nO2YO0sDQRSFvxvXmEjS5FEKNYggPoogPoogPoogPoogPoogPlArbeER7FNYWNpKIywEEdEokpDGs7DQ+AvWzOzOrpvsZte5Fw4cCzPI+XbO7J2ZEwsYGEwCm8A6MAxcAmPAmkiBeMGnwD7wA7wDF54+UfALvOfaZUnV0EAncA/c5NrlWf6fCdwS//wXn+KxXwzihXNfqeb9RfZfAYwDywX0wTdwyb0X9uT/i/4v+f4m6Z96vN7v0X4X7v3oTbe5Bf4Ab7lyeXp/T/9lcAEcAJfSjyZ9/b4wAnAHPAMXkj+vM0UfF/vFInCXOzeN72+O/nOOBWAVuAdu5XvEun3HOfvN0f/NscXreL85/4vHFm+U84f9X+b45+f8Yf/XOf7xOf+4P5//8T6/7+/5f8H5867Xv5Pz17U/Cvz4pGf+X50/cOov+v/R7b++b/3F6/993f/w7Uv5T6I/Ofof4/Ww9eL1ovXi9bCfxGthf+L14vXi9bCfxGthf+L14vXi9bCfxGthf+L14vXi9bCfxGthf+L1sv70+Y95vXG+35tWb/i34p/P/vE9v4Gf//Y3OfuP3j9+Xv/wX/+X67/7fS8R/w5Uv7mPZ+v/E/25W5Yv7vO4FfV75u/789fXb+/re//1Zf3X+/uY/5Zonx8fP5eP+X+J/vj5f8/X59/uYv6X9f/4/F8M7S+G/snR+mLofNf7TqH993D7l7f/6vF59f4f+T8m9Zdrf9Dof5fX/wWwXb/vPz259AAAAABJRU5ErkJggg=='); mask-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAACXBIWXMAAAsTAAALEwEAmpwYAAACTElEQVR4nO2YO0sDQRSFvxvXmEjS5FEKNYggPoogPoogPoogPoogPoogPlArbeER7FNYWNpKIywEEdEokpDGs7DQ+AvWzOzOrpvsZte5Fw4cCzPI+XbO7J2ZEwsYGEwCm8A6MAxcAmPAmkiBeMGnwD7wA7wDF54+UfALvOfaZUnV0EAncA/c5NrlWf6fCdwS//wXn+KxXwzihXNfqeb9RfZfAYwDywX0wTdwyb0X9uT/i/4v+f4m6Z96vN7v0X4X7v3oTbe5Bf4Ab7lyeXp/T/9lcAEcAJfSjyZ9/b4wAnAHPAMXkj+vM0UfF/vFInCXOzeN72+O/nOOBWAVuAdu5XvEun3HOfvN0f/NscXreL85/4vHFm+U84f9X+b45+f8Yf/XOf7xOf+4P5//8T6/7+/5f8H5867Xv5Pz17U/Cvz4pGf+X50/cOov+v/R7b++b/3F6/993f/w7Uv5T6I/Ofof4/Ww9eL1ovXi9bCfxGthf+L14vXi9bCfxGthf+L14vXi9bCfxGthf+L14vXi9bCfxGthf+L1sv70+Y95vXG+35tWb/i34p/P/vE9v4Gf//Y3OfuP3j9+Xv/wX/+X67/7fS8R/w5Uv7mPZ+v/E/25W5Yv7vO4FfV75u/789fXb+/re//1Zf3X+/uY/5Zonx8fP5eP+X+J/vj5f8/X59/uYv6X9f/4/F8M7S+G/snR+mLofNf7TqH993D7l7f/6vF59f4f+T8m9Zdrf9Dof5fX/wWwXb/vPz259AAAAABJRU5ErkJggg==');"></div>
+                <span class="tab-text">Menu</span>
+            </button>
+
+            <button class="tab-item" data-index="2">
+                <div class="icon-wrapper" style="-webkit-mask-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAACXBIWXMAAAsTAAALEwEAmpwYAAACQElEQVR4nO2Yv0sDQRSFvxvXmMjSFFIKNYggPoogPoogPoogPoogPoogPlArbeER7FNYWNpKIywEEcmYQBLSGFpYfMDX5j3mNskZtrw3uPDmOdhF5vN2Xvbe3gsFDAYTwA5wCtwAV8AYsM5SIV6wI7AHvADfwAdw6eubBe/An1y7TFEFDXQDz8B1rl2f5ft3wC3xwX/xIR77ySBeOPeY6t5vpP4OwDywUUBfPAO33HshTf8//d/w9Tnpn3u9wX+i/Sns/eStunYAvgNvefN5fv8L+jeAS+AGOJV+vOkr9uMTAFfAPfAh5TN7pnhfLBpFuL64654bY/y3Y77Y+OLN+bfb84/5f9r5T8b5Y/OfnfmX8//G/GfH/GvH/B/P/5N9vtnn6vO9387/M+w/qL8Z/YfWf6P/8T6/7xf6Nf8tOX/X8f7fXn/9vH992X+3v2H7/6T/0H7d/ob5b4n+66H/YfP9xP3fXn89Zf5X9N9OfzH8H/bZfM57vnn+b1p95T8u4/34Xp/Axf/6m77852f8z7D+m/v7kv+eaN+m2/fPzUf7N6L/XfqH6fXv+fj4N/rPff6N8v4+f//68n9z/v//V4v+8/X/8vW9ZPx9SP0m5l8V59fofzK0PhvaV6vN97rvMtr/O7b/+vK7jvWvH5//F/+X6b899u6O/idD+0vYfWno/zM='); mask-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAACXBIWXMAAAsTAAALEwEAmpwYAAACQElEQVR4nO2YvUoDQRSFr417N8ZAEhBSCSKIdwXxrSC+FSSuIK4grvABNfERbFNYWNpKIywEEdEokkghDSKFxS+Ym7xnN8u67Do74MLO87A7zMvOf7w4GEwCm8AOcA8cAmPANkuFOMGhwCnwBHwAN76+XvAKfIn1ywRV0MAs8AbcxPruRf4/AtwRX//Fi3i6LwZxwrmnlPd9M/Z3BFwS5wW0xRPwk2tvJOnfTP+N+L4Y/ZPfN6T/mfa7cPdbb7rNT8AVcCteLuv3X6P/DLgELoAX6b8mvbZvhgA4B56Ae+nP95XiY6FYCOr19Z310Vnjvz7myo0vXsT/G/PfjPnHnS83vnhZ/6/P//W487fmfyv9W8eYfxv9v5f+5/7/pP++b755+X5v//vOf7m9/tO//v5fof+Yv/86+69f/5OfvzH/U7f6z/v+rZf2v9Oef//7z4z+09Xf/O4f+/l5Xw59U2H+Y+pvev3N7//N+f+vV7/D/pYxv8X/A+m/Xv3O+/1X788v+7fXfy38T7e/OfvfpH5b7Xun+p8P/U+29s9497vOfxfu/z79f8X9Xxf2/5T7b8p9N//6//b1P0z+v0X/F6z/vO97Y//nff/89Z9D/6nrv9/rfy78Dxf/V0Ovt//r4677/O59Nq//0frPxf/A/f/5e5L/Z9b/fvxuU7+J9pfE/nfp36XW/4Xm538X6n9z+wAAAABJRU5ErkJggg==');"></div>
+                <span class="tab-text">Settings</span>
+            </button>
+        </nav>
+    </div>
 </div>
 
 <script>
@@ -150,23 +219,58 @@
     const slider = document.getElementById('slider');
     const tabBar = document.getElementById('tabBar');
     const tabs = document.querySelectorAll('.tab-item');
+    const bgSwitcher = document.getElementById('bgSwitcher');
+
+    // Набор фонов (светлые, темные, пестрые)
+    const backgrounds = [
+        'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80', // Синий градиент (оригинал)
+        'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=1200&q=80', // Яркий градиент
+        'https://images.unsplash.com/photo-1511300636408-a63a89df3482?auto=format&fit=crop&w=1200&q=80', // Светлый фон (белый/розовый)
+        'https://images.unsplash.com/photo-1614728894747-a83421e2b9c9?auto=format&fit=crop&w=1200&q=80', // Грязный пестрый фон
+        'https://images.unsplash.com/photo-1550684376-efcbd6e3f031?auto=format&fit=crop&w=1200&q=80', // Почти белый минимализм
+        'https://images.unsplash.com/photo-1604328698692-f76ea9498e76?auto=format&fit=crop&w=1200&q=80'  // Темный, глубокий
+    ];
 
     let state = { x: 0, tx: 0, vx: 0, w: 0, tw: 0, vw: 0, sx: 1, tsx: 1, vsx: 0, sy: 1, tsy: 1, vsy: 0, isMoving: false, intensity: 1, currentIndex: 0 };
 
+    // Инициализация переключателя фонов
+    function initBackgroundSwitcher() {
+        backgrounds.forEach((bg, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'bg-btn' + (index === 0 ? ' active' : '');
+            btn.style.backgroundImage = `url(${bg})`;
+            btn.addEventListener('click', () => changeBackground(index));
+            bgSwitcher.appendChild(btn);
+        });
+        changeBackground(0); // Дефолтный фон
+    }
+
+    // Смена фона
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-    const bgImg = new Image();
-    bgImg.crossOrigin = "anonymous"; 
-    bgImg.src = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80';
+    let currentBgImg = null;
 
-    bgImg.onload = () => {
-        canvas.width = bgImg.width; canvas.height = bgImg.height;
-        ctx.drawImage(bgImg, 0, 0);
-        updateDynamicColors();
-    };
+    function changeBackground(index) {
+        document.querySelectorAll('.bg-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.bg-btn')[index].classList.add('active');
 
+        const bgUrl = backgrounds[index];
+        document.body.style.backgroundImage = `url(${bgUrl})`;
+
+        currentBgImg = new Image();
+        currentBgImg.crossOrigin = "anonymous"; 
+        currentBgImg.src = bgUrl;
+
+        currentBgImg.onload = () => {
+            canvas.width = currentBgImg.width; canvas.height = currentBgImg.height;
+            ctx.drawImage(currentBgImg, 0, 0);
+            updateDynamicColors(); // Пересчитать цвета под новый фон
+        };
+    }
+
+    // Анализ цветов под таббаром
     function getPixelColor(clientX, clientY) {
-        if (!canvas.width) return [255, 255, 255];
+        if (!canvas.width || !currentBgImg) return [255, 255, 255];
         const imgX = Math.min(canvas.width - 1, Math.max(0, Math.floor((clientX / window.innerWidth) * canvas.width)));
         const imgY = Math.min(canvas.height - 1, Math.max(0, Math.floor((clientY / window.innerHeight) * canvas.height)));
         const data = ctx.getImageData(imgX, imgY, 1, 1).data;
@@ -183,6 +287,7 @@
         const pRight  = getPixelColor(rct.right - 15, cy);
         const pBottom = getPixelColor(cx, rct.bottom - 10);
 
+        // Яркость фона по ITU R BT.601
         const avgBrightness = (
             (pLeft[0]*0.299 + pLeft[1]*0.587 + pLeft[2]*0.114) +
             (pTop[0]*0.299 + pTop[1]*0.587 + pTop[2]*0.114) +
@@ -190,38 +295,32 @@
             (pBottom[0]*0.299 + pBottom[1]*0.587 + pBottom[2]*0.114)
         ) / 4;
 
-        const avgR = (pLeft[0] + pTop[0] + pRight[0] + pBottom[0]) / 4;
-        const avgG = (pLeft[1] + pTop[1] + pRight[1] + pBottom[1]) / 4;
-        const avgB = (pLeft[2] + pTop[2] + pRight[2] + pBottom[2]) / 4;
-
         const rootStyle = document.documentElement.style;
 
-        // Настройка прозрачности капли по правилу
-        if (avgBrightness > 125) { 
-            rootStyle.setProperty('--tabbar-bg', 'linear-gradient(180deg, rgba(10, 10, 12, 0.86) 0%, rgba(6, 6, 8, 0.82) 100%)');
+        // --- [СМЕНА ТЕМЫ] ---
+        // Изменил порог на 140, чтобы он быстрее уходил в темный режим на пограничных фонах
+        if (avgBrightness > 140) { 
+            // Светлый фон -> Темная тема таббара
+            rootStyle.setProperty('--tabbar-bg', 'linear-gradient(180deg, rgba(10, 10, 12, 0.88) 0%, rgba(6, 6, 8, 0.84) 100%)');
             rootStyle.setProperty('--slider-bg', 'rgba(255, 255, 255, 0.15)'); 
             rootStyle.setProperty('--active-accent', '#ffffff');
-            rootStyle.setProperty('--inactive-color', 'rgba(255, 255, 255, 0.45)');
+            rootStyle.setProperty('--inactive-color', 'rgba(255, 255, 255, 0.5)');
+            rootStyle.setProperty('--p-fly-drop', 'rgba(255, 255, 255, 0.4)');
+            rootStyle.setProperty('--text-shadow', 'none');
         } else {
+            // Темный фон -> Светлая тема таббара
             rootStyle.setProperty('--tabbar-bg', 'linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.04) 100%)');
-            rootStyle.setProperty('--slider-bg', 'rgba(0, 0, 0, 0.25)'); 
+            rootStyle.setProperty('--slider-bg', 'rgba(0, 0, 0, 0.3)'); 
             rootStyle.setProperty('--active-accent', '#ffffff');
             rootStyle.setProperty('--inactive-color', 'rgba(255, 255, 255, 0.75)');
+            rootStyle.setProperty('--p-fly-drop', 'rgba(255, 255, 255, 0.5)');
+            // Добавляем легкую тень тексту для читаемости на пестром фоне
+            rootStyle.setProperty('--text-shadow', '0 1px 2px rgba(0,0,0,0.3)');
         }
-
-        // 1. Контур таббара: делаем ровно на 25% светлее фона (255 * 0.25 = 64)
-        const tabR = Math.min(255, avgR + 64);
-        const tabG = Math.min(255, avgG + 64);
-        const tabB = Math.min(255, avgB + 64);
-        rootStyle.setProperty('--p-fly-tabbar', `rgb(${tabR}, ${tabG}, ${tabB})`);
-
-        // 2. Контур капли: делаем ровно на 35% светлее фона (255 * 0.35 = 89)
-        const dropR = Math.min(255, avgR + 89);
-        const dropG = Math.min(255, avgG + 89);
-        const dropB = Math.min(255, avgB + 89);
-        rootStyle.setProperty('--p-fly-drop', `rgb(${dropR}, ${dropG}, ${dropB})`);
+        // --------------------
     }
 
+    // --- [SPRING PHYSICS] ---
     function spring(curr, tgt, vel, cfg) {
         const acc = (-cfg.k * (curr - tgt) - cfg.d * vel) / cfg.m;
         vel += acc * 0.016;
@@ -254,6 +353,7 @@
         [state.sx, state.vsx] = spring(state.sx, state.tsx, state.vsx, PHYSICS.scale);
         [state.sy, state.vsy] = spring(state.sy, state.tsy, state.vsy, PHYSICS.scale);
 
+        // Используем transform для анимации (GPU)
         slider.style.left = `${state.x}px`;
         slider.style.width = `${state.w}px`;
         slider.style.transform = `scale(${state.sx}, ${state.sy})`;
@@ -279,7 +379,9 @@
         state.currentIndex = newIdx;
     }
 
+    // Инициализация
     tabs.forEach(tab => tab.addEventListener('click', () => setActive(tab)));
+    initBackgroundSwitcher();
     setActive(document.querySelector('.tab-item.active'), true);
     
     window.addEventListener('resize', () => {
