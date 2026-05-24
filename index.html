@@ -9,7 +9,6 @@
             --active-accent: #ffffff;
             --inactive-color: rgba(255, 255, 255, 0.7);
             --slider-bg: rgba(0, 0, 0, 0.25);
-            /* Контур капли в полете теперь темнее */
             --slider-border-flying: rgba(0, 0, 0, 0.35);
         }
 
@@ -26,7 +25,6 @@
             user-select: none;
         }
 
-        /* ВОЗВРАТ К РАЗМЕРАМ ИЗ ПЕРВОГО ВАРИАНТА */
         .tab-bar-container {
             margin-bottom: calc(15px + env(safe-area-inset-bottom));
             width: 92%;
@@ -39,10 +37,9 @@
             padding: 4px;
             justify-content: space-around;
             align-items: center;
-            
-            /* Умный градиентный контур: светлее вверху-слева и внизу-справа */
             border: 1px solid transparent;
             border-radius: 38px;
+            /* Градиентный глянцевый контур (вверху-слева и внизу-справа светлее) */
             background: 
                 linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%) padding-box,
                 linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.08) 45%, rgba(255, 255, 255, 0.08) 55%, rgba(255, 255, 255, 0.4) 100%) border-box;
@@ -51,7 +48,7 @@
                         0 10px 30px rgba(0, 0, 0, 0.15);
         }
 
-        /* ПОДФОНОВЫЙ БЛЮР С ДЕФОРМАЦИЕЙ КАРТИНКИ */
+        /* ДИНАМИЧЕСКАЯ ЛИНЗА-РЕФРАКТОР */
         .glass-refraction {
             position: absolute;
             inset: 0;
@@ -60,15 +57,18 @@
             z-index: 0;
             pointer-events: none;
         }
+        
         .glass-refraction::before {
             content: '';
             position: absolute;
-            inset: -5px;
-            /* Наследуем и фиксируем фон, смещая масштаб для эффекта линзы */
-            background: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRkLiZZofuMdxDrT1-l8xUj0r7hEpeStNzrFqFqgayAjeO5YdDEWEJXo_lQ&s=10') no-repeat center center fixed;
+            /* Опережающий размер для компенсации сдвигов и scale */
+            top: -20px; left: -20px; right: -20px; bottom: -20px;
+            background: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRkLiZZofuMdxDrT1-l8xUj0r7hEpeStNzrFqFqgayAjeO5YdDEWEJXo_lQ&s=10') no-repeat;
             background-size: cover;
-            filter: blur(5px) saturate(125%);
-            transform: scale(1.05); 
+            /* Небольшой блур + увеличение создают честный эффект преломления стекла */
+            filter: blur(4px) saturate(130%);
+            transform: scale(1.06); 
+            will-change: background-position;
         }
 
         .tab-item {
@@ -86,7 +86,6 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Размеры иконок из первого кода (24px) */
         .icon-wrapper {
             width: 24px;
             height: 24px;
@@ -101,7 +100,6 @@
             transition: background-color 0.25s ease;
         }
 
-        /* Текст из первого кода (10px) */
         .tab-text {
             font-size: 10px;
             font-weight: 500;
@@ -128,7 +126,6 @@
             transition: background-color 0.16s ease-out, border-color 0.16s ease-out;
         }
 
-        /* В полете капля становится прозрачной с темным аккуратным контуром */
         .liquid-slider.flying {
             background-color: transparent !important; 
             border-color: var(--slider-border-flying) !important;
@@ -139,9 +136,8 @@
 <body>
 
 <div class="tab-bar-container">
-    <nav class="ios-tab-bar">
-        <div class="glass-refraction"></div>
-        
+    <nav class="ios-tab-bar" id="tabBar">
+        <div class="glass-refraction" id="refraction"></div>
         <div class="liquid-slider" id="slider"></div>
 
         <button class="tab-item active" data-index="0">
@@ -164,9 +160,30 @@
 <script>
     const PHYSICS = { pos: { k: 380, d: 38, m: 1 }, scale: { k: 420, d: 24, m: 1 } };
     const slider = document.getElementById('slider');
+    const tabBar = document.getElementById('tabBar');
     const tabs = document.querySelectorAll('.tab-item');
 
     let state = { x: 0, tx: 0, vx: 0, w: 0, tw: 0, vw: 0, sx: 1, tsx: 1, vsx: 0, sy: 1, tsy: 1, vsy: 0, isMoving: false, intensity: 1, currentIndex: 0 };
+
+    // Функция точной синхронизации линзы подложки с реальным фоном за ней
+    function syncRefraction() {
+        const rect = tabBar.getBoundingClientRect();
+        // Рассчитываем точное смещение фона внутри таббара относительно окна браузера
+        const bgX = -rect.left + 20; 
+        const bgY = -rect.top + 20;
+        // Задаем координаты, имитируя, что таббар — это прозрачный вырез
+        tabBar.style.setProperty('--refract-x', `${bgX}px`);
+        tabBar.style.setProperty('--refract-y', `${bgY}px`);
+        
+        const refractionStyle = document.querySelector('.glass-refraction').style;
+        refractionStyle.setProperty('--bg-pos-x', `${bgX}px`);
+        refractionStyle.setProperty('--bg-pos-y', `${bgY}px`);
+    }
+
+    // Внедряем динамические переменные в псевдоэлемент линзы
+    const styleSheet = document.createElement("style");
+    styleSheet.innerText = `.glass-refraction::before { background-position: var(--bg-pos-x, 0px) var(--bg-pos-y, 0px) !important; }`;
+    document.head.appendChild(styleSheet);
 
     function spring(curr, tgt, vel, cfg) {
         const acc = (-cfg.k * (curr - tgt) - cfg.d * vel) / cfg.m;
@@ -180,7 +197,6 @@
         if (state.isMoving) {
             if (dist > 15) { 
                 slider.classList.add('flying');
-                /* Высота капли в полете теперь изящнее и аккуратнее */
                 state.tsx = 1 - (0.07 * state.intensity); 
                 state.tsy = 1 + (0.13 * state.intensity); 
             } else if (dist <= 15 && dist > 0.5) {
@@ -228,6 +244,11 @@
 
     tabs.forEach(tab => tab.addEventListener('click', () => setActive(tab)));
     setActive(document.querySelector('.tab-item.active'), true);
+    
+    // Инициализируем и следим за изменениями экрана/скролла
+    syncRefraction();
+    window.addEventListener('resize', syncRefraction);
+    
     requestAnimationFrame(update);
 </script>
 
