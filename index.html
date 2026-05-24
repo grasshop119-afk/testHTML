@@ -8,14 +8,13 @@
         :root {
             --active-accent: #ffffff;
             --inactive-color: rgba(255, 255, 255, 0.75);
-            --p-fly: rgba(255, 255, 255, 0.6); /* Динамический контур */
+            --p-fly: rgba(255, 255, 255, 0.4); /* Приглушенный общий контур */
             --tabbar-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
             --slider-bg: rgba(0, 0, 0, 0.42);
         }
 
         body {
             margin: 0;
-            /* Случайное качественное абстрактное фото с Unsplash */
             background: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80') no-repeat center center fixed;
             background-size: cover;
             height: 100vh;
@@ -42,7 +41,6 @@
             align-items: center;
             border-radius: 38px;
             background: var(--tabbar-bg);
-            /* Тонкий контур 1px, полностью идентичный капле */
             border: 1px solid var(--p-fly); 
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
             transition: background 0.35s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.2s ease;
@@ -109,7 +107,6 @@
 
         .liquid-slider.flying {
             background-color: transparent !important; 
-            /* Тонкий контур 1px у летящей капли, как у таббара */
             border: 1px solid var(--p-fly) !important; 
             box-shadow: none; 
         }
@@ -211,12 +208,12 @@
             rootStyle.setProperty('--inactive-color', 'rgba(255, 255, 255, 0.75)');
         }
 
-        // Приглушили контур на 50% от прошлого варианта (изменили базовые множители и константу)
+        // Обновленная формула цвета: контур стал мягче, а на светлом фоне капля стала на 30% ярче (factor 4.0 -> 5.2)
         const getFlyColor = () => {
-            const factor = isDarkTheme ? 4.0 : 2.3; 
-            const r = Math.min(255, avgR * factor + 26);
-            const g = Math.min(255, avgG * factor + 26);
-            const b = Math.min(255, avgB * factor + 26);
+            const factor = isDarkTheme ? 5.2 : 1.15; 
+            const r = Math.min(255, avgR * factor + 13);
+            const g = Math.min(255, avgG * factor + 13);
+            const b = Math.min(255, avgB * factor + 13);
             return `rgb(${r}, ${g}, ${b})`; 
         };
 
