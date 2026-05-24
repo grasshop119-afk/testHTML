@@ -3,22 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iOS Liquid Glass Tabbar</title>
+    <title>iOS 26 Liquid Glass Tabbar</title>
     <style>
         :root {
-            /* Универсальная стеклянная палитра, адаптирующаяся под фон */
-            --glass-bg: rgba(255, 255, 255, 0.12);
-            --glass-edge: rgba(255, 255, 255, 0.45);
-            --glass-shadow: rgba(0, 0, 0, 0.15);
-            --pill-glass: rgba(255, 255, 255, 0.22);
-            --pill-moving-edge: rgba(255, 255, 255, 0.6);
-            --text-inactive: rgba(255, 255, 255, 0.65);
-            --text-active: #ffffff;
+            /* Стекло адаптируется под любой фон, уходим от глухих темных цветов */
+            --glass-bg: rgba(255, 255, 255, 0.11);
+            --glass-border: rgba(255, 255, 255, 0.45);
+            --glass-highlight: rgba(255, 255, 255, 0.25);
+            --active-accent: #ffffff;
+            --inactive-color: rgba(255, 255, 255, 0.6);
         }
 
         body {
             margin: 0;
-            /* Ставим твою картинку на фон */
+            /* Твоя стоковая картинка на фоне для проверки деформации */
             background: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRkLiZZofuMdxDrT1-l8xUj0r7hEpeStNzrFqFqgayAjeO5YdDEWEJXo_lQ&s=10') no-repeat center center;
             background-size: cover;
             height: 100vh;
@@ -32,29 +30,27 @@
 
         .tab-bar-container {
             margin-bottom: calc(25px + env(safe-area-inset-bottom));
-            width: 90%;
+            width: 88%;
             max-width: 420px;
         }
 
-        /* ЭФФЕКТ ЖИДКОГО СТЕКЛА (Основа таббара) */
+        /* ЭФФЕКТ ЖИДКОГО СТЕКЛА (Пропорции точь-в-точь как на фото) */
         .ios-tab-bar {
             position: relative;
-            background: var(--glass-bg);
-            /* Мощный блур + насыщение цвета подложки, как в iOS */
-            backdrop-filter: blur(30px) saturate(190%);
-            -webkit-backdrop-filter: blur(30px) saturate(190%);
+            /* Сложный градиент имитирует деформацию света на краях линзы */
+            background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 70%), var(--glass-bg);
+            backdrop-filter: blur(30px) saturate(210%);
+            -webkit-backdrop-filter: blur(30px) saturate(210%);
             border-radius: 40px;
             display: flex;
             padding: 6px;
-            box-sizing: border-box;
+            /* Тонкий стеклянный светящийся контур */
+            border: 1px solid var(--glass-border);
+            /* Внутреннее преломление + внешняя мягкая тень */
+            box-shadow: inset 0 1px 4px rgba(255,255,255,0.3), 
+                        0 12px 32px rgba(0, 0, 0, 0.25);
             justify-content: space-around;
-            
-            /* Эффект преломления света по краям (объемное стекло) */
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            box-shadow: 
-                inset 0 2px 4px rgba(255, 255, 255, 0.3),
-                inset 0 -2px 4px rgba(0, 0, 0, 0.1),
-                0 10px 30px var(--glass-shadow);
+            align-items: center;
         }
 
         .tab-item {
@@ -73,67 +69,57 @@
         }
 
         .icon-wrapper {
-            width: 24px;
-            height: 24px;
+            width: 22px;
+            height: 22px;
             margin-bottom: 4px;
-            background-color: var(--text-inactive);
+            background-color: var(--inactive-color);
             -webkit-mask-size: contain;
             -webkit-mask-repeat: no-repeat;
             -webkit-mask-position: center;
             mask-size: contain;
             mask-repeat: no-repeat;
             mask-position: center;
-            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.25s;
+            transition: background-color 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
         .tab-text {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 600;
-            color: var(--text-inactive);
-            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.25s;
+            color: var(--inactive-color);
+            letter-spacing: 0.3px;
+            transition: color 0.3s ease;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.15);
         }
 
-        /* Эффект лупы/подсветки при наведении капли */
-        .tab-item.active .icon-wrapper { 
-            background-color: var(--text-active); 
-            transform: scale(1.1);
-        }
-        .tab-item.active .tab-text { 
-            color: var(--text-active);
-            transform: scale(1.05);
-        }
+        .tab-item.active .icon-wrapper { background-color: var(--active-accent); }
+        .tab-item.active .tab-text { color: var(--active-accent); }
 
-        /* КАПЛЯ (Жидкая линза) */
+        /* КАПЛЯ-ЛУПА (Глянцевый объемный слайдер) */
         .liquid-slider {
             position: absolute;
             top: 6px;
             left: 6px;
             height: calc(100% - 12px);
-            background: var(--pill-glass);
+            /* Капля прозрачная, но за счет теней выглядит как линза */
+            background: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.05) 100%);
             border-radius: 34px;
             z-index: 1;
             pointer-events: none;
             box-sizing: border-box;
-            
-            /* Двойной стеклянный контур для капли */
             border: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 
-                inset 0 1px 3px rgba(255, 255, 255, 0.4),
-                0 4px 12px rgba(0, 0, 0, 0.12);
-
-            /* Внутреннее искажение линзы */
-            backdrop-filter: blur(5px) brightness(1.1);
-            -webkit-backdrop-filter: blur(5px) brightness(1.1);
-
-            will-change: transform, left, width, background-color, border-color;
-            transition: background-color 0.2s, border-color 0.2s;
+            /* Мощный внутренний блик создает эффект "выпуклой сферы" */
+            box-shadow: inset 0 2px 6px rgba(255,255,255,0.4), 
+                        inset 0 -2px 4px rgba(0,0,0,0.05),
+                        0 4px 12px rgba(0,0,0,0.15);
+            will-change: transform, left, width, background, border-color;
+            transition: background 0.2s, border-color 0.2s;
         }
 
-        /* Состояние перелета (Капля оторвалась и вытянулась вверх) */
+        /* При дальнем полете капля становится чистым контуром преломления */
         .liquid-slider.flying {
-            background-color: rgba(255, 255, 255, 0.05) !important; 
-            border-color: var(--pill-moving-edge) !important;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            background: transparent !important; 
+            border-color: var(--glass-border) !important;
+            box-shadow: inset 0 1px 4px rgba(255,255,255,0.2);
         }
     </style>
 </head>
@@ -161,8 +147,7 @@
 </div>
 
 <script>
-    // Увеличили жесткость пружины для веса "стекла", чтобы оно двигалось упруго
-    const PHYSICS = { pos: { k: 420, d: 40, m: 1 }, scale: { k: 460, d: 26, m: 1 } };
+    const PHYSICS = { pos: { k: 380, d: 38, m: 1 }, scale: { k: 420, d: 24, m: 1 } };
     const slider = document.getElementById('slider');
     const tabs = document.querySelectorAll('.tab-item');
 
@@ -180,14 +165,14 @@
         if (state.isMoving) {
             if (dist > 15) { 
                 slider.classList.add('flying');
-                // Реализация ТВОЕГО ТЗ: Сужение по бокам (X) и раздувание ВВЕРХ (Y) выше таббара
-                state.tsx = 1 - (0.14 * state.intensity); 
+                /* Физика капли-пузыря: сужается по X и раздувается по Y выше таббара */
+                state.tsx = 1 - (0.15 * state.intensity); 
                 state.tsy = 1 + (0.28 * state.intensity); 
             } else if (dist <= 15 && dist > 0.5) {
                 slider.classList.remove('flying');
-                // Эффект шлепка при падении обратно в пазы
+                /* Приземление со "шлепком" */
                 state.tsx = 1 + (0.08 * state.intensity); 
-                state.tsy = 1 - (0.04 * state.intensity); 
+                state.tsy = 1 - (0.05 * state.intensity); 
             } else {
                 state.tsx = state.tsy = 1;
                 if (Math.abs(state.vx) < 0.2 && Math.abs(state.vsx) < 0.2) {
@@ -221,7 +206,7 @@
             state.x = state.tx; state.w = state.tw;
             state.sx = state.sy = 1;
         } else {
-            state.intensity = Math.abs(newIdx - state.currentIndex) > 1 ? 1.3 : 0.7;
+            state.intensity = Math.abs(newIdx - state.currentIndex) > 1 ? 1.4 : 0.8;
             state.isMoving = true;
         }
         state.currentIndex = newIdx;
