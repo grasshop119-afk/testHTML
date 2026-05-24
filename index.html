@@ -8,7 +8,7 @@
         :root {
             --active-accent: #ffffff;
             --inactive-color: rgba(255, 255, 255, 0.75);
-            --p-fly: #fff; /* Единый яркий цвет для контура таббара и летящей капли */
+            --p-fly: #fff; /* Общий яркий контур для таббара и летящей капли */
             --tabbar-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
             --slider-bg: rgba(0, 0, 0, 0.42);
         }
@@ -41,38 +41,14 @@
             align-items: center;
             border-radius: 38px;
             background: var(--tabbar-bg);
-            border: 1px solid transparent; 
+            /* Добавляем контур таббара, идентичный капле в полете */
+            border: 1.5px solid var(--p-fly); 
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
-            transition: background 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: background 0.35s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.2s ease;
             z-index: 1;
             
             backdrop-filter: blur(4px) url(#liquid-lens) saturate(140%);
             -webkit-backdrop-filter: blur(4px) saturate(140%);
-        }
-
-        /* Возвращаем слой контура для таббара */
-        .tab-gradient-layer {
-            position: absolute;
-            inset: -1px;
-            border-radius: 38px;
-            z-index: 3;
-            pointer-events: none;
-            overflow: hidden;
-        }
-
-        /* Контур таббара теперь точь-в-точь дублирует цвет капли через переменную --p-fly */
-        .tab-gradient-layer::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border: 1px solid transparent;
-            border-radius: 38px;
-            mask-image: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask-composite: xor;
-            -webkit-mask-image: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            background: conic-gradient(from 135deg at 50% 50%, var(--p-fly) 0%, var(--p-fly) 25%, var(--p-fly) 50%, var(--p-fly) 75%, var(--p-fly) 100%);
-            filter: blur(0.4px);
         }
 
         .tab-item {
@@ -132,7 +108,7 @@
 
         .liquid-slider.flying {
             background-color: transparent !important; 
-            border: 1.5px solid var(--p-fly) !important; 
+            border: 1.5px solid var(--p-fly) !important; /* Точно такой же контур, как у таббара */
             box-shadow: none; 
         }
     </style>
@@ -148,7 +124,6 @@
 
 <div class="tab-bar-container">
     <nav class="ios-tab-bar" id="tabBar">
-        <div class="tab-gradient-layer"></div>
         <div class="liquid-slider" id="slider"></div>
 
         <button class="tab-item active" data-index="0">
@@ -234,13 +209,13 @@
             rootStyle.setProperty('--inactive-color', 'rgba(255, 255, 255, 0.75)');
         }
 
-        // Вычисляем общую переменную цвета: сделали её на ~30% светлее текущей за счёт увеличения factor
+        // Вычисляем контур: увеличили множители примерно на 30% для лучшей яркости
         const getFlyColor = () => {
-            const factor = isDarkTheme ? 4.6 : 2.6; // Подняли множители для заметного осветления границ
-            const r = Math.min(255, avgR * factor + 50);
-            const g = Math.min(255, avgG * factor + 50);
-            const b = Math.min(255, avgB * factor + 50);
-            return `rgb(${r}, ${g}, ${b})`;
+            const factor = isDarkTheme ? 4.55 : 2.6; // Множители увеличены на 30% (были 3.5 и 2.0)
+            const r = Math.min(255, avgR * factor + 52);
+            const g = Math.min(255, avgG * factor + 52);
+            const b = Math.min(255, avgB * factor + 52);
+            return `rgb(${r}, ${g}, ${b})`; 
         };
 
         rootStyle.setProperty('--p-fly', getFlyColor());
