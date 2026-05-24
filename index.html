@@ -10,7 +10,7 @@
             --inactive-color: rgba(255, 255, 255, 0.75);
             --p-fly: rgba(255, 255, 255, 0.4); 
             --tabbar-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
-            --slider-bg: rgba(45, 45, 45, 0.55); /* Сделали каплю менее темной в дефолтном состоянии */
+            --slider-bg: rgba(0, 0, 0, 0.25); /* Значение по умолчанию */
         }
 
         body {
@@ -149,7 +149,6 @@
     const tabs = document.querySelectorAll('.tab-item');
 
     let state = { x: 0, tx: 0, vx: 0, w: 0, tw: 0, vw: 0, sx: 1, tsx: 1, vsx: 0, sy: 1, tsy: 1, vsy: 0, isMoving: false, intensity: 1, currentIndex: 0 };
-    let isDarkTheme = false;
 
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -194,26 +193,26 @@
 
         const rootStyle = document.documentElement.style;
 
+        // Настройка цвета капли в зависимости от яркости фона
         if (avgBrightness > 125) { 
-            isDarkTheme = true;
+            // Светлый фон -> Тёмная тема интерфейса -> Капля белая 15%
             rootStyle.setProperty('--tabbar-bg', 'linear-gradient(180deg, rgba(10, 10, 12, 0.86) 0%, rgba(6, 6, 8, 0.82) 100%)');
-            rootStyle.setProperty('--slider-bg', 'rgba(255, 255, 255, 0.35)'); /* Сделали каплю светлее на светлом фоне */
+            rootStyle.setProperty('--slider-bg', 'rgba(255, 255, 255, 0.15)');
             rootStyle.setProperty('--active-accent', '#ffffff');
             rootStyle.setProperty('--inactive-color', 'rgba(255, 255, 255, 0.45)');
         } else {
-            isDarkTheme = false;
+            // Тёмный фон -> Светлая тема интерфейса -> Капля тёмная 25%
             rootStyle.setProperty('--tabbar-bg', 'linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.04) 100%)');
-            rootStyle.setProperty('--slider-bg', 'rgba(55, 55, 55, 0.48)'); /* Существенно уменьшили черноту капли на темном фоне */
+            rootStyle.setProperty('--slider-bg', 'rgba(0, 0, 0, 0.25)');
             rootStyle.setProperty('--active-accent', '#ffffff');
             rootStyle.setProperty('--inactive-color', 'rgba(255, 255, 255, 0.75)');
         }
 
-        // Уменьшили засветление контура еще на 50% (снизили коэффициенты умножения и убрали лишний статический прирост яркости)
+        // Простой расчет контура: строго на 25% ярче базового цвета фона (умножение на 1.25)
         const getFlyColor = () => {
-            const factor = isDarkTheme ? 2.1 : 1.35; 
-            const r = Math.min(255, avgR * factor + 12);
-            const g = Math.min(255, avgG * factor + 12);
-            const b = Math.min(255, avgB * factor + 12);
+            const r = Math.min(255, avgR * 1.25);
+            const g = Math.min(255, avgG * 1.25);
+            const b = Math.min(255, avgB * 1.25);
             return `rgb(${r}, ${g}, ${b})`; 
         };
 
