@@ -8,9 +8,9 @@
         :root {
             --active-accent: #ffffff;
             --inactive-color: rgba(255, 255, 255, 0.75);
-            --p-accent: rgba(255, 255, 255, 0.5);
+            --p-top: #fff; --p-right: #fff; --p-bottom: #fff; --p-left: #fff;
             --tabbar-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
-            --slider-bg: rgba(0, 0, 0, 0.28);
+            --slider-bg: rgba(0, 0, 0, 0.4);
         }
 
         body {
@@ -45,7 +45,7 @@
             border-radius: 38px;
             background: var(--tabbar-bg);
             border: 1px solid transparent;
-            box-shadow: inset 0 1px 3.5px rgba(255, 255, 255, 0.15), 0 15px 35px rgba(0, 0, 0, 0.35);
+            box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.12), 0 15px 35px rgba(0, 0, 0, 0.35);
             transition: background 0.3s ease;
             z-index: 1;
             backdrop-filter: blur(12px) url(#liquid-lens) saturate(140%);
@@ -71,7 +71,7 @@
             mask-composite: xor;
             -webkit-mask-image: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             -webkit-mask-composite: xor;
-            background: var(--p-accent);
+            background: conic-gradient(from 135deg at 50% 50%, var(--p-top) 0%, var(--p-right) 25%, var(--p-bottom) 50%, var(--p-left) 75%, var(--p-top) 100%);
             filter: blur(0.4px);
         }
 
@@ -124,15 +124,15 @@
             z-index: 2;
             pointer-events: none;
             box-sizing: border-box;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.08);
             will-change: transform, left, width, background-color, border-color;
             transition: background-color 0.2s ease, border-color 0.2s ease;
         }
 
         .liquid-slider.flying {
             background: transparent !important; 
-            border: 1.5px solid var(--p-accent) !important;
+            border: 1.5px solid var(--p-top) !important;
             box-shadow: none;
         }
     </style>
@@ -198,38 +198,58 @@
     bgImg.src = randomBg;
 
     bgImg.onload = () => {
-        canvas.width = 30; canvas.height = 30;
+        canvas.width = bgImg.width; canvas.height = bgImg.height;
+        ctx.drawImage(bgImg, 0, 0);
         updateDynamicColors();
     };
 
+    function getPixelColor(clientX, clientY) {
+        if (!canvas.width) return [255, 255, 255];
+        const imgX = Math.min(canvas.width - 1, Math.max(0, Math.floor((clientX / window.innerWidth) * canvas.width)));
+        const imgY = Math.min(canvas.height - 1, Math.max(0, Math.floor((clientY / window.innerHeight) * canvas.height)));
+        const data = ctx.getImageData(imgX, imgY, 1, 1).data;
+        return [data[0], data[1], data[2]];
+    }
+
     function updateDynamicColors() {
         const rct = tabBar.getBoundingClientRect();
-        const imgX = Math.floor((rct.left + rct.width/2) / window.innerWidth * bgImg.width);
-        const imgY = Math.floor((rct.top + rct.height/2) / window.innerHeight * bgImg.height);
-        
-        ctx.drawImage(bgImg, imgX, imgY, 5, 5, 0, 0, 1, 1);
-        const pixel = ctx.getImageData(0, 0, 1, 1).data;
-        
-        const r = pixel[0], g = pixel[1], b = pixel[2];
-        const brightness = r * 0.299 + g * 0.587 + b * 0.114;
+        const cx = rct.left + rct.width / 2;
+        const cy = rct.top + rct.height / 2;
+
+        const pLeft   = getPixelColor(rct.left + 15, cy);
+        const pTop    = getPixelColor(cx, rct.top + 10);
+        const pRight  = getPixelColor(rct.right - 15, cy);
+        const pBottom = getPixelColor(cx, rct.bottom - 10);
+
+        const brightness = (
+            (pLeft[0]*0.299 + pLeft[1]*0.587 + pLeft[2]*0.114) +
+            (pTop[0]*0.299 + pTop[1]*0.587 + pTop[2]*0.114) +
+            (pRight[0]*0.299 + pRight[1]*0.587 + pRight[2]*0.114) +
+            (pBottom[0]*0.299 + pBottom[1]*0.587 + pBottom[2]*0.114)
+        ) / 4;
+
         const rootStyle = document.documentElement.style;
 
         if (brightness > 125) { 
             rootStyle.setProperty('--tabbar-bg', 'linear-gradient(180deg, rgba(12, 12, 16, 0.88) 0%, rgba(6, 6, 8, 0.84) 100%)');
-            rootStyle.setProperty('--slider-bg', 'rgba(255, 255, 255, 0.22)');
+            rootStyle.setProperty('--slider-bg', 'rgba(0, 0, 0, 0.45)');
             rootStyle.setProperty('--active-accent', '#ffffff');
             rootStyle.setProperty('--inactive-color', 'rgba(255, 255, 255, 0.45)');
         } else {
             rootStyle.setProperty('--tabbar-bg', 'linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%)');
-            rootStyle.setProperty('--slider-bg', 'rgba(0, 0, 0, 0.32)');
+            rootStyle.setProperty('--slider-bg', 'rgba(0, 0, 0, 0.65)');
             rootStyle.setProperty('--active-accent', '#ffffff');
             rootStyle.setProperty('--inactive-color', 'rgba(255, 255, 255, 0.75)');
         }
 
-        const nr = Math.min(255, r + 100);
-        const ng = Math.min(255, g + 100);
-        const nb = Math.min(255, b + 100);
-        rootStyle.setProperty('--p-accent', `rgba(${nr}, ${ng}, ${nb}, 0.75)`);
+        const lgt = (p) => {
+            return `rgba(${Math.min(255, p[0] + 85)}, ${Math.min(255, p[1] + 85)}, ${Math.min(255, p[2] + 85)}, 0.8)`;
+        };
+
+        rootStyle.setProperty('--p-top', lgt(pTop));
+        rootStyle.setProperty('--p-right', lgt(pRight));
+        rootStyle.setProperty('--p-bottom', lgt(pBottom));
+        rootStyle.setProperty('--p-left', lgt(pLeft));
     }
 
     function spring(curr, tgt, vel, cfg) {
