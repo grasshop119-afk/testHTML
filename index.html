@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Dynamic Liquid Tabbar - Perfect Smooth Border</title>
+    <title>Dynamic Liquid Tabbar with Smooth Rounded Border</title>
     <style>
         :root {
             --active-accent: #ffffff;
@@ -14,11 +14,11 @@
             --tabbar-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
             --slider-bg: rgba(0, 0, 0, 0.20);
 
-            /* 4 точки замера для плавного контура */
-            --border-color-t: rgb(255, 255, 255);
-            --border-color-r: rgb(255, 255, 255);
-            --border-color-b: rgb(255, 255, 255);
+            /* Переменные для 4 точек замера контура */
             --border-color-l: rgb(255, 255, 255);
+            --border-color-r: rgb(255, 255, 255);
+            --border-color-t: rgb(255, 255, 255);
+            --border-color-b: rgb(255, 255, 255);
         }
 
         body {
@@ -51,24 +51,12 @@
             padding: 4px;
             justify-content: space-around;
             align-items: center;
-            
-            /* ВОЗВРАЩАЕМ ИДЕАЛЬНОЕ ЗАКРУГЛЕНИЕ */
             border-radius: 38px;
             
-            /* Делаем прозрачную рамку в 1px, которая станет нашим градиентом */
-            border: 1px solid transparent; 
+            /* СТРОГО СТАТИЧЕСКИЙ ФОН */
+            background: var(--tabbar-bg);
             
-            /* ХАК ДЛЯ ПЛАВНОГО КОНТУРА С СОХРАНЕНИЕМ border-radius:
-               Первым слоем накладываем родной фон таббара, вторым — конический градиент рамки. */
-            background-image: 
-                var(--tabbar-bg), 
-                conic-gradient(from 0deg, var(--border-color-r), var(--border-color-b), var(--border-color-l), var(--border-color-t), var(--border-color-r));
-            
-            /* Магия разделения слоев: первый обрезается по контенту, второй заходит на область border */
-            background-origin: border-box;
-            background-clip: padding-box, border-box;
-            
-            /* Объемные тени */
+            /* Мягкие тени для объема */
             box-shadow: 
                 0 0 0 1px rgba(0, 0, 0, 0.03), 
                 0 12px 30px rgba(0, 0, 0, 0.12), 
@@ -77,9 +65,37 @@
             transition: box-shadow 0.35s ease;
             z-index: 1;
             
-            /* Родной блюр и деформация "жидкости" */
+            /* Механика блюра и "жидкости" (не тронута) */
             backdrop-filter: blur(4px) url(#liquid-lens) saturate(140%);
             -webkit-backdrop-filter: blur(4px) saturate(140%);
+        }
+
+        /* --- МАГИЯ: ЗАКРУГЛЕННЫЙ КОНТУР В 1px ЧЕРЕЗ PSEUDO-ELEMENT --- */
+        .ios-tab-bar::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 38px; /* Идеальное круглое ребро */
+            padding: 1px; /* Толщина нашего контура */
+            
+            /* Конический градиент для плавной склейки 4 сторон */
+            background: conic-gradient(
+                from 0deg, 
+                var(--border-color-r), 
+                var(--border-color-b), 
+                var(--border-color-l), 
+                var(--border-color-t), 
+                var(--border-color-r)
+            );
+            
+            /* Хитрый маскинг: вырезаем внутреннюю часть псевдоэлемента, 
+               оставляя видимым только border шириной в 1px, заданный через padding */
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            
+            pointer-events: none;
+            z-index: 5;
         }
 
         .tab-item {
@@ -227,7 +243,6 @@
         const cx = rct.left + rct.width / 2;
         const cy = rct.top + rct.height / 2;
 
-        // Замеряем точки строго по границам таббара
         const pLeft   = getPixelColor(rct.left + 5, cy);
         const pTop    = getPixelColor(cx, rct.top + 5);
         const pRight  = getPixelColor(rct.right - 5, cy);
@@ -235,7 +250,6 @@
 
         const rootStyle = document.documentElement.style;
 
-        // Осветляем пиксели на 25% специально для эффекта стеклянной фаски
         const lighten = (p) => [Math.min(255, p[0] + 64), Math.min(255, p[1] + 64), Math.min(255, p[2] + 64)];
 
         const cLeft   = lighten(pLeft);
@@ -243,13 +257,11 @@
         const cRight  = lighten(pRight);
         const cBottom = lighten(pBottom);
 
-        // Обновляем цвета 4 четвертей рамки
         rootStyle.setProperty('--border-color-l', `rgb(${cLeft[0]}, ${cLeft[1]}, ${cLeft[2]})`);
         rootStyle.setProperty('--border-color-t', `rgb(${cTop[0]}, ${cTop[1]}, ${cTop[2]})`);
         rootStyle.setProperty('--border-color-r', `rgb(${cRight[0]}, ${cRight[1]}, ${cRight[2]})`);
         rootStyle.setProperty('--border-color-b', `rgb(${cBottom[0]}, ${cBottom[1]}, ${cBottom[2]})`);
 
-        // Усредняем только для капли
         const avgR = (pLeft[0] + pTop[0] + pRight[0] + pBottom[0]) / 4;
         const avgG = (pLeft[1] + pTop[1] + pRight[1] + pBottom[1]) / 4;
         const avgB = (pLeft[2] + pTop[2] + pRight[2] + pBottom[2]) / 4;
