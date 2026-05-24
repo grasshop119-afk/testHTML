@@ -12,7 +12,7 @@
             --tabbar-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
             --slider-bg: rgba(0, 0, 0, 0.20);
 
-            /* 4 переменные чисто под каждую сторону контура */
+            /* 4 базовые точки для плавного кругового перетекания */
             --border-top: rgb(255, 255, 255);
             --border-right: rgb(255, 255, 255);
             --border-bottom: rgb(255, 255, 255);
@@ -50,23 +50,27 @@
             justify-content: space-around;
             align-items: center;
             border-radius: 38px;
-            background: var(--tabbar-bg);
             
-            /* --- ТЕПЕРЬ СТРОГО 4 СТОРОНЫ КОНТУРА --- */
-            border-width: 1px;
-            border-style: solid;
-            border-top-color: var(--border-top);
-            border-right-color: var(--border-right);
-            border-bottom-color: var(--border-bottom);
-            border-left-color: var(--border-left);
+            /* --- НАСТОЯЩИЙ ПЛАВНЫЙ КОНТУР ИЗ 4 ЧЕТВЕРТЕЙ --- */
+            border: 1px solid transparent; /* Резервируем 1px под контур */
+            background-image: 
+                var(--tabbar-bg), 
+                conic-gradient(
+                    from 0deg at 50% 50%, 
+                    var(--border-right) 0deg 45deg, 
+                    var(--border-bottom) 135deg, 
+                    var(--border-left) 225deg, 
+                    var(--border-top) 315deg, 
+                    var(--border-right) 360deg
+                );
+            background-origin: border-box;
+            background-clip: padding-box, border-box; /* Первый фон ложится внутрь, второй — строго на рамку */
             
             box-shadow: 
                 0 0 0 1px rgba(0, 0, 0, 0.03), 
                 0 12px 30px rgba(0, 0, 0, 0.12), 
                 0 4px 8px rgba(0, 0, 0, 0.05);   
             
-            /* Добавил border-color в transition, чтобы контур плавно менял цвет при смене фона */
-            transition: border-color 0.3s ease, box-shadow 0.35s ease;
             z-index: 1;
             
             backdrop-filter: blur(4px) url(#liquid-lens) saturate(140%);
@@ -218,15 +222,15 @@
         const cx = rct.left + rct.width / 2;
         const cy = rct.top + rct.height / 2;
 
-        // Берем пиксели строго за пределами контура (сдвиг наружу на 5px), чтобы ловить цвет внешнего фона
-        const pLeft   = getPixelColor(rct.left - 5, cy);
-        const pTop    = getPixelColor(cx, rct.top - 5);
-        const pRight  = getPixelColor(rct.right + 5, cy);
-        const pBottom = getPixelColor(rct.bottom + 5, cy);
+        // Замеряем цвета за границами таббара
+        const pLeft   = getPixelColor(rct.left - 6, cy);
+        const pTop    = getPixelColor(cx, rct.top - 6);
+        const pRight  = getPixelColor(rct.right + 6, cy);
+        const pBottom = getPixelColor(rct.bottom + 6, cy);
 
         const rootStyle = document.documentElement.style;
 
-        // Делаем цвет контура на 25% светлее фона для эффекта глянцевого ребра
+        // Освежаем цвета ребра на 25% ярче фона
         const lighten = (p) => [Math.min(255, p[0] + 64), Math.min(255, p[1] + 64), Math.min(255, p[2] + 64)];
 
         const cLeft   = lighten(pLeft);
@@ -234,13 +238,13 @@
         const cRight  = lighten(pRight);
         const cBottom = lighten(pBottom);
 
-        // Присваиваем каждой грани рамки свой персональный цвет
+        // Обновляем CSS-переменные сторон
         rootStyle.setProperty('--border-top', `rgb(${cTop[0]}, ${cTop[1]}, ${cTop[2]})`);
         rootStyle.setProperty('--border-right', `rgb(${cRight[0]}, ${cRight[1]}, ${cRight[2]})`);
         rootStyle.setProperty('--border-bottom', `rgb(${cBottom[0]}, ${cBottom[1]}, ${cBottom[2]})`);
         rootStyle.setProperty('--border-left', `rgb(${cLeft[0]}, ${cLeft[1]}, ${cLeft[2]})`);
 
-        // Осредненный цвет чисто для летающей капли
+        // Цвет для капли
         const avgR = (pLeft[0] + pTop[0] + pRight[0] + pBottom[0]) / 4;
         const avgG = (pLeft[1] + pTop[1] + pRight[1] + pBottom[1]) / 4;
         const avgB = (pLeft[2] + pTop[2] + pRight[2] + pBottom[2]) / 4;
