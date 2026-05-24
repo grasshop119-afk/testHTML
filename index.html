@@ -6,18 +6,16 @@
     <title>iOS 26 Liquid Glass Tabbar</title>
     <style>
         :root {
-            /* Полностью универсальные цвета на основе альфа-каналов */
-            --glass-border: rgba(255, 255, 255, 0.45);
             --active-accent: #ffffff;
-            --inactive-color: rgba(255, 255, 255, 0.75);
-            /* Капля на фото темная и элегантная */
-            --slider-bg: rgba(0, 0, 0, 0.28);
-            --slider-border-moving: rgba(255, 255, 255, 0.2);
+            --inactive-color: rgba(255, 255, 255, 0.7);
+            --slider-bg: rgba(0, 0, 0, 0.25);
+            /* Контур капли в полете теперь темнее */
+            --slider-border-flying: rgba(0, 0, 0, 0.35);
         }
 
         body {
             margin: 0;
-            background: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRkLiZZofuMdxDrT1-l8xUj0r7hEpeStNzrFqFqgayAjeO5YdDEWEJXo_lQ&s=10') no-repeat center center;
+            background: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRkLiZZofuMdxDrT1-l8xUj0r7hEpeStNzrFqFqgayAjeO5YdDEWEJXo_lQ&s=10') no-repeat center center fixed;
             background-size: cover;
             height: 100vh;
             display: flex;
@@ -28,35 +26,55 @@
             user-select: none;
         }
 
+        /* ВОЗВРАТ К РАЗМЕРАМ ИЗ ПЕРВОГО ВАРИАНТА */
         .tab-bar-container {
-            margin-bottom: calc(25px + env(safe-area-inset-bottom));
-            width: 90%;
-            max-width: 410px;
+            margin-bottom: calc(15px + env(safe-area-inset-bottom));
+            width: 92%;
+            max-width: 400px;
         }
 
-        /* ТОЧНАЯ КОПИЯ СТЕКЛЯННОЙ ТРУБКИ С ФОТО */
         .ios-tab-bar {
             position: relative;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
-            /* Умеренный блур и легкое искажение за счет сатурации фона */
-            backdrop-filter: blur(10px) saturate(140%);
-            -webkit-backdrop-filter: blur(10px) saturate(140%);
-            border-radius: 40px;
             display: flex;
-            padding: 6px;
-            /* Толстый стеклянный ободок */
-            border: 1.5px solid var(--glass-border);
-            /* Эффект преломления света внутри линзы по бокам */
-            box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2), 
-                        0 10px 30px rgba(0, 0, 0, 0.12);
+            padding: 4px;
             justify-content: space-around;
             align-items: center;
+            
+            /* Умный градиентный контур: светлее вверху-слева и внизу-справа */
+            border: 1px solid transparent;
+            border-radius: 38px;
+            background: 
+                linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%) padding-box,
+                linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.08) 45%, rgba(255, 255, 255, 0.08) 55%, rgba(255, 255, 255, 0.4) 100%) border-box;
+            
+            box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.1), 
+                        0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        /* ПОДФОНОВЫЙ БЛЮР С ДЕФОРМАЦИЕЙ КАРТИНКИ */
+        .glass-refraction {
+            position: absolute;
+            inset: 0;
+            border-radius: 36px;
+            overflow: hidden;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .glass-refraction::before {
+            content: '';
+            position: absolute;
+            inset: -5px;
+            /* Наследуем и фиксируем фон, смещая масштаб для эффекта линзы */
+            background: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRkLiZZofuMdxDrT1-l8xUj0r7hEpeStNzrFqFqgayAjeO5YdDEWEJXo_lQ&s=10') no-repeat center center fixed;
+            background-size: cover;
+            filter: blur(5px) saturate(125%);
+            transform: scale(1.05); 
         }
 
         .tab-item {
             position: relative;
             z-index: 2;
-            padding: 10px 0;
+            padding: 8px 0;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -68,10 +86,10 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Иконки стали крупнее, как на рендере */
+        /* Размеры иконок из первого кода (24px) */
         .icon-wrapper {
-            width: 28px;
-            height: 28px;
+            width: 24px;
+            height: 24px;
             margin-bottom: 4px;
             background-color: var(--inactive-color);
             -webkit-mask-size: contain;
@@ -83,39 +101,37 @@
             transition: background-color 0.25s ease;
         }
 
+        /* Текст из первого кода (10px) */
         .tab-text {
-            font-size: 11px;
-            font-weight: 600;
+            font-size: 10px;
+            font-weight: 500;
             color: var(--inactive-color);
             transition: color 0.25s ease;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
 
         .tab-item.active .icon-wrapper { background-color: var(--active-accent); }
         .tab-item.active .tab-text { color: var(--active-accent); }
 
-        /* МЯГКАЯ ТЕМНАЯ КАПЛЯ БЕЗ СВЕРХОБЪЕМА */
         .liquid-slider {
             position: absolute;
-            top: 6px;
-            left: 6px;
-            height: calc(100% - 12px);
+            top: 4px;
+            left: 4px;
+            height: calc(100% - 8px);
             background: var(--slider-bg);
-            backdrop-filter: blur(2px);
             border-radius: 34px;
             z-index: 1;
             pointer-events: none;
             box-sizing: border-box;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.08);
             will-change: transform, left, width, background-color, border-color;
             transition: background-color 0.16s ease-out, border-color 0.16s ease-out;
         }
 
-        /* При прыжке капля утончается и теряет темный цвет */
+        /* В полете капля становится прозрачной с темным аккуратным контуром */
         .liquid-slider.flying {
             background-color: transparent !important; 
-            border-color: var(--slider-border-moving) !important;
+            border-color: var(--slider-border-flying) !important;
             box-shadow: none;
         }
     </style>
@@ -124,6 +140,8 @@
 
 <div class="tab-bar-container">
     <nav class="ios-tab-bar">
+        <div class="glass-refraction"></div>
+        
         <div class="liquid-slider" id="slider"></div>
 
         <button class="tab-item active" data-index="0">
@@ -162,9 +180,9 @@
         if (state.isMoving) {
             if (dist > 15) { 
                 slider.classList.add('flying');
-                /* Рост по вертикали сделан аккуратнее и ниже на пару пикселей */
-                state.tsx = 1 - (0.08 * state.intensity); 
-                state.tsy = 1 + (0.14 * state.intensity); 
+                /* Высота капли в полете теперь изящнее и аккуратнее */
+                state.tsx = 1 - (0.07 * state.intensity); 
+                state.tsy = 1 + (0.13 * state.intensity); 
             } else if (dist <= 15 && dist > 0.5) {
                 slider.classList.remove('flying');
                 state.tsx = 1 + (0.06 * state.intensity); 
