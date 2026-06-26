@@ -2,406 +2,438 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Dynamic Interactive Liquid Tabbar</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный Кинотеатр</title>
     <style>
-        :root {
-            --active-accent: #ffffff;
-            --inactive-color: rgba(255, 255, 255, 0.70);
-            --p-fly-drop: rgba(255, 255, 255, 0.5);   
-            
-            /* Фиксированный фон таббара */
-            --tabbar-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
-            --slider-bg: rgba(0, 0, 0, 0.20);
-
-            /* Переменные для 4 усредненных четвертей контура */
-            --border-color-l: rgb(255, 255, 255);
-            --border-color-r: rgb(255, 255, 255);
-            --border-color-t: rgb(255, 255, 255);
-            --border-color-b: rgb(255, 255, 255);
+        /* Базовый сброс стилей */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            margin: 0;
-            /* Фиксированный абстрактный фон без рандома */
-            background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80');
-            background-size: cover;
-            background-position: center center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            overflow: hidden;
-            -webkit-user-select: none;
-            user-select: none;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #09070f 0%, #020105 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 40px 20px;
         }
 
-        .tab-bar-container {
-            margin-bottom: calc(15px + max(env(safe-area-inset-bottom), 12px)); 
-            width: 92%;
-            max-width: 400px;
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
             position: relative;
         }
 
-        .ios-tab-bar {
+        header {
+            text-align: center;
+            margin-bottom: 40px;
             position: relative;
-            display: flex;
-            padding: 4px;
-            justify-content: space-around;
-            align-items: center;
-            border-radius: 38px;
-            background: var(--tabbar-bg);
-            
-            box-shadow: 
-                0 0 0 1px rgba(0, 0, 0, 0.03), 
-                0 12px 30px rgba(0, 0, 0, 0.12), 
-                0 4px 8px rgba(0, 0, 0, 0.05);   
-            
-            z-index: 1;
-            backdrop-filter: blur(4px) url(#liquid-lens) saturate(140%);
-            -webkit-backdrop-filter: blur(4px) saturate(140%);
         }
 
-        /* Наш идеальный контур */
-        .ios-tab-bar::after {
-            content: "";
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, #ff7b00, #ffae00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+
+        /* Кнопка управления ключом сверху */
+        .key-management {
             position: absolute;
-            inset: 0;
-            border-radius: 38px;
-            padding: 1px;
-            
-            background: conic-gradient(
-                from 0deg, 
-                var(--border-color-r), 
-                var(--border-color-b), 
-                var(--border-color-l), 
-                var(--border-color-t), 
-                var(--border-color-r)
-            );
-            
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            
-            pointer-events: none;
-            z-index: 5;
+            top: 0;
+            right: 0;
+            z-index: 10;
         }
 
-        .tab-item {
-            position: relative;
-            z-index: 4;
-            padding: 8px 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: none;
-            border: none;
-            flex: 1;
+        .key-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ccc;
+            padding: 8px 16px;
+            border-radius: 20px;
             cursor: pointer;
+            font-size: 0.85rem;
+            backdrop-filter: blur(8px);
+            transition: all 0.2s;
+        }
+
+        .key-btn:hover {
+            background: rgba(255, 174, 0, 0.1);
+            border-color: #ffae00;
+            color: #fff;
+        }
+
+        /* Инпут и Кнопка поиска */
+        .search-box {
+            display: flex;
+            max-width: 600px;
+            margin: 0 auto 40px auto;
+            gap: 10px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 15px 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-size: 1rem;
+            backdrop-filter: blur(8px);
             outline: none;
-            -webkit-tap-highlight-color: transparent;
+            transition: border-color 0.3s;
         }
 
-        .icon-wrapper {
-            width: 24px;
-            height: 24px;
-            margin-bottom: 4px;
-            background-color: var(--inactive-color);
-            -webkit-mask-size: contain;
-            -webkit-mask-repeat: no-repeat;
-            -webkit-mask-position: center;
-            mask-size: contain;
-            mask-repeat: no-repeat;
-            mask-position: center;
-            transition: background-color 0.25s ease;
+        .search-input:focus {
+            border-color: #ffae00;
         }
 
-        .tab-text {
-            font-size: 10px;
-            font-weight: 500;
-            color: var(--inactive-color);
-            transition: color 0.25s ease;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        .search-btn {
+            padding: 0 25px;
+            border-radius: 12px;
+            border: none;
+            background: #ffae00;
+            color: #000;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
         }
 
-        .tab-item.active .icon-wrapper { background-color: var(--active-accent); }
-        .tab-item.active .tab-text { color: var(--active-accent); }
+        .search-btn:hover {
+            background: #ff7b00;
+        }
 
-        /* Включаемpointer-events и ставим правильный курсор для перетаскивания */
-        .liquid-slider {
+        /* Сетка результатов */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        /* Эффект стекла (Glassmorphism) */
+        .card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), border-color 0.3s;
+            backdrop-filter: blur(8px);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 174, 0, 0.3);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            background: #13111a;
+        }
+
+        .card-content {
+            padding: 12px;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-meta {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        /* Окно плеера */
+        .player-section {
+            display: none;
+            background: rgba(10, 8, 18, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            backdrop-filter: blur(20px);
+        }
+
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .player-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .close-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 74, 74, 0.2);
+            color: #ff4a4a;
+        }
+
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 12px;
+            background: #000;
+        }
+
+        .video-container iframe {
             position: absolute;
-            top: 4px;
-            left: 4px;
-            height: calc(100% - 8px);
-            background: var(--slider-bg);
-            border-radius: 34px;
-            z-index: 2;
-            pointer-events: auto; 
-            cursor: -webkit-grab;
-            cursor: grab;
-            box-sizing: border-box;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.15);
-            will-change: transform, left, width;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-            touch-action: none; /* Отключаем системный скролл при перетаскивании на мобилках */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
         }
 
-        .liquid-slider.flying {
-            background-color: transparent !important; 
-            border: 1px solid var(--p-fly-drop) !important; 
-            box-shadow: none; 
+        .status-msg {
+            text-align: center;
+            color: #888;
+            font-size: 1.1rem;
+            margin-top: 40px;
+        }
+
+        /* Стеклянное модальное окно для ввода ключа */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: rgba(20, 18, 30, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+        }
+
+        .modal-content h3 {
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .modal-content p {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: white;
+            margin-bottom: 20px;
+            outline: none;
+            text-align: center;
+        }
+
+        .modal-input:focus {
+            border-color: #ffae00;
+        }
+
+        .modal-btn {
+            background: #ffae00;
+            color: black;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .modal-btn:hover {
+            background: #ff7b00;
         }
     </style>
 </head>
 <body>
 
-<svg style="position: absolute; width: 0; height: 0;">
-    <filter id="liquid-lens">
-        <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="1" result="noise" />
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale="8" xChannelSelector="R" yChannelSelector="G" />
-    </filter>
-</svg>
+    <div class="container">
+        <div class="key-management">
+            <button class="key-btn" onclick="openKeyModal()">⚙️ Настройки API</button>
+        </div>
 
-<div class="tab-bar-container">
-    <nav class="ios-tab-bar" id="tabBar">
-        <div class="liquid-slider" id="slider"></div>
+        <header>
+            <h1>Личный Кинотеатр</h1>
+            <div class="search-box">
+                <input type="text" id="search-input" class="search-input" placeholder="Введите название фильма или сериала...">
+                <button class="search-btn" onclick="searchMovies()">Искать</button>
+            </div>
+        </header>
 
-        <button class="tab-item active" data-index="0">
-            <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/6997/6997164.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/6997/6997164.png');"></div>
-            <span class="tab-text">Home</span>
-        </button>
+        <div class="grid" id="movies-grid"></div>
+        <div id="status" class="status-msg">Введите название фильма для поиска 🍿</div>
 
-        <button class="tab-item" data-index="1">
-            <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/2769/2769160.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/2769/2769160.png');"></div>
-            <span class="tab-text">Menu</span>
-        </button>
+        <div class="player-section" id="player-container">
+            <div class="player-header">
+                <div class="player-title" id="current-title">Название фильма</div>
+                <button class="close-btn" onclick="closePlayer()">Закрыть</button>
+            </div>
+            <div class="video-container">
+                <iframe id="video-iframe" src="" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
 
-        <button class="tab-item" data-index="2">
-            <div class="icon-wrapper" style="-webkit-mask-image: url('https://cdn-icons-png.flaticon.com/512/9959/9959489.png'); mask-image: url('https://cdn-icons-png.flaticon.com/512/9959/9959489.png');"></div>
-            <span class="tab-text">Settings</span>
-        </button>
-    </nav>
-</div>
+    <div class="modal" id="key-modal">
+        <div class="modal-content">
+            <h3>Введите API ключ TMDB</h3>
+            <p>Ключ сохранится локально в вашем браузере. В исходном коде на GitHub его никто не увидит.</p>
+            <input type="text" id="key-input" class="modal-input" placeholder="Вставьте ваш API Key (v3 auth)...">
+            <button class="modal-btn" onclick="saveKey()">Сохранить</button>
+        </div>
+    </div>
 
-<script>
-    const PHYSICS = { pos: { k: 380, d: 38, m: 1 }, scale: { k: 420, d: 24, m: 1 } };
-    const slider = document.getElementById('slider');
-    const tabBar = document.getElementById('tabBar');
-    const tabs = document.querySelectorAll('.tab-item');
+    <script>
+        const grid = document.getElementById('movies-grid');
+        const status = document.getElementById('status');
+        const playerContainer = document.getElementById('player-container');
+        const iframe = document.getElementById('video-iframe');
+        const currentTitle = document.getElementById('current-title');
+        const searchInput = document.getElementById('search-input');
+        const keyModal = document.getElementById('key-modal');
+        const keyInput = document.getElementById('key-input');
 
-    let state = { 
-        x: 0, tx: 0, vx: 0, 
-        w: 0, tw: 0, vw: 0, 
-        sx: 1, tsx: 1, vsx: 0, 
-        sy: 1, tsy: 1, vsy: 0, 
-        isMoving: false, isDragging: false, intensity: 1, currentIndex: 0 
-    };
-
-    let dragStartX = 0;
-    let dragStartSliderX = 0;
-
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    const bgImg = new Image();
-    bgImg.crossOrigin = "anonymous"; 
-    bgImg.src = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80';
-
-    bgImg.onload = () => {
-        canvas.width = bgImg.width; canvas.height = bgImg.height;
-        ctx.drawImage(bgImg, 0, 0);
-        updateDynamicColors();
-    };
-
-    function getAverageRegionColor(clientX, clientY, size = 16) {
-        if (!canvas.width) return [255, 255, 255];
-        const imgX = Math.floor((clientX / window.innerWidth) * canvas.width);
-        const imgY = Math.floor((clientY / window.innerHeight) * canvas.height);
-        const startX = Math.min(canvas.width - size, Math.max(0, imgX - Math.floor(size / 2)));
-        const startY = Math.min(canvas.height - size, Math.max(0, imgY - Math.floor(size / 2)));
-        
-        const imgData = ctx.getImageData(startX, startY, size, size).data;
-        let totalR = 0, totalG = 0, totalB = 0, count = 0;
-        
-        for (let i = 0; i < imgData.length; i += 4) {
-            totalR += imgData[i]; totalG += imgData[i + 1]; totalB += imgData[i + 2];
-            count++;
-        }
-        return [Math.floor(totalR / count), Math.floor(totalG / count), Math.floor(totalB / count)];
-    }
-
-    function updateDynamicColors() {
-        const rct = tabBar.getBoundingClientRect();
-        const cx = rct.left + rct.width / 2;
-        const cy = rct.top + rct.height / 2;
-
-        const pLeft   = getAverageRegionColor(rct.left + 5, cy, 16);
-        const pTop    = getAverageRegionColor(cx, rct.top + 5, 16);
-        const pRight  = getAverageRegionColor(rct.right - 5, cy, 16);
-        const pBottom = getAverageRegionColor(cx, rct.bottom - 5, 16);
-
-        const rootStyle = document.documentElement.style;
-        const lighten = (p) => [Math.min(255, p[0] + 64), Math.min(255, p[1] + 64), Math.min(255, p[2] + 64)];
-
-        const cLeft   = lighten(pLeft); const cTop    = lighten(pTop);
-        const cRight  = lighten(pRight); const cBottom = lighten(pBottom);
-
-        rootStyle.setProperty('--border-color-l', `rgb(${cLeft[0]}, ${cLeft[1]}, ${cLeft[2]})`);
-        rootStyle.setProperty('--border-color-t', `rgb(${cTop[0]}, ${cTop[1]}, ${cTop[2]})`);
-        rootStyle.setProperty('--border-color-r', `rgb(${cRight[0]}, ${cRight[1]}, ${cRight[2]})`);
-        rootStyle.setProperty('--border-color-b', `rgb(${cBottom[0]}, ${cBottom[1]}, ${cBottom[2]})`);
-
-        const avgR = (pLeft[0] + pTop[0] + pRight[0] + pBottom[0]) / 4;
-        const avgG = (pLeft[1] + pTop[1] + pRight[1] + pBottom[1]) / 4;
-        const avgB = (pLeft[2] + pTop[2] + pRight[2] + pBottom[2]) / 4;
-        rootStyle.setProperty('--p-fly-drop', `rgb(${Math.min(255, avgR + 89)}, ${Math.min(255, avgG + 89)}, ${Math.min(255, avgB + 89)})`);
-    }
-
-    // --- ЛОГИКА ОПРЕДЕЛЕНИЯ БЛИЖАЙШЕГО ТАБА ---
-    function getClosestTab() {
-        let closestTab = tabs[0];
-        let minDistance = Infinity;
-        const sliderCenter = state.x + state.w / 2;
-        
-        tabs.forEach(tab => {
-            const tabCenter = tab.offsetLeft + tab.offsetWidth / 2;
-            const dist = Math.abs(sliderCenter - tabCenter);
-            if (dist < minDistance) {
-                minDistance = dist;
-                closestTab = tab;
+        // Проверяем наличие ключа при загрузке
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedKey = localStorage.getItem('tmdb_api_key');
+            if (!savedKey) {
+                openKeyModal();
             }
         });
-        return closestTab;
-    }
 
-    // --- МЕХАНИКА DRAG-AND-DROP ---
-    slider.addEventListener('pointerdown', (e) => {
-        e.preventDefault();
-        state.isDragging = true;
-        dragStartX = e.clientX;
-        dragStartSliderX = state.x;
-        slider.style.cursor = 'grabbing';
-        
-        // Захватываем указатель, чтобы тащить капсулу даже за пределами таббара
-        slider.setPointerCapture(e.pointerId);
-    });
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchMovies();
+        });
 
-    slider.addEventListener('pointermove', (e) => {
-        if (!state.isDragging) return;
-        
-        let deltaX = e.clientX - dragStartX;
-        let newX = dragStartSliderX + deltaX;
-        
-        // Ограничиваем перемещение внутренними границами таббара
-        const minX = 4;
-        const maxX = tabBar.offsetWidth - state.w - 4;
-        state.x = Math.max(minX, Math.min(maxX, newX));
-        
-        // Пока тащим, подсматриваем ближайший таб и берем его ширину мимикрии
-        const targetTab = getClosestTab();
-        if (targetTab) {
-            state.tw = targetTab.offsetWidth;
+        // Работа с модальным окном
+        function openKeyModal() {
+            const savedKey = localStorage.getItem('tmdb_api_key');
+            if (savedKey) keyInput.value = savedKey;
+            keyModal.style.display = 'flex';
         }
-    });
 
-    slider.addEventListener('pointerup', (e) => {
-        if (!state.isDragging) return;
-        state.isDragging = false;
-        slider.style.cursor = 'grab';
-        slider.releasePointerCapture(e.pointerId);
-        
-        // При отпускании находим финишный ближайший таб и активируем его пружиной
-        const finalTab = getClosestTab();
-        if (finalTab) {
-            setActive(finalTab);
-        }
-    });
-
-    slider.addEventListener('pointercancel', () => {
-        if (!state.isDragging) return;
-        state.isDragging = false;
-        slider.style.cursor = 'grab';
-        const finalTab = getClosestTab();
-        if (finalTab) setActive(finalTab);
-    });
-
-    function spring(curr, tgt, vel, cfg) {
-        const acc = (-cfg.k * (curr - tgt) - cfg.d * vel) / cfg.m;
-        vel += acc * 0.016;
-        return [curr + vel * 0.016, vel];
-    }
-
-    function update() {
-        const dist = Math.abs(state.x - state.tx);
-
-        if (state.isMoving && !state.isDragging) {
-            if (dist > 15) { 
-                slider.classList.add('flying');
-                state.tsx = 1 - (0.07 * state.intensity); 
-                state.tsy = 1 + (0.13 * state.intensity); 
-            } else if (dist <= 15 && dist > 0.5) {
-                slider.classList.remove('flying');
-                state.tsx = 1 + (0.06 * state.intensity); 
-                state.tsy = 1 - (0.04 * state.intensity); 
+        function saveKey() {
+            const userKey = keyInput.value.trim();
+            if (userKey) {
+                localStorage.setItem('tmdb_api_key', userKey);
+                keyModal.style.display = 'none';
+                status.textContent = 'Ключ сохранен! Можно искать фильмы 🍿';
             } else {
-                state.tsx = state.tsy = 1;
-                if (Math.abs(state.vx) < 0.2 && Math.abs(state.vsx) < 0.2) {
-                    state.isMoving = false;
-                    slider.classList.remove('flying');
-                }
+                alert('Пожалуйста, введите корректный ключ.');
             }
         }
 
-        // Если тащим рукой — отключаем пружину для X, пишем координаты напрямую
-        if (!state.isDragging) {
-            [state.x, state.vx] = spring(state.x, state.tx, state.vx, PHYSICS.pos);
-        } else {
-            state.vx = 0; 
+        // Поиск фильмов
+        async function searchMovies() {
+            const query = searchInput.value.trim();
+            if (!query) return;
+
+            const apiKey = localStorage.getItem('tmdb_api_key');
+            if (!apiKey) {
+                status.textContent = 'Ошибка: Сначала добавьте API ключ в настройках сверху!';
+                openKeyModal();
+                return;
+            }
+
+            status.textContent = 'Ищем... 🔍';
+            grid.innerHTML = '';
+            
+            try {
+                const response = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${apiKey}&query=${encodeURIComponent(query)}&language=ru-RU`);
+                const data = await response.json();
+
+                if (!data.results || data.results.length === 0) {
+                    status.textContent = 'Ничего не найдено 😔';
+                    return;
+                }
+
+                status.textContent = '';
+
+                const filtered = data.results.filter(item => (item.media_type === 'movie' || item.media_type === 'tv') && item.poster_path);
+
+                grid.innerHTML = filtered.map(item => {
+                    const title = item.title || item.name;
+                    const year = (item.release_date || item.first_air_date || '').split('-')[0];
+                    const poster = `https://image.tmdb.org/t/p/w400${item.poster_path}`;
+                    
+                    return `
+                        <div class="card" onclick="openPlayer('${item.id}', '${title.replace(/'/g, "\\'")}')">
+                            <img class="card-image" src="${poster}" alt="${title}" loading="lazy">
+                            <div class="card-content">
+                                <div class="card-title">${title}</div>
+                                <div class="card-meta">${year ? year : '—'} | ${item.media_type === 'movie' ? 'Фильм' : 'Сериал'}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            } catch (err) {
+                console.error(err);
+                status.textContent = 'Ошибка сети. Проверьте правильность API ключа.';
+            }
         }
 
-        // Ширина меняется через пружину ВСЕГДА, чтобы капсула «жидко» растягивалась при пролете секторов
-        [state.w, state.vw] = spring(state.w, state.tw, state.vw, PHYSICS.pos);
-        
-        [state.sx, state.vsx] = spring(state.sx, state.tsx, state.vsx, PHYSICS.scale);
-        [state.sy, state.vsy] = spring(state.sy, state.tsy, state.vsy, PHYSICS.scale);
+        function openPlayer(id, title) {
+            currentTitle.textContent = title;
+            
+            // Используем стабильный плеер
+            const embedUrl = `https://kinobox.tv/embed/tmdb/${id}`;
 
-        slider.style.left = `${state.x}px`;
-        slider.style.width = `${state.w}px`;
-        slider.style.transform = `scale(${state.sx}, ${state.sy})`;
-
-        requestAnimationFrame(update);
-    }
-
-    function setActive(el, instant = false) {
-        const newIdx = parseInt(el.dataset.index);
-        tabs.forEach(t => t.classList.remove('active'));
-        el.classList.add('active');
-
-        state.tx = el.offsetLeft;
-        state.tw = el.offsetWidth;
-        
-        if (instant) {
-            state.x = state.tx; state.w = state.tw;
-            state.sx = state.sy = 1;
-        } else {
-            state.intensity = Math.abs(newIdx - state.currentIndex) > 1 ? 1.2 : 0.7;
-            state.isMoving = true;
+            iframe.src = embedUrl;
+            playerContainer.style.display = 'block';
+            playerContainer.scrollIntoView({ behavior: 'smooth' });
         }
-        state.currentIndex = newIdx;
-    }
 
-    tabs.forEach(tab => tab.addEventListener('click', (e) => {
-        // Защита: если клик произошел в процессе отпускания драга, не перезапускаем анимацию
-        if (state.isDragging) return;
-        setActive(tab);
-    }));
-    
-    setActive(document.querySelector('.tab-item.active'), true);
-    window.addEventListener('resize', updateDynamicColors);
-    requestAnimationFrame(update);
-</script>
-
+        function closePlayer() {
+            playerContainer.style.display = 'none';
+            iframe.src = '';
+        }
+    </script>
 </body>
 </html>
